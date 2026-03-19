@@ -270,6 +270,22 @@ Why:
 - the only remaining exception is clearly temporary tooling, which can be
   handled last without broad product risk
 
+### 2026-03-18: `artbeat_core` no longer depends on `artbeat_art_walk`
+
+Decision:
+
+- remove the final `artbeat_core -> artbeat_art_walk` package dependency
+- delete the unreferenced temporary XP repair widget instead of porting that
+  one-off recovery tool into core
+
+Why:
+
+- the last remaining edge was not live product behavior
+- keeping a feature-package dependency in core just for dead tooling would
+  preserve the wrong architecture for no runtime benefit
+- core is now back to acting as a true shared foundation rather than a
+  cross-feature hub
+
 ### 2026-03-18: `artbeat_profile` dropped four unused feature dependencies
 
 Decision:

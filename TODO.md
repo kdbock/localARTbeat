@@ -104,14 +104,13 @@ feature packages:
 - nearby art reads
 - discovery progress reads
 
-Only one `artbeat_core -> artbeat_art_walk` dependency remains, and it is now
-temporary tooling rather than live app behavior.
+`artbeat_core` no longer depends on sibling feature packages.
 
 ## Current Graph Snapshot
 
 From `docs/PACKAGE_DEPENDENCY_INVENTORY.md`:
 
-- `artbeat_core` still depends on `artbeat_art_walk`
+- `artbeat_core` depends on no sibling feature packages
 - `artbeat_admin`, `artbeat_profile`, `artbeat_auth`, `artbeat_messaging`,
   `artbeat_settings`, and `artbeat_ads` depend only on `artbeat_core`
 - the remaining higher-coupling feature packages are:
@@ -128,46 +127,45 @@ From `docs/PACKAGE_DEPENDENCY_INVENTORY.md`:
 Still open:
 
 - remaining tracked root cleanup
-- final decision on `packages/artbeat_profile/ios`
+- dedicated tracked-source cleanup change for `packages/artbeat_profile/ios`
 - continued separation of durable source from local/generated artifacts
 
 Primary tracking doc:
 
 - `docs/REPO_HYGIENE.md`
 
-### 2. Finish `artbeat_core` cleanup
-
-Only one live manifest edge remains:
-
-- `artbeat_core -> artbeat_art_walk`
-
-Current reason:
-
-- temporary XP repair tool at `packages/artbeat_core/lib/src/widgets/temp_xp_fix.dart`
-
-Next action:
-
-- replace the `RewardsService` usage there with a core-local equivalent, or
-- delete/archive the temporary tool if it is no longer needed
-
-Then:
-
-- remove `artbeat_art_walk` from `packages/artbeat_core/pubspec.yaml`
-
-### 3. Compliance and release follow-up
+### 2. Compliance and release follow-up
 
 Still open:
 
 - legal/security follow-up items
 - production canary sign-off completion
 - admin deletion fulfillment reliability
+- credentialed staging repro after the 2026-03-18 diagnostic rollout
 
 Primary trackers:
 
 - `docs/WORK_QUEUE.md`
 - `docs/KNOWN_ISSUES.md`
+- `docs/security/LEGAL_RELEASE_STATUS.md`
 
-### 4. Backend/rules cleanup
+Current stopping point:
+
+- function-side deletion diagnostics are in place
+- admin UI now shows failed request details
+- `scripts/legal_staging_regression.sh` now prints request status and
+  processing errors after the callable
+- a fresh staging deploy of `functions:processDataDeletionRequest` was started
+  from this machine on 2026-03-18
+- a local 2026-03-19 rerun of `scripts/legal_staging_regression.sh` passed the
+  non-admin rule/storage/chat checks
+- the credentialed staging repro was completed on 2026-03-19 and passed after
+  fixing `deletionSummary.pipelineSteps` to stop using
+  `FieldValue.serverTimestamp()` inside array items
+- the remaining blockers are fresh manual in-app QA evidence and current
+  product/legal + support sign-off before reopening the production canary
+
+### 3. Backend/rules cleanup
 
 Still largely untouched:
 
@@ -181,9 +179,9 @@ Do not continue broad refactors by default.
 
 Recommended order:
 
-1. Finish the last `artbeat_core -> artbeat_art_walk` dependency.
-2. Complete repo hygiene decisions and cleanup.
-3. Address legal/security and release-process follow-up.
+1. Complete repo hygiene decisions and cleanup.
+2. Finish the legal/security staging repro and close the deletion blocker.
+3. Complete release-process follow-up and canary gating.
 4. Start backend/functions modularization only after the above is stable.
 
 ## What Good Looks Like Now

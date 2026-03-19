@@ -17,6 +17,55 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
 
   String _statusFilter = 'all';
 
+  String _formatTimestamp(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate().toLocal().toString();
+    }
+    return '-';
+  }
+
+  String _buildRequestDetails(Map<String, dynamic> data) {
+    final userId = (data['userId'] ?? '').toString();
+    final requestedAt = data['requestedAt'];
+    final acknowledgedAt = data['acknowledgedAt'];
+    final fulfilledAt = data['fulfilledAt'];
+    final deniedAt = data['deniedAt'];
+    final failedAt = data['processingFailedAt'];
+    final ackDueAt = data['slaAcknowledgementDueAt'];
+    final completionDueAt = data['slaCompletionDueAt'];
+    final reviewNotes = (data['reviewNotes'] ?? '').toString().trim();
+    final processingError =
+        data['processingError'] is Map<String, dynamic>
+            ? data['processingError'] as Map<String, dynamic>
+            : const <String, dynamic>{};
+    final errorMessage = (processingError['message'] ?? '').toString().trim();
+    final errorCode = (processingError['code'] ?? '').toString().trim();
+
+    final lines = <String>[
+      'User: $userId',
+      'Requested: ${_formatTimestamp(requestedAt)}',
+      'Ack due: ${_formatTimestamp(ackDueAt)}',
+      'Completion due: ${_formatTimestamp(completionDueAt)}',
+      'Ack: ${_formatTimestamp(acknowledgedAt)}',
+      'Done: ${_formatTimestamp(fulfilledAt)}',
+      'Denied: ${_formatTimestamp(deniedAt)}',
+      'Failed: ${_formatTimestamp(failedAt)}',
+    ];
+
+    if (reviewNotes.isNotEmpty) {
+      lines.add('Review notes: $reviewNotes');
+    }
+    if (errorMessage.isNotEmpty || errorCode.isNotEmpty) {
+      final errorParts = <String>[
+        if (errorCode.isNotEmpty) '[$errorCode]',
+        if (errorMessage.isNotEmpty) errorMessage,
+      ];
+      lines.add('Processing error: ${errorParts.join(' ')}');
+    }
+
+    return lines.join('\n');
+  }
+
   Future<void> _updateStatus(
     DocumentReference<Map<String, dynamic>> ref,
     String newStatus,
@@ -231,6 +280,7 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
               PopupMenuItem(value: 'pending', child: Text('Pending')),
               PopupMenuItem(value: 'in_review', child: Text('In Review')),
               PopupMenuItem(value: 'fulfilled', child: Text('Fulfilled')),
+              PopupMenuItem(value: 'failed', child: Text('Failed')),
               PopupMenuItem(value: 'denied', child: Text('Denied')),
             ],
           ),
@@ -260,16 +310,7 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
               final status = (data['status'] ?? 'pending').toString();
               final requestType =
                   (data['requestType'] ?? data['type'] ?? 'unknown').toString();
-              final userId = (data['userId'] ?? '').toString();
-              final requestedAt = data['requestedAt'];
-              final acknowledgedAt = data['acknowledgedAt'];
-              final fulfilledAt = data['fulfilledAt'];
               final isOverdue = _isSlaOverdue(data);
-              final ackDueAt = data['slaAcknowledgementDueAt'];
-              final completionDueAt = data['slaCompletionDueAt'];
-              final requestedLabel = requestedAt is Timestamp
-                  ? requestedAt.toDate().toLocal().toString()
-                  : 'Pending timestamp';
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -278,9 +319,7 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
                     '${requestType.toUpperCase()} • $status${isOverdue ? ' • SLA OVERDUE' : ''}',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  subtitle: Text(
-                    'User: $userId\nRequested: $requestedLabel\nAck due: ${ackDueAt is Timestamp ? ackDueAt.toDate().toLocal() : '-'}\nCompletion due: ${completionDueAt is Timestamp ? completionDueAt.toDate().toLocal() : '-'}\nAck: ${acknowledgedAt is Timestamp ? acknowledgedAt.toDate().toLocal() : '-'}\nDone: ${fulfilledAt is Timestamp ? fulfilledAt.toDate().toLocal() : '-'}',
-                  ),
+                  subtitle: Text(_buildRequestDetails(data)),
                   trailing: IconButton(
                     icon: const Icon(Icons.more_horiz),
                     onPressed: () =>

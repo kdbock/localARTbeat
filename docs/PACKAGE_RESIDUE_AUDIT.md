@@ -49,12 +49,18 @@ Assessment:
 - nothing else in the repo references it directly
 - removing it would be a tracked-source deletion and should be treated as
   higher risk
+- a repo-wide reference scan only found:
+  - this audit and hygiene documentation
+  - the scaffold's own `project.pbxproj`
+  - no build scripts, package metadata, or runtime code depending on it
 
 Recommended action:
 
 - do not remove as part of opportunistic cleanup
-- verify no one still relies on this package-local iOS scaffold
-- if confirmed unused, remove in a dedicated cleanup change with validation
+- treat it as likely dead tracked scaffold, but keep it until a dedicated
+  removal change is scheduled
+- when removed, do it as an isolated cleanup task with explicit validation and
+  reviewer awareness rather than as part of ongoing refactor work
 
 Risk:
 

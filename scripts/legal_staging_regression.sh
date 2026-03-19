@@ -60,6 +60,38 @@ json_field() {
   echo "${json}" | jq -r "${path} // empty"
 }
 
+fetch_firestore_doc() {
+  local doc_name="$1"
+  local token="$2"
+  "$CURL" -sS \
+    "https://firestore.googleapis.com/v1/${doc_name}" \
+    -H "Authorization: Bearer ${token}"
+}
+
+print_request_diagnostics() {
+  local request_json="$1"
+  local status
+  local reviewed_by
+  local failed_at
+  local error_code
+  local error_message
+  local review_notes
+
+  status="$(json_field "${request_json}" '.fields.status.stringValue')"
+  reviewed_by="$(json_field "${request_json}" '.fields.reviewedBy.stringValue')"
+  failed_at="$(json_field "${request_json}" '.fields.processingFailedAt.timestampValue')"
+  error_code="$(json_field "${request_json}" '.fields.processingError.mapValue.fields.code.stringValue')"
+  error_message="$(json_field "${request_json}" '.fields.processingError.mapValue.fields.message.stringValue')"
+  review_notes="$(json_field "${request_json}" '.fields.reviewNotes.stringValue')"
+
+  echo "request_status=${status:-unknown}"
+  echo "request_reviewed_by=${reviewed_by:--}"
+  echo "request_failed_at=${failed_at:--}"
+  echo "request_review_notes=${review_notes:--}"
+  echo "request_processing_error_code=${error_code:--}"
+  echo "request_processing_error_message=${error_message:--}"
+}
+
 echo "== Legal Staging Regression =="
 echo "project: ${PROJECT_ID}"
 
@@ -238,11 +270,14 @@ if [[ -n "${ADMIN_ID_TOKEN}" ]]; then
     -H "Content-Type: application/json" \
     -d "{\"data\":{\"requestId\":\"${REQ_ID}\",\"userId\":\"${U1_ID}\",\"reviewNotes\":\"legal_staging_regression\"}}")"
   CALLABLE_ERR="$(json_field "${CALLABLE_RESP}" '.error.status')"
+  REQUEST_DOC_AFTER_CALL="$(fetch_firestore_doc "${REQ_NAME}" "${ADMIN_ID_TOKEN}")"
   if [[ -n "${CALLABLE_ERR}" ]]; then
     echo "Callable failed: ${CALLABLE_RESP}"
+    print_request_diagnostics "${REQUEST_DOC_AFTER_CALL}"
     exit 1
   fi
   echo "callable_response=${CALLABLE_RESP}"
+  print_request_diagnostics "${REQUEST_DOC_AFTER_CALL}"
 fi
 
 echo "== Completed =="

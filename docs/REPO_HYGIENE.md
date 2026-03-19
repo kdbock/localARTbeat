@@ -46,6 +46,9 @@ These should live in a clearer home once verified safe to move:
   - `debug_users.js`
   - `extract_english_text.py`
   - `extract_strings.py`
+  - `add_crashlytics_build_phase.sh`
+  - `sync_comment_counts.dart`
+  - `test_app_check.dart`
   - `translate_de.py`
   - `translate_de_simple.py`
   - `verify_fix.dart`
@@ -55,9 +58,12 @@ These should live in a clearer home once verified safe to move:
   - `existing_profile_keys.txt`
   - `used_profile_keys.txt`
   - `deps.txt`
+  - `fields`
 - one-off notes:
+  - `WHATS_NEW.md`
   - `legal_system_full_checklist.md`
   - `finding-forgiveness-STANDARD-PRINT-READY.txt`
+  - `delete_data.html`
 
 Target homes:
 
@@ -79,10 +85,22 @@ Initial archival moves completed:
   `tools/text-extraction/scripts/`
 - legacy standalone root scripts moved under:
   `tools/legacy-root-scripts/`
+- `add_crashlytics_build_phase.sh` ->
+  `tools/legacy-root-scripts/add_crashlytics_build_phase.sh`
+- `sync_comment_counts.dart` ->
+  `tools/legacy-root-scripts/sync_comment_counts.dart`
+- `test_app_check.dart` ->
+  `tools/legacy-root-scripts/test_app_check.dart`
 - `legal_system_full_checklist.md` ->
   `docs/archive/legal_system_full_checklist.md`
 - `finding-forgiveness-STANDARD-PRINT-READY.txt` ->
   `docs/archive/finding-forgiveness-STANDARD-PRINT-READY.txt`
+- `WHATS_NEW.md` ->
+  `docs/archive/WHATS_NEW_2026-01-28.md`
+- `delete_data.html` ->
+  `docs/archive/delete_data_google_play_account_deletion_page.html`
+- `fields` ->
+  `docs/archive/flutter_widget_dump_fields.txt`
 
 ### Should Not Be Committed Or Relied On
 
@@ -125,6 +143,13 @@ verifying they are not still referenced.
 Audit details:
 
 - see `docs/PACKAGE_RESIDUE_AUDIT.md`
+
+Current decision:
+
+- `packages/artbeat_admin/.git` was accidental residue and is removed
+- `packages/artbeat_profile/ios` appears to be an unused standalone scaffold,
+  but because it is tracked source it should only be removed in a dedicated
+  cleanup change, not during opportunistic repo-hygiene work
 
 ## Safe Cleanup Order
 

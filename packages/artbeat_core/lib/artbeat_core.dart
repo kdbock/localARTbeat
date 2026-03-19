@@ -30,7 +30,6 @@ export 'src/theme/glass_input_decoration.dart'
 export 'shared_widgets.dart';
 
 // Export Models
-// Note: AchievementModel is now provided by artbeat_art_walk package
 
 // Export Core Services
 export 'src/services/config_service.dart' show ConfigService;

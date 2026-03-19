@@ -5534,7 +5534,29 @@ async function isAdminUser(uid) {
   const userDoc = await admin.firestore().collection("users").doc(uid).get();
   if (!userDoc.exists) return false;
   const data = userDoc.data() || {};
-  return data.userType === "admin";
+  return data.userType === "admin" || data.role === "admin";
+}
+
+async function runDeletionStep(summary, step, operation) {
+  summary.currentStep = step;
+  summary.pipelineSteps = summary.pipelineSteps || [];
+  const stepRecord = {
+    step,
+    startedAt: new Date().toISOString(),
+  };
+  summary.pipelineSteps.push(stepRecord);
+
+  try {
+    const result = await operation();
+    stepRecord.completedAt = new Date().toISOString();
+    return result;
+  } catch (error) {
+    const message = error?.message || String(error);
+    summary.failedStep = step;
+    stepRecord.failedAt = new Date().toISOString();
+    stepRecord.error = message;
+    throw new Error(`${step}: ${message}`);
+  }
 }
 
 async function deleteWhereFieldEquals(
@@ -5727,6 +5749,9 @@ async function executeUserDeletionPipeline(userId, requestId) {
       "direct_commissions",
     ],
     storageErrors: [],
+    pipelineSteps: [],
+    failedStep: null,
+    currentStep: null,
   };
 
   const rootDocs = [
@@ -5741,7 +5766,9 @@ async function executeUserDeletionPipeline(userId, requestId) {
   ];
 
   for (const path of rootDocs) {
-    await deleteDocAndSubcollections(path, summary);
+    await runDeletionStep(summary, `delete root document ${path}`, async () => {
+      await deleteDocAndSubcollections(path, summary);
+    });
   }
 
   const userIdDeletions = [
@@ -5761,7 +5788,13 @@ async function executeUserDeletionPipeline(userId, requestId) {
   ];
 
   for (const [collectionName, fieldName] of userIdDeletions) {
-    await deleteWhereFieldEquals(collectionName, fieldName, userId, summary);
+    await runDeletionStep(
+      summary,
+      `delete ${collectionName} where ${fieldName} == ${userId}`,
+      async () => {
+        await deleteWhereFieldEquals(collectionName, fieldName, userId, summary);
+      }
+    );
   }
 
   // Cross-parent follow edge cleanup is best-effort because legacy edge docs
@@ -5790,49 +5823,63 @@ async function executeUserDeletionPipeline(userId, requestId) {
   ];
 
   for (const prefix of storagePrefixes) {
-    await deleteStoragePrefix(prefix, summary);
+    await runDeletionStep(summary, `delete storage prefix ${prefix}`, async () => {
+      await deleteStoragePrefix(prefix, summary);
+    });
   }
 
-  await cleanupUserOwnedChatMedia(userId, summary);
+  await runDeletionStep(summary, "cleanup user-owned chat media", async () => {
+    await cleanupUserOwnedChatMedia(userId, summary);
+  });
 
-  try {
-    await admin.auth().deleteUser(userId);
-    summary.authDeleted = true;
-  } catch (error) {
-    const message = String(error?.message || error || "").toLowerCase();
-    const code = String(error?.code || "").toLowerCase();
-    const codeInfo = String(error?.errorInfo?.code || "").toLowerCase();
-    const isUserMissing =
-      message.includes("user-not-found") ||
-      message.includes("no user record corresponding to the provided identifier") ||
-      code.includes("user-not-found") ||
-      codeInfo.includes("user-not-found");
-    if (isUserMissing) {
-      summary.authDeleted = false;
-      summary.authAlreadyMissing = true;
-    } else {
+  await runDeletionStep(summary, `delete auth user ${userId}`, async () => {
+    try {
+      await admin.auth().deleteUser(userId);
+      summary.authDeleted = true;
+    } catch (error) {
+      const message = String(error?.message || error || "").toLowerCase();
+      const code = String(error?.code || "").toLowerCase();
+      const codeInfo = String(error?.errorInfo?.code || "").toLowerCase();
+      const isUserMissing =
+        message.includes("user-not-found") ||
+        message.includes("no user record corresponding to the provided identifier") ||
+        code.includes("user-not-found") ||
+        codeInfo.includes("user-not-found");
+      if (isUserMissing) {
+        summary.authDeleted = false;
+        summary.authAlreadyMissing = true;
+        return;
+      }
       throw error;
     }
-  }
+  });
 
+  summary.currentStep = "completed";
   return summary;
 }
 
 exports.processDataDeletionRequest = onCall(
   {maxInstances: 2, timeoutSeconds: 540, memory: "512MiB"},
   async (request) => {
+    let requestId = "";
+    let userIdArg = "";
+    let reviewNotes = "";
+    let requestRef = null;
+    let requestData = {};
+    let callerUid = null;
+
     try {
       if (!request.auth?.uid) {
         throw new HttpsError("unauthenticated", "Authentication required.");
       }
-      const callerUid = request.auth.uid;
+      callerUid = request.auth.uid;
       if (!(await isAdminUser(callerUid))) {
         throw new HttpsError("permission-denied", "Admin access required.");
       }
 
-      const requestId = String(request.data?.requestId || "").trim();
-      const userIdArg = String(request.data?.userId || "").trim();
-      const reviewNotes = String(request.data?.reviewNotes || "").trim();
+      requestId = String(request.data?.requestId || "").trim();
+      userIdArg = String(request.data?.userId || "").trim();
+      reviewNotes = String(request.data?.reviewNotes || "").trim();
 
       if (!requestId && !userIdArg) {
         throw new HttpsError(
@@ -5841,9 +5888,7 @@ exports.processDataDeletionRequest = onCall(
         );
       }
 
-      let requestRef = null;
       let requestSnap = null;
-      let requestData = {};
 
       if (requestId) {
         requestRef = admin.firestore().collection("dataRequests").doc(requestId);
@@ -5927,6 +5972,28 @@ exports.processDataDeletionRequest = onCall(
         summary,
       };
     } catch (error) {
+      if (requestRef) {
+        try {
+          await requestRef.set(
+            {
+              status: "failed",
+              processingFailedAt: admin.firestore.FieldValue.serverTimestamp(),
+              reviewedBy: callerUid,
+              reviewNotes: reviewNotes || requestData.reviewNotes || null,
+              processingError: {
+                message: error?.message || String(error),
+                code: error?.code || error?.errorInfo?.code || null,
+              },
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            {merge: true}
+          );
+        } catch (writeError) {
+          logger.error(
+            `Failed to record deletion request failure state: ${writeError?.stack || writeError?.message || String(writeError)}`
+          );
+        }
+      }
       if (error instanceof HttpsError) {
         throw error;
       }

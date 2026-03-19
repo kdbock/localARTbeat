@@ -71,10 +71,6 @@ dependencies:
   timeago: ^3.7.0
   flutter_local_notifications: ^20.1.0
 
-  # Local modules
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

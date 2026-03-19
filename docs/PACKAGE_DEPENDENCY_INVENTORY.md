@@ -69,8 +69,7 @@ Depends on:
 ### `artbeat_core`
 
 Depends on:
-
-- `artbeat_art_walk`
+- no sibling feature packages
 
 ### `artbeat_events`
 
@@ -115,15 +114,10 @@ Target rules from `docs/DEPENDENCY_RULES.md`:
 
 ### Critical Violation: `artbeat_core`
 
-`artbeat_core` currently depends on 1 sibling feature package.
+`artbeat_core` currently depends on 0 sibling feature packages.
 
 This is the highest-leverage architecture problem in the repo because it turns
 the intended base layer into a cross-feature hub.
-
-The remaining edge is now narrow and temporary in practice: core's live app
-behavior has been moved off feature-package reads/writes, and the last import
-surface is the temporary XP repair widget in
-`packages/artbeat_core/lib/src/widgets/temp_xp_fix.dart`.
 
 ### High-Coupling Feature Packages
 
@@ -210,7 +204,7 @@ and blast radius is smaller.
 - completed: remove `artbeat_core -> artbeat_community`
 - completed: remove `artbeat_core -> artbeat_artwork`
 - completed: narrow `artbeat_core -> artbeat_art_walk` to temporary tooling
-- remove all feature dependencies from `artbeat_core`
+- completed: remove all feature dependencies from `artbeat_core`
 
 ## Working Rule
 

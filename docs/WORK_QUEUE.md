@@ -23,20 +23,20 @@ Risk values:
 | Task | Status | Risk | Area | Release Impact | Test Needed | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | Create canonical project docs and operating system | done | low | repo/process | none | doc review | Canonical docs created under `docs/` |
-| Clean repo root and separate source from generated/local artifacts | in_progress | medium | repo hygiene | indirect | smoke + git review | Safe phase started: ignore coverage, destination folders, cleanup policy |
+| Clean repo root and separate source from generated/local artifacts | in_progress | medium | repo hygiene | indirect | smoke + git review | Safe phase started: ignore coverage, destination folders, cleanup policy; tracked root notes/scripts/artifacts have been moved in batches, and `packages/artbeat_profile/ios` is now explicitly deferred to a dedicated removal change rather than opportunistic cleanup |
 | Define and enforce package dependency rules | in_progress | high | architecture | indirect | analyze + targeted regression | Policy exists; Stage 1 cuts are done. Stage 2 cleanup cuts are landing, and the remaining work is shifting from manifest cleanup to targeted refactors |
-| Reduce `artbeat_core` feature ownership | in_progress | high | architecture | indirect | package tests + app smoke | Admin, ads, capture, artist, events, messaging, community, and artwork are clean; art-walk usage is now reduced to the temporary XP repair widget in `temp_xp_fix.dart` |
+| Reduce `artbeat_core` feature ownership | done | high | architecture | indirect | package tests + app smoke | `artbeat_core` no longer depends on sibling feature packages; the unreferenced temporary XP repair widget was removed and the last `artbeat_core -> artbeat_art_walk` edge is gone |
 | Standardize translation validation workflow | done | medium | localization | low | locale parity report + parity test | Canonical report script added, locale files aligned, parity test added |
 | Consolidate deployment and release process into canonical runbook | done | low | operations | none | doc review | Durable release/testing steps folded into `docs/RELEASE_CHECKLIST.md`; older docs now reference-only |
-| Finish open legal/security follow-up items from `TODO.md` | todo | high | compliance | direct | staging validation | Keep policy and behavior aligned |
+| Finish open legal/security follow-up items from `TODO.md` | in_progress | high | compliance | direct | staging validation | Automated staging checks passed; on 2026-03-19 the concrete deletion failure was fixed, `functions:processDataDeletionRequest` was redeployed, and a credentialed staging repro passed end-to-end with `result.ok=true`; remaining work is fresh manual QA plus current non-engineering sign-off; see `docs/security/LEGAL_RELEASE_STATUS.md` |
 | Split large backend function domains into clearer modules | todo | medium | backend | medium | function smoke tests | Start after release process is tighter |
 
 ## Blocked Or Watch Items
 
 | Item | Status | Risk | Blocker | Notes |
 | --- | --- | --- | --- | --- |
-| Production canary sign-off completion | blocked | high | non-engineering sign-off and evidence | See `TODO.md` and legal docs |
-| Admin deletion fulfillment reliability | blocked | high | observed manual QA failure | See `docs/archive/manual_qa_result_2026-02-27.md` |
+| Production canary sign-off completion | blocked | high | fresh manual QA and non-engineering sign-off still required after the 2026-03-19 deletion fix | See `docs/security/LEGAL_RELEASE_STATUS.md` |
+| Admin deletion fulfillment reliability | done | high | Credentialed staging repro passed on 2026-03-19 after redeploying the fix to `processDataDeletionRequest` | See `docs/security/LEGAL_RELEASE_STATUS.md` |
 
 ## Completed Recently
 
@@ -51,9 +51,9 @@ Risk values:
 | Tighten ignore rules for local/debug output | done | `.gitignore` updated for common root and package-local artifacts |
 | Create canonical destinations for archived docs and tooling | done | Added `docs/archive/` and `tools/` guidance docs |
 | Inventory tracked root files and classify cleanup targets | done | See `docs/REPO_HYGIENE.md` |
-| Move or archive tracked root utility files | in_progress | Historical data files and standalone scripts moved out of root; more cleanup remains |
+| Move or archive tracked root utility files | in_progress | Historical data files, standalone scripts, stale notes, and root debug artifacts moved out of root in batches; more cleanup remains |
 | Audit unusual package-local project artifacts | done | Findings recorded in `docs/PACKAGE_RESIDUE_AUDIT.md` |
-| Remove accidental committed package-local project artifacts | in_progress | Nested `packages/artbeat_admin/.git` removed; `packages/artbeat_profile/ios` still needs explicit decision |
+| Remove accidental committed package-local project artifacts | in_progress | Nested `packages/artbeat_admin/.git` removed; `packages/artbeat_profile/ios` reviewed and deferred to a dedicated tracked-source cleanup change |
 | Reduce `artbeat_artwork` direct dependency on `artbeat_profile` | done | Removed unused manifest dependency; package verification pending broader Stage 2 reassessment |
 | Remove `artbeat_artist` direct dependency on `artbeat_ads` | done | Removed unused manifest dependency; verify with package tests |
 | Remove `artbeat_artwork` direct dependency on `artbeat_events` | done | Removed unused manifest dependency; verify with package tests |
@@ -97,7 +97,8 @@ Risk values:
 | Remove `artbeat_core` direct dependency on `artbeat_messaging` | done | Core unread-count and block/unblock paths now use core-local Firestore/Auth services instead of the messaging package |
 | Remove `artbeat_core` direct dependency on `artbeat_community` | done | Core post-feed reads, commission preview, and create-post launches now use core-local read surfaces and shared routes |
 | Remove `artbeat_core` direct dependency on `artbeat_artwork` | done | Dashboard artwork/book reads and filtered artwork results now use a core-local `ArtworkReadService` and core `ArtworkModel` |
-| Narrow `artbeat_core -> artbeat_art_walk` to temporary tooling only | done | Achievement, progression, challenge, activity, nearby-art, and discovery-progress reads/writes are now core-owned; only `temp_xp_fix.dart` still imports `artbeat_art_walk` |
+| Narrow `artbeat_core -> artbeat_art_walk` to temporary tooling only | done | Achievement, progression, challenge, activity, nearby-art, and discovery-progress reads/writes moved into core first |
+| Remove final `artbeat_core -> artbeat_art_walk` dependency | done | Deleted the unreferenced temporary XP repair widget and removed `artbeat_art_walk` from `artbeat_core/pubspec.yaml` |
 
 ## Queue Rules
 

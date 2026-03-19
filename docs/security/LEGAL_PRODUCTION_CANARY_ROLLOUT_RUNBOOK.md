@@ -7,7 +7,7 @@ Target project: production Firebase project (set explicitly at runtime)
 ## Preconditions
 
 - [x] Staging regression is green (`scripts/legal_staging_regression.sh`).
-- [ ] Manual in-app QA checklist completed:
+- [ ] Manual in-app QA checklist completed successfully:
 - `docs/LEGAL_STAGING_MANUAL_QA_CHECKLIST.md`
 - [ ] On-call window reserved (minimum 24-48h observation after deploy).
 - [ ] Rollback operator available.
@@ -68,8 +68,8 @@ firebase deploy --project <prod-project-id> --only functions:processDataDeletion
 ## Sign-Off
 
 - [x] Engineering sign-off
-- [x] Product/legal owner sign-off
-- [x] Support readiness sign-off
+- [ ] Product/legal owner sign-off confirmed against current evidence
+- [ ] Support readiness sign-off confirmed against current evidence
 
 ## Execution Log
 
@@ -79,6 +79,9 @@ firebase deploy --project <prod-project-id> --only functions:processDataDeletion
   `PROJECT_ID=wordnerd-artbeat ADMIN_EMAIL=<set> ADMIN_PASSWORD=<set> ./scripts/legal_staging_regression.sh`
 - [x] 2026-02-26: Shared chat lifecycle hardening deployed and validated:
   storage/firestore/function updates deployed to `wordnerd-artbeat`; regression checks include participant message create allow/deny.
-- [x] 2026-02-26: Manual in-app UI checklist completed and attached.
+- [x] 2026-02-26: Manual in-app UI checklist session executed and attached.
 - Attachment target: `docs/LEGAL_STAGING_UI_QA_SESSION_REPORT_YYYY-MM-DD.md`
 - [x] 2026-02-26: GitHub Actions workflow run evidence attached (`22424833231` success).
+- [ ] 2026-02-27: Follow-up manual QA exposed blocking deletion fulfillment
+  failure (`[firebase_functions/internal] INTERNAL`); production canary remains
+  blocked until fresh passing evidence exists.
