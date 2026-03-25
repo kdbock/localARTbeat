@@ -21,11 +21,26 @@ class SubscriptionService extends ChangeNotifier {
   factory SubscriptionService() => _instance;
   SubscriptionService._internal();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth? _authInstance;
+  FirebaseFirestore? _firestoreInstance;
   final SubscriptionPlanValidator _planValidator = SubscriptionPlanValidator();
   final SubscriptionValidationService _validationService =
       SubscriptionValidationService();
+
+  void initialize() {
+    _authInstance ??= FirebaseAuth.instance;
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Get the current user's subscription
   Future<SubscriptionModel?> getUserSubscription() async {

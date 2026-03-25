@@ -6,8 +6,13 @@ class SearchAnalytics {
   factory SearchAnalytics() => _instance;
   SearchAnalytics._internal();
 
-  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAnalytics? _analyticsInstance;
+  FirebaseFirestore? _firestoreInstance;
+
+  FirebaseAnalytics get _analytics =>
+      _analyticsInstance ??= FirebaseAnalytics.instance;
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
 
   Future<void> trackSearch({
     required String query,

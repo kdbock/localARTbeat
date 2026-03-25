@@ -7,9 +7,24 @@ import '../models/feature_limits.dart';
 /// Service for tracking and managing usage-based feature limits
 /// Implements 2025 industry standards with soft limits and overage tracking
 class UsageTrackingService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final Logger _logger = Logger('UsageTrackingService');
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   /// Get current usage for a user
   Future<Map<String, int>> getCurrentUsage(String userId) async {

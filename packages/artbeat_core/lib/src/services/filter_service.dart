@@ -5,7 +5,10 @@ import '../models/filter_types.dart';
 
 /// Service for handling all filtering operations
 class FilterService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
 
   /// Filter artists based on parameters
   Future<List<ArtistProfileModel>> filterArtists(

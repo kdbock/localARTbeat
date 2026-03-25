@@ -9,9 +9,13 @@ import '../models/feature_limits.dart';
 /// AI-powered service implementing 2025 industry standards
 /// Provides smart recommendations, content analysis, and automation features
 class AIService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final Logger _logger = Logger('AIService');
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   static const String _openaiApiUrl =
       'https://api.openai.com/v1/chat/completions';

@@ -5,8 +5,23 @@ import '../models/daily_challenge_model.dart';
 import '../utils/logger.dart';
 
 class DailyChallengeProgressService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   Future<void> recordSocialShare() async {
     await _recordIfMatching((challenge) => challenge.title.contains('Sharer'));

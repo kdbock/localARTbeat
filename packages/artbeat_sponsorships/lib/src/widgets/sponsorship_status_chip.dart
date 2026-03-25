@@ -10,7 +10,9 @@ class SponsorshipStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = switch (status) {
       SponsorshipStatus.active => Colors.greenAccent,
+      SponsorshipStatus.approved => Colors.lightGreenAccent,
       SponsorshipStatus.pending => Colors.orangeAccent,
+      SponsorshipStatus.needsCreative => Colors.amberAccent,
       SponsorshipStatus.expired => Colors.grey,
       SponsorshipStatus.rejected => Colors.redAccent,
     };
@@ -22,7 +24,7 @@ class SponsorshipStatusChip extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
       ),
       child: Text(
-        status.name.toUpperCase(),
+        status.displayName.toUpperCase(),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w800,

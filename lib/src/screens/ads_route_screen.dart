@@ -14,37 +14,6 @@ class AdsRouteScreen extends StatefulWidget {
 }
 
 class _AdsRouteScreenState extends State<AdsRouteScreen> {
-  final LocalAdIapService _iapService = LocalAdIapService();
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeIap();
-  }
-
-  Future<void> _initializeIap() async {
-    try {
-      await _iapService.initIap();
-      await _iapService.fetchProducts();
-      if (!mounted) return;
-      setState(() {
-        _isInitialized = true;
-      });
-    } on Exception catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isInitialized = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load ad packages: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final body = Stack(
@@ -171,8 +140,12 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
                     label: 'Artist funding',
                   ),
                   _AdsFeatureChip(
-                    icon: Icons.bar_chart,
-                    label: 'Simple analytics',
+                    icon: Icons.repeat,
+                    label: 'Monthly placements',
+                  ),
+                  _AdsFeatureChip(
+                    icon: Icons.verified_outlined,
+                    label: 'Review before live',
                   ),
                 ],
               ),
@@ -182,12 +155,7 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
       ),
     );
 
-  Widget _buildAdPackagesSection() {
-    if (!_isInitialized) {
-      return _buildLoadingState();
-    }
-
-    return Container(
+  Widget _buildAdPackagesSection() => Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -199,7 +167,7 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Launch a local campaign',
+            'Launch a simple local ad',
             style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -208,9 +176,36 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Browse active ads in your area or create a new sponsored placement for your business.',
+            'Create a banner or inline ad request for your business, or browse active local promotions already running in the app.',
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white70,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Monthly ad subscriptions are paid through Apple, then reviewed before they go live.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Available placements: Community feed, Artists and artwork, and Events.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'After you submit, Apple checkout opens. Approved ads then publish into the placement you selected.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -222,7 +217,7 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
               FilledButton.icon(
                 onPressed: _openCreateAdFlow,
                 icon: const Icon(Icons.add_business_rounded),
-                label: const Text('Create local ad'),
+                label: const Text('Submit local ad'),
               ),
               OutlinedButton.icon(
                 onPressed: _openBrowseAdsFlow,
@@ -234,7 +229,6 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
         ],
       ),
     );
-  }
 
   Future<void> _openCreateAdFlow() async {
     await Navigator.of(context).push<void>(
@@ -251,29 +245,6 @@ class _AdsRouteScreenState extends State<AdsRouteScreen> {
       ),
     );
   }
-
-  Widget _buildLoadingState() => Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        color: Colors.white.withValues(alpha: 0.05),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        children: [
-          const CircularProgressIndicator(color: Color(0xFF22D3EE)),
-          const SizedBox(height: 16),
-          Text(
-            'Loading available packages...',
-            style: GoogleFonts.spaceGrotesk(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
 
   Widget _buildWorldBackground() => DecoratedBox(
       decoration: const BoxDecoration(

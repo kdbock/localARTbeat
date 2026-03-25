@@ -192,35 +192,16 @@ const _sponsorshipOptions = [
     ],
     route: AppRoutes.sponsorshipArtWalk,
   ),
-  _SponsorshipOption(
-    icon: Icons.camera_alt,
-    titleKey: 'sponsorship_hub_option_capture_title',
-    priceKey: 'sponsorship_hub_option_capture_price',
-    durationKey: 'sponsorship_hub_option_duration_monthly',
-    descriptionKey: 'sponsorship_hub_option_capture_description',
-    perks: [
-      'sponsorship_hub_option_capture_perk_visibility',
-      'sponsorship_hub_option_capture_perk_message',
-      'sponsorship_hub_option_capture_perk_report',
-    ],
-    route: AppRoutes.sponsorshipCapture,
-  ),
-  _SponsorshipOption(
-    icon: Icons.radar,
-    titleKey: 'sponsorship_hub_option_discovery_title',
-    priceKey: 'sponsorship_hub_option_discovery_price',
-    durationKey: 'sponsorship_hub_option_duration_monthly',
-    descriptionKey: 'sponsorship_hub_option_discovery_description',
-    perks: [
-      'sponsorship_hub_option_discovery_perk_pin',
-      'sponsorship_hub_option_discovery_perk_badge',
-      'sponsorship_hub_option_discovery_perk_report',
-    ],
-    route: AppRoutes.sponsorshipDiscover,
-  ),
 ];
 
 const _supportCtas = [
+  _SupportCta(
+    titleKey: 'Promote your business with Local Ads',
+    subtitleKey:
+        'Capture and discovery placements now live under monthly Banner and Inline ads.',
+    icon: Icons.campaign_outlined,
+    route: AppRoutes.ads,
+  ),
   _SupportCta(
     titleKey: 'sponsorship_hub_support_cta_title',
     subtitleKey: 'sponsorship_hub_support_cta_subtitle',

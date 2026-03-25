@@ -33,10 +33,21 @@ class SponsorshipCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  sponsorship.tier.name.toUpperCase(),
+                  sponsorship.businessName,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 4),
+                Text(
+                  sponsorship.businessAddress ??
+                      sponsorship.relatedEntityName ??
+                      sponsorship.tier.name.toUpperCase(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
                 SponsorshipStatusChip(status: sponsorship.status),
               ],
             ),

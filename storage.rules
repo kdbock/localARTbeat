@@ -12,6 +12,10 @@ service firebase.storage {
     function isAuthorized() {
       return isAuthenticated() && hasAppCheck();
     }
+
+    function isAuthenticatedOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
     
     function isUserPath(userId) {
       return isAuthorized() && request.auth.uid == userId;
@@ -43,9 +47,10 @@ service firebase.storage {
       allow write: if false; // Specific paths must explicitly allow write
     }
 
-    // Legacy debug path; keep admin-only in production
+    // Legacy profile path used by older clients
     match /profile/{allPaths=**} {
-      allow read, write: if isAuthorized() && isAdmin(request.auth.uid);
+      allow read: if true;
+      allow write, delete: if isAuthorized();
     }
 
     // Legacy debug path; keep admin-only in production
@@ -230,11 +235,11 @@ service firebase.storage {
     // Post images for community feed
     match /post_images/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -243,11 +248,11 @@ service firebase.storage {
     // Post videos for community feed
     match /posts/{userId}/videos/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -256,11 +261,11 @@ service firebase.storage {
     // Post audio for community feed
     match /posts/{userId}/audio/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -274,18 +279,29 @@ service firebase.storage {
     // Profile images
     match /profile_images/{userId}/{fileName} {
       allow read: if true; // Public read for profile images
-      allow write: if isAuthorized() && request.auth.uid == userId;
-      allow delete: if isAuthorized() && request.auth.uid == userId;
+      allow write: if isAuthenticatedOwner(userId);
+      allow delete: if isAuthenticatedOwner(userId);
     }
 
-    // Legacy Enhanced Storage root path - admin only
-    match /profile/{fileName} {
-      allow read, write, delete: if isAuthorized() && isAdmin(request.auth.uid);
+    // Allow nested thumbnails and other user-owned files under profile_images
+    match /profile_images/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticatedOwner(userId);
+      allow delete: if isAuthenticatedOwner(userId);
     }
 
-    // Enhanced Storage Service paths for profile thumbnails
-    match /profile/thumbnails/{fileName} {
-      allow read, write, delete: if isAuthorized() && isAdmin(request.auth.uid);
+    // Legacy Enhanced Storage path used by older shipped clients
+    match /profile/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticatedOwner(userId);
+      allow delete: if isAuthenticatedOwner(userId);
+    }
+
+    // Legacy settings path used by older shipped clients
+    match /profile_pictures/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticatedOwner(userId);
+      allow delete: if isAuthenticatedOwner(userId);
     }
 
     // Enhanced Storage Service paths for artwork images (used for cover images)
@@ -365,11 +381,11 @@ service firebase.storage {
     // Ad images - for advertisement uploads
     match /ads/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );

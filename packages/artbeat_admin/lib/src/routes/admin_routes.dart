@@ -16,6 +16,7 @@ import '../screens/moderation/admin_artwork_moderation_screen.dart';
 import '../screens/moderation/admin_community_moderation_screen.dart';
 import '../screens/moderation/admin_art_walk_moderation_screen.dart';
 import '../screens/moderation/admin_content_moderation_screen.dart';
+import '../screens/moderation/admin_sponsorship_moderation_screen.dart';
 import '../screens/admin_platform_curation_screen.dart';
 import '../models/user_admin_model.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -63,6 +64,7 @@ class AdminRoutes {
   static const String communityModeration = '/admin/moderation/community';
   static const String artWalkModeration = '/admin/moderation/art-walks';
   static const String contentModeration = '/admin/moderation/content';
+  static const String sponsorshipModeration = '/admin/moderation/sponsorships';
   static const String flaggingQueue = '/admin/moderation/flagging-queue';
   static const String platformCuration = '/admin/curation';
 
@@ -106,6 +108,11 @@ class AdminRoutes {
       case contentModeration:
         return MaterialPageRoute<void>(
           builder: (_) => const AdminContentModerationScreen(),
+          settings: settings,
+        );
+      case sponsorshipModeration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminSponsorshipModerationScreen(),
           settings: settings,
         );
       case flaggingQueue:

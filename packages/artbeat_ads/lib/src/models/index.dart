@@ -3,6 +3,5 @@ export 'local_ad_duration.dart';
 export 'local_ad_size.dart';
 export 'local_ad_status.dart';
 export 'local_ad_zone.dart';
-export 'local_ad_purchase.dart';
 export 'ad_pricing_matrix.dart';
 export 'ad_report_model.dart';

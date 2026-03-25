@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../utils/logger.dart';
+import '../utils/env_loader.dart';
 
 /// Handles server-side purchase verification for both Google Play and App Store
 ///
 /// IMPORTANT: This service now uses Firebase Cloud Functions for secure verification.
 /// Service account credentials are stored securely in Cloud Functions, not in the client app.
 class PurchaseVerificationService {
-  static const String _cloudFunctionBaseUrl =
-      'https://us-central1-wordnerd-artbeat.cloudfunctions.net';
+  static String get _cloudFunctionBaseUrl => EnvLoader().cloudFunctionsBaseUrl;
 
   /// Verify Android purchase via Cloud Function
   ///

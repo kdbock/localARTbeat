@@ -10,7 +10,16 @@ import '../utils/logger.dart';
 /// This service consolidates functionality from both artbeat_core and artbeat_artist
 /// to provide a single point of truth for artist-related operations.
 class ArtistService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Get featured artists using ArtistProfileModel for enhanced data
   Future<List<ArtistProfileModel>> getFeaturedArtistProfiles() async {

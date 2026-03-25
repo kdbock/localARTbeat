@@ -11,8 +11,12 @@ class CaptureAnalyticsService extends ChangeNotifier {
   factory CaptureAnalyticsService() => _instance;
   CaptureAnalyticsService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   // Analytics data
   final Map<String, dynamic> _captureMetrics = {};

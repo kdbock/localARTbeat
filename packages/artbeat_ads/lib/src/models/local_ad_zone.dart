@@ -1,33 +1,41 @@
 enum LocalAdZone { home, events, artists, community, featured }
 
 extension LocalAdZoneExtension on LocalAdZone {
+  static const launchPlacements = <LocalAdZone>[
+    LocalAdZone.community,
+    LocalAdZone.artists,
+    LocalAdZone.events,
+  ];
+
+  bool get isLaunchPlacement => launchPlacements.contains(this);
+
   String get displayName {
     switch (this) {
       case LocalAdZone.home:
-        return 'Home';
+        return 'Home (not in launch rotation)';
       case LocalAdZone.events:
         return 'Events';
       case LocalAdZone.artists:
-        return 'Artists';
+        return 'Artists and artwork';
       case LocalAdZone.community:
-        return 'Community';
+        return 'Community feed';
       case LocalAdZone.featured:
-        return 'Featured';
+        return 'Featured (not in launch rotation)';
     }
   }
 
   String get description {
     switch (this) {
       case LocalAdZone.home:
-        return 'Main dashboard - high visibility';
+        return 'Reserved for a future launch phase.';
       case LocalAdZone.events:
-        return 'Events & experiences section';
+        return 'Shown between event sections and event discovery content.';
       case LocalAdZone.artists:
-        return 'Artists profiles area';
+        return 'Shown beside artist and artwork browsing surfaces.';
       case LocalAdZone.community:
-        return 'Community hub & feeds';
+        return 'Shown between community posts and social content.';
       case LocalAdZone.featured:
-        return 'Premium featured placement';
+        return 'Reserved for a future launch phase.';
     }
   }
 

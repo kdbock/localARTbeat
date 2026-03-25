@@ -26,8 +26,23 @@ class ArtistBoostService {
   ArtistBoostService._internal();
 
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth? _authInstance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _authInstance ??= FirebaseAuth.instance;
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   // Artist Boost configurations (Spark / Surge / Overdrive)
   static const Map<String, Map<String, dynamic>> _boostProducts = {

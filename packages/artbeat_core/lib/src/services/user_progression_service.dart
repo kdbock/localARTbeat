@@ -4,11 +4,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/logger.dart';
 
 class UserProgressionService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
 
   static final Map<String, Future<Map<String, dynamic>>> _dailyLoginInFlight =
       {};
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   static const Map<int, Map<String, dynamic>> levelSystem = {
     1: {'title': 'Sketcher (Frida Kahlo)', 'minXP': 0, 'maxXP': 199},

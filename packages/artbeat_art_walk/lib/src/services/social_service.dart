@@ -113,7 +113,16 @@ class SocialActivity {
 
 /// Service for managing social features and activity feeds
 class SocialService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   // Collection references
   CollectionReference get _activities =>

@@ -21,7 +21,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   // Services
   final _userService = UserService();
-  final _storageService = EnhancedStorageService();
   final _auth = FirebaseAuth.instance;
   final _imagePicker = ImagePicker();
 
@@ -478,17 +477,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Upload image to Firebase Storage
       final imageFile = File(pickedFile.path);
-      final uploadResult = await _storageService.uploadImageWithOptimization(
-        imageFile: imageFile,
-        category: 'profile_pictures/${user.uid}',
-        generateThumbnail: true,
-        customWidth: 512,
-        customHeight: 512,
+      final imageUrl = await _userService.uploadProfileImage(
+        imageFile,
+        userId: user.uid,
       );
-
-      final imageUrl = uploadResult['imageUrl'] ?? '';
 
       // Update user profile in Firestore
       await _userService.firestore.collection('users').doc(user.uid).update({

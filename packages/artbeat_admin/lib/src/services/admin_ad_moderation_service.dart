@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/admin_ad_report_model.dart';
+import '../models/admin_local_ad_purchase_recovery.dart';
 import '../models/admin_local_ad.dart';
 
 class AdminAdModerationService {
@@ -12,6 +13,7 @@ class AdminAdModerationService {
 
   static const String _adsCollection = 'localAds';
   static const String _reportsCollection = 'ad_reports';
+  static const String _recoveriesCollection = 'localAdPurchaseRecoveries';
 
   Future<List<AdminLocalAd>> getAdsForReview() async {
     try {
@@ -53,6 +55,36 @@ class AdminAdModerationService {
       return stats;
     } catch (e) {
       throw Exception('Failed to get ad statistics: $e');
+    }
+  }
+
+  Future<List<AdminLocalAd>> getAdsNeedingPaymentFollowUp() async {
+    try {
+      final snapshot = await _firestore
+          .collection(_adsCollection)
+          .where('purchaseFollowUpStatus', isEqualTo: 'pending_refund_review')
+          .orderBy('reviewedAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => AdminLocalAd.fromSnapshot(doc)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch ads needing payment follow-up: $e');
+    }
+  }
+
+  Future<List<AdminLocalAdPurchaseRecovery>> getPurchaseRecoveries() async {
+    try {
+      final snapshot = await _firestore
+          .collection(_recoveriesCollection)
+          .where('status', isEqualTo: 'pending_manual_recovery')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => AdminLocalAdPurchaseRecovery.fromSnapshot(doc))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch purchase recoveries: $e');
     }
   }
 
@@ -105,6 +137,8 @@ class AdminAdModerationService {
         'reviewedAt': Timestamp.now(),
         if (adminNotes != null) 'adminNotes': adminNotes,
         'rejectionReason': null,
+        'purchaseFollowUpStatus': 'active_subscription',
+        'purchaseFollowUpNotes': FieldValue.delete(),
       });
     } catch (e) {
       AppLogger.error('Failed to approve ad: $e');
@@ -123,9 +157,51 @@ class AdminAdModerationService {
         'reviewedBy': adminId,
         'reviewedAt': Timestamp.now(),
         'rejectionReason': reason,
+        'purchaseFollowUpStatus': 'pending_refund_review',
+        'purchaseFollowUpNotes':
+            'Rejected after payment. Review Apple/Google subscription cancellation or refund handling.',
       });
     } catch (e) {
       AppLogger.error('Failed to reject ad: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> markPurchaseRecoveryReviewed({
+    required String recoveryId,
+    required String adminId,
+    required String resolutionNotes,
+  }) async {
+    try {
+      await _firestore.collection(_recoveriesCollection).doc(recoveryId).update({
+        'status': 'reviewed_manual_follow_up',
+        'reviewedBy': adminId,
+        'reviewedAt': Timestamp.now(),
+        'resolutionNotes': resolutionNotes,
+      });
+    } catch (e) {
+      AppLogger.error('Failed to mark ad purchase recovery reviewed: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateAdPurchaseFollowUp({
+    required String adId,
+    required String status,
+    required String adminId,
+    String? notes,
+    bool? autoRenewing,
+  }) async {
+    try {
+      await _firestore.collection(_adsCollection).doc(adId).update({
+        'purchaseFollowUpStatus': status,
+        'purchaseFollowUpNotes': notes ?? FieldValue.delete(),
+        'reviewedBy': adminId,
+        'reviewedAt': Timestamp.now(),
+        if (autoRenewing != null) 'autoRenewing': autoRenewing,
+      });
+    } catch (e) {
+      AppLogger.error('Failed to update ad purchase follow-up: $e');
       rethrow;
     }
   }

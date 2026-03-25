@@ -110,7 +110,6 @@ service_account.json
 .env
 .env.*
 !.env.example
-!.env.production
 !.env.local.example
 .env.local
 *.key
@@ -129,9 +128,6 @@ service_account.json
 **/google_maps_api.xml
 **/client_secret*.json
 **/oauth_credentials.json
-
-# Debug keystore (keep debug.keystore for development)
-!debug.keystore
 
 # Test cache files
 **/build/test_cache/

@@ -187,21 +187,7 @@ class InAppPurchaseManager {
 
   /// Handle ad purchase
   void _handleAdPurchase(CompletedPurchase purchase) {
-    // Extract ad metadata
-    final metadata = purchase.metadata;
-    final artworkId = metadata['artworkId'] as String?;
-    final targetingOptions =
-        metadata['targetingOptions'] as Map<String, dynamic>?;
-
-    if (artworkId != null && targetingOptions != null) {
-      _adService.completeAdPurchase(
-        userId: purchase.userId,
-        productId: purchase.productId,
-        transactionId: purchase.transactionId ?? purchase.purchaseId,
-        artworkId: artworkId,
-        targetingOptions: targetingOptions,
-      );
-    }
+    _adService.logLegacyAdPurchaseAttempt(purchase.productId);
   }
 
   /// Handle premium purchase
@@ -293,60 +279,8 @@ class InAppPurchaseManager {
   }
 
   // Ad methods
-  Future<bool> purchaseAdPackage({
-    required String adProductId,
-    required String artworkId,
-    required Map<String, dynamic> targetingOptions,
-    Map<String, dynamic>? metadata,
-  }) {
-    // Check if IAP should be used for ads
-    final paymentMethod = _paymentStrategy.getPaymentMethod(
-      PurchaseType.nonConsumable, // Ad packages are typically non-consumable
-      ArtbeatModule.ads,
-    );
-
-    if (paymentMethod != PaymentMethod.iap) {
-      AppLogger.warning(
-        'Ad purchase should use $paymentMethod but IAP manager was called',
-      );
-      // Ads must use Stripe per Apple policy - this IAP method should not be used for ads
-      return Future.value(false);
-    }
-
-    return _adService.purchaseAdPackage(
-      adProductId: adProductId,
-      artworkId: artworkId,
-      targetingOptions: targetingOptions,
-      metadata: metadata,
-    );
-  }
-
   List<Map<String, dynamic>> getAvailableAdPackages() {
     return _adService.getAvailableAdPackages();
-  }
-
-  Future<List<InAppAdPurchase>> getUserAdPurchases(String userId) {
-    return _adService.getUserAdPurchases(userId);
-  }
-
-  Future<List<Map<String, dynamic>>> getUserActiveCampaigns(String userId) {
-    return _adService.getUserActiveCampaigns(userId);
-  }
-
-  Future<int> getAdCreditsBalance(String userId) {
-    return _adService.getAdCreditsBalance(userId);
-  }
-
-  Future<bool> useAdCredits(String userId, int impressions) {
-    return _adService.useAdCredits(userId, impressions);
-  }
-
-  Future<Map<String, dynamic>> getAdStatistics(String userId) {
-    return _adService.getAdStatistics(userId);
-  }
-
-  Future<Map<String, dynamic>> getCampaignAnalytics(String campaignId) {
-    return _adService.getCampaignAnalytics(campaignId);
   }
 
   // General methods

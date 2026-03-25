@@ -5,7 +5,16 @@ import '../models/public_art_model.dart';
 import '../utils/logger.dart';
 
 class PublicArtReadService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   Future<List<PublicArtModel>> getPublicArtNearLocation({
     required double latitude,

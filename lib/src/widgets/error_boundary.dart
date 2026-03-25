@@ -1,4 +1,3 @@
-import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -26,26 +25,16 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   @override
   void initState() {
     super.initState();
-    // Save the previous error handler
     _previousOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
-      if (kDebugMode) {
-        AppLogger.error(
-          '❌ Flutter Error caught by ErrorBoundary: ${details.exception}',
-        );
-        AppLogger.error('❌ Stack trace: ${details.stack}');
-      }
       if (widget.onError != null) {
         widget.onError!(details.exception, details.stack ?? StackTrace.current);
       }
-
-      // Don't show error UI for render overflow errors in production
       final isRenderOverflowError = details.exception.toString().contains(
         'RenderFlex overflowed',
       );
 
-      // Defer setState until after build phase
-      if (mounted && !_hasError && (!isRenderOverflowError || kDebugMode)) {
+      if (mounted && !_hasError && !isRenderOverflowError) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
@@ -55,14 +44,12 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
           }
         });
       }
-      // Optionally call the previous handler
       _previousOnError?.call(details);
     };
   }
 
   @override
   void dispose() {
-    // Restore the previous error handler
     FlutterError.onError = _previousOnError;
     super.dispose();
   }

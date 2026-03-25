@@ -312,7 +312,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
             ? null
             : _brandingNotesController.text.trim(),
         tier: tier,
-        status: _resolveSponsorshipStatus(checkout.status),
+        status: SponsorshipStatus.pending,
         startDate: now,
         endDate: now.add(
           Duration(days: SponsorshipPricing.durationDaysFor(tier)),
@@ -324,8 +324,8 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         logoUrl: '',
         linkUrl: '',
         createdAt: now,
-        relatedEntityId: widget.selectedEvent?.name,
-        chapterId: businessAddress.isEmpty ? null : businessAddress,
+        relatedEntityName: widget.selectedEvent?.displayName,
+        businessAddress: businessAddress.isEmpty ? null : businessAddress,
         contactEmail: _contactEmailController.text.trim(),
         phone: _phoneController.text.trim().isEmpty
             ? null
@@ -361,16 +361,6 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
-    }
-  }
-
-  SponsorshipStatus _resolveSponsorshipStatus(String? paymentStatus) {
-    switch (paymentStatus) {
-      case 'active':
-      case 'trialing':
-        return SponsorshipStatus.active;
-      default:
-        return SponsorshipStatus.pending;
     }
   }
 
@@ -410,10 +400,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   List<String> _placementsForTier(SponsorshipTier tier) {
     switch (tier) {
       case SponsorshipTier.artWalk:
-        return [
-          SponsorshipPlacements.artWalkHeader,
-          SponsorshipPlacements.artWalkStopCard,
-        ];
+        return [SponsorshipPlacements.artWalkHeader];
       case SponsorshipTier.capture:
         return [SponsorshipPlacements.captureDetailBanner];
       case SponsorshipTier.discover:

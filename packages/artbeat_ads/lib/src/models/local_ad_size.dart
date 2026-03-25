@@ -4,18 +4,18 @@ extension LocalAdSizeExtension on LocalAdSize {
   String get displayName {
     switch (this) {
       case LocalAdSize.small:
-        return 'Small';
+        return 'Banner Ad';
       case LocalAdSize.big:
-        return 'Big';
+        return 'Inline Ad';
     }
   }
 
   String get description {
     switch (this) {
       case LocalAdSize.small:
-        return 'Standard size - lower visibility';
+        return 'Best for section breaks across key dashboards';
       case LocalAdSize.big:
-        return 'Large size - premium visibility';
+        return 'Best for feed visibility between local content cards';
     }
   }
 

@@ -12,8 +12,12 @@ class AIMLIntegrationService extends ChangeNotifier {
   factory AIMLIntegrationService() => _instance;
   AIMLIntegrationService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   // AI processing statistics
   int _processedImages = 0;

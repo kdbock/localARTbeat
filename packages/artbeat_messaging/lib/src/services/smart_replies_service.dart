@@ -6,9 +6,13 @@ import 'package:logging/logging.dart';
 
 /// Service for generating AI-powered smart reply suggestions
 class SmartRepliesService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final Logger _logger = Logger('SmartRepliesService');
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   static const String _openaiApiUrl =
       'https://api.openai.com/v1/chat/completions';

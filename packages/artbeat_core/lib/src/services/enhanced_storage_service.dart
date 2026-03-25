@@ -93,6 +93,8 @@ class EnhancedStorageService {
       if (thumbnail != null) {
         final thumbPath = storagePath == category
             ? '$storagePath/thumbnails/${fileName}_thumb.jpg'
+            : storagePath == 'profile_images'
+            ? '$storagePath/${user.uid}/${fileName}_thumb.jpg'
             : '$storagePath/${user.uid}/thumbnails/${fileName}_thumb.jpg';
 
         thumbnailUrl = await _uploadImageData(thumbnail, thumbPath, user.uid);
@@ -168,7 +170,7 @@ class EnhancedStorageService {
 
     switch (category) {
       case 'profile':
-        return 'profile';
+        return 'profile_images';
       case 'capture':
         return 'capture_images';
       case 'artwork':

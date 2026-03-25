@@ -10,6 +10,7 @@ import '../models/user_model.dart';
 import '../models/user_type.dart';
 import '../models/artist_profile_model.dart';
 import '../models/achievement_model.dart';
+import '../services/firebase_storage_auth_service.dart';
 import '../storage/enhanced_storage_service.dart';
 import '../utils/logger.dart';
 
@@ -29,6 +30,9 @@ class UserService extends ChangeNotifier {
 
   UserService._internal() {
     _logDebug('Initializing UserService');
+  }
+
+  void initialize() {
     _initializeFirebase();
   }
 
@@ -104,7 +108,7 @@ class UserService extends ChangeNotifier {
 
   // Getters
   FirebaseAuth get auth {
-    _initializeFirebase();
+    initialize();
     if (_auth == null) {
       throw StateError('Firebase Auth not available in test environment');
     }
@@ -112,7 +116,7 @@ class UserService extends ChangeNotifier {
   }
 
   FirebaseFirestore get firestore {
-    _initializeFirebase();
+    initialize();
     if (_firestore == null) {
       throw StateError('Firebase Firestore not available in test environment');
     }
@@ -120,7 +124,7 @@ class UserService extends ChangeNotifier {
   }
 
   FirebaseStorage get storage {
-    _initializeFirebase();
+    initialize();
     if (_storage == null) {
       throw StateError('Firebase Storage not available in test environment');
     }
@@ -140,19 +144,19 @@ class UserService extends ChangeNotifier {
   }
 
   User? get currentUser {
-    _initializeFirebase();
+    initialize();
     return _auth?.currentUser;
   }
 
   String? get currentUserId => currentUser?.uid;
   Stream<User?> get authStateChanges {
-    _initializeFirebase();
+    initialize();
     return _auth?.authStateChanges() ?? Stream.value(null);
   }
 
   // User operations
   Future<UserModel?> getCurrentUserModel() async {
-    _initializeFirebase();
+    initialize();
     final user = _auth?.currentUser;
     if (user == null) return null;
     return getUserModel(user.uid);
@@ -281,6 +285,67 @@ class UserService extends ChangeNotifier {
   }
 
   // Upload photo methods
+  Future<String> uploadProfileImage(File imageFile, {String? userId}) async {
+    final targetUserId = userId ?? currentUserId;
+    if (targetUserId == null) {
+      throw Exception('No current user ID');
+    }
+
+    if (!await imageFile.exists()) {
+      throw Exception('Image file does not exist');
+    }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final storagePath = 'profile_images/$targetUserId/profile_$timestamp.jpg';
+    final ref = storage.ref().child(storagePath);
+    final metadata = SettableMetadata(
+      contentType: 'image/jpeg',
+      customMetadata: {
+        'uploadedBy': targetUserId,
+        'uploadTime': DateTime.now().toIso8601String(),
+      },
+    );
+
+    final tokenService = FirebaseStorageAuthService();
+    await tokenService.refreshTokens();
+
+    String? authToken;
+    try {
+      authToken = await auth.currentUser?.getIdToken();
+    } catch (_) {}
+
+    debugPrint(
+      '👤 UserService uploadProfileImage: currentUid=${auth.currentUser?.uid}, targetUserId=$targetUserId, path=$storagePath, hasAuthToken=${authToken?.isNotEmpty == true}',
+    );
+
+    try {
+      await ref.putFile(imageFile, metadata);
+    } on FirebaseException catch (e, s) {
+      debugPrint(
+        '👤 UserService uploadProfileImage failed: code=${e.code}, message=${e.message}, plugin=${e.plugin}',
+      );
+      _logError('Profile photo upload failed', e, s);
+
+      if (e.code == 'unauthorized') {
+        debugPrint(
+          '👤 UserService uploadProfileImage: retrying after token refresh',
+        );
+        await tokenService.refreshTokens();
+        try {
+          authToken = await auth.currentUser?.getIdToken();
+        } catch (_) {}
+        debugPrint(
+          '👤 UserService uploadProfileImage retry: currentUid=${auth.currentUser?.uid}, targetUserId=$targetUserId, path=$storagePath, hasAuthToken=${authToken?.isNotEmpty == true}',
+        );
+        await ref.putFile(imageFile, metadata);
+      } else {
+        rethrow;
+      }
+    }
+
+    return ref.getDownloadURL();
+  }
+
   Future<void> uploadAndUpdateProfilePhoto(File imageFile) async {
     final userId = currentUserId;
     if (userId == null) {
@@ -289,27 +354,12 @@ class UserService extends ChangeNotifier {
     }
 
     try {
-      _logDebug('Starting optimized profile photo upload for user $userId');
+      _logDebug('Starting profile photo upload for user $userId');
 
-      // Use enhanced storage service for optimized upload
-      final enhancedStorage = EnhancedStorageService();
-      final result = await enhancedStorage.uploadImageWithOptimization(
-        imageFile: imageFile,
-        category: 'profile',
-        generateThumbnail: true,
-      );
-
-      final url = result['imageUrl']!;
+      final url = await uploadProfileImage(imageFile, userId: userId);
       _logDebug('Download URL: $url');
-      _logDebug('Original size: ${result['originalSize']}');
-      _logDebug('Compressed size: ${result['compressedSize']}');
 
-      // Update Firestore with both main image and thumbnail
       final updateData = {'profileImageUrl': url};
-
-      if (result['thumbnailUrl'] != null) {
-        updateData['profileImageThumbnailUrl'] = result['thumbnailUrl']!;
-      }
 
       await _usersCollection
           .doc(userId)
@@ -1028,22 +1078,11 @@ class UserService extends ChangeNotifier {
   /// Update user profile image
   Future<bool> updateUserProfileImage(String userId, File imageFile) async {
     try {
-      final storageService = EnhancedStorageService();
-
-      // Upload image with optimization
-      final uploadResult = await storageService.uploadImageWithOptimization(
-        imageFile: imageFile,
-        category: 'profile',
-        generateThumbnail: true,
-      );
-
-      final imageUrl = uploadResult['imageUrl']!;
-      final thumbnailUrl = uploadResult['thumbnailUrl'];
+      final imageUrl = await uploadProfileImage(imageFile, userId: userId);
 
       // Update user document with new profile image
       await _usersCollection.doc(userId).update({
         'profileImageUrl': imageUrl,
-        if (thumbnailUrl != null) 'profileThumbnailUrl': thumbnailUrl,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

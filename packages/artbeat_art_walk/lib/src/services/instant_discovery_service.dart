@@ -18,11 +18,27 @@ class InstantDiscoveryService {
 
   InstantDiscoveryService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final RewardsService _rewardsService = RewardsService();
   final ChallengeService _challengeService = ChallengeService();
   final SponsorService _sponsorService = SponsorService();
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+    _challengeService.initialize();
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   // Cache for discovered art IDs
   Set<String>? _discoveredArtIds;

@@ -210,8 +210,13 @@ Current flow shape:
 Primary screens involved:
 
 - `ArtWalkSponsorshipScreen`
-- `CaptureSponsorshipScreen`
-- `DiscoverSponsorshipScreen`
+- `CaptureSponsorshipScreen` retired
+- `DiscoverSponsorshipScreen` retired
+
+Current product boundary:
+- `Art Walk` remains the curated sponsorship product
+- `Capture` and `Discovery` visibility are now handled through the Local Ads flow
+- legacy sponsorship routes for capture/discovery now hand off to ads instead of opening Stripe sponsorship checkout
 - `CreateSponsorshipScreen`
 - `SponsorshipReviewScreen`
 - `SponsorshipDashboardScreen`

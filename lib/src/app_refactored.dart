@@ -150,29 +150,30 @@ class MyApp extends StatelessWidget {
 
     // Additional service providers for DashboardViewModel
     Provider<core.ArtworkReadService>(
-      create: (_) => core.ArtworkReadService(),
+      create: (_) => core.ArtworkReadService()..initialize(),
       lazy: true,
     ),
     Provider<core.PublicArtReadService>(
-      create: (_) => core.PublicArtReadService(),
+      create: (_) => core.PublicArtReadService()..initialize(),
       lazy: true,
     ),
     Provider<ArtWalkService>(create: (_) => ArtWalkService(), lazy: true),
-    Provider<ChallengeService>(create: (_) => ChallengeService(), lazy: true),
+    Provider<ChallengeService>(
+      create: (_) => ChallengeService()..initialize(),
+      lazy: true,
+    ),
     Provider<capture.CaptureService>(
       create: (_) => capture.CaptureService(
         postCaptureHooks: CaptureArtWalkHooks(),
       ),
       lazy: true,
     ),
-    Provider<core.CaptureServiceInterface>(
-      create: (_) => capture.CaptureService(
-        postCaptureHooks: CaptureArtWalkHooks(),
-      ),
+    ProxyProvider<capture.CaptureService, core.CaptureServiceInterface>(
+      update: (_, captureService, __) => captureService,
       lazy: true,
     ),
     ChangeNotifierProvider<core.SubscriptionService>.value(
-      value: core.SubscriptionService(),
+      value: core.SubscriptionService()..initialize(),
     ),
 
     // Dashboard ViewModel

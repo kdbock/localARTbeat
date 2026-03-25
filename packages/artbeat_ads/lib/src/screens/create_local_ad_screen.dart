@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import '../models/index.dart';
 import '../services/index.dart';
+import 'my_ads_screen.dart';
 
 class CreateLocalAdScreen extends StatefulWidget {
   const CreateLocalAdScreen({Key? key, this.initialSize, this.initialDuration})
@@ -28,9 +29,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   final _contactController = TextEditingController();
   final _websiteController = TextEditingController();
 
-  final LocalAdZone _selectedZone = LocalAdZone.home;
+  LocalAdZone _selectedPlacement = LocalAdZone.community;
   LocalAdSize _selectedSize = LocalAdSize.small;
-  LocalAdDuration _selectedDuration = LocalAdDuration.oneWeek;
+  LocalAdDuration _selectedDuration = LocalAdDuration.oneMonth;
   bool _showTitle = true;
   bool _showDescription = true;
   final List<File> _selectedImages = [];
@@ -38,15 +39,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   bool _isLoading = false;
 
   late LocalAdService _adService;
-  late LocalAdIapService _iapService;
+  late LocalAdIapService _adIapService;
 
   @override
   void initState() {
     super.initState();
     _selectedSize = widget.initialSize ?? LocalAdSize.small;
-    _selectedDuration = widget.initialDuration ?? LocalAdDuration.oneWeek;
+    _selectedDuration = LocalAdDuration.oneMonth;
+    _selectedPlacement = _availablePlacementsForSelectedType.first;
     _adService = LocalAdService();
-    _iapService = LocalAdIapService();
+    _adIapService = LocalAdIapService();
   }
 
   @override
@@ -83,9 +85,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     if (_selectedImages.isEmpty) return [];
 
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
       final urls = <String>[];
-      for (final uploadFile in _selectedImages) {
-        final fileName = 'ads/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      for (var index = 0; index < _selectedImages.length; index++) {
+        final uploadFile = _selectedImages[index];
+        final fileName =
+            'ads/${user.uid}/${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
         final reference = FirebaseStorage.instance.ref().child(fileName);
 
         try {
@@ -125,16 +134,18 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _iapService.initIap();
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      await _iapService.purchaseAd(
-        size: _selectedSize,
-        duration: _selectedDuration,
-      );
-
       _uploadedImageUrls = await _uploadImages();
+      if (_selectedImages.isNotEmpty &&
+          _uploadedImageUrls.length != _selectedImages.length) {
+        throw Exception('One or more ad images failed to upload.');
+      }
+
+      final purchase = await _adIapService.purchaseAdSubscription(
+        size: _selectedSize,
+      );
 
       final now = DateTime.now();
       final expiresAt = now.add(Duration(days: _selectedDuration.days));
@@ -154,24 +165,33 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         websiteUrl: _websiteController.text.trim().isNotEmpty
             ? _websiteController.text.trim()
             : null,
-        zone: _selectedZone,
+        zone: _selectedPlacement,
         size: _selectedSize,
         createdAt: now,
         expiresAt: expiresAt,
-        status: LocalAdStatus.active,
+        status: LocalAdStatus.pendingReview,
+        subscriptionProductId: purchase.productId,
+        purchaseId: purchase.purchaseId,
+        transactionId: purchase.transactionId,
+        monthlyPrice: purchase.price,
+        currencyCode: purchase.currencyCode,
+        autoRenewing: true,
+        purchaseFollowUpStatus: 'verification_pending',
+        purchaseFollowUpNotes:
+            'Waiting for server-side purchase verification before review.',
       );
 
-      await _adService.createAd(ad);
+      final creationOutcome = await _adService.createPurchasedAd(
+        ad: ad,
+        verificationData: purchase.verificationData,
+      );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'ads_create_local_ad_success_ad_posted_successfully'.tr(),
-            ),
-          ),
-        );
-        Navigator.pop(context);
+        if (creationOutcome.adId != null) {
+          await _showSubmissionSuccessDialog();
+        } else {
+          await _showPurchaseRecoveryDialog(creationOutcome.recoveryId);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -194,8 +214,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fromStore =
-        widget.initialSize != null && widget.initialDuration != null;
+    final fromStore = widget.initialSize != null;
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -242,9 +261,137 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     );
   }
 
+  Future<void> _showSubmissionSuccessDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF111827),
+        title: const Text(
+          'Ad submitted',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your monthly ad subscription was confirmed and your ad is now waiting for review.',
+              style: TextStyle(color: Colors.white70, height: 1.4),
+            ),
+            SizedBox(height: 14),
+            Text(
+              'What happens next:',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. It appears in My Ads under Pending review.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+            Text(
+              '2. It stays hidden from the live app until approval.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+            Text(
+              '3. Once approved, it will publish in the placement you selected.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+            Text(
+              '4. Apple manages the monthly billing for this ad subscription.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Done'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(
+                  builder: (context) => const MyAdsScreen(),
+                ),
+              );
+            },
+            child: const Text('View My Ads'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPurchaseRecoveryDialog(String? recoveryId) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF111827),
+        title: const Text(
+          'Purchase completed',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Your monthly ad subscription was charged successfully, but the ad record needs manual recovery before review can continue.',
+              style: TextStyle(color: Colors.white70, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'What happens next:',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '1. ARTbeat has recorded the failed ad creation attempt.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+            const Text(
+              '2. An admin will need to recover or recreate the paid ad manually.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
+            if (recoveryId != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Recovery ID: $recoveryId',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeroSection(BuildContext context) {
-    final fromStore =
-        widget.initialSize != null && widget.initialDuration != null;
+    final fromStore = widget.initialSize != null;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -285,7 +432,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ads_create_local_ad_text_promote_your_art'.tr(),
+                  'Create a local ad that fits the ARTbeat experience',
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -294,7 +441,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'ads_create_local_ad_text_reach_art_lovers'.tr(),
+                  'Choose a monthly banner or inline placement and stay visible to local art explorers without building a full campaign.',
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -618,7 +765,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Add banner image',
+                        _selectedSize == LocalAdSize.small
+                            ? 'Add banner image'
+                            : 'Add inline ad image',
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -642,7 +791,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ads_create_local_ad_text_size_and_duration'.tr(),
+          'Choose your ad type',
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontSize: 18,
@@ -651,7 +800,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'ads_create_local_ad_text_select_size'.tr(),
+          'Select the placement style that best fits how people browse ARTbeat.',
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -665,7 +814,14 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: InkWell(
-                  onTap: () => setState(() => _selectedSize = size),
+                  onTap: () => setState(() {
+                    _selectedSize = size;
+                    final allowedPlacements =
+                        _availablePlacementsForSelectedType;
+                    if (!allowedPlacements.contains(_selectedPlacement)) {
+                      _selectedPlacement = allowedPlacements.first;
+                    }
+                  }),
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
@@ -709,66 +865,97 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             );
           }).toList(),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         Text(
-          'ads_create_local_ad_text_select_duration'.tr(),
+          'Choose a placement',
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
-        Column(
-          children: LocalAdDuration.values.map((duration) {
-            final isSelected = _selectedDuration == duration;
-            final price =
-                AdPricingMatrix.getPrice(_selectedSize, duration) ?? 0.0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: InkWell(
-                onTap: () => setState(() => _selectedDuration = duration),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFF22D3EE)
-                          : Colors.white.withValues(alpha: 0.2),
-                      width: isSelected ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: _availablePlacementsForSelectedType.map((placement) {
+            final isSelected = _selectedPlacement == placement;
+            return InkWell(
+              onTap: () => setState(() => _selectedPlacement = placement),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 170,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
                     color: isSelected
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.white.withValues(alpha: 0.02),
+                        ? const Color(0xFF22D3EE)
+                        : Colors.white.withValues(alpha: 0.12),
+                    width: isSelected ? 2 : 1,
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        duration.displayName,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontWeight: isSelected ? FontWeight.bold : null,
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.8),
-                        ),
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.03),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _placementTitle(placement),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                       ),
-                      Text(
-                        '\$${price.toStringAsFixed(2)}',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF34D399),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _placementDescription(placement),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.65),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
           }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: Colors.white.withValues(alpha: 0.04),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.repeat, color: Color(0xFF22D3EE), size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Apple checkout opens when you submit. Paid monthly ad subscriptions are reviewed before they go live.',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Available now: Community feed, Artists and artwork, and Events.',
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.58),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -776,7 +963,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
   Widget _buildSubmitButton(BuildContext context) {
     final price =
-        AdPricingMatrix.getPrice(_selectedSize, _selectedDuration) ?? 0.0;
+        AdPricingMatrix.getPrice(_selectedSize, LocalAdDuration.oneMonth) ??
+        0.0;
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -799,9 +987,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               )
             : Text(
-                'ads_create_local_ad_text_post_ad_for_price'.tr(
-                  namedArgs: {'price': '\$${price.toStringAsFixed(2)}'},
-                ),
+                'Pay & submit • \$${price.toStringAsFixed(2)}/month',
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.black,
                   fontSize: 16,
@@ -814,7 +1000,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
   Widget _buildSelectedPackageSummary() {
     final price =
-        AdPricingMatrix.getPrice(_selectedSize, _selectedDuration) ?? 0.0;
+        AdPricingMatrix.getPrice(_selectedSize, LocalAdDuration.oneMonth) ??
+        0.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -846,7 +1033,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             ],
           ),
         Text(
-          'Your Ad Package',
+          'Your Monthly Ad Subscription',
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontSize: 18,
@@ -873,9 +1060,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Text(
                       _selectedSize.displayName,
                       style: GoogleFonts.spaceGrotesk(
@@ -884,17 +1071,26 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       ),
                     ),
                     Text(
-                      _selectedDuration.displayName,
+                      'Monthly subscription',
                       style: GoogleFonts.spaceGrotesk(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _placementTitle(_selectedPlacement),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.62),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
               Text(
-                '\$${price.toStringAsFixed(2)}',
+                '\$${price.toStringAsFixed(2)}/mo',
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white,
                   fontSize: 18,
@@ -906,7 +1102,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Package selected from the store.',
+          'Apple collects payment first. This ad then stays pending until it is reviewed and approved.',
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.6),
             fontSize: 12,
@@ -1037,8 +1233,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   }
 
   Widget _buildAdPreview() {
-    final isSpotlight = _selectedSize == LocalAdSize.small;
-    final previewAspectRatio = isSpotlight ? 320 / 50 : 300 / 250;
+    final isBanner = _selectedSize == LocalAdSize.small;
+    final previewAspectRatio = isBanner ? 320 / 80 : 4 / 3;
     final imagePreview = AspectRatio(
       aspectRatio: previewAspectRatio,
       child: _selectedImages.isNotEmpty
@@ -1056,7 +1252,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               alignment: Alignment.center,
               child: Icon(
                 Icons.image_outlined,
-                size: isSpotlight ? 16 : 28,
+                size: isBanner ? 16 : 28,
                 color: Colors.white.withValues(alpha: 0.5),
               ),
             ),
@@ -1124,7 +1320,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               _titleController.text,
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white,
-                fontSize: isSpotlight ? 14 : 18,
+                fontSize: isBanner ? 14 : 18,
                 fontWeight: FontWeight.w700,
               ),
               maxLines: 2,
@@ -1138,9 +1334,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               _descriptionController.text,
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white.withValues(alpha: 0.8),
-                fontSize: isSpotlight ? 11 : 13,
+                fontSize: isBanner ? 11 : 13,
               ),
-              maxLines: isSpotlight ? 2 : 3,
+              maxLines: isBanner ? 2 : 3,
               overflow: TextOverflow.ellipsis,
             ),
           // Show rotation indicator if multiple images
@@ -1172,11 +1368,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   String _imageSizeHint() {
     final size = widget.initialSize ?? _selectedSize;
     if (size == LocalAdSize.big) {
-      // Billboard ads - large square format
-      return 'Recommended: 300 x 250 px (MREC format)';
+      return 'Recommended: 4:3 or square artwork for inline feed placements';
     } else {
-      // Spotlight ads - banner format (industry standard)
-      return 'Recommended: 320 x 50 px (mobile banner format)';
+      return 'Recommended: wide artwork for banner placements between sections';
     }
   }
 
@@ -1184,23 +1378,20 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     return 'Upload 2-4 images and they will automatically rotate every few seconds in your ad';
   }
 
+  List<LocalAdZone> get _availablePlacementsForSelectedType =>
+      _selectedSize == LocalAdSize.big
+      ? const [LocalAdZone.community, LocalAdZone.artists]
+      : LocalAdZoneExtension.launchPlacements;
+
+  String _placementTitle(LocalAdZone placement) => placement.displayName;
+
+  String _placementDescription(LocalAdZone placement) => placement.description;
+
   String _heroAdImageAsset() {
     if (_selectedSize == LocalAdSize.big) {
-      if (_selectedDuration == LocalAdDuration.oneWeek) {
-        return 'assets/images/ad_big_1w.png';
-      } else if (_selectedDuration == LocalAdDuration.oneMonth) {
-        return 'assets/images/ad_big_1m.png';
-      } else {
-        return 'assets/images/ad_big_3m.png';
-      }
+      return 'assets/images/ad_big_1m.png';
     } else {
-      if (_selectedDuration == LocalAdDuration.oneWeek) {
-        return 'assets/images/ad_small_1w.png';
-      } else if (_selectedDuration == LocalAdDuration.oneMonth) {
-        return 'assets/images/ad_small_1m.png';
-      } else {
-        return 'assets/images/ad_small_3m.png';
-      }
+      return 'assets/images/ad_small_1m.png';
     }
   }
 

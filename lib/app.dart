@@ -1,16 +1,10 @@
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_auth/artbeat_auth.dart';
-import 'package:artbeat_capture/artbeat_capture.dart' as capture;
-import 'package:artbeat_community/artbeat_community.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'src/integrations/capture_art_walk_hooks.dart';
+import 'src/app_providers.dart';
+import 'src/bootstrap/app_error_handling.dart';
 import 'src/routing/app_router.dart';
 import 'src/widgets/error_boundary.dart';
 
@@ -18,40 +12,8 @@ import 'src/widgets/error_boundary.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key}) {
-    _setupGlobalErrorHandling();
-  }
+  MyApp({super.key});
   final _appRouter = AppRouter();
-
-  void _setupGlobalErrorHandling() {
-    // Set up global error handler for Flutter framework errors
-    FlutterError.onError = (FlutterErrorDetails details) {
-      final error = details.exception;
-      final errorString = error.toString();
-
-      // Filter out expected 404 errors for missing artwork images
-      final isExpected404 =
-          errorString.contains('statusCode: 404') &&
-          (errorString.contains('firebasestorage.googleapis.com') ||
-              errorString.contains('firebase') ||
-              errorString.contains('artwork') ||
-              errorString.contains('HttpException'));
-
-      if (isExpected404) {
-        // Log 404 errors at debug level only
-        if (kDebugMode) {
-          debugPrint(
-            '🖼️ Missing image (404): ${errorString.split(',').first}',
-          );
-        }
-        // Don't show these errors in release mode
-        return;
-      }
-
-      // For other errors, use the default Flutter error handling
-      FlutterError.presentError(details);
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,201 +21,15 @@ class MyApp extends StatelessWidget {
     try {
       return ErrorBoundary(
         onError: (error, stackTrace) {
-          // Filter out expected 404 errors for missing artwork images
-          final errorString = error.toString();
-          final isExpected404 =
-              errorString.contains('statusCode: 404') &&
-              (errorString.contains('firebasestorage.googleapis.com') ||
-                  errorString.contains('firebase') ||
-                  errorString.contains('artwork') ||
-                  errorString.contains('HttpException'));
-
-          if (isExpected404) {
-            // Log 404 errors at debug level only
-            if (kDebugMode) {
-              debugPrint(
-                '🖼️ Missing image (404): ${errorString.split(',').first}',
-              );
-            }
-          } else {
-            // Log other errors normally
-            AppLogger.error('❌ App-level error caught: $error');
-            AppLogger.error('❌ Stack trace: $stackTrace');
+          if (isExpectedMissingImageError(error)) {
+            logExpectedMissingImageError(error);
+            return;
           }
+          core.AppLogger.error('❌ App-level error caught: $error');
+          core.AppLogger.error('❌ Stack trace: $stackTrace');
         },
         child: MultiProvider(
-          providers: [
-            // Core providers
-            ChangeNotifierProvider<core.UserService>.value(
-              value: core.UserService(),
-            ),
-            ChangeNotifierProvider<core.ChapterPartnerProvider>(
-              create: (_) => core.ChapterPartnerProvider()..initialize(),
-              lazy: true,
-            ),
-            Provider<AuthService>(create: (_) => AuthService(), lazy: true),
-            ChangeNotifierProvider<core.ConnectivityService>(
-              create: (_) => core.ConnectivityService(),
-              lazy: true,
-            ),
-            Provider<ThemeData>(
-              create: (_) => core.ArtbeatTheme.lightTheme,
-              lazy: false,
-            ),
-            // Content Engagement Service
-            ChangeNotifierProvider<core.ContentEngagementService>(
-              create: (_) => core.ContentEngagementService(),
-              lazy: true,
-            ),
-            ChangeNotifierProvider<messaging.ChatService>(
-              create: (_) => messaging.ChatService(),
-              lazy: true, // Changed to lazy to prevent early Firebase access
-            ),
-            Provider<core.MessagingStatusService>(
-              create: (_) => core.MessagingStatusService(),
-              lazy: true,
-            ),
-            // Message Reaction Service for emoji reactions
-            ChangeNotifierProvider<messaging.MessageReactionService>(
-              create: (_) => messaging.MessageReactionService(),
-              lazy: true,
-            ),
-            ChangeNotifierProvider<core.MessagingProvider>(
-              create: (context) =>
-                  core.MessagingProvider(
-                    context.read<core.MessagingStatusService>(),
-                  ),
-              lazy: true,
-            ),
-            // Presence Service for online status
-            Provider<messaging.PresenceService>(
-              create: (_) => messaging.PresenceService(),
-              lazy: false, // Start immediately to track presence
-            ),
-            // Presence Provider for UI components
-            ChangeNotifierProvider<messaging.PresenceProvider>(
-              create: (context) => messaging.PresenceProvider(
-                context.read<messaging.PresenceService>(),
-              ),
-              lazy: false,
-            ),
-            // Community providers
-            ChangeNotifierProvider<CommunityService>(
-              create: (_) => CommunityService(),
-              lazy: true, // Changed to lazy to prevent early Firebase access
-            ),
-            ChangeNotifierProvider<core.CommunityProvider>(
-              create: (_) => core.CommunityProvider(),
-              lazy: true,
-            ),
-            // Search controller
-            ChangeNotifierProvider<core.SearchController>(
-              create: (_) => core.SearchController(),
-              lazy: true,
-            ),
-            // Additional service providers for DashboardViewModel
-            Provider<core.ArtworkReadService>(
-              create: (_) => core.ArtworkReadService(),
-              lazy: true,
-            ),
-            Provider<core.PublicArtReadService>(
-              create: (_) => core.PublicArtReadService(),
-              lazy: true,
-            ),
-            Provider<ArtWalkService>(
-              create: (_) => ArtWalkService(),
-              lazy: true,
-            ),
-            Provider<ArtWalkProgressService>(
-              create: (_) => ArtWalkProgressService(),
-              lazy: true,
-            ),
-            Provider<ArtWalkNavigationService>(
-              create: (_) => ArtWalkNavigationService(),
-              lazy: true,
-            ),
-            Provider<AchievementService>(
-              create: (_) => AchievementService(),
-              lazy: true,
-            ),
-            Provider<AudioNavigationService>(
-              create: (_) => AudioNavigationService(),
-              lazy: true,
-            ),
-            Provider<SocialService>(create: (_) => SocialService(), lazy: true),
-            Provider<InstantDiscoveryService>(
-              create: (_) => InstantDiscoveryService(),
-              lazy: true,
-            ),
-            Provider<ChallengeService>(
-              create: (_) => ChallengeService(),
-              lazy: true,
-            ),
-            Provider<WeeklyGoalsService>(
-              create: (_) => WeeklyGoalsService(),
-              lazy: true,
-            ),
-            Provider<RewardsService>(
-              create: (_) => RewardsService(),
-              lazy: true,
-            ),
-            Provider<capture.CaptureService>(
-              create: (_) => capture.CaptureService(
-                postCaptureHooks: CaptureArtWalkHooks(),
-              ),
-              lazy: true,
-            ),
-            Provider<core.CaptureServiceInterface>(
-              create: (_) => capture.CaptureService(
-                postCaptureHooks: CaptureArtWalkHooks(),
-              ),
-              lazy: true,
-            ),
-            ChangeNotifierProvider<core.SubscriptionService>.value(
-              value: core.SubscriptionService(),
-            ),
-            // Dashboard ViewModel - Create after required services
-            ChangeNotifierProxyProvider5<
-              core.ArtworkReadService,
-              core.SubscriptionService,
-              core.UserService,
-              capture.CaptureService,
-              core.PublicArtReadService,
-              core.DashboardViewModel
-            >(
-              create: (BuildContext context) => core.DashboardViewModel(
-                artworkService: context.read<core.ArtworkReadService>(),
-                subscriptionService: context.read<core.SubscriptionService>(),
-                userService: context.read<core.UserService>(),
-                captureService: context.read<capture.CaptureService>(),
-                publicArtService: context.read<core.PublicArtReadService>(),
-              ),
-              update:
-                  (
-                    BuildContext context,
-                    core.ArtworkReadService artworkService,
-                    core.SubscriptionService subscriptionService,
-                    core.UserService userService,
-                    capture.CaptureService captureService,
-                    core.PublicArtReadService publicArtService,
-                    core.DashboardViewModel? previous,
-                  ) {
-                    final chapterProvider = context
-                        .read<core.ChapterPartnerProvider>();
-                        final viewModel =
-                        (previous ??
-                              core.DashboardViewModel(
-                                artworkService: artworkService,
-                                subscriptionService: subscriptionService,
-                                userService: userService,
-                                captureService: captureService,
-                                publicArtService: publicArtService,
-                              ))
-                          ..updateChapter(chapterProvider.activeChapterId);
-                    return viewModel;
-                  },
-            ),
-          ],
+          providers: createAppProviders(),
           child: MaterialApp(
             navigatorKey: navigatorKey,
             title: 'ARTbeat',
@@ -269,8 +45,8 @@ class MyApp extends StatelessWidget {
         ),
       );
     } on Exception catch (e, s) {
-      AppLogger.error('Error in MyApp build: $e');
-      AppLogger.error('Stack: $s');
+      core.AppLogger.error('Error in MyApp build: $e');
+      core.AppLogger.error('Stack: $s');
       return MaterialApp(
         home: Scaffold(body: Center(child: Text('Error: $e'))),
       );

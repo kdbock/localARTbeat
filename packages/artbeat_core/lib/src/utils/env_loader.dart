@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'logger.dart';
 
@@ -15,55 +14,20 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // 1. Try to load baseline .env if it exists
+      // 1. Load the single local runtime env file when present.
+      // `.env.example` is documentation only and is not used at runtime.
       try {
         await dotenv.load(fileName: '.env');
         _envVars.addAll(dotenv.env);
-        AppLogger.info('📝 Loaded baseline .env file');
+        AppLogger.info('📝 Loaded local .env file');
       } catch (_) {
-        // Ignore if .env doesn't exist
-      }
-
-      // 2. Load environment-specific file and merge
-      try {
-        const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
-
-        try {
-          await dotenv.load(fileName: primaryEnv);
-        } catch (_) {
-          // CI and shared environments typically only ship example files.
-          if (kReleaseMode) {
-            await dotenv.load(fileName: '.env.example');
-          } else {
-            rethrow;
-          }
-        }
-
-        // Merge with care: only use real values, never placeholders.
-        // Keep valid baseline values from .env when .env.example is placeholder-only.
-        dotenv.env.forEach((key, value) {
-          if (_isPlaceholderValue(value)) return;
-
-          final existing = _envVars[key];
-          if (existing != null &&
-              existing.isNotEmpty &&
-              !_isPlaceholderValue(existing)) {
-            return;
-          }
-
-          _envVars[key] = value;
-        });
-
-        AppLogger.info('📝 Loaded $primaryEnv and merged configuration');
-      } catch (e) {
-        AppLogger.warning(
-          '⚠️ Could not load primary .env file ($e), using baseline only',
+        AppLogger.info(
+          '📝 No local .env file found. Falling back to build-time defines.',
         );
       }
 
-      // 3. Merge with String.fromEnvironment for build-time overrides
-      // This allows both .env files and --dart-define to work together
-      // Note: We use const defines for critical variables to ensure reliability
+      // 2. Merge with String.fromEnvironment for build-time overrides.
+      // CI/release should prefer explicit `--dart-define` values.
       const apiBaseUrlDefine = String.fromEnvironment('API_BASE_URL');
       if (apiBaseUrlDefine.isNotEmpty) {
         _envVars['API_BASE_URL'] = apiBaseUrlDefine;
@@ -77,6 +41,14 @@ class EnvLoader {
       const firebaseRegionDefine = String.fromEnvironment('FIREBASE_REGION');
       if (firebaseRegionDefine.isNotEmpty) {
         _envVars['FIREBASE_REGION'] = firebaseRegionDefine;
+      }
+
+      const firebaseFunctionsBaseUrlDefine = String.fromEnvironment(
+        'FIREBASE_FUNCTIONS_BASE_URL',
+      );
+      if (firebaseFunctionsBaseUrlDefine.isNotEmpty) {
+        _envVars['FIREBASE_FUNCTIONS_BASE_URL'] =
+            firebaseFunctionsBaseUrlDefine;
       }
 
       const googleMapsKeyDefine = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
@@ -124,11 +96,7 @@ class EnvLoader {
       // Set defaults for critical values if still empty
       _envVars.putIfAbsent('API_BASE_URL', () => 'https://api.artbeat.app');
       _envVars.putIfAbsent('FIREBASE_REGION', () => 'us-central1');
-      _envVars.putIfAbsent(
-        'STRIPE_PUBLISHABLE_KEY',
-        () =>
-            'pk_live_51QpJ6iAO5ulTKoALD0MCyfwOCP2ivyVgKNK457uvrjJ0N9uj9Y7uSAtWfYq7nyuFZFqMjF4BHaDOYuMpwxd0PdbK00Ooktqk6z',
-      );
+      _envVars.putIfAbsent('FIREBASE_PROJECT_ID', () => 'wordnerd-artbeat');
 
       AppLogger.info(
         '✅ Environment variables loaded successfully (${_envVars.length} variables)',
@@ -148,18 +116,25 @@ class EnvLoader {
     return _envVars.containsKey(key);
   }
 
+  /// Resolve the Firebase Cloud Functions base URL for the active environment.
+  String get cloudFunctionsBaseUrl {
+    final configuredBaseUrl = get('FIREBASE_FUNCTIONS_BASE_URL').trim();
+    if (configuredBaseUrl.isNotEmpty) {
+      return configuredBaseUrl;
+    }
+
+    final region = get('FIREBASE_REGION', defaultValue: 'us-central1').trim();
+    final projectId = get(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: 'wordnerd-artbeat',
+    ).trim();
+
+    return 'https://$region-$projectId.cloudfunctions.net';
+  }
+
   /// Get all environment variables
   Map<String, String> getAll() {
     return Map.unmodifiable(_envVars);
   }
 
-  bool _isPlaceholderValue(String value) {
-    final v = value.trim();
-    if (v.isEmpty) return true;
-
-    return v.contains(r'${') ||
-        v.contains('XXXXXXXX') ||
-        v.toLowerCase().contains('your_') ||
-        v.toLowerCase().contains('placeholder');
-  }
 }

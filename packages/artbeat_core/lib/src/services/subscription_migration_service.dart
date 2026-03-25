@@ -5,8 +5,11 @@ import '../models/subscription_tier.dart';
 /// Service to handle migration from old pricing to 2025 industry standard pricing
 /// Ensures smooth transition for existing users while implementing new features
 class SubscriptionMigrationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
   final Logger _logger = Logger('SubscriptionMigrationService');
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
 
   /// Migrate user from legacy subscription tier to new 2025 tier
   Future<bool> migrateUserSubscription(String userId) async {

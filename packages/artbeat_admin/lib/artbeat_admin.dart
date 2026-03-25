@@ -38,6 +38,7 @@ export 'src/screens/moderation/admin_artwork_moderation_screen.dart';
 export 'src/screens/moderation/admin_community_moderation_screen.dart';
 export 'src/screens/moderation/admin_art_walk_moderation_screen.dart';
 export 'src/screens/moderation/admin_content_moderation_screen.dart';
+export 'src/screens/moderation/admin_sponsorship_moderation_screen.dart';
 
 // Export routes
 export 'src/routes/admin_routes.dart';

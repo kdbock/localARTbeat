@@ -21,43 +21,19 @@ class AdPricingConfig {
 
 class AdPricingMatrix {
   static const List<AdPricingConfig> allConfigs = [
-    // SMALL ADS (BANNER FORMAT)
-    AdPricingConfig(
-      size: LocalAdSize.small,
-      duration: LocalAdDuration.oneWeek,
-      sku: 'ad_small_1w',
-      price: 4.99,
-    ),
+    // Banner ad: between sections / dashboard breaks
     AdPricingConfig(
       size: LocalAdSize.small,
       duration: LocalAdDuration.oneMonth,
-      sku: 'ad_small_1m',
+      sku: 'artbeat_ad_banner_monthly',
       price: 9.99,
     ),
-    AdPricingConfig(
-      size: LocalAdSize.small,
-      duration: LocalAdDuration.threeMonths,
-      sku: 'ad_small_3m',
-      price: 19.99,
-    ),
-    // BIG ADS (SQUARE FORMAT)
-    AdPricingConfig(
-      size: LocalAdSize.big,
-      duration: LocalAdDuration.oneWeek,
-      sku: 'ad_big_1w',
-      price: 9.99,
-    ),
+    // Inline ad: native-feeling placement inside feeds / browse surfaces
     AdPricingConfig(
       size: LocalAdSize.big,
       duration: LocalAdDuration.oneMonth,
-      sku: 'ad_big_1m',
+      sku: 'artbeat_ad_inline_monthly',
       price: 19.99,
-    ),
-    AdPricingConfig(
-      size: LocalAdSize.big,
-      duration: LocalAdDuration.threeMonths,
-      sku: 'ad_big_3m',
-      price: 49.99,
     ),
   ];
 
@@ -70,7 +46,15 @@ class AdPricingMatrix {
         (config) => config.size == size && config.duration == duration,
       );
     } catch (e) {
-      return null;
+      try {
+        // Keep older code paths working while the merchant flow is monthly-only.
+        return allConfigs.firstWhere(
+          (config) =>
+              config.size == size && config.duration == LocalAdDuration.oneMonth,
+        );
+      } catch (_) {
+        return null;
+      }
     }
   }
 

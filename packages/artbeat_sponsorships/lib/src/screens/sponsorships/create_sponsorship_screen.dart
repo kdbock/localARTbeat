@@ -22,7 +22,9 @@ class CreateSponsorshipScreen extends StatelessWidget {
             children: [
               SponsorshipSection(
                 title: 'sponsorship_create_experiences_title'.tr(),
-                subtitle: 'sponsorship_create_experiences_subtitle'.tr(),
+                subtitle:
+                    'Art Walk is the premium curated sponsorship experience. Capture and discovery placements are now handled through Local Ads.'
+                        ,
                 child: Column(
                   children: [
                     SponsorshipCtaTile(
@@ -35,22 +37,17 @@ class CreateSponsorshipScreen extends StatelessWidget {
                 ),
               ),
               SponsorshipSection(
-                title: 'sponsorship_create_discovery_title'.tr(),
-                subtitle: 'sponsorship_create_discovery_subtitle'.tr(),
+                title: 'Local Ads',
+                subtitle:
+                    'Use Local Ads for capture and discovery visibility inside the app.',
                 child: Column(
                   children: [
                     SponsorshipCtaTile(
-                      icon: Icons.camera_alt,
-                      title: 'sponsorship_create_capture_title'.tr(),
-                      subtitle: 'sponsorship_create_capture_subtitle'.tr(),
-                      onTap: () => _go(context, AppRoutes.sponsorshipCapture),
-                    ),
-                    const SizedBox(height: 12),
-                    SponsorshipCtaTile(
-                      icon: Icons.radar,
-                      title: 'sponsorship_create_discover_title'.tr(),
-                      subtitle: 'sponsorship_create_discover_subtitle'.tr(),
-                      onTap: () => _go(context, AppRoutes.sponsorshipDiscover),
+                      icon: Icons.campaign_outlined,
+                      title: 'Open Local Ads',
+                      subtitle:
+                          'Choose Banner or Inline and submit for review through the ad flow.',
+                      onTap: () => _go(context, AppRoutes.ads),
                     ),
                   ],
                 ),

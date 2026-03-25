@@ -68,17 +68,30 @@ class BiometricAuthService {
     return _instance;
   }
 
-  BiometricAuthService._internal() {
-    _initializeBiometricAuth();
-  }
+  BiometricAuthService._internal();
 
   final LocalAuthentication _localAuth = LocalAuthentication();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth? _authInstance;
+  FirebaseFirestore? _firestoreInstance;
 
   bool _isInitialized = false;
   List<BiometricType> _availableBiometrics = [];
   BiometricSettings _settings = BiometricSettings.defaultSettings();
+
+  void initialize() {
+    _authInstance ??= FirebaseAuth.instance;
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Initialize biometric authentication
   Future<void> _initializeBiometricAuth() async {

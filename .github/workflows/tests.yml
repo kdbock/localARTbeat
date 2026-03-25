@@ -25,8 +25,13 @@ jobs:
             artbeat_artist,
             artbeat_art_walk,
             artbeat_community,
+            artbeat_capture,
+            artbeat_events,
             artbeat_settings,
             artbeat_messaging,
+            artbeat_ads,
+            artbeat_admin,
+            artbeat_sponsorships,
           ]
 
     steps:

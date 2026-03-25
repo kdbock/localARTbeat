@@ -12,9 +12,30 @@ class FeedbackService {
   factory FeedbackService() => _instance;
   FeedbackService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseStorage? _storageInstance;
+  FirebaseAuth? _authInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _storageInstance ??= FirebaseStorage.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseStorage get _storage {
+    initialize();
+    return _storageInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   // Collection reference
   CollectionReference get _feedbackCollection =>

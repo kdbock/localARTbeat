@@ -4,6 +4,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../models/admin_ad_report_model.dart';
+import '../models/admin_local_ad_purchase_recovery.dart';
 import '../models/admin_local_ad.dart';
 import '../services/admin_ad_moderation_service.dart';
 
@@ -16,14 +17,18 @@ class AdminAdManagementWidget extends StatefulWidget {
       _AdminAdManagementWidgetState();
 }
 
+enum _AdminAdFilter { all, needsReview, paymentIssues, flagged, reports }
+
 class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   final AdminAdModerationService _moderationService = AdminAdModerationService();
 
   List<AdminLocalAd> _adsForReview = [];
+  List<AdminLocalAd> _adsNeedingPaymentFollowUp = [];
+  List<AdminLocalAdPurchaseRecovery> _purchaseRecoveries = [];
   List<AdminAdReportModel> _pendingReports = [];
   Map<String, int> _adStats = {};
   bool _isLoading = true;
-  String _selectedFilter = 'All';
+  _AdminAdFilter _selectedFilter = _AdminAdFilter.all;
 
   @override
   void initState() {
@@ -34,14 +39,20 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final [adsForReview, adStats] = await Future.wait([
+      final [adsForReview, adStats, paymentFollowUpAds, recoveries] =
+          await Future.wait([
         _moderationService.getAdsForReview(),
         _moderationService.getAdStatistics(),
+        _moderationService.getAdsNeedingPaymentFollowUp(),
+        _moderationService.getPurchaseRecoveries(),
       ]);
 
       setState(() {
         _adsForReview = adsForReview as List<AdminLocalAd>;
         _adStats = adStats as Map<String, int>;
+        _adsNeedingPaymentFollowUp = paymentFollowUpAds as List<AdminLocalAd>;
+        _purchaseRecoveries =
+            recoveries as List<AdminLocalAdPurchaseRecovery>;
         _isLoading = false;
       });
 
@@ -72,6 +83,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       children: [
         // Header
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -86,12 +98,28 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              'admin_ad_management_title'.tr(),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'admin_ad_management_title'.tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Submitted ads stay pending until they are approved and published.',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -119,7 +147,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       children: [
         Expanded(
           child: _buildStatCard(
-            'Pending Review',
+            'Needs Review',
             (_adStats['Pending Review'] ?? 0).toString(),
             Icons.pending_actions,
             Colors.orange,
@@ -150,6 +178,16 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
             _pendingReports.length.toString(),
             Icons.report_problem,
             Colors.amber,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'Payment Issues',
+            (_adsNeedingPaymentFollowUp.length + _purchaseRecoveries.length)
+                .toString(),
+            Icons.receipt_long,
+            Colors.deepOrange,
           ),
         ),
       ],
@@ -196,26 +234,27 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   }
 
   Widget _buildFilterTabs() {
-    final filters = [
-      'admin_ad_filter_all'.tr(),
-      'admin_ad_filter_pending_review'.tr(),
-      'admin_ad_filter_flagged'.tr(),
-      'admin_ad_filter_reports'.tr(),
+    final filters = <(_AdminAdFilter, String)>[
+      (_AdminAdFilter.all, 'admin_ad_filter_all'.tr()),
+      (_AdminAdFilter.needsReview, 'admin_ad_filter_pending_review'.tr()),
+      (_AdminAdFilter.paymentIssues, 'Payment issues'),
+      (_AdminAdFilter.flagged, 'admin_ad_filter_flagged'.tr()),
+      (_AdminAdFilter.reports, 'admin_ad_filter_reports'.tr()),
     ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: filters.map((filter) {
-          final isSelected = _selectedFilter == filter;
+          final isSelected = _selectedFilter == filter.$1;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
-              label: Text(filter),
+              label: Text(filter.$2),
               selected: isSelected,
               onSelected: (selected) {
                 setState(() {
-                  _selectedFilter = filter;
+                  _selectedFilter = filter.$1;
                 });
               },
               backgroundColor: Colors.white.withValues(alpha: 0.05),
@@ -238,13 +277,15 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Widget _buildFilteredContent() {
     switch (_selectedFilter) {
-      case 'Pending Review':
+      case _AdminAdFilter.needsReview:
         return _buildAdsForReview();
-      case 'Flagged':
+      case _AdminAdFilter.paymentIssues:
+        return _buildPaymentIssuesView();
+      case _AdminAdFilter.flagged:
         return _buildFlaggedAds();
-      case 'Reports':
+      case _AdminAdFilter.reports:
         return _buildReportsView();
-      default:
+      case _AdminAdFilter.all:
         return _buildAllAdsView();
     }
   }
@@ -255,10 +296,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         .toList();
 
     if (pendingAds.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
-          'admin_ad_empty_pending'.tr(),
-          style: const TextStyle(color: Colors.grey),
+          'No ad placements are waiting for review.',
+          style: TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -277,10 +318,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         .toList();
 
     if (flaggedAds.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
-          'admin_ad_empty_flagged'.tr(),
-          style: const TextStyle(color: Colors.grey),
+          'No flagged ad placements right now.',
+          style: TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -295,10 +336,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Widget _buildReportsView() {
     if (_pendingReports.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
-          'admin_ad_empty_reports'.tr(),
-          style: const TextStyle(color: Colors.grey),
+          'No ad reports need attention right now.',
+          style: TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -308,6 +349,26 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       itemBuilder: (context, index) {
         return _buildReportCard(_pendingReports[index]);
       },
+    );
+  }
+
+  Widget _buildPaymentIssuesView() {
+    if (_purchaseRecoveries.isEmpty && _adsNeedingPaymentFollowUp.isEmpty) {
+      return const Center(
+        child: Text(
+          'No paid ad recoveries or refund follow-up items right now.',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return ListView(
+      children: [
+        for (final recovery in _purchaseRecoveries)
+          _buildRecoveryCard(recovery),
+        for (final ad in _adsNeedingPaymentFollowUp)
+          _buildPaymentFollowUpAdCard(ad),
+      ],
     );
   }
 
@@ -368,7 +429,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               Icon(Icons.location_on, size: 16, color: Colors.grey[400]),
               const SizedBox(width: 4),
               Text(
-                ad.zone.displayName,
+                ad.zone.placementDisplayName,
                 style: TextStyle(color: Colors.grey[400], fontSize: 12),
               ),
               const SizedBox(width: 16),
@@ -389,6 +450,21 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               ],
             ],
           ),
+          if (ad.hasPaidSubscription) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.subscriptions, size: 16, color: Colors.grey[400]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    ad.purchaseFollowUpStatus ?? 'Paid submission',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 16),
 
           // Action buttons
@@ -399,7 +475,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
                   onPressed: () => _approveAd(ad),
                   icon: const Icon(Icons.check, color: Colors.green, size: 16),
                   label: const Text(
-                    'Approve',
+                    'Approve & publish',
                     style: TextStyle(color: Colors.green),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -510,6 +586,171 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRecoveryCard(AdminLocalAdPurchaseRecovery recovery) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.deepOrange.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.warning_amber, color: Colors.deepOrange),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Paid ad recovery needed',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                _formatDate(recovery.createdAt),
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            recovery.error ?? 'Ad document creation failed after payment.',
+            style: TextStyle(color: Colors.grey[300], fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          _buildMiniMeta('User', recovery.userId),
+          if (recovery.subscriptionProductId != null)
+            _buildMiniMeta('Subscription', recovery.subscriptionProductId!),
+          if (recovery.purchaseId != null)
+            _buildMiniMeta('Purchase ID', recovery.purchaseId!),
+          if (recovery.transactionId != null)
+            _buildMiniMeta('Transaction ID', recovery.transactionId!),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () => _markRecoveryReviewed(recovery),
+              icon: const Icon(Icons.task_alt, size: 16),
+              label: const Text('Mark follow-up complete'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentFollowUpAdCard(AdminLocalAd ad) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.receipt_long, color: Colors.amber),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  ad.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              _buildStatusChip(ad.status),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            ad.purchaseFollowUpNotes ??
+                'This paid ad needs subscription refund/cancellation review.',
+            style: TextStyle(color: Colors.grey[300], fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          _buildMiniMeta('Placement', ad.zone.placementDisplayName),
+          if (ad.subscriptionProductId != null)
+            _buildMiniMeta('Subscription', ad.subscriptionProductId!),
+          if (ad.transactionId != null)
+            _buildMiniMeta('Transaction ID', ad.transactionId!),
+          if (ad.purchaseId != null)
+            _buildMiniMeta('Purchase ID', ad.purchaseId!),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _setAdPurchaseFollowUp(
+                    ad,
+                    status: 'refund_requested',
+                    notes:
+                        'Refund or cancellation request has been submitted for store review.',
+                  ),
+                  icon: const Icon(Icons.undo, size: 16),
+                  label: const Text('Refund requested'),
+                ),
+                TextButton.icon(
+                  onPressed: () => _setAdPurchaseFollowUp(
+                    ad,
+                    status: 'refund_completed',
+                    notes:
+                        'Refund follow-up completed. Confirm store-side resolution if needed.',
+                    autoRenewing: false,
+                  ),
+                  icon: const Icon(Icons.task_alt, size: 16),
+                  label: const Text('Refund completed'),
+                ),
+                TextButton.icon(
+                  onPressed: () => _setAdPurchaseFollowUp(
+                    ad,
+                    status: 'subscription_canceled',
+                    notes:
+                        'Monthly ad subscription was canceled or marked to not renew.',
+                    autoRenewing: false,
+                  ),
+                  icon: const Icon(Icons.cancel, size: 16),
+                  label: const Text('Subscription canceled'),
+                ),
+                TextButton.icon(
+                  onPressed: () => _viewAdDetails(ad),
+                  icon: const Icon(Icons.visibility, size: 16),
+                  label: const Text('View payment details'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniMeta(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(color: Colors.grey[400], fontSize: 12),
       ),
     );
   }
@@ -677,6 +918,69 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     }
   }
 
+  Future<void> _markRecoveryReviewed(
+    AdminLocalAdPurchaseRecovery recovery,
+  ) async {
+    try {
+      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
+      await _moderationService.markPurchaseRecoveryReviewed(
+        recoveryId: recovery.id,
+        adminId: adminId,
+        resolutionNotes: 'Manual follow-up completed in admin dashboard.',
+      );
+      await _loadData();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ad payment recovery marked as reviewed.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update recovery status: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _setAdPurchaseFollowUp(
+    AdminLocalAd ad, {
+    required String status,
+    required String notes,
+    bool? autoRenewing,
+  }) async {
+    try {
+      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
+      await _moderationService.updateAdPurchaseFollowUp(
+        adId: ad.id,
+        status: status,
+        adminId: adminId,
+        notes: notes,
+        autoRenewing: autoRenewing,
+      );
+      await _loadData();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Updated payment follow-up: $status'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update payment follow-up: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _viewAdDetails(AdminLocalAd ad) {
     showDialog<void>(
       context: context,
@@ -698,7 +1002,7 @@ class _RejectAdDialogState extends State<_RejectAdDialog> {
     return AlertDialog(
       backgroundColor: ArtbeatColors.backgroundDark,
       title: const Text(
-        'Reject Advertisement',
+        'Reject Ad Submission',
         style: TextStyle(color: Colors.white),
       ),
       content: Column(
@@ -706,7 +1010,7 @@ class _RejectAdDialogState extends State<_RejectAdDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Please provide a reason for rejection:',
+            'Please provide a short reason so the business knows what to fix before resubmitting.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
@@ -769,7 +1073,7 @@ class _AdDetailsDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'Ad Details',
+                    'Ad Submission Details',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -838,7 +1142,7 @@ class _AdDetailsDialog extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Details grid
-                    _buildDetailRow('Zone', ad.zone.displayName),
+                    _buildDetailRow('Placement', ad.zone.placementDisplayName),
                     _buildDetailRow('Size', ad.size.displayName),
                     _buildDetailRow('Status', ad.status.displayName),
                     _buildDetailRow(
@@ -846,6 +1150,37 @@ class _AdDetailsDialog extends StatelessWidget {
                     _buildDetailRow(
                         'Expires', ad.expiresAt.toString().substring(0, 16)),
                     _buildDetailRow('Report Count', ad.reportCount.toString()),
+                    if (ad.subscriptionProductId != null)
+                      _buildDetailRow(
+                        'Subscription Product',
+                        ad.subscriptionProductId!,
+                      ),
+                    if (ad.purchaseId != null)
+                      _buildDetailRow('Purchase ID', ad.purchaseId!),
+                    if (ad.transactionId != null)
+                      _buildDetailRow('Transaction ID', ad.transactionId!),
+                    if (ad.monthlyPrice != null)
+                      _buildDetailRow(
+                        'Monthly Price',
+                        ad.currencyCode != null
+                            ? '${ad.currencyCode} ${ad.monthlyPrice!.toStringAsFixed(2)}'
+                            : ad.monthlyPrice!.toStringAsFixed(2),
+                      ),
+                    if (ad.subscriptionProductId != null)
+                      _buildDetailRow(
+                        'Auto Renewing',
+                        ad.autoRenewing ? 'Yes' : 'No',
+                      ),
+                    if (ad.purchaseFollowUpStatus != null)
+                      _buildDetailRow(
+                        'Purchase Follow-Up',
+                        ad.purchaseFollowUpStatus!,
+                      ),
+                    if (ad.purchaseFollowUpNotes != null)
+                      _buildDetailRow(
+                        'Follow-Up Notes',
+                        ad.purchaseFollowUpNotes!,
+                      ),
                     if (ad.contactInfo != null)
                       _buildDetailRow('Contact', ad.contactInfo!),
                     if (ad.websiteUrl != null)

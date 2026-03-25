@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_ads/artbeat_ads.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../widgets/events_drawer.dart';
@@ -218,8 +219,28 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     SliverToBoxAdapter(child: _buildCategoryFilter()),
                     if (_filteredEvents.isNotEmpty)
                       SliverToBoxAdapter(child: _buildFeaturedSection()),
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(14, 8, 14, 4),
+                        child: AdSmallBannerWidget(
+                          zone: LocalAdZone.events,
+                          height: 88,
+                          isDismissible: false,
+                        ),
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: _buildQuickActionsGrid(currentUser),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(14, 8, 14, 8),
+                        child: AdSmallBannerWidget(
+                          zone: LocalAdZone.events,
+                          height: 96,
+                          isDismissible: false,
+                        ),
+                      ),
                     ),
                     SliverToBoxAdapter(
                       child: _buildSectionHeader(

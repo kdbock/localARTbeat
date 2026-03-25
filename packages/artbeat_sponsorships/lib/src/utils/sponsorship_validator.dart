@@ -28,8 +28,7 @@ class SponsorshipValidator {
   static bool isPlacementAllowed(SponsorshipTier tier, String placementKey) {
     switch (tier) {
       case SponsorshipTier.artWalk:
-        return placementKey == SponsorshipPlacements.artWalkHeader ||
-            placementKey == SponsorshipPlacements.artWalkStopCard;
+        return placementKey == SponsorshipPlacements.artWalkHeader;
 
       case SponsorshipTier.capture:
         return placementKey == SponsorshipPlacements.captureDetailBanner;

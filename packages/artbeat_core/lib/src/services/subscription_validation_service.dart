@@ -10,9 +10,25 @@ class SubscriptionValidationService {
   factory SubscriptionValidationService() => _instance;
   SubscriptionValidationService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final SubscriptionPlanValidator _planValidator = SubscriptionPlanValidator();
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+    _planValidator.initialize();
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   /// Get the current user's subscription tier
   Future<SubscriptionTier> getCurrentSubscriptionTier() async {

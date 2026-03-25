@@ -550,7 +550,6 @@ class ArtbeatDrawerItems {
     // Advertising
     createAd,
     manageMyAds,
-    myAdStatistics,
     approvedAds,
     // Subscriptions
     subscriptionPlans,
@@ -565,7 +564,6 @@ class ArtbeatDrawerItems {
     // Advertising
     createAd,
     manageMyAds,
-    myAdStatistics,
     // Subscriptions
     subscriptionPlans,
     paymentMethods,
@@ -579,7 +577,7 @@ class ArtbeatDrawerItems {
     paymentManagement,
     adminSettings,
     manageAds,
-  ];
+ ];
 
   static List<ArtbeatDrawerItem> get moderatorItems => [moderatorDashboard];
 

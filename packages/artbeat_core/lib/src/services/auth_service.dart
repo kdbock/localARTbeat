@@ -4,7 +4,7 @@ import '../utils/logger.dart';
 /// Service for authentication-related operations
 class AuthService {
   static AuthService? _instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseAuth? _authInstance;
 
   factory AuthService() {
     _instance ??= AuthService._internal();
@@ -12,6 +12,15 @@ class AuthService {
   }
 
   AuthService._internal();
+
+  void initialize() {
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   /// Get current authenticated user
   User? get currentUser => _auth.currentUser;

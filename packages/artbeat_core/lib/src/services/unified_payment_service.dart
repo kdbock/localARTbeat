@@ -167,58 +167,33 @@ class UnifiedPaymentService {
   // Device fingerprinting for fraud detection
   String? _deviceFingerprint;
 
-  // Cloud Functions URLs - unified for all 5 revenue streams
-  static const Map<String, String> _functionUrls = {
-    'createCustomer':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createCustomer',
-    'createSetupIntent':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createSetupIntent',
-    'createPaymentIntent':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createPaymentIntent',
-    'processBoostPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processBoostPayment',
-    'processSubscriptionPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSubscriptionPayment',
-    'processAdPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processAdPayment',
-    'processSponsorshipPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSponsorshipPayment',
-    'processCommissionPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionPayment',
-    'createCommissionPaymentIntent':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createCommissionPaymentIntent',
-    'processCommissionDepositPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionDepositPayment',
-    'processCommissionMilestonePayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionMilestonePayment',
-    'processCommissionFinalPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionFinalPayment',
-    'processArtworkSalePayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processArtworkSalePayment',
-    'processEventTicketPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processEventTicketPayment',
-    'completeCommission':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/completeCommission',
-    'getPaymentMethods':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/getPaymentMethods',
-    'updateCustomer':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/updateCustomer',
-    'detachPaymentMethod':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/detachPaymentMethod',
-    'createSubscription':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createSubscription',
-    'cancelSubscription':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/cancelSubscription',
-    'changeSubscriptionTier':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/changeSubscriptionTier',
-    'requestRefund':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/requestRefund',
-    'validatePaymentRisk':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/validatePaymentRisk',
-    'reportFraudAttempt':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/reportFraudAttempt',
-    'processPayout':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processPayout',
+  // Cloud Functions names - resolved against an environment-aware base URL.
+  static const Map<String, String> _functionNames = {
+    'createCustomer': 'createCustomer',
+    'createSetupIntent': 'createSetupIntent',
+    'createPaymentIntent': 'createPaymentIntent',
+    'processBoostPayment': 'processBoostPayment',
+    'processSubscriptionPayment': 'processSubscriptionPayment',
+    'processAdPayment': 'processAdPayment',
+    'processSponsorshipPayment': 'processSponsorshipPayment',
+    'processCommissionPayment': 'processCommissionPayment',
+    'createCommissionPaymentIntent': 'createCommissionPaymentIntent',
+    'processCommissionDepositPayment': 'processCommissionDepositPayment',
+    'processCommissionMilestonePayment': 'processCommissionMilestonePayment',
+    'processCommissionFinalPayment': 'processCommissionFinalPayment',
+    'processArtworkSalePayment': 'processArtworkSalePayment',
+    'processEventTicketPayment': 'processEventTicketPayment',
+    'completeCommission': 'completeCommission',
+    'getPaymentMethods': 'getPaymentMethods',
+    'updateCustomer': 'updateCustomer',
+    'detachPaymentMethod': 'detachPaymentMethod',
+    'createSubscription': 'createSubscription',
+    'cancelSubscription': 'cancelSubscription',
+    'changeSubscriptionTier': 'changeSubscriptionTier',
+    'requestRefund': 'requestRefund',
+    'validatePaymentRisk': 'validatePaymentRisk',
+    'reportFraudAttempt': 'reportFraudAttempt',
+    'processPayout': 'processPayout',
   };
 
   // ========================================================================
@@ -300,7 +275,7 @@ class UnifiedPaymentService {
       throw Exception('User not authenticated');
     }
 
-    final url = _functionUrls[functionKey]!;
+    final url = _buildFunctionUrl(functionKey);
     AppLogger.network('🌐 Making request to: $url');
     AppLogger.info('📝 Request body: ${json.encode(body)}');
     final uri = Uri.parse(url);
@@ -336,6 +311,20 @@ class UnifiedPaymentService {
     }
 
     return response;
+  }
+
+  String _buildFunctionUrl(String functionKey) {
+    final functionName = _functionNames[functionKey];
+    if (functionName == null) {
+      throw ArgumentError.value(
+        functionKey,
+        'functionKey',
+        'Unknown Cloud Function key',
+      );
+    }
+
+    final baseUrl = EnvLoader().cloudFunctionsBaseUrl;
+    return '$baseUrl/$functionName';
   }
 
   /// Create a payment intent for Stripe

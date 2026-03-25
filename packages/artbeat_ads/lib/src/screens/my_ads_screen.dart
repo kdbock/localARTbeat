@@ -102,6 +102,13 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           }
 
           final ads = snapshot.data ?? [];
+          final pendingAds = ads
+              .where(
+                (ad) =>
+                    ad.status == LocalAdStatus.pendingReview ||
+                    ad.status == LocalAdStatus.flagged,
+              )
+              .toList();
           final activeAds = ads
               .where((ad) => ad.status == LocalAdStatus.active && !ad.isExpired)
               .toList();
@@ -109,6 +116,8 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
               .where(
                 (ad) =>
                     ad.status == LocalAdStatus.expired ||
+                    ad.status == LocalAdStatus.rejected ||
+                    ad.status == LocalAdStatus.deleted ||
                     (ad.status == LocalAdStatus.active && ad.isExpired),
               )
               .toList();
@@ -136,6 +145,28 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
 
           return ListView(
             children: [
+              if (pendingAds.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pending review (${pendingAds.length})',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'These ads have been submitted and paid, but they are not visible in the live app until they are approved.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                ...pendingAds.map(
+                  (ad) => AdCard(ad: ad, onDelete: () => _deleteAd(ad.id)),
+                ),
+              ],
               if (activeAds.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.all(16),

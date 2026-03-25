@@ -7,6 +7,31 @@ import 'rewards_service.dart';
 
 /// Service for managing user challenges (daily/weekly goals and rewards)
 class ChallengeService {
+  static final ChallengeService _instance = ChallengeService._internal();
+
+  factory ChallengeService() => _instance;
+
+  ChallengeService._internal();
+
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
+  final RewardsService _rewardsService = RewardsService();
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
+
   /// Get all completed challenges for the current user
   Future<List<ChallengeModel>> getCompletedChallenges() async {
     final user = _auth.currentUser;
@@ -27,16 +52,6 @@ class ChallengeService {
       return [];
     }
   }
-
-  static final ChallengeService _instance = ChallengeService._internal();
-
-  factory ChallengeService() => _instance;
-
-  ChallengeService._internal();
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final RewardsService _rewardsService = RewardsService();
 
   /// Get today's daily challenge for the user
   Future<ChallengeModel?> getTodaysChallenge() async {

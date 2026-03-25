@@ -28,7 +28,7 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Row(
         children: [
           if (showBackButton)
@@ -44,23 +44,29 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
                 Text(
                   title,
                   style: GoogleFonts.spaceGrotesk(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                     letterSpacing: -0.5,
+                    height: 1.0,
                   ),
                   textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle!.toUpperCase(),
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.w800,
                       color: Colors.white.withValues(alpha: 0.5),
-                      letterSpacing: 1.5,
+                      letterSpacing: 1.2,
+                      height: 1.0,
                     ),
                     textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
               ],
             ),

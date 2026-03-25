@@ -92,7 +92,7 @@ flutter:
 
   # Assets
   assets:
-    - .env.example
+    - .env
     - assets/
     - assets/images/
     - assets/icons/

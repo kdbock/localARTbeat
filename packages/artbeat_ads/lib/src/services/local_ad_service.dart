@@ -1,10 +1,17 @@
+import 'dart:io' show Platform;
+
+import 'package:artbeat_core/src/services/purchase_verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/index.dart';
 
 class LocalAdService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static const String _collection = 'localAds';
+  static const String _recoveriesCollection = 'localAdPurchaseRecoveries';
 
   Future<String> createAd(LocalAd ad) async {
     try {
@@ -14,6 +21,50 @@ class LocalAdService {
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to create ad: $e');
+    }
+  }
+
+  Future<({String? adId, String? recoveryId})> createPurchasedAd({
+    required LocalAd ad,
+    required String verificationData,
+  }) async {
+    try {
+      final isVerified = await _verifyPurchase(
+        ad: ad,
+        verificationData: verificationData,
+      );
+
+      if (!isVerified) {
+        throw Exception('Store purchase verification failed for ad checkout');
+      }
+
+      final adId = await createAd(
+        ad.copyWith(
+          purchaseFollowUpStatus: 'verified_pending_review',
+          purchaseFollowUpNotes:
+              'Store purchase verified server-side before ad creation.',
+        ),
+      );
+      return (adId: adId, recoveryId: null);
+    } catch (error) {
+      try {
+        final recoveryRef = _firestore.collection(_recoveriesCollection).doc();
+        await recoveryRef.set({
+          'userId': ad.userId,
+          'createdAt': Timestamp.now(),
+          'status': 'pending_manual_recovery',
+          'error': error.toString(),
+          'adPayload': ad.toMap(),
+          'purchaseId': ad.purchaseId,
+          'transactionId': ad.transactionId,
+          'subscriptionProductId': ad.subscriptionProductId,
+          'purchaseFollowUpStatus': ad.purchaseFollowUpStatus,
+          'purchaseFollowUpNotes': ad.purchaseFollowUpNotes,
+        });
+        return (adId: null, recoveryId: recoveryRef.id);
+      } catch (_) {
+        rethrow;
+      }
     }
   }
 
@@ -228,5 +279,43 @@ class LocalAdService {
     } catch (e) {
       throw Exception('Failed to get ad statistics: $e');
     }
+  }
+
+  Future<bool> _verifyPurchase({
+    required LocalAd ad,
+    required String verificationData,
+  }) async {
+    final normalizedData = verificationData.trim();
+    if (normalizedData.isEmpty) {
+      throw Exception('Missing purchase verification payload');
+    }
+
+    final productId = ad.subscriptionProductId?.trim() ?? '';
+    if (productId.isEmpty) {
+      throw Exception('Missing product ID for purchase verification');
+    }
+
+    if (Platform.isIOS) {
+      final userId = _auth.currentUser?.uid ?? ad.userId;
+      if (userId.isEmpty) {
+        throw Exception('Missing user ID for iOS purchase verification');
+      }
+
+      return PurchaseVerificationService.verifyAppStorePurchase(
+        receiptData: normalizedData,
+        productId: productId,
+        userId: userId,
+      );
+    }
+
+    if (Platform.isAndroid) {
+      return PurchaseVerificationService.verifyGooglePlayPurchase(
+        packageName: 'com.wordnerd.artbeat',
+        productId: productId,
+        purchaseToken: normalizedData,
+      );
+    }
+
+    throw Exception('Unsupported platform for ad purchase verification');
   }
 }

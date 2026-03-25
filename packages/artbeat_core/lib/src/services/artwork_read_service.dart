@@ -5,8 +5,19 @@ import '../models/artwork_model.dart';
 import '../utils/logger.dart';
 
 class ArtworkReadService {
-  final CollectionReference<Map<String, dynamic>> _artworkCollection =
-      FirebaseFirestore.instance.collection('artwork');
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  CollectionReference<Map<String, dynamic>> get _artworkCollection =>
+      _firestore.collection('artwork');
 
   Future<List<ArtworkModel>> getFeaturedArtwork({
     int limit = 10,

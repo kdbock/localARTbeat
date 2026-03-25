@@ -9,10 +9,25 @@ import '../utils/logger.dart';
 /// Content-specific engagement service for ARTbeat content types
 /// Replaces UniversalEngagementService with content-specific engagement handling
 class ContentEngagementService extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore? _firestoreInstance;
+  FirebaseAuth? _authInstance;
   final DailyChallengeProgressService _challengeProgressService =
       DailyChallengeProgressService();
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+    _authInstance ??= FirebaseAuth.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
 
   /// Toggle engagement for any content type
   Future<bool> toggleEngagement({

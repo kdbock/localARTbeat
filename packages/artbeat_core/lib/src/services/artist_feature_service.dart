@@ -4,9 +4,19 @@ import '../utils/logger.dart';
 
 /// Service for managing artist features granted by boosts
 class ArtistFeatureService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final CollectionReference _featuresCollection = FirebaseFirestore.instance
-      .collection('artist_features');
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
+
+  CollectionReference get _featuresCollection =>
+      _firestore.collection('artist_features');
 
   /// Create features for a boost purchase
   Future<List<ArtistFeature>> createFeaturesForBoost({

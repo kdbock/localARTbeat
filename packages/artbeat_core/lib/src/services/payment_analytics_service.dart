@@ -17,7 +17,10 @@ class PaymentAnalyticsService {
 
   PaymentAnalyticsService._internal();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
 
   /// Get comprehensive payment metrics for a date range
   Future<PaymentMetrics> getPaymentMetrics(DateRange range) async {

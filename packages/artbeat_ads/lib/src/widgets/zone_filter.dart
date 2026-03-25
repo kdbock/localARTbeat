@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../models/index.dart';
 
-class ZoneFilter extends StatelessWidget {
-  final LocalAdZone selectedZone;
-  final void Function(LocalAdZone) onZoneChanged;
+class PlacementFilter extends StatelessWidget {
+  final LocalAdZone selectedPlacement;
+  final void Function(LocalAdZone) onPlacementChanged;
 
-  const ZoneFilter({
+  const PlacementFilter({
     Key? key,
-    required this.selectedZone,
-    required this.onZoneChanged,
+    required this.selectedPlacement,
+    required this.onPlacementChanged,
   }) : super(key: key);
 
   @override
@@ -17,14 +17,14 @@ class ZoneFilter extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
-        children: LocalAdZone.values
+        children: LocalAdZoneExtension.launchPlacements
             .map(
               (zone) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: FilterChip(
-                  label: Text(zone.displayName),
-                  selected: selectedZone == zone,
-                  onSelected: (_) => onZoneChanged(zone),
+                  label: Text(_placementLabel(zone)),
+                  selected: selectedPlacement == zone,
+                  onSelected: (_) => onPlacementChanged(zone),
                 ),
               ),
             )
@@ -32,4 +32,6 @@ class ZoneFilter extends StatelessWidget {
       ),
     );
   }
+
+  String _placementLabel(LocalAdZone zone) => zone.displayName;
 }

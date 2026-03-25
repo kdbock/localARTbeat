@@ -149,6 +149,9 @@ jobs:
           - artbeat_community
           - artbeat_capture
           - artbeat_settings
+          - artbeat_ads
+          - artbeat_admin
+          - artbeat_sponsorships
 
     steps:
       - name: Checkout code
@@ -370,6 +373,55 @@ jobs:
             echo "✅ No high-risk secrets detected"
           fi
 
+      - name: Check for tracked sensitive config files
+        run: |
+          TRACKED_SENSITIVE_FILES=(
+            ".env.production"
+            "debug.keystore"
+            "service-account-key.json"
+          )
+
+          FOUND_TRACKED_FILES=false
+
+          for path in "${TRACKED_SENSITIVE_FILES[@]}"; do
+            if git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
+              echo "⚠️ Tracked sensitive file detected: $path"
+              FOUND_TRACKED_FILES=true
+            fi
+          done
+
+          if [ "$FOUND_TRACKED_FILES" = true ]; then
+            echo "⚠️ Sensitive config files are still tracked. Migrate them out of version control."
+            exit 1
+          fi
+
+          echo "✅ No tracked sensitive config files detected"
+
+  functions_checks:
+    name: Functions Checks
+    runs-on: ubuntu-latest
+    needs: pre_flight
+    if: needs.pre_flight.outputs.should_run_tests == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Build functions
+        run: npm run build
+        working-directory: functions
+
   # Performance tests
   performance_tests:
     name: Performance Tests
@@ -423,6 +475,7 @@ jobs:
         integration_tests,
         build_tests,
         security_checks,
+        functions_checks,
       ]
     if: always() && needs.pre_flight.outputs.should_run_tests == 'true'
 
@@ -466,6 +519,13 @@ jobs:
             exit 1
           elif [[ "${{ needs.security_checks.result }}" == "success" ]]; then
             echo "✅ Security checks passed"
+          fi
+
+          if [[ "${{ needs.functions_checks.result }}" == "failure" ]]; then
+            echo "❌ Functions checks failed"
+            exit 1
+          elif [[ "${{ needs.functions_checks.result }}" == "success" ]]; then
+            echo "✅ Functions checks passed"
           fi
 
           echo ""

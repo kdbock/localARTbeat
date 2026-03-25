@@ -29,6 +29,7 @@ class ArtCommunityService extends ChangeNotifier {
   SimpleLatLng? _lastSortedViewerLocation;
   bool _artistSortInFlight = false;
   bool _pendingArtistSort = false;
+  bool _isDisposed = false;
 
   Stream<List<ArtPost>> get feedStream => _feedController.stream;
   Stream<List<ArtistProfile>> get artistsStream => _artistsController.stream;
@@ -338,6 +339,7 @@ class ArtCommunityService extends ChangeNotifier {
   }
 
   void _scheduleArtistSort() {
+    if (_isDisposed) return;
     if (_artistSortInFlight) {
       _pendingArtistSort = true;
       return;
@@ -346,12 +348,16 @@ class ArtCommunityService extends ChangeNotifier {
   }
 
   Future<void> _performArtistSort() async {
+    if (_isDisposed) return;
     _artistSortInFlight = true;
     try {
       final viewerLocation = await _getViewerLocation();
+      if (_isDisposed) return;
       if (!_shouldResortArtists(viewerLocation)) {
         _artistsCache = _mergeArtistUpdates(_artistsCache, _artistsRawCache);
-        _artistsController.add(_artistsCache);
+        if (!_isDisposed && !_artistsController.isClosed) {
+          _artistsController.add(_artistsCache);
+        }
         return;
       }
 
@@ -375,12 +381,14 @@ class ArtCommunityService extends ChangeNotifier {
         },
       );
       _artistsCache = sorted;
-      if (_shouldEmitArtistUpdate(_artistsCache)) {
+      if (!_isDisposed &&
+          !_artistsController.isClosed &&
+          _shouldEmitArtistUpdate(_artistsCache)) {
         _artistsController.add(_artistsCache);
       }
     } finally {
       _artistSortInFlight = false;
-      if (_pendingArtistSort) {
+      if (!_isDisposed && _pendingArtistSort) {
         _pendingArtistSort = false;
         _scheduleArtistSort();
       }
@@ -1303,6 +1311,8 @@ class ArtCommunityService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _artistSortDebounce?.cancel();
     _feedController.close();
     _artistsController.close();
     super.dispose();

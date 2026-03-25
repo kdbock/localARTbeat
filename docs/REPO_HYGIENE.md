@@ -122,7 +122,6 @@ These are local/debug artifacts and should remain ignored:
 Treat these as local-only and avoid editing casually in source-control work:
 
 - `.env`
-- `.env.local`
 - `key.properties`
 - `service-account-key.json`
 

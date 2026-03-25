@@ -11,11 +11,18 @@ class PresenceService {
   Timer? _presenceTimer;
   StreamSubscription<User?>? _authSubscription;
   bool _isOnline = false;
+  bool _isInitialized = false;
   DateTime? _lastDebugLog;
 
   PresenceService({FirebaseFirestore? firestore, FirebaseAuth? auth})
     : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance {
+      _auth = auth ?? FirebaseAuth.instance;
+
+  void initialize() {
+    if (_isInitialized) {
+      return;
+    }
+    _isInitialized = true;
     _setupAuthListener();
   }
 
@@ -371,5 +378,7 @@ class PresenceService {
     AppLogger.info('PresenceService: Disposing');
     _stopPresenceUpdates();
     _authSubscription?.cancel();
+    _authSubscription = null;
+    _isInitialized = false;
   }
 }

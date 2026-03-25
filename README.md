@@ -395,7 +395,7 @@ cd artbeat
 flutter pub get
 
 # Setup environment
-cp .env.example .env.local
+cp .env.example .env
 # Configure Firebase and API keys
 
 # Run on device/simulator
@@ -403,6 +403,14 @@ flutter run
 ```
 
 ### **Environment Configuration**
+
+Use one local runtime file:
+
+```bash
+cp .env.example .env
+```
+
+For CI and release builds, prefer `--dart-define` or CI secret injection rather than additional `.env.*` files.
 
 #### **Required Environment Variables**
 

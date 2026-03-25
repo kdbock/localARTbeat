@@ -950,9 +950,12 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: Colors.white, size: 28),
-                const SizedBox(height: 12),
+                Flexible(
+                  child: Icon(icon, color: Colors.white, size: 26),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   label,
                   style: _grotesk(15, FontWeight.w700),
@@ -960,10 +963,10 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: _grotesk(12, FontWeight.w600, opacity: 0.7),
+                  style: _grotesk(11, FontWeight.w600, opacity: 0.7),
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

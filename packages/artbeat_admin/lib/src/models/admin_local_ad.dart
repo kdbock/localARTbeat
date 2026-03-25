@@ -18,6 +18,21 @@ extension AdminLocalAdZoneExtension on AdminLocalAdZone {
     }
   }
 
+  String get placementDisplayName {
+    switch (this) {
+      case AdminLocalAdZone.community:
+        return 'Community feed';
+      case AdminLocalAdZone.artists:
+        return 'Artists and artwork';
+      case AdminLocalAdZone.events:
+        return 'Events';
+      case AdminLocalAdZone.home:
+        return 'Home (not in launch rotation)';
+      case AdminLocalAdZone.featured:
+        return 'Featured (not in launch rotation)';
+    }
+  }
+
   static AdminLocalAdZone fromIndex(int idx) {
     if (idx < 0 || idx >= AdminLocalAdZone.values.length) {
       return AdminLocalAdZone.home;
@@ -32,9 +47,9 @@ extension AdminLocalAdSizeExtension on AdminLocalAdSize {
   String get displayName {
     switch (this) {
       case AdminLocalAdSize.small:
-        return 'Small';
+        return 'Banner Ad';
       case AdminLocalAdSize.big:
-        return 'Big';
+        return 'Inline Ad';
     }
   }
 
@@ -116,6 +131,14 @@ class AdminLocalAd {
   final DateTime? reviewedAt;
   final String? reviewedBy;
   final String? rejectionReason;
+  final String? subscriptionProductId;
+  final String? purchaseId;
+  final String? transactionId;
+  final double? monthlyPrice;
+  final String? currencyCode;
+  final bool autoRenewing;
+  final String? purchaseFollowUpStatus;
+  final String? purchaseFollowUpNotes;
 
   const AdminLocalAd({
     required this.id,
@@ -135,6 +158,14 @@ class AdminLocalAd {
     this.reviewedAt,
     this.reviewedBy,
     this.rejectionReason,
+    this.subscriptionProductId,
+    this.purchaseId,
+    this.transactionId,
+    this.monthlyPrice,
+    this.currencyCode,
+    this.autoRenewing = true,
+    this.purchaseFollowUpStatus,
+    this.purchaseFollowUpNotes,
   });
 
   factory AdminLocalAd.fromMap(Map<String, dynamic> map, String id) {
@@ -158,6 +189,14 @@ class AdminLocalAd {
       reviewedAt: (map['reviewedAt'] as Timestamp?)?.toDate(),
       reviewedBy: map['reviewedBy'] as String?,
       rejectionReason: map['rejectionReason'] as String?,
+      subscriptionProductId: map['subscriptionProductId'] as String?,
+      purchaseId: map['purchaseId'] as String?,
+      transactionId: map['transactionId'] as String?,
+      monthlyPrice: (map['monthlyPrice'] as num?)?.toDouble(),
+      currencyCode: map['currencyCode'] as String?,
+      autoRenewing: map['autoRenewing'] as bool? ?? true,
+      purchaseFollowUpStatus: map['purchaseFollowUpStatus'] as String?,
+      purchaseFollowUpNotes: map['purchaseFollowUpNotes'] as String?,
     );
   }
 
@@ -167,4 +206,10 @@ class AdminLocalAd {
       snapshot.id,
     );
   }
+
+  bool get hasPaidSubscription =>
+      subscriptionProductId != null ||
+      purchaseId != null ||
+      transactionId != null ||
+      monthlyPrice != null;
 }

@@ -16,9 +16,9 @@ class InAppPurchaseService {
   factory InAppPurchaseService() => _instance;
   InAppPurchaseService._internal();
 
-  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  InAppPurchase? _inAppPurchaseInstance;
+  FirebaseAuth? _authInstance;
+  FirebaseFirestore? _firestoreInstance;
 
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   bool _isAvailable = false;
@@ -49,12 +49,8 @@ class InAppPurchaseService {
       'artbeat_boost_overdrive', // Overdrive Boost
     ],
     'ads': [
-      'ad_small_1w', // Small ad package - 1 week
-      'ad_small_1m', // Small ad package - 1 month
-      'ad_small_3m', // Small ad package - 3 months
-      'ad_big_1w', // Big ad package - 1 week
-      'ad_big_1m', // Big ad package - 1 month
-      'ad_big_3m', // Big ad package - 3 months
+      'artbeat_ad_banner_monthly',
+      'artbeat_ad_inline_monthly',
     ],
   };
 
@@ -63,11 +59,30 @@ class InAppPurchaseService {
   void Function(String)? onPurchaseError;
   void Function(String)? onPurchaseCancelled;
 
+  void initializeDependencies() {
+    _authInstance ??= FirebaseAuth.instance;
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initializeDependencies();
+    return _authInstance!;
+  }
+
+  FirebaseFirestore get _firestore {
+    initializeDependencies();
+    return _firestoreInstance!;
+  }
+
+  InAppPurchase get _inAppPurchase =>
+      _inAppPurchaseInstance ??= InAppPurchase.instance;
+
   /// Initialize the in-app purchase service
   /// This method performs all necessary setup to prevent null PendingIntent crashes
   Future<bool> initialize() async {
     try {
       AppLogger.info('🔄 Initializing in-app purchase service...');
+      initializeDependencies();
 
       // Check if in-app purchases are available on this device
       _isAvailable = await _inAppPurchase.isAvailable();
@@ -523,19 +538,9 @@ class InAppPurchaseService {
     PurchaseDetails details,
   ) async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) return;
-
-      // Determine ad credits based on product
-      final adCredits = _getAdCreditsFromProductId(purchase.productId);
-
-      // Add ad credits to user account
-      await _firestore.collection('users').doc(user.uid).update({
-        'adCredits': FieldValue.increment(adCredits),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      AppLogger.info('✅ Ad purchase processed: $adCredits credits added');
+      AppLogger.info(
+        '✅ Ad subscription purchase recorded: ${purchase.productId}',
+      );
     } catch (e) {
       AppLogger.error('Error processing ad purchase: $e');
     }
@@ -795,10 +800,10 @@ class InAppPurchaseService {
 
   /// Helper methods
   PurchaseType _getPurchaseType(String productId) {
-    if (_productIds['subscriptions']!.contains(productId)) {
-      return PurchaseType.subscription;
-    } else if (_productIds['boosts']!.contains(productId) ||
+    if (_productIds['subscriptions']!.contains(productId) ||
         _productIds['ads']!.contains(productId)) {
+      return PurchaseType.subscription;
+    } else if (_productIds['boosts']!.contains(productId)) {
       return PurchaseType.consumable;
     }
     return PurchaseType.nonConsumable;
@@ -837,27 +842,6 @@ class InAppPurchaseService {
     if (productId.contains('business')) return SubscriptionTier.business;
     if (productId.contains('enterprise')) return SubscriptionTier.enterprise;
     return SubscriptionTier.free;
-  }
-
-  int _getAdCreditsFromProductId(String productId) {
-    switch (productId) {
-      // Small ad packages
-      case 'ad_small_1w':
-        return 50; // Small package, 1 week
-      case 'ad_small_1m':
-        return 200; // Small package, 1 month
-      case 'ad_small_3m':
-        return 600; // Small package, 3 months
-      // Big ad packages
-      case 'ad_big_1w':
-        return 150; // Big package, 1 week
-      case 'ad_big_1m':
-        return 600; // Big package, 1 month
-      case 'ad_big_3m':
-        return 1800; // Big package, 3 months
-      default:
-        return 0;
-    }
   }
 
   /// Get user's active subscriptions

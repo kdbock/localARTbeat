@@ -142,41 +142,6 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Ads section
-          const Text(
-            'Advertisement Packages',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Promote Your Artwork',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Purchase ad packages to increase visibility for your artwork.',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isInitialized ? _showFullAdWidget : null,
-                      child: const Text('Promote Artwork'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
           if (_isInitialized) ...[
             const Text(
               'Debug Information',
@@ -250,12 +215,4 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
     );
   }
 
-  void _showFullAdWidget() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) =>
-            const AdPurchaseWidget(artworkTitle: 'Demo Artwork'),
-      ),
-    );
-  }
 }

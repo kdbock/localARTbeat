@@ -28,30 +28,30 @@ print_info() {
     echo -e "${GREEN}ℹ️  $1${NC}"
 }
 
-# Check if .env.local exists
-if [ ! -f ".env.local" ]; then
-    print_error ".env.local file not found!"
-    print_info "Please create .env.local with your API keys:"
+# Check if .env exists
+if [ ! -f ".env" ]; then
+    print_error ".env file not found!"
+    print_info "Please create .env with your API keys:"
     echo ""
-    echo "  export GOOGLE_MAPS_API_KEY=your_key_here"
-    echo "  export STRIPE_PUBLISHABLE_KEY=pk_test_or_pk_live_here"
-    echo "  export ENVIRONMENT=development"
+    echo "  cp .env.example .env"
     echo ""
     exit 1
 fi
 
 # Load environment variables
-print_info "Loading environment variables from .env.local..."
-source .env.local
+print_info "Loading environment variables from .env..."
+set -a
+source .env
+set +a
 
 # Validate required variables
 if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
-    print_error "GOOGLE_MAPS_API_KEY not set in .env.local"
+    print_error "GOOGLE_MAPS_API_KEY not set in .env"
     exit 1
 fi
 
 if [ -z "$STRIPE_PUBLISHABLE_KEY" ]; then
-    print_error "STRIPE_PUBLISHABLE_KEY not set in .env.local"
+    print_error "STRIPE_PUBLISHABLE_KEY not set in .env"
     exit 1
 fi
 

@@ -21,6 +21,14 @@ class LocalAd {
   final DateTime? reviewedAt;
   final String? reviewedBy;
   final String? rejectionReason;
+  final String? subscriptionProductId;
+  final String? purchaseId;
+  final String? transactionId;
+  final double? monthlyPrice;
+  final String? currencyCode;
+  final bool autoRenewing;
+  final String? purchaseFollowUpStatus;
+  final String? purchaseFollowUpNotes;
 
   LocalAd({
     required this.id,
@@ -40,6 +48,14 @@ class LocalAd {
     this.reviewedAt,
     this.reviewedBy,
     this.rejectionReason,
+    this.subscriptionProductId,
+    this.purchaseId,
+    this.transactionId,
+    this.monthlyPrice,
+    this.currencyCode,
+    this.autoRenewing = true,
+    this.purchaseFollowUpStatus,
+    this.purchaseFollowUpNotes,
   });
 
   bool get isExpired {
@@ -74,6 +90,14 @@ class LocalAd {
       reviewedAt: (map['reviewedAt'] as Timestamp?)?.toDate(),
       reviewedBy: map['reviewedBy'] as String?,
       rejectionReason: map['rejectionReason'] as String?,
+      subscriptionProductId: map['subscriptionProductId'] as String?,
+      purchaseId: map['purchaseId'] as String?,
+      transactionId: map['transactionId'] as String?,
+      monthlyPrice: (map['monthlyPrice'] as num?)?.toDouble(),
+      currencyCode: map['currencyCode'] as String?,
+      autoRenewing: map['autoRenewing'] as bool? ?? true,
+      purchaseFollowUpStatus: map['purchaseFollowUpStatus'] as String?,
+      purchaseFollowUpNotes: map['purchaseFollowUpNotes'] as String?,
     );
   }
 
@@ -104,6 +128,17 @@ class LocalAd {
       if (reviewedAt != null) 'reviewedAt': Timestamp.fromDate(reviewedAt!),
       if (reviewedBy != null) 'reviewedBy': reviewedBy,
       if (rejectionReason != null) 'rejectionReason': rejectionReason,
+      if (subscriptionProductId != null)
+        'subscriptionProductId': subscriptionProductId,
+      if (purchaseId != null) 'purchaseId': purchaseId,
+      if (transactionId != null) 'transactionId': transactionId,
+      if (monthlyPrice != null) 'monthlyPrice': monthlyPrice,
+      if (currencyCode != null) 'currencyCode': currencyCode,
+      'autoRenewing': autoRenewing,
+      if (purchaseFollowUpStatus != null)
+        'purchaseFollowUpStatus': purchaseFollowUpStatus,
+      if (purchaseFollowUpNotes != null)
+        'purchaseFollowUpNotes': purchaseFollowUpNotes,
     };
   }
 
@@ -125,6 +160,14 @@ class LocalAd {
     DateTime? reviewedAt,
     String? reviewedBy,
     String? rejectionReason,
+    String? subscriptionProductId,
+    String? purchaseId,
+    String? transactionId,
+    double? monthlyPrice,
+    String? currencyCode,
+    bool? autoRenewing,
+    String? purchaseFollowUpStatus,
+    String? purchaseFollowUpNotes,
   }) {
     return LocalAd(
       id: id ?? this.id,
@@ -144,6 +187,15 @@ class LocalAd {
       reviewedAt: reviewedAt ?? this.reviewedAt,
       reviewedBy: reviewedBy ?? this.reviewedBy,
       rejectionReason: rejectionReason ?? this.rejectionReason,
+      subscriptionProductId: subscriptionProductId ?? this.subscriptionProductId,
+      purchaseId: purchaseId ?? this.purchaseId,
+      transactionId: transactionId ?? this.transactionId,
+      monthlyPrice: monthlyPrice ?? this.monthlyPrice,
+      currencyCode: currencyCode ?? this.currencyCode,
+      autoRenewing: autoRenewing ?? this.autoRenewing,
+      purchaseFollowUpStatus:
+          purchaseFollowUpStatus ?? this.purchaseFollowUpStatus,
+      purchaseFollowUpNotes: purchaseFollowUpNotes ?? this.purchaseFollowUpNotes,
     );
   }
 

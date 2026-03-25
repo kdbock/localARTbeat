@@ -2,31 +2,69 @@
 
 ## Overview
 
-Create **17 IAP products** in your App Store Connect account:
+Create **13 IAP products** in your App Store Connect account:
 
-- **6 consumable ad products** (banner and square ads)
+- **2 auto-renewable ad subscription products** (local ads)
 - **3 consumable boost products** (artist momentum)
 - **8 auto-renewable subscription products** (artist subscriptions)
 
 ---
 
-## SMALL Ads (Banner Format)
+## Ads - Monthly Subscriptions
 
-| SKU           | Display                  | Description             | Price     | Duration |
-| ------------- | ------------------------ | ----------------------- | --------- | -------- |
-| `ad_small_1w` | Small Banners - 7 Days   | 7-day small banner ads  | **$0.99** | 1 Week   |
-| `ad_small_1m` | Small Banners - 1 Month  | 30-day small banner ads | **$1.99** | 1 Month  |
-| `ad_small_3m` | Small Banner Bundle - 3M | 90-day small banner ads | **$4.99** | 3 Months |
+The live app flow for local ads is:
 
----
+- User creates an `Inline Ad` or `Banner Ad`
+- User chooses a placement:
+  - `Community feed`
+  - `Artists and artwork`
+  - `Events`
+- Apple checkout opens for the monthly ad subscription
+- User completes payment with Apple
+- The paid ad is submitted for review
+- Ad remains pending until approved
+- If approved, it goes live in the chosen placement
+- Apple manages recurring monthly billing until cancellation
 
-## BIG Ads (Square Format)
+### Active Ad Subscription SKUs
 
-| SKU         | Display                   | Description               | Price     | Duration |
-| ----------- | ------------------------- | ------------------------- | --------- | -------- |
-| `ad_big_1w` | Premium Squares - 7 Days  | 7-day premium square ads  | **$1.99** | 1 Week   |
-| `ad_big_1m` | Premium Squares - 1 Month | 30-day premium square ads | **$3.99** | 1 Month  |
-| `ad_big_3m` | Big Square Bundle - 3M    | 90-day premium square ads | **$9.99** | 3 Months |
+| SKU                          | Display                     | Description                                         | Price      | Billing |
+| ---------------------------- | --------------------------- | --------------------------------------------------- | ---------- | ------- |
+| `artbeat_ad_banner_monthly`  | Banner Ad - Monthly         | Monthly banner placement between sections           | **$9.99**  | Monthly |
+| `artbeat_ad_inline_monthly`  | Inline Ad - Monthly         | Monthly inline placement inside feeds and browsing  | **$19.99** | Monthly |
+
+### Review Metadata Checklist
+
+Use the same positioning in both App Store Connect and Google Play Console:
+
+- `Inline Ads Monthly`
+  - Description: `Monthly inline ad placement inside supported ARTbeat feeds and discovery surfaces. Payment starts a monthly subscription. Submitted ads enter review before they go live.`
+- `Banner Ads Monthly`
+  - Description: `Monthly banner ad placement between supported ARTbeat sections. Payment starts a monthly subscription. Submitted ads enter review before they go live.`
+- Reviewer notes:
+  - The business user creates an ad, uploads media, chooses a placement, and completes store checkout.
+  - After payment, the ad is saved as `Pending review`.
+  - The ad is not shown to end users until an admin approves it.
+  - `Inline Ads Monthly` is the higher tier. `Banner Ads Monthly` is the lower tier.
+- Reviewer test checklist:
+  - Store product loads on device
+  - Checkout opens from the ad submission screen
+  - Paid ad appears in `My Ads` as pending review
+  - Admin can approve or reject the ad
+  - Approved ad renders in its selected placement
+
+### Retired Ad SKU List
+
+These SKUs existed in the earlier consumable ad design and are kept here only as historical reference:
+
+- `ad_small_1w`
+- `ad_small_1m`
+- `ad_small_3m`
+- `ad_big_1w`
+- `ad_big_1m`
+- `ad_big_3m`
+
+If ARTbeat later returns to true in-app ad checkout, define a new Apple-compliant ad purchase plan first instead of reviving this list unchanged.
 
 ---
 
@@ -73,7 +111,7 @@ Supporters can tip artists on their artwork and profiles via **Stripe** (not IAP
 Artists earn when ads appear on their content (artist profiles, artworks, galleries).
 
 - Revenue share: 50–70% to artists, 30–50% to platform
-- Buyers purchase ad slots via consumable IAP (see Ad Products section)
+- Ads are purchased as monthly in-app subscriptions and still require approval before going live
 - Artists with higher visibility/engagement earn more
 
 ---
@@ -83,7 +121,7 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 **ARTBEAT Revenue** (Platform):
 
 - Artists pay $4.99–$79.99/month for subscriptions (tools, storage, analytics)
-- App sells ads (consumable IAP)
+- App sells monthly local ad subscriptions through Apple / Google billing
 - App sells boosts (consumable IAP)
 - App takes 8–15% cut of commissions, 5–10% cut of tips, 30–50% of ad revenue
 
@@ -126,7 +164,7 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 
 | Revenue Stream           | Who Pays      | Platform    | Product Type        | Setup Location                  | Goes To             |
 | ------------------------ | ------------- | ----------- | ------------------- | ------------------------------- | ------------------- |
-| **Ads**                  | Users/Artists | iOS/Android | Consumable IAP      | App Store Connect / Google Play | **ArtBeat**         |
+| **Ads**                  | Users/Artists | iOS/Android | Auto-Renewable IAP  | App Store Connect / Google Play | **ArtBeat**         |
 | **Boosts**               | Supporters    | iOS/Android | Consumable IAP      | App Store Connect / Google Play | **ArtBeat**         |
 | **Artist Subscriptions** | Artists       | iOS/Android | Auto-Renewable IAP  | App Store Connect / Google Play | **ArtBeat**         |
 | **Commissions & Sales**  | Buyers        | Stripe      | Direct Seller/Buyer | Stripe Dashboard                | **Artist** (90%+)   |
@@ -139,18 +177,21 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 
 ### iOS (App Store Connect)
 
-#### For Ad Products (Consumable)
+#### For Ad Products
 
 1. Go to **My Apps** → Select your app
-2. Navigate to **In-App Purchases**
-3. For each ad SKU:
-   - Click **Create In-App Purchase**
-   - Select **Consumable** (not Renewable Subscription)
-   - Enter the **SKU** exactly as listed
-   - Set **Reference Name** to match the SKU
-   - Set **Price Tier** to match the pricing
-   - Fill in metadata (description, screenshot, etc.)
+2. Navigate to **Subscriptions**
+3. Click **Create Subscription Group** and name it `Local Ads`
+4. Create these two subscriptions:
+   - `artbeat_ad_banner_monthly`
+   - `artbeat_ad_inline_monthly`
+5. For each subscription:
+   - Set **Reference Name** to match the product purpose
+   - Set **Subscription Duration** to `1 month`
+   - Set **Price Tier** to match the pricing above
+   - Add localizations and review metadata
    - Save and submit for review
+6. These subscriptions are used to collect payment before the ad enters review
 
 #### For Boost Products (Consumable)
 
@@ -183,16 +224,14 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 
 ### Android (Google Play Console)
 
-#### For Ad Products (Managed Products)
+#### For Ad Products
 
-1. Go to your app → **Monetize** → **In-app products**
-2. For each ad SKU:
-   - Click **Create product**
-   - Select **Managed product** (not subscription)
-   - Enter the **Product ID** exactly as the SKU
-   - Set **Default price** to match the pricing
-   - Activate the product
-   - Save
+1. Go to your app → **Monetize** → **Subscriptions**
+2. Create these two subscription products:
+   - `artbeat_ad_banner_monthly`
+   - `artbeat_ad_inline_monthly`
+3. Set each base plan to monthly recurring billing
+4. Add product copy that explains the ad still requires approval before going live
 
 #### For Boost Products (Managed Products)
 
@@ -222,17 +261,6 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 
 ## Quick Copy-Paste Lists
 
-### All Ad SKUs (6 products)
-
-```
-ad_small_1w
-ad_small_1m
-ad_small_3m
-ad_big_1w
-ad_big_1m
-ad_big_3m
-```
-
 ### All Boost SKUs (3 products)
 
 ```
@@ -254,15 +282,18 @@ artbeat_business_yearly
 artbeat_enterprise_yearly
 ```
 
-### All SKUs Combined (17 total products)
+### All Ad Subscription SKUs (2 products)
 
 ```
-ad_small_1w
-ad_small_1m
-ad_small_3m
-ad_big_1w
-ad_big_1m
-ad_big_3m
+artbeat_ad_banner_monthly
+artbeat_ad_inline_monthly
+```
+
+### All SKUs Combined (13 total products)
+
+```
+artbeat_ad_banner_monthly
+artbeat_ad_inline_monthly
 artbeat_boost_spark
 artbeat_boost_surge
 artbeat_boost_overdrive
@@ -278,16 +309,12 @@ artbeat_enterprise_yearly
 
 ### CSV Format (for bulk import if supported)
 
-#### Ad Products (Consumable)
+#### Ad Subscription Products (Auto-Renewable)
 
 ```
 SKU,Product Type,Price (USD),Display Name
-ad_small_1w,Consumable,0.99,Small Banner - 1 Week
-ad_small_1m,Consumable,1.99,Small Banner - 1 Month
-ad_small_3m,Consumable,4.99,Small Banner - 3 Months
-ad_big_1w,Consumable,1.99,Big Square - 1 Week
-ad_big_1m,Consumable,3.99,Big Square - 1 Month
-ad_big_3m,Consumable,9.99,Big Square - 3 Months
+artbeat_ad_banner_monthly,Auto-Renewable Subscription,9.99,Banner Ad - Monthly
+artbeat_ad_inline_monthly,Auto-Renewable Subscription,19.99,Inline Ad - Monthly
 ```
 
 #### Boost Products (Consumable)
@@ -317,13 +344,12 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 
 ## Why This Structure Passes Apple Review
 
-### Ad Products (6 Consumables)
+### Ad Products
 
-- **Each product is a distinct, itemized purchase** — not a "generic credit" system
-- Users see exactly what they're buying: size × duration
-- The pricing is transparent and varies by configuration
-- All ad products are **consumable** (one-time purchase per ad)
-- Simple enough for local advertisers to understand in seconds
+- Local ads are sold as **monthly subscriptions**
+- Payment happens through Apple / Google before the ad is submitted for review
+- Review still controls whether the paid ad becomes visible in the live app
+- This keeps billing logical for the user while preserving approval control for ARTbeat
 
 ### Boost Products (3 Consumables) - VISIBILITY ONLY
 
@@ -362,8 +388,8 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 
 1. In Xcode: **Product** → **Scheme** → **Edit Scheme**
 2. Select **Run** → **Options** → **StoreKit Configuration**
-3. Create a test configuration file with all 17 SKUs
-4. Add both consumable products (ads + boosts) and subscription products (artist subscriptions)
+3. Create a test configuration file with the 13 active SKUs in this document
+4. Add ad subscriptions, boost products, and artist subscription products
 5. For subscriptions, set test durations (e.g., 5 minutes = 1 month) for faster testing
 6. Products will be available for testing without real charges
 

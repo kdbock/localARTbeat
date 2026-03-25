@@ -15,7 +15,7 @@ class PresenceProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
 
   void _initialize() {
-    // The PresenceService handles its own initialization
+    _presenceService.initialize();
     _isInitialized = true;
     AppLogger.info('PresenceProvider: Initialized');
   }

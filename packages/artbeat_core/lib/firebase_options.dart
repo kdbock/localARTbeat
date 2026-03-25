@@ -31,11 +31,11 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: String.fromEnvironment(
       'FIREBASE_API_KEY',
-      defaultValue: 'AIzaSyAXFpdz_5cJ8m4ZDgBb7kVx7PHxinwEkdA',
+      defaultValue: 'AIzaSyCHzdFFIrQ4-KOF1wKvN-J9S7kSV-CgF8o',
     ),
     appId: String.fromEnvironment(
       'FIREBASE_APP_ID',
-      defaultValue: '1:665020451634:ios:2aa5cc17ac7d0dad78652b',
+      defaultValue: '1:665020451634:ios:fcce3b8f65048f0578652b',
     ),
     messagingSenderId: String.fromEnvironment(
       'FIREBASE_MESSAGING_SENDER_ID',
@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
       defaultValue: 'wordnerd-artbeat.firebasestorage.app',
     ),
     androidClientId:
-        '665020451634-sb8o1cgfji453vifsr3gqqqe1u2o5in4.apps.googleusercontent.com',
+        '665020451634-9hfnfqdf7fcu3iutdvnq35brlkj8mgo7.apps.googleusercontent.com',
     iosBundleId: 'com.wordnerd.artbeat',
     appGroupId: 'group.H49R32NPY6.com.wordnerd.artbeat',
   );
@@ -105,11 +105,11 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: String.fromEnvironment(
       'FIREBASE_API_KEY',
-      defaultValue: 'AIzaSyAXFpdz_5cJ8m4ZDgBb7kVx7PHxinwEkdA',
+      defaultValue: 'AIzaSyCHzdFFIrQ4-KOF1wKvN-J9S7kSV-CgF8o',
     ),
     appId: String.fromEnvironment(
       'FIREBASE_APP_ID',
-      defaultValue: '1:665020451634:ios:2aa5cc17ac7d0dad78652b',
+      defaultValue: '1:665020451634:ios:fcce3b8f65048f0578652b',
     ),
     messagingSenderId: String.fromEnvironment(
       'FIREBASE_MESSAGING_SENDER_ID',

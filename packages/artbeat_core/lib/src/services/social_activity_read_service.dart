@@ -5,7 +5,16 @@ import '../models/social_activity_model.dart';
 import '../utils/logger.dart';
 
 class SocialActivityReadService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   CollectionReference get _activities =>
       _firestore.collection('socialActivities');

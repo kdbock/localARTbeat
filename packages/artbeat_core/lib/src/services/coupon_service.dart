@@ -10,8 +10,23 @@ class CouponService extends ChangeNotifier {
   factory CouponService() => _instance;
   CouponService._internal();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth? _authInstance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _authInstance ??= FirebaseAuth.instance;
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    initialize();
+    return _authInstance!;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Create a new coupon
   Future<String> createCoupon({

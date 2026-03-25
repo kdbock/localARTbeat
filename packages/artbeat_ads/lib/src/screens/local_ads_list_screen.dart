@@ -16,7 +16,7 @@ class LocalAdsListScreen extends StatefulWidget {
 }
 
 class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
-  late LocalAdZone _selectedZone;
+  late LocalAdZone _selectedPlacement;
   final _adService = LocalAdService();
   final _searchController = TextEditingController();
   bool _isSearching = false;
@@ -24,7 +24,10 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedZone = widget.initialZone ?? LocalAdZone.home;
+    final initialPlacement = widget.initialZone ?? LocalAdZone.community;
+    _selectedPlacement = initialPlacement.isLaunchPlacement
+        ? initialPlacement
+        : LocalAdZone.community;
   }
 
   @override
@@ -78,11 +81,11 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
                 onChanged: (value) => setState(() {}),
               ),
             ),
-          ZoneFilter(
-            selectedZone: _selectedZone,
-            onZoneChanged: (zone) {
+          PlacementFilter(
+            selectedPlacement: _selectedPlacement,
+            onPlacementChanged: (zone) {
               setState(() {
-                _selectedZone = zone;
+                _selectedPlacement = zone;
                 _searchController.clear();
                 _isSearching = false;
               });
@@ -91,16 +94,16 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
           Expanded(
             child: _isSearching && _searchController.text.isNotEmpty
                 ? _buildSearchResults()
-                : _buildZoneAds(),
+                : _buildPlacementAds(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildZoneAds() {
+  Widget _buildPlacementAds() {
     return FutureBuilder<List<LocalAd>>(
-      future: _adService.getActiveAdsByZone(_selectedZone),
+      future: _adService.getActiveAdsByZone(_selectedPlacement),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -124,7 +127,7 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
                 Text(
                   'ads_local_ads_list_text_no_ads_in_zone'.tr().replaceAll(
                     '{zone}',
-                    _selectedZone.displayName,
+                    _selectedPlacement.displayName,
                   ),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
@@ -175,4 +178,5 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
       },
     );
   }
+
 }

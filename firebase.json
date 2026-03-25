@@ -11,7 +11,7 @@
       "ios": {
         "default": {
           "projectId": "wordnerd-artbeat",
-          "appId": "1:665020451634:ios:2aa5cc17ac7d0dad78652b",
+          "appId": "1:665020451634:ios:fcce3b8f65048f0578652b",
           "uploadDebugSymbols": false,
           "fileOutput": "ios/Runner/GoogleService-Info.plist"
         }
@@ -21,7 +21,7 @@
           "projectId": "wordnerd-artbeat",
           "configurations": {
             "android": "1:665020451634:android:70aaba9b305fa17b78652b",
-            "ios": "1:665020451634:ios:2aa5cc17ac7d0dad78652b"
+            "ios": "1:665020451634:ios:fcce3b8f65048f0578652b"
           }
         }
       }

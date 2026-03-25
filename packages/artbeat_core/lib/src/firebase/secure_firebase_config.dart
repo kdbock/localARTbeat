@@ -8,6 +8,7 @@ class SecureFirebaseConfig {
 
   static bool _appCheckInitialized = false;
   static String? _teamId;
+  static String? _lastProviderMode;
 
   /// Configure App Check with optional debug override.
   ///
@@ -30,25 +31,32 @@ class SecureFirebaseConfig {
 
     final bool useDebugProvider = kDebugMode || forceDebug;
 
-    if (useDebugProvider) {
-      debugPrint('🛡️ ============================================');
-      debugPrint('🛡️ SKIPPING APP CHECK IN DEBUG MODE (TEMPORARY FIX)');
-      debugPrint('🛡️ ============================================');
-      // Temporarily skip App Check activation in debug mode
-      _appCheckInitialized = true;
-      return;
-    }
-
     try {
       debugPrint('🛡️ ============================================');
-      debugPrint('🛡️ ACTIVATING APP CHECK IN PRODUCTION MODE');
-      debugPrint('🛡️ Android: Play Integrity');
-      debugPrint('🛡️ iOS: App Attest with DeviceCheck fallback');
+      if (useDebugProvider) {
+        _lastProviderMode = 'debug';
+        debugPrint('🛡️ ACTIVATING APP CHECK IN DEBUG MODE');
+        debugPrint('🛡️ Android: Debug provider');
+        debugPrint('🛡️ iOS/macOS: Debug provider');
+        if (debugToken != null && debugToken.isNotEmpty) {
+          debugPrint('🛡️ Using fixed debug token');
+          debugPrint('🛡️ Debug token length: ${debugToken.length}');
+        }
+      } else {
+        _lastProviderMode = 'production';
+        debugPrint('🛡️ ACTIVATING APP CHECK IN PRODUCTION MODE');
+        debugPrint('🛡️ Android: Play Integrity');
+        debugPrint('🛡️ iOS: App Attest with DeviceCheck fallback');
+      }
       debugPrint('🛡️ ============================================');
 
       await FirebaseAppCheck.instance.activate(
-        providerApple: const AppleAppAttestWithDeviceCheckFallbackProvider(),
-        providerAndroid: const AndroidPlayIntegrityProvider(),
+        providerApple: useDebugProvider
+            ? AppleDebugProvider(debugToken: debugToken)
+            : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+        providerAndroid: useDebugProvider
+            ? AndroidDebugProvider(debugToken: debugToken)
+            : const AndroidPlayIntegrityProvider(),
         providerWeb: ReCaptchaV3Provider(
           '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', // Test key
         ),
@@ -59,10 +67,18 @@ class SecureFirebaseConfig {
       FirebaseAppCheck.instance.onTokenChange.listen(
         (token) {
           debugPrint('🛡️ ============================================');
-          debugPrint('🛡️ PRODUCTION APP CHECK TOKEN RECEIVED');
+          debugPrint(
+            useDebugProvider
+                ? '🛡️ DEBUG APP CHECK TOKEN RECEIVED'
+                : '🛡️ PRODUCTION APP CHECK TOKEN RECEIVED',
+          );
           debugPrint('🛡️ Token length: ${token?.length ?? 0}');
           if (token != null && token.isNotEmpty) {
-            debugPrint('🛡️ ✅ Production provider is working!');
+            debugPrint(
+              useDebugProvider
+                  ? '🛡️ ✅ Debug provider is working!'
+                  : '🛡️ ✅ Production provider is working!',
+            );
             try {
               final parts = token.split('.');
               if (parts.length >= 2) {
@@ -74,24 +90,51 @@ class SecureFirebaseConfig {
         },
         onError: (Object error) {
           debugPrint('⚠️ ============================================');
-          debugPrint('⚠️ PRODUCTION APP CHECK TOKEN ERROR: $error');
+          debugPrint(
+            useDebugProvider
+                ? '⚠️ DEBUG APP CHECK TOKEN ERROR: $error'
+                : '⚠️ PRODUCTION APP CHECK TOKEN ERROR: $error',
+          );
           debugPrint('⚠️ ============================================');
         },
       );
 
-      debugPrint('🛡️ ✅ AppCheck activated with PRODUCTION providers');
+      debugPrint(
+        useDebugProvider
+            ? '🛡️ ✅ AppCheck activated with DEBUG providers'
+            : '🛡️ ✅ AppCheck activated with PRODUCTION providers',
+      );
 
-      try {
-        debugPrint('🛡️ Testing production token fetch...');
-        final token = await FirebaseAppCheck.instance.getToken(true);
-        if (token != null && token.isNotEmpty) {
-          debugPrint('🛡️ ✅ Production token fetch successful!');
-          debugPrint('🛡️ Token length: ${token.length} characters');
-        } else {
-          debugPrint('⚠️ Production token is null or empty');
+      if (useDebugProvider) {
+        debugPrint(
+          '🛡️ Debug mode: waiting for App Check token via onTokenChange listener',
+        );
+      } else {
+        try {
+          debugPrint('🛡️ Testing production token fetch...');
+          final token = await FirebaseAppCheck.instance.getToken(true);
+          if (token != null && token.isNotEmpty) {
+            debugPrint('🛡️ ✅ Production token fetch successful!');
+            debugPrint('🛡️ Token length: ${token.length} characters');
+          } else {
+            debugPrint('⚠️ Production token is null or empty');
+          }
+        } catch (e) {
+          debugPrint('⚠️ Production token fetch failed: $e');
+          final message = e.toString();
+          if (message.contains('App not registered')) {
+            debugPrint(
+              '⚠️ Firebase App Check does not recognize this Apple app ID. '
+              'Verify the iOS app with bundle ID com.wordnerd.artbeat and app ID '
+              '1:665020451634:ios:fcce3b8f65048f0578652b is registered in Firebase.',
+            );
+          }
+          if (message.contains('App attestation failed')) {
+            debugPrint(
+              '⚠️ Apple production attestation failed. Confirm App Attest/DeviceCheck is enabled for the same Firebase iOS app.',
+            );
+          }
         }
-      } catch (e) {
-        debugPrint('⚠️ Production token fetch failed: $e');
       }
     } catch (e) {
       debugPrint('⚠️ AppCheck activation failed: $e');
@@ -105,6 +148,7 @@ class SecureFirebaseConfig {
     'appCheckInitialized': _appCheckInitialized,
     'appsCount': 0, // intentionally not reading Firebase.apps here
     'teamId': _teamId,
+    'providerMode': _lastProviderMode,
   };
 
   static Future<bool> testStorageAccess() async {

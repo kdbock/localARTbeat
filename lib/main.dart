@@ -16,6 +16,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'app.dart';
 import 'config/maps_config.dart';
+import 'src/bootstrap/app_error_handling.dart';
 import 'src/managers/app_lifecycle_manager.dart';
 import 'src/services/app_permission_service.dart';
 
@@ -65,36 +66,7 @@ Future<void> main() async {
   _installPerformanceDiagnostics();
   _enableDebugBuildFlags(_enableVerboseRebuildLogging);
 
-  // Global Flutter error handling
-  FlutterError.onError = (FlutterErrorDetails details) {
-    CrashPreventionService.logCrashPrevention(
-      operation: 'flutter_framework',
-      errorType: details.exception.runtimeType.toString(),
-      additionalInfo: details.exception.toString(),
-    );
-
-    AppLogger.error(
-      'Flutter framework error: ${details.exception}',
-      error: details.exception,
-      stackTrace: details.stack,
-    );
-
-    // Do not swallow framework errors in debug; surface them visibly.
-    FlutterError.presentError(details);
-  };
-
-  // Platform-level error handling
-  PlatformDispatcher.instance.onError = (error, stack) {
-    CrashPreventionService.logCrashPrevention(
-      operation: 'platform_error',
-      errorType: error.runtimeType.toString(),
-      additionalInfo: error.toString(),
-    );
-
-    AppLogger.error('Platform error: $error', error: error, stackTrace: stack);
-    // In debug, allow default handling so the error is visible.
-    return !kDebugMode;
-  };
+  installGlobalErrorHandlers();
 
   PerformanceMonitor.startTimer('app_startup');
 
@@ -304,19 +276,23 @@ Future<void> _initializeCoreServices() async {
   }
 
   await _initializeFirebaseCore();
+  await _guardedInit(
+    ConfigService.instance.initialize,
+    'ConfigService',
+    timeout: const Duration(seconds: 20),
+  );
+  await _guardedInit(
+    _initializeAppCheck,
+    'App Check',
+    timeout: const Duration(seconds: 20),
+  );
 
   await Future.wait([
-    _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
     _guardedInit(
       () => ImageManagementService().initialize(),
       'ImageManagementService',
     ),
     _guardedInit(MapsConfig.initialize, 'MapsConfig'),
-    _guardedInit(
-      _initializeAppCheck,
-      'App Check',
-      timeout: const Duration(seconds: 20),
-    ),
   ]);
 }
 
@@ -383,8 +359,10 @@ Future<void> _initializeAppCheck() async {
 
   debugPrint('🛡️ About to call configureAppCheck...');
   try {
+    final debugToken = ConfigService.instance.firebaseAppCheckDebugToken;
     await SecureFirebaseConfig.configureAppCheck(
       teamId: 'H49R32NPY6',
+      debugToken: debugToken,
     ).timeout(const Duration(seconds: 8));
     debugPrint('🛡️ ✅ configureAppCheck completed successfully');
   } on Exception catch (e) {

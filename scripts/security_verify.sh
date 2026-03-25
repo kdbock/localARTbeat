@@ -116,7 +116,7 @@ check_gitignore() {
     fi
 }
 
-check_gitignore "\.env\.local" ".env.local"
+check_gitignore "\.env$" ".env"
 check_gitignore "google-services\.json" "google-services.json"
 check_gitignore "GoogleService-Info\.plist" "GoogleService-Info.plist"
 check_gitignore "client_secret" "client_secret files"
@@ -144,8 +144,8 @@ else
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 fi
 
-echo -n "Checking for .env.local.example... "
-if [ -f ".env.local.example" ]; then
+echo -n "Checking for .env.example... "
+if [ -f ".env.example" ]; then
     echo "✅ OK"
 else
     echo "❌ MISSING"

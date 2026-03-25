@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path;
@@ -8,6 +9,7 @@ import '../utils/logger.dart';
 
 class EnhancedStorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _uuid = const Uuid();
 
   Future<Map<String, String>> uploadImageWithOptimization({
@@ -59,7 +61,7 @@ class EnhancedStorageService {
       // Generate unique filename
       final extension = path.extension(imageFile.path).toLowerCase();
       final filename = '${_uuid.v4()}$extension';
-      final storagePath = '$category/$filename';
+      final storagePath = _resolveStoragePath(category, filename);
 
       // Upload compressed image
       final mainRef = _storage.ref().child(storagePath);
@@ -86,7 +88,7 @@ class EnhancedStorageService {
         );
 
         final thumbnailBytes = img.encodeJpg(thumbnail, quality: 85);
-        final thumbnailPath = '$category/thumbnails/$filename';
+        final thumbnailPath = _resolveThumbnailPath(category, filename);
         final thumbnailRef = _storage.ref().child(thumbnailPath);
 
         await thumbnailRef.putData(
@@ -105,6 +107,26 @@ class EnhancedStorageService {
       AppLogger.error('❌ Error in enhanced image upload: $e');
       rethrow;
     }
+  }
+
+  String _resolveStoragePath(String category, String filename) {
+    final userId = _auth.currentUser?.uid;
+
+    if (category == 'profile' && userId != null) {
+      return 'profile_images/$userId/$filename';
+    }
+
+    return '$category/$filename';
+  }
+
+  String _resolveThumbnailPath(String category, String filename) {
+    final userId = _auth.currentUser?.uid;
+
+    if (category == 'profile' && userId != null) {
+      return 'profile_images/$userId/${filename}_thumb.jpg';
+    }
+
+    return '$category/thumbnails/$filename';
   }
 
   Future<void> deleteImage(String imageUrl) async {

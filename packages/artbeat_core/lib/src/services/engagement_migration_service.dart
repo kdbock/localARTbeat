@@ -5,7 +5,16 @@ import '../utils/logger.dart';
 /// Service to migrate from old engagement system to new universal system
 /// Handles migration of likes, applause, follows, etc. to the new system
 class EngagementMigrationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore? _firestoreInstance;
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Migrate all engagement data from old system to new universal system
   Future<void> migrateAllEngagements() async {

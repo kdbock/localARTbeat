@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/sponsorship.dart';
 import '../models/sponsorship_tier.dart';
@@ -101,7 +102,7 @@ class _SponsorBannerState extends State<SponsorBanner> {
       return const SizedBox.shrink();
     }
 
-    if (_sponsor == null) {
+    if (_sponsor == null || !_sponsor!.hasRenderableCreative) {
       if (widget.showPlaceholder) {
         return Padding(
           padding: widget.padding,
@@ -152,7 +153,7 @@ class _LabeledBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: () => _openLink(context, sponsor.linkUrl),
+    onTap: () => unawaited(_openLink(context, sponsor.linkUrl)),
     child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -217,7 +218,7 @@ class _CompactBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: () => _openLink(context, sponsor.linkUrl),
+    onTap: () => unawaited(_openLink(context, sponsor.linkUrl)),
     child: Container(
       height: 56,
       decoration: BoxDecoration(
@@ -335,7 +336,22 @@ class SponsorPlaceholder extends StatelessWidget {
 /*                                   Helpers                                  */
 /* -------------------------------------------------------------------------- */
 
-void _openLink(BuildContext context, String url) {
-  // Intentionally left minimal.
-  // Hook into your existing url_launcher / routing logic.
+Future<void> _openLink(BuildContext context, String url) async {
+  final withScheme = url.contains('://') ? url : 'https://$url';
+  final uri = Uri.tryParse(withScheme);
+  if (uri == null || uri.host.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sponsor link is not available right now.')),
+    );
+    return;
+  }
+
+  try {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } on Exception catch (_) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Unable to open sponsor link.')),
+    );
+  }
 }

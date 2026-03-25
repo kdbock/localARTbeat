@@ -9,11 +9,20 @@ import '../utils/sponsorship_placements.dart';
 
 class SponsorService {
   SponsorService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestoreInstance = firestore;
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore? _firestoreInstance;
 
   static const String _collection = 'sponsorships';
+
+  void initialize() {
+    _firestoreInstance ??= FirebaseFirestore.instance;
+  }
+
+  FirebaseFirestore get _firestore {
+    initialize();
+    return _firestoreInstance!;
+  }
 
   /// Resolve a single sponsor for a placement.
   ///
@@ -36,7 +45,13 @@ class SponsorService {
 
     final snapshot = await _firestore
         .collection(_collection)
-        .where('status', isEqualTo: SponsorshipStatus.active.value)
+        .where(
+          'status',
+          whereIn: [
+            SponsorshipStatus.approved.value,
+            SponsorshipStatus.active.value,
+          ],
+        )
         .where('placementKeys', arrayContains: placementKey)
         .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(now))
         .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
@@ -76,7 +91,13 @@ class SponsorService {
 
     final snapshot = await _firestore
         .collection(_collection)
-        .where('status', isEqualTo: SponsorshipStatus.active.value)
+        .where(
+          'status',
+          whereIn: [
+            SponsorshipStatus.approved.value,
+            SponsorshipStatus.active.value,
+          ],
+        )
         .where('placementKeys', arrayContains: placementKey)
         .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(now))
         .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(now))

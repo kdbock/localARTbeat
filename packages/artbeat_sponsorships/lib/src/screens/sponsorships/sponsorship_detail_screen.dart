@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/sponsorship.dart';
+import '../../models/sponsorship_status.dart';
 import '../../models/sponsorship_tier.dart';
 import '../../services/sponsorship_repository.dart';
 import '../../widgets/sponsorship_review_row.dart';
@@ -62,7 +63,7 @@ class SponsorshipDetailScreen extends StatelessWidget {
                         ),
                         SponsorshipReviewRow(
                           label: 'sponsorship_detail_label_status'.tr(),
-                          value: sponsorship.status.name.toUpperCase(),
+                          value: sponsorship.status.displayName,
                         ),
                         SponsorshipReviewRow(
                           label: 'sponsorship_detail_label_payment'.tr(),
@@ -91,8 +92,8 @@ class SponsorshipDetailScreen extends StatelessWidget {
                               : '--',
                         ),
                         SponsorshipReviewRow(
-                          label: 'sponsorship_review_label_venue'.tr(),
-                          value: sponsorship.chapterId ?? '--',
+                          label: 'Business address',
+                          value: sponsorship.businessAddress ?? '--',
                         ),
                         SponsorshipReviewRow(
                           label: 'sponsorship_review_contact_email_label'.tr(),
@@ -111,7 +112,10 @@ class SponsorshipDetailScreen extends StatelessWidget {
                       children: [
                         SponsorshipReviewRow(
                           label: 'sponsorship_review_label_event'.tr(),
-                          value: sponsorship.relatedEntityId ?? '--',
+                          value:
+                              sponsorship.relatedEntityName ??
+                              sponsorship.relatedEntityId ??
+                              '--',
                         ),
                         SponsorshipReviewRow(
                           label: 'sponsorship_review_label_date'.tr(),
@@ -121,6 +125,14 @@ class SponsorshipDetailScreen extends StatelessWidget {
                         SponsorshipReviewRow(
                           label: 'sponsorship_review_label_type'.tr(),
                           value: sponsorship.placementKeys.join(', '),
+                        ),
+                        SponsorshipReviewRow(
+                          label: 'Moderation notes',
+                          value: sponsorship.moderationNotes ?? '--',
+                        ),
+                        SponsorshipReviewRow(
+                          label: 'Reviewed by',
+                          value: sponsorship.reviewedBy ?? '--',
                         ),
                         SponsorshipReviewRow(
                           label: 'sponsorship_detail_label_radius'.tr(),

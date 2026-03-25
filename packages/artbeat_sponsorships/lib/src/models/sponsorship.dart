@@ -22,7 +22,9 @@ class Sponsorship {
     this.longitude,
     this.bannerUrl,
     this.relatedEntityId,
+    this.relatedEntityName,
     this.chapterId,
+    this.businessAddress,
     this.contactEmail,
     this.phone,
     this.brandingNotes,
@@ -32,6 +34,9 @@ class Sponsorship {
     this.stripeSubscriptionId,
     this.stripePriceId,
     this.stripeProductId,
+    this.moderationNotes,
+    this.reviewedBy,
+    this.reviewedAt,
   });
 
   factory Sponsorship.fromSnapshot(DocumentSnapshot snapshot) =>
@@ -61,7 +66,12 @@ class Sponsorship {
         bannerUrl: data['bannerUrl'] as String?,
         linkUrl: data['linkUrl'] as String,
         relatedEntityId: data['relatedEntityId'] as String?,
+        relatedEntityName:
+            data['relatedEntityName'] as String? ??
+            data['relatedEntityId'] as String?,
         chapterId: data['chapterId'] as String?,
+        businessAddress:
+            data['businessAddress'] as String? ?? data['chapterId'] as String?,
         createdAt: (data['createdAt'] as Timestamp).toDate(),
         contactEmail: data['contactEmail'] as String?,
         phone: data['phone'] as String?,
@@ -72,6 +82,9 @@ class Sponsorship {
         stripeSubscriptionId: data['stripeSubscriptionId'] as String?,
         stripePriceId: data['stripePriceId'] as String?,
         stripeProductId: data['stripeProductId'] as String?,
+        moderationNotes: data['moderationNotes'] as String?,
+        reviewedBy: data['reviewedBy'] as String?,
+        reviewedAt: (data['reviewedAt'] as Timestamp?)?.toDate(),
       );
   final String id;
   final String businessId;
@@ -93,7 +106,9 @@ class Sponsorship {
   final String linkUrl;
 
   final String? relatedEntityId; // eventId, artWalkId, etc
+  final String? relatedEntityName;
   final String? chapterId;
+  final String? businessAddress;
   final DateTime createdAt;
   final String? contactEmail;
   final String? phone;
@@ -104,6 +119,9 @@ class Sponsorship {
   final String? stripeSubscriptionId;
   final String? stripePriceId;
   final String? stripeProductId;
+  final String? moderationNotes;
+  final String? reviewedBy;
+  final DateTime? reviewedAt;
 
   Map<String, dynamic> toMap() => {
     'businessId': businessId,
@@ -121,7 +139,9 @@ class Sponsorship {
     'bannerUrl': bannerUrl,
     'linkUrl': linkUrl,
     'relatedEntityId': relatedEntityId,
+    'relatedEntityName': relatedEntityName,
     'chapterId': chapterId,
+    'businessAddress': businessAddress,
     'createdAt': Timestamp.fromDate(createdAt),
     'contactEmail': contactEmail,
     'phone': phone,
@@ -132,6 +152,9 @@ class Sponsorship {
     'stripeSubscriptionId': stripeSubscriptionId,
     'stripePriceId': stripePriceId,
     'stripeProductId': stripeProductId,
+    'moderationNotes': moderationNotes,
+    'reviewedBy': reviewedBy,
+    if (reviewedAt != null) 'reviewedAt': Timestamp.fromDate(reviewedAt!),
   };
 
   /// ----- Pure logic helpers (no UI concerns) -----
@@ -144,6 +167,18 @@ class Sponsorship {
   bool get isExpired => DateTime.now().isAfter(endDate);
 
   bool get isGlobal => radiusMiles == null;
+
+  bool get hasRenderableCreative =>
+      logoUrl.trim().isNotEmpty && normalizedLinkUrl != null;
+
+  String? get normalizedLinkUrl {
+    final raw = linkUrl.trim();
+    if (raw.isEmpty) return null;
+    final withScheme = raw.contains('://') ? raw : 'https://$raw';
+    final uri = Uri.tryParse(withScheme);
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) return null;
+    return uri.toString();
+  }
 
   static double? _extractLatitude(Map<String, dynamic> data) {
     final topLevel = (data['latitude'] as num?)?.toDouble();
