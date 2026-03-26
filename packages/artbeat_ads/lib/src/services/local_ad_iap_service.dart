@@ -39,6 +39,7 @@ class LocalAdIapService {
   Completer<LocalAdPurchaseResult>? _pendingPurchaseCompleter;
   ProductDetails? _pendingProduct;
   String? _pendingProductId;
+  final Set<String> _handledPurchaseKeys = <String>{};
   bool _isInitialized = false;
 
   Future<void> initIap() async {
@@ -152,6 +153,16 @@ class LocalAdIapService {
         return;
       case PurchaseStatus.purchased:
       case PurchaseStatus.restored:
+        final purchaseKey =
+            details.purchaseID ??
+            '${details.productID}:${details.transactionDate ?? ''}';
+        if (_handledPurchaseKeys.contains(purchaseKey)) {
+          if (details.pendingCompletePurchase) {
+            await _inAppPurchase.completePurchase(details);
+          }
+          return;
+        }
+
         final product = _pendingProduct;
         if (product == null) {
           _completePendingPurchaseWithError(
@@ -164,7 +175,15 @@ class LocalAdIapService {
           await _inAppPurchase.completePurchase(details);
         }
 
-        _pendingPurchaseCompleter?.complete(
+        final completer = _pendingPurchaseCompleter;
+        if (completer == null || completer.isCompleted) {
+          _handledPurchaseKeys.add(purchaseKey);
+          _clearPendingPurchase();
+          break;
+        }
+
+        _handledPurchaseKeys.add(purchaseKey);
+        completer.complete(
           LocalAdPurchaseResult(
             productId: details.productID,
             purchaseId:

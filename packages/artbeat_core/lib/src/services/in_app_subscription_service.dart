@@ -15,6 +15,9 @@ class InAppSubscriptionService {
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
   FirebaseAuth? _authInstance;
   FirebaseFirestore? _firestoreInstance;
+  String? _lastSubscriptionError;
+
+  String? get lastSubscriptionError => _lastSubscriptionError;
 
   void initialize() {
     _authInstance ??= FirebaseAuth.instance;
@@ -37,12 +40,14 @@ class InAppSubscriptionService {
     bool isYearly = false,
   }) async {
     try {
+      _lastSubscriptionError = null;
       AppLogger.info(
         '🎯 Starting subscription purchase for ${tier.displayName} (yearly: $isYearly)',
       );
 
       final user = _auth.currentUser;
       if (user == null) {
+        _lastSubscriptionError = 'User not authenticated for subscription';
         AppLogger.error('User not authenticated for subscription');
         return false;
       }
@@ -60,6 +65,8 @@ class InAppSubscriptionService {
       final productId = _getProductIdForTier(tier, isYearly);
       AppLogger.info('Product ID for ${tier.displayName}: $productId');
       if (productId == null) {
+        _lastSubscriptionError =
+            'No product ID found for tier: ${tier.displayName}';
         AppLogger.error('No product ID found for tier: ${tier.displayName}');
         return false;
       }
@@ -79,11 +86,15 @@ class InAppSubscriptionService {
           '✅ Subscription purchase initiated: ${tier.displayName}',
         );
       } else {
+        _lastSubscriptionError =
+            _purchaseService.lastPurchaseError ??
+            'Failed to initiate subscription purchase';
         AppLogger.error('❌ Failed to initiate subscription purchase');
       }
 
       return success;
     } catch (e) {
+      _lastSubscriptionError = e.toString();
       AppLogger.error('Error subscribing to tier: $e');
       return false;
     }

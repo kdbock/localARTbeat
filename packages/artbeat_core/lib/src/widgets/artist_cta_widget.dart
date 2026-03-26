@@ -74,7 +74,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
         final user = snapshot.data!;
 
         // Don't show if user is already an artist
-        if (user.userType == 'artist' || user.userType == 'gallery') {
+        if (user.isArtist || user.isGallery) {
           return const SizedBox.shrink();
         }
 
@@ -271,7 +271,7 @@ class CompactArtistCTAWidget extends StatelessWidget {
         final user = snapshot.data!;
 
         // Don't show if user is already an artist
-        if (user.userType == 'artist' || user.userType == 'gallery') {
+        if (user.isArtist || user.isGallery) {
           return const SizedBox.shrink();
         }
 

@@ -976,7 +976,7 @@ class AppRouter {
     switch (settings.name) {
       case core.AppRoutes.subscriptions:
         return RouteUtils.createMainLayoutRoute(
-          child: const core.SubscriptionsScreen(),
+          child: const core.SubscriptionPlansScreen(),
         );
 
       case core.AppRoutes.boosts:
@@ -1003,10 +1003,8 @@ class AppRouter {
         );
 
       case core.AppRoutes.subscriptionPlans:
-        return RouteUtils.createSimpleRoute(
-          child: const artist.ArtistOnboardScreen(
-            preselectedPlan: 'creator plan',
-          ),
+        return RouteUtils.createMainLayoutRoute(
+          child: const core.SubscriptionPlansScreen(),
         );
 
       case core.AppRoutes.paymentMethods:

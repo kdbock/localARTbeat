@@ -271,8 +271,8 @@ Future<void> _initializeCoreServices() async {
     timeout: const Duration(seconds: 10),
   );
   final envValid = EnvValidator().validateAll();
-  if (!envValid && kReleaseMode) {
-    throw Exception('Missing required environment variables');
+  if (!envValid) {
+    throw Exception('Invalid environment configuration');
   }
 
   await _initializeFirebaseCore();
@@ -385,6 +385,12 @@ Future<void> _runDeferredInits() async {
       final env = EnvLoader();
       final stripeKey = env.get('STRIPE_PUBLISHABLE_KEY');
       if (stripeKey.isNotEmpty) {
+        final stripeMode = stripeKey.startsWith('pk_live_')
+            ? 'pk_live'
+            : stripeKey.startsWith('pk_test_')
+            ? 'pk_test'
+            : 'unknown';
+        AppLogger.info('💳 Active Stripe publishable key mode: $stripeMode');
         await StripeSafetyService.initialize(publishableKey: stripeKey);
       } else {
         AppLogger.warning('⚠️ STRIPE_PUBLISHABLE_KEY missing');

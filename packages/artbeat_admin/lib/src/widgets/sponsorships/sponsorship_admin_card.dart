@@ -64,9 +64,18 @@ class SponsorshipAdminCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               _MetaChip(label: sponsorship.paymentStatus ?? 'payment unknown'),
+              if (sponsorship.paymentFollowUpStatus?.trim().isNotEmpty ?? false)
+                _MetaChip(label: sponsorship.paymentFollowUpStatus!),
               _MetaChip(label: sponsorship.placementKeys.join(', ')),
             ],
           ),
+          if (sponsorship.paymentFollowUpNotes?.trim().isNotEmpty ?? false) ...[
+            const SizedBox(height: 10),
+            Text(
+              sponsorship.paymentFollowUpNotes!,
+              style: TextStyle(color: Colors.lightBlue[100], fontSize: 12),
+            ),
+          ],
           if (sponsorship.moderationNotes?.trim().isNotEmpty ?? false) ...[
             const SizedBox(height: 10),
             Text(

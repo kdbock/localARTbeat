@@ -356,13 +356,14 @@ class _LoginScreenState extends State<LoginScreen>
                                   obscureText: _obscurePassword,
                                   prefixIcon: const Icon(Icons.lock_outlined),
                                   suffixIcon: IconButton(
+                                    tooltip: _obscurePassword
+                                        ? 'Show password'
+                                        : 'Hide password',
                                     icon: Icon(
                                       _obscurePassword
                                           ? Icons.visibility_off_outlined
                                           : Icons.visibility_outlined,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.70,
-                                      ),
+                                      color: const Color(0xFF1F2937),
                                     ),
                                     onPressed: () {
                                       setState(

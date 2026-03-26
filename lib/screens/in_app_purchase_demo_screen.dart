@@ -200,17 +200,7 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
   void _showFullSubscriptionWidget() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Subscription Plans'),
-            backgroundColor: ArtbeatColors.primary,
-            foregroundColor: Colors.white,
-          ),
-          body: const SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: SubscriptionPurchaseWidget(),
-          ),
-        ),
+        builder: (context) => const SubscriptionPlansScreen(),
       ),
     );
   }

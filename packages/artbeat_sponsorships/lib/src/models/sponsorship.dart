@@ -30,10 +30,13 @@ class Sponsorship {
     this.brandingNotes,
     this.additionalNotes,
     this.paymentStatus,
+    this.paymentFollowUpStatus,
+    this.paymentFollowUpNotes,
     this.stripeCustomerId,
     this.stripeSubscriptionId,
     this.stripePriceId,
     this.stripeProductId,
+    this.stripePaymentIntentStatus,
     this.moderationNotes,
     this.reviewedBy,
     this.reviewedAt,
@@ -78,10 +81,13 @@ class Sponsorship {
         brandingNotes: data['brandingNotes'] as String?,
         additionalNotes: data['additionalNotes'] as String?,
         paymentStatus: data['paymentStatus'] as String?,
+        paymentFollowUpStatus: data['paymentFollowUpStatus'] as String?,
+        paymentFollowUpNotes: data['paymentFollowUpNotes'] as String?,
         stripeCustomerId: data['stripeCustomerId'] as String?,
         stripeSubscriptionId: data['stripeSubscriptionId'] as String?,
         stripePriceId: data['stripePriceId'] as String?,
         stripeProductId: data['stripeProductId'] as String?,
+        stripePaymentIntentStatus: data['stripePaymentIntentStatus'] as String?,
         moderationNotes: data['moderationNotes'] as String?,
         reviewedBy: data['reviewedBy'] as String?,
         reviewedAt: (data['reviewedAt'] as Timestamp?)?.toDate(),
@@ -115,10 +121,13 @@ class Sponsorship {
   final String? brandingNotes;
   final String? additionalNotes;
   final String? paymentStatus;
+  final String? paymentFollowUpStatus;
+  final String? paymentFollowUpNotes;
   final String? stripeCustomerId;
   final String? stripeSubscriptionId;
   final String? stripePriceId;
   final String? stripeProductId;
+  final String? stripePaymentIntentStatus;
   final String? moderationNotes;
   final String? reviewedBy;
   final DateTime? reviewedAt;
@@ -148,10 +157,13 @@ class Sponsorship {
     'brandingNotes': brandingNotes,
     'additionalNotes': additionalNotes,
     'paymentStatus': paymentStatus,
+    'paymentFollowUpStatus': paymentFollowUpStatus,
+    'paymentFollowUpNotes': paymentFollowUpNotes,
     'stripeCustomerId': stripeCustomerId,
     'stripeSubscriptionId': stripeSubscriptionId,
     'stripePriceId': stripePriceId,
     'stripeProductId': stripeProductId,
+    'stripePaymentIntentStatus': stripePaymentIntentStatus,
     'moderationNotes': moderationNotes,
     'reviewedBy': reviewedBy,
     if (reviewedAt != null) 'reviewedAt': Timestamp.fromDate(reviewedAt!),

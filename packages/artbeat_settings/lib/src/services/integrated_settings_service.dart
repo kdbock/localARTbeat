@@ -19,6 +19,7 @@ class IntegratedSettingsService extends ChangeNotifier {
 
   // Stream subscriptions for real-time updates
   StreamSubscription<DocumentSnapshot>? _userSettingsSubscription;
+  StreamSubscription<DocumentSnapshot>? _accountSettingsSubscription;
 
   // Performance tracking
   int _cacheHits = 0;
@@ -49,6 +50,16 @@ class IntegratedSettingsService extends ChangeNotifier {
               _invalidateCache();
               notifyListeners();
             }
+          });
+
+      _accountSettingsSubscription?.cancel();
+      _accountSettingsSubscription = _firestore
+          .collection('users')
+          .doc(userId)
+          .snapshots()
+          .listen((_) {
+            _invalidateCache('accountSettings');
+            notifyListeners();
           });
     }
   }
@@ -354,10 +365,11 @@ class IntegratedSettingsService extends ChangeNotifier {
       }
 
       final doc = await _firestore.collection('users').doc(userId).get();
+      final authUser = _auth.currentUser;
 
       AccountSettingsModel settings;
       if (!doc.exists) {
-        final user = _auth.currentUser!;
+        final user = authUser!;
         settings = AccountSettingsModel(
           userId: userId,
           email: user.email ?? '',
@@ -369,9 +381,12 @@ class IntegratedSettingsService extends ChangeNotifier {
         await _firestore
             .collection('users')
             .doc(userId)
-            .set(settings.toMap(), SetOptions(merge: true));
+            .set(_buildAccountSettingsPayload(settings), SetOptions(merge: true));
       } else {
-        settings = AccountSettingsModel.fromMap(doc.data()!);
+        settings = AccountSettingsModel.fromUserDocument(
+          doc.data()!,
+          authUser: authUser,
+        );
       }
 
       _setCached(cacheKey, settings);
@@ -397,12 +412,30 @@ class IntegratedSettingsService extends ChangeNotifier {
       await _firestore
           .collection('users')
           .doc(userId)
-          .set(settings.toMap(), SetOptions(merge: true));
+          .set(_buildAccountSettingsPayload(settings), SetOptions(merge: true));
     } catch (e) {
       _invalidateCache('accountSettings');
       AppLogger.error('Error updating account settings: $e');
       rethrow;
     }
+  }
+
+  Map<String, dynamic> _buildAccountSettingsPayload(
+    AccountSettingsModel settings,
+  ) {
+    return {
+      'userId': settings.userId,
+      'email': settings.email,
+      'username': settings.username,
+      'displayName': settings.displayName,
+      'fullName': settings.displayName,
+      'phoneNumber': settings.phoneNumber,
+      'profileImageUrl': settings.profileImageUrl,
+      'bio': settings.bio,
+      'emailVerified': settings.emailVerified,
+      'phoneVerified': settings.phoneVerified,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
   }
 
   /// Get blocked users with caching
@@ -684,6 +717,7 @@ class IntegratedSettingsService extends ChangeNotifier {
   @override
   void dispose() {
     _userSettingsSubscription?.cancel();
+    _accountSettingsSubscription?.cancel();
     super.dispose();
   }
 }

@@ -1255,27 +1255,54 @@ class UnifiedPaymentService {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) throw Exception('User not authenticated');
+      final trimmedEmail = email.trim();
+      final trimmedName = name.trim();
+      if (trimmedEmail.isEmpty) {
+        throw Exception('Customer email is required');
+      }
 
       final response = await _makeAuthenticatedRequest(
         functionKey: 'createCustomer',
-        body: {'email': email, 'userId': userId},
+        body: {
+          'email': trimmedEmail,
+          'userId': userId,
+          if (trimmedName.isNotEmpty) 'name': trimmedName,
+        },
       );
 
       if (response.statusCode != 200) {
+        String message = 'Failed to create customer (${response.statusCode})';
+        try {
+          final data = json.decode(response.body) as Map<String, dynamic>;
+          final error = data['error'] as String?;
+          final details =
+              (data['message'] as String?) ?? (data['details'] as String?);
+          if (error != null && error.isNotEmpty) {
+            message = '$message: $error';
+          }
+          if (details != null && details.isNotEmpty) {
+            message = '$message ($details)';
+          }
+        } catch (_) {
+          final raw = response.body.trim();
+          if (raw.isNotEmpty) {
+            message = '$message: $raw';
+          }
+        }
         if (response.statusCode == 404) {
           throw Exception('Payment service temporarily unavailable');
         }
-        throw Exception('Failed to create customer: ${response.statusCode}');
+        throw Exception(message);
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
       final customerId = data['customerId'] as String;
 
-      // Store customer ID in Firestore
-      await _firestore.collection('users').doc(userId).update({
+      // Persist the Stripe customer ID even if this user document is sparse.
+      await _firestore.collection('users').doc(userId).set({
         'stripeCustomerId': customerId,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      }, SetOptions(merge: true));
 
       return customerId;
     } catch (e) {
@@ -1285,7 +1312,10 @@ class UnifiedPaymentService {
   }
 
   /// Get or create a customer ID
-  Future<String> getOrCreateCustomerId() async {
+  Future<String> getOrCreateCustomerId({
+    String? fallbackEmail,
+    String? fallbackName,
+  }) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) {
       throw Exception('User not authenticated');
@@ -1308,8 +1338,8 @@ class UnifiedPaymentService {
     }
 
     // If not, create a new customer in Stripe
-    final email = _auth.currentUser?.email ?? '';
-    final name = _auth.currentUser?.displayName ?? '';
+    final email = (_auth.currentUser?.email ?? fallbackEmail ?? '').trim();
+    final name = (_auth.currentUser?.displayName ?? fallbackName ?? '').trim();
     AppLogger.info('Creating new customer with email: $email, name: $name');
     return createCustomer(email: email, name: name);
   }

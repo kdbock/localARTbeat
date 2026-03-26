@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/sponsorship_tier.dart';
@@ -62,8 +61,21 @@ class SponsorshipCheckoutService {
     required String contactEmail,
   }) async {
     final plan = _resolvePlan(tier);
-    var customerId = await _paymentService.getOrCreateCustomerId();
-    final setupIntentSecret = await _createSetupIntentWithRecovery(customerId);
+    final trimmedBusinessName = businessName.trim();
+    final trimmedContactEmail = contactEmail.trim();
+    if (trimmedContactEmail.isEmpty) {
+      throw Exception('A contact email is required for sponsorship billing');
+    }
+
+    var customerId = await _paymentService.getOrCreateCustomerId(
+      fallbackEmail: trimmedContactEmail,
+      fallbackName: trimmedBusinessName,
+    );
+    final setupIntentSecret = await _createSetupIntentWithRecovery(
+      customerId,
+      contactEmail: trimmedContactEmail,
+      businessName: trimmedBusinessName,
+    );
     if (setupIntentSecret.customerId != null) {
       customerId = setupIntentSecret.customerId!;
     }
@@ -93,15 +105,15 @@ class SponsorshipCheckoutService {
         'customerId': customerId,
         'priceId': plan.priceId,
         'productId': plan.productId,
-        'paymentMethodId': paymentMethodId,
-        'sponsorshipType': tier.value,
-        'metadata': {
-          'module': 'sponsorships',
-          'businessName': businessName,
-          'contactEmail': contactEmail,
+          'paymentMethodId': paymentMethodId,
+          'sponsorshipType': tier.value,
+          'metadata': {
+            'module': 'sponsorships',
+            'businessName': trimmedBusinessName,
+            'contactEmail': trimmedContactEmail,
+          },
         },
-      },
-    );
+      );
 
     if (response.statusCode != 200) {
       String message = 'Failed to create sponsorship subscription';
@@ -155,8 +167,10 @@ class SponsorshipCheckoutService {
   }
 
   Future<({String secret, String? customerId})> _createSetupIntentWithRecovery(
-    String customerId,
-  ) async {
+    String customerId, {
+    required String contactEmail,
+    required String businessName,
+  }) async {
     try {
       final secret = await _paymentService.createSetupIntent(customerId);
       return (secret: secret, customerId: null);
@@ -169,13 +183,9 @@ class SponsorshipCheckoutService {
 
       if (!shouldRecover) rethrow;
 
-      final user = FirebaseAuth.instance.currentUser;
-      final email = user?.email?.trim() ?? '';
-      if (email.isEmpty) rethrow;
-
       final freshCustomerId = await _paymentService.createCustomer(
-        email: email,
-        name: user?.displayName ?? '',
+        email: contactEmail,
+        name: businessName,
       );
       final secret = await _paymentService.createSetupIntent(freshCustomerId);
       return (secret: secret, customerId: freshCustomerId);

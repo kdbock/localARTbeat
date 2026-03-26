@@ -29,6 +29,7 @@ Risk values:
 | Standardize translation validation workflow | done | medium | localization | low | locale parity report + parity test | Canonical report script added, locale files aligned, parity test added |
 | Consolidate deployment and release process into canonical runbook | done | low | operations | none | doc review | Durable release/testing steps folded into `docs/RELEASE_CHECKLIST.md`; older docs now reference-only |
 | Finish open legal/security follow-up items from `TODO.md` | in_progress | high | compliance | direct | staging validation | Automated staging checks passed; on 2026-03-19 the concrete deletion failure was fixed, `functions:processDataDeletionRequest` was redeployed, and a credentialed staging repro passed end-to-end with `result.ok=true`; remaining work is fresh manual QA plus current non-engineering sign-off; see `docs/security/LEGAL_RELEASE_STATUS.md` |
+| Run targeted release-confidence manual QA on hardened user flows | in_progress | high | QA/release | direct | manual QA | Use `docs/RELEASE_CONFIDENCE_QA_CHECKLIST.md`; focus on account persistence, paid flows, capture upload queueing, chat media retry, and admin deletion pipeline visibility |
 | Split large backend function domains into clearer modules | todo | medium | backend | medium | function smoke tests | Start after release process is tighter |
 
 ## Blocked Or Watch Items

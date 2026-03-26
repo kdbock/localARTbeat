@@ -31,7 +31,10 @@ service cloud.firestore {
 
     function isGallery(userId) {
       return exists(/databases/$(database)/documents/users/$(userId)) &&
-        get(/databases/$(database)/documents/users/$(userId)).data.userType == 'gallery';
+        (
+          get(/databases/$(database)/documents/users/$(userId)).data.userType == 'gallery' ||
+          get(/databases/$(database)/documents/users/$(userId)).data.userType == 'business'
+        );
     }
 
     function isArtist(userId) {
@@ -42,7 +45,8 @@ service cloud.firestore {
     function isContentCreator(userId) {
       return exists(/databases/$(database)/documents/users/$(userId)) &&
         (get(/databases/$(database)/documents/users/$(userId)).data.userType == 'artist' ||
-         get(/databases/$(database)/documents/users/$(userId)).data.userType == 'gallery');
+         get(/databases/$(database)/documents/users/$(userId)).data.userType == 'gallery' ||
+         get(/databases/$(database)/documents/users/$(userId)).data.userType == 'business');
     }
 
     // User document rules
@@ -52,13 +56,13 @@ service cloud.firestore {
       allow create: if isAuthenticated() &&
         request.auth.uid == userId &&
         (!('userType' in request.resource.data) ||
-         request.resource.data.userType in ['user', 'artist', 'gallery']);
+         request.resource.data.userType in ['user', 'regular', 'artist', 'gallery', 'business']);
       allow update: if isAuthenticated() && (
         isAdmin(request.auth.uid) ||
         // User can update own profile fields, but cannot self-assign privileged roles.
         (request.auth.uid == userId &&
          (!('userType' in request.resource.data) ||
-          request.resource.data.userType in ['user', 'artist', 'gallery'])) ||
+          request.resource.data.userType in ['user', 'regular', 'artist', 'gallery', 'business'])) ||
         // Allow updating engagement stats from any authenticated user
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['engagementStats'])) ||
         // Allow updating presence/online status fields
@@ -567,6 +571,28 @@ service cloud.firestore {
       );
     }
 
+    // Local ad purchase recoveries - fallback records when paid ad creation
+    // cannot complete automatically after checkout.
+    match /localAdPurchaseRecoveries/{recoveryId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'pending_manual_recovery';
+      allow read, list: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update: if isAuthenticated() && (
+        isAdmin(request.auth.uid) ||
+        (resource.data.userId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'purchaseFollowUpStatus',
+           'purchaseFollowUpNotes',
+           'updatedAt'
+         ]))
+      );
+      allow delete: if isAuthenticated() && isAdmin(request.auth.uid);
+    }
+
     // Chat rules
     match /chats/{chatId} {
       function isChatParticipant() {
@@ -852,7 +878,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated() && (
         isGallery(request.auth.uid) ||
-        request.resource.data.subscriptionTier == 'gallery'
+        request.resource.data.subscriptionTier in ['gallery', 'business']
       );
       allow update: if isAuthenticated() && (
         isGallery(request.auth.uid) && request.auth.uid == resource.data.ownerId ||

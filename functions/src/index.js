@@ -16,6 +16,7 @@ const {defineSecret} = require("firebase-functions/params");
 const nodemailer = require("nodemailer");
 const https = require("https");
 const crypto = require("crypto");
+const cors = require("cors")({origin: true});
 
 // Set global options for all functions
 setGlobalOptions({
@@ -32,6 +33,14 @@ const smtpUserSecret = defineSecret("SMTP_USER");
 const smtpPassSecret = defineSecret("SMTP_PASS");
 
 admin.initializeApp();
+
+function getStripeClient() {
+  const secret = String(stripeSecretKey.value() || "").trim();
+  if (!secret) {
+    throw new Error("STRIPE_SECRET_KEY is not configured");
+  }
+  return require("stripe")(secret);
+}
 
 function normalizeDisplayName(value) {
   return String(value || "").trim().toLowerCase();
@@ -1755,7 +1764,7 @@ function formatPercent(value) {
 
 async function getStripeMetrics(startUtc, endUtc) {
   try {
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = getStripeClient();
     const created = {
       gte: Math.floor(startUtc.getTime() / 1000),
       lt: Math.floor(endUtc.getTime() / 1000),
@@ -2590,17 +2599,20 @@ exports.createCustomer = onRequest(
         console.log("✅ Auth successful for user:", authUserId);
 
         // Initialize Stripe with the secret
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const {email, userId} = request.body;
+        const {email, userId, name} = request.body;
+        const trimmedEmail = String(email || "").trim();
+        const trimmedName = String(name || "").trim();
 
-        if (!email || !userId) {
+        if (!trimmedEmail || !userId) {
           return response.status(400).send({
             error: "Missing required fields",
+            details: "email and userId are required",
           });
         }
 
@@ -2611,12 +2623,18 @@ exports.createCustomer = onRequest(
 
         // Create customer
         const customer = await stripe.customers.create({
-          email,
+          email: trimmedEmail,
+          ...(trimmedName ? {name: trimmedName} : {}),
           metadata: {
             userId,
             firebaseUserId: userId,
           },
         });
+
+        await admin.firestore().collection("users").doc(userId).set({
+          stripeCustomerId: customer.id,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, {merge: true});
 
         // Return customer ID
         response.status(200).send({
@@ -2657,7 +2675,7 @@ exports.createSetupIntent = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -2720,7 +2738,7 @@ exports.createPaymentIntent = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -2799,7 +2817,7 @@ exports.createCommissionPaymentIntent = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -2879,7 +2897,7 @@ exports.processCommissionDepositPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3011,7 +3029,7 @@ exports.processCommissionMilestonePayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3157,7 +3175,7 @@ exports.processCommissionFinalPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3290,7 +3308,7 @@ exports.getPaymentMethods = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3349,7 +3367,7 @@ exports.updateCustomer = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3412,7 +3430,7 @@ exports.detachPaymentMethod = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3450,7 +3468,7 @@ exports.createSubscription = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3499,7 +3517,7 @@ exports.cancelSubscription = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3542,7 +3560,7 @@ exports.changeSubscriptionTier = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3615,7 +3633,7 @@ exports.processGiftPayment = onRequest(
         const authUserId = decodedToken.uid;
         console.log("✅ Auth successful for user:", authUserId);
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3787,7 +3805,7 @@ exports.processBoostPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -3916,7 +3934,7 @@ exports.processArtworkSalePayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4096,7 +4114,7 @@ exports.processEventTicketPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4246,7 +4264,7 @@ exports.processSubscriptionPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4344,7 +4362,7 @@ exports.processAdPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4441,7 +4459,7 @@ exports.processSponsorshipPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4588,7 +4606,7 @@ exports.processCommissionPayment = onRequest(
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const authUserId = decodedToken.uid;
 
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});
@@ -4854,7 +4872,7 @@ exports.requestRefund = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        const stripe = require("stripe")(stripeSecretKey.value());
+        const stripe = getStripeClient();
 
         if (request.method !== "POST") {
           return response.status(405).send({error: "Method Not Allowed"});

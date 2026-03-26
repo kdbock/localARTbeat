@@ -410,7 +410,12 @@ Use one local runtime file:
 cp .env.example .env
 ```
 
-For CI and release builds, prefer `--dart-define` or CI secret injection rather than additional `.env.*` files.
+For CI and release builds, prefer `--dart-define` or CI secret injection rather than additional `.env.*` files. Local `.env` is for non-release development only.
+
+Stripe environment standard:
+- Local/debug builds must use `pk_test_...`
+- Production release builds must use `pk_live_...`
+- Production release builds should source Stripe from release config or CI secrets, not local `.env`
 
 #### **Required Environment Variables**
 

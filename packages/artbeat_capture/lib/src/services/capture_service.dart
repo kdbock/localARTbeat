@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -8,6 +10,7 @@ import 'package:artbeat_core/artbeat_core.dart'
 // Import offline services
 import 'capture_post_capture_hooks.dart';
 import 'offline_queue_service.dart';
+import 'storage_service.dart';
 
 /// Service for managing art captures in the ARTbeat app.
 class CaptureService implements CaptureServiceInterface {
@@ -16,11 +19,17 @@ class CaptureService implements CaptureServiceInterface {
   Connectivity? _connectivityOverride;
   UserService? _userServiceOverride;
   CapturePostCaptureHooks? _postCaptureHooksOverride;
+  StorageService? _storageServiceOverride;
+  OfflineQueueService? _offlineQueueServiceOverride;
 
   Connectivity get _connectivity => _connectivityOverride ?? Connectivity();
   UserService get _userService => _userServiceOverride ?? UserService();
   CapturePostCaptureHooks get _postCaptureHooks =>
       _postCaptureHooksOverride ?? const NoopCapturePostCaptureHooks();
+  StorageService get _storageService =>
+      _storageServiceOverride ?? StorageService();
+  OfflineQueueService get _offlineQueueService =>
+      _offlineQueueServiceOverride ?? OfflineQueueService();
 
   FirebaseFirestore? _mockFirestore;
 
@@ -45,11 +54,15 @@ class CaptureService implements CaptureServiceInterface {
     Connectivity? connectivity,
     UserService? userService,
     CapturePostCaptureHooks? postCaptureHooks,
+    StorageService? storageService,
+    OfflineQueueService? offlineQueueService,
   }) {
     _mockFirestore = firestore;
     _connectivityOverride = connectivity;
     _userServiceOverride = userService;
     _postCaptureHooksOverride = postCaptureHooks;
+    _storageServiceOverride = storageService;
+    _offlineQueueServiceOverride = offlineQueueService;
   }
 
   /// Lazy Firebase Firestore instance
@@ -213,8 +226,7 @@ class CaptureService implements CaptureServiceInterface {
         return await saveCapture(capture);
       } else {
         // Offline: add to queue for later sync
-        final offlineQueueService = OfflineQueueService();
-        final localCaptureId = await offlineQueueService.addCaptureToQueue(
+        final localCaptureId = await _offlineQueueService.addCaptureToQueue(
           captureData: capture,
           localImagePath: localImagePath,
         );
@@ -226,6 +238,79 @@ class CaptureService implements CaptureServiceInterface {
       AppLogger.error('Error saving capture with offline support: $e');
       return null;
     }
+  }
+
+  Future<({String? captureId, bool queuedOffline})> createCaptureFromLocalImage({
+    required CaptureModel capture,
+    required String localImagePath,
+  }) async {
+    try {
+      final connectivityResults = await _connectivity.checkConnectivity();
+      final isConnected = connectivityResults.any(
+        (result) => result != ConnectivityResult.none,
+      );
+
+      if (!isConnected) {
+        final localCaptureId = await _queueCaptureForLater(
+          capture: capture,
+          localImagePath: localImagePath,
+        );
+        return (captureId: localCaptureId, queuedOffline: true);
+      }
+
+      final imageUrl = await _storageService.uploadCaptureImage(
+        File(localImagePath),
+        capture.userId,
+      );
+      final savedCapture = await createCapture(
+        capture.copyWith(imageUrl: imageUrl),
+      );
+      return (captureId: savedCapture.id, queuedOffline: false);
+    } catch (e) {
+      if (_shouldQueueOfflineFallback(e)) {
+        try {
+          final localCaptureId = await _queueCaptureForLater(
+            capture: capture,
+            localImagePath: localImagePath,
+          );
+          return (captureId: localCaptureId, queuedOffline: true);
+        } catch (queueError) {
+          throw Exception(
+            'Capture upload failed and offline queue fallback failed. '
+            'Upload error: $e. Queue error: $queueError',
+          );
+        }
+      }
+      rethrow;
+    }
+  }
+
+  Future<String> _queueCaptureForLater({
+    required CaptureModel capture,
+    required String localImagePath,
+  }) {
+    return _offlineQueueService.addCaptureToQueue(
+      captureData: capture,
+      localImagePath: localImagePath,
+    );
+  }
+
+  bool _shouldQueueOfflineFallback(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('network') ||
+        message.contains('socket') ||
+        message.contains('timeout') ||
+        message.contains('unavailable') ||
+        message.contains('connection') ||
+        message.contains('cannot connect to firebase storage') ||
+        message.contains('failed to upload image') ||
+        message.contains('upload failed after') ||
+        message.contains('fallback upload failed') ||
+        message.contains('all storage configurations failed') ||
+        message.contains('deadline-exceeded') ||
+        message.contains('cloud_firestore/unavailable') ||
+        message.contains('firebase upload failed') ||
+        message.contains('storage/retry-limit-exceeded');
   }
 
   /// Save a new capture

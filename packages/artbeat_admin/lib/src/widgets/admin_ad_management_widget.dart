@@ -458,7 +458,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    ad.purchaseFollowUpStatus ?? 'Paid submission',
+                    '${ad.paymentSummaryLabel} • ${ad.paymentFollowUpDisplayLabel}',
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
                 ),
@@ -685,6 +685,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
             style: TextStyle(color: Colors.grey[300], fontSize: 13),
           ),
           const SizedBox(height: 12),
+          _buildMiniMeta('Payment state', ad.paymentFollowUpDisplayLabel),
+          _buildMiniMeta('Billing', ad.paymentSummaryLabel),
           _buildMiniMeta('Placement', ad.zone.placementDisplayName),
           if (ad.subscriptionProductId != null)
             _buildMiniMeta('Subscription', ad.subscriptionProductId!),
@@ -1155,6 +1157,8 @@ class _AdDetailsDialog extends StatelessWidget {
                         'Subscription Product',
                         ad.subscriptionProductId!,
                       ),
+                    if (ad.hasPaidSubscription)
+                      _buildDetailRow('Billing', ad.paymentSummaryLabel),
                     if (ad.purchaseId != null)
                       _buildDetailRow('Purchase ID', ad.purchaseId!),
                     if (ad.transactionId != null)
@@ -1174,7 +1178,7 @@ class _AdDetailsDialog extends StatelessWidget {
                     if (ad.purchaseFollowUpStatus != null)
                       _buildDetailRow(
                         'Purchase Follow-Up',
-                        ad.purchaseFollowUpStatus!,
+                        ad.paymentFollowUpDisplayLabel,
                       ),
                     if (ad.purchaseFollowUpNotes != null)
                       _buildDetailRow(

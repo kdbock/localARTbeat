@@ -17,6 +17,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
   String? _error;
 
   Future<void> _handleLogin() async {
@@ -114,12 +115,27 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      tooltip: _obscurePassword
+                          ? 'Show password'
+                          : 'Hide password',
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                    border: const OutlineInputBorder(),
                   ),
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'admin_login_validation_enter_password'.tr();

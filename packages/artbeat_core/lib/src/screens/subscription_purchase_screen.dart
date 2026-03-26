@@ -241,11 +241,15 @@ class _SubscriptionPurchaseScreenState
                           : Colors.white.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      title,
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
@@ -690,7 +694,10 @@ class _SubscriptionPurchaseScreenState
           Navigator.pop(context, true);
         }
       } else {
-        throw Exception('Failed to initiate subscription purchase');
+        throw Exception(
+          _subscriptionService.lastSubscriptionError ??
+              'Failed to initiate subscription purchase',
+        );
       }
     } catch (e) {
       if (mounted) {

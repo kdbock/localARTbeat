@@ -78,6 +78,25 @@ fi
 # Determine build type
 BUILD_TYPE="${1:-run}"
 
+RELEASE_BUILD=false
+case "$BUILD_TYPE" in
+    build-apk|build-appbundle|build-ios|build-ipa)
+        RELEASE_BUILD=true
+        ;;
+esac
+
+# Production releases must use a dedicated release Stripe key source.
+if [[ "$RELEASE_BUILD" == true && "$ENVIRONMENT" == "production" ]]; then
+    if [ -z "$RELEASE_STRIPE_PUBLISHABLE_KEY" ]; then
+        print_error "RELEASE_STRIPE_PUBLISHABLE_KEY must be provided outside .env for production release builds"
+        print_info "Example:"
+        echo "  RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... $0 $BUILD_TYPE"
+        exit 1
+    fi
+
+    STRIPE_PUBLISHABLE_KEY="$RELEASE_STRIPE_PUBLISHABLE_KEY"
+fi
+
 print_success "Configuration validated"
 echo ""
 echo "  Environment: $ENVIRONMENT"

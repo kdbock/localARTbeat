@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -102,8 +103,10 @@ class OfflineDatabaseService {
 
       final result = await db.insert('offline_queue', {
         ...item.toJson(),
-        'captureData': jsonEncode(item.captureData.toJson()),
-        'metadata': item.metadata != null ? jsonEncode(item.metadata!) : null,
+        'captureData': jsonEncode(_encodeForLocalStorage(item.captureData.toJson())),
+        'metadata': item.metadata != null
+            ? jsonEncode(_encodeForLocalStorage(item.metadata!))
+            : null,
         'syncPriority': item.syncPriority,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
@@ -124,8 +127,10 @@ class OfflineDatabaseService {
         'offline_queue',
         {
           ...item.toJson(),
-          'captureData': jsonEncode(item.captureData.toJson()),
-          'metadata': item.metadata != null ? jsonEncode(item.metadata!) : null,
+          'captureData': jsonEncode(_encodeForLocalStorage(item.captureData.toJson())),
+          'metadata': item.metadata != null
+              ? jsonEncode(_encodeForLocalStorage(item.metadata!))
+              : null,
           'syncPriority': item.syncPriority,
         },
         where: 'id = ?',
@@ -315,12 +320,17 @@ class OfflineDatabaseService {
   OfflineQueueItem _mapToQueueItem(Map<String, dynamic> map) {
     // Parse the captureData JSON string back to Map
     final captureDataStr = map['captureData'] as String;
-    final captureData = jsonDecode(captureDataStr) as Map<String, dynamic>;
+    final captureData = _decodeFromLocalStorage(
+      jsonDecode(captureDataStr) as Map<String, dynamic>,
+    ) as Map<String, dynamic>;
 
     // Parse metadata if present
     Map<String, dynamic>? metadata;
     if (map['metadata'] != null) {
-      metadata = jsonDecode(map['metadata'] as String) as Map<String, dynamic>;
+      metadata = _decodeFromLocalStorage(
+            jsonDecode(map['metadata'] as String) as Map<String, dynamic>,
+          )
+          as Map<String, dynamic>;
     }
 
     return OfflineQueueItem(
@@ -345,5 +355,62 @@ class OfflineDatabaseService {
       await db.close();
       _database = null;
     }
+  }
+
+  Object? _encodeForLocalStorage(Object? value) {
+    if (value == null) return null;
+    if (value is Timestamp) {
+      return {
+        '__type': 'timestamp',
+        'value': value.toDate().toIso8601String(),
+      };
+    }
+    if (value is GeoPoint) {
+      return {
+        '__type': 'geopoint',
+        'latitude': value.latitude,
+        'longitude': value.longitude,
+      };
+    }
+    if (value is DateTime) {
+      return {
+        '__type': 'datetime',
+        'value': value.toIso8601String(),
+      };
+    }
+    if (value is Map<String, dynamic>) {
+      return value.map(
+        (key, nestedValue) =>
+            MapEntry(key, _encodeForLocalStorage(nestedValue)),
+      );
+    }
+    if (value is List) {
+      return value.map(_encodeForLocalStorage).toList();
+    }
+    return value;
+  }
+
+  Object? _decodeFromLocalStorage(Object? value) {
+    if (value is Map<String, dynamic>) {
+      final type = value['__type'];
+      if (type == 'timestamp' || type == 'datetime') {
+        final raw = value['value'] as String?;
+        return raw == null ? null : DateTime.parse(raw);
+      }
+      if (type == 'geopoint') {
+        return GeoPoint(
+          (value['latitude'] as num).toDouble(),
+          (value['longitude'] as num).toDouble(),
+        );
+      }
+      return value.map(
+        (key, nestedValue) =>
+            MapEntry(key, _decodeFromLocalStorage(nestedValue)),
+      );
+    }
+    if (value is List) {
+      return value.map(_decodeFromLocalStorage).toList();
+    }
+    return value;
   }
 }

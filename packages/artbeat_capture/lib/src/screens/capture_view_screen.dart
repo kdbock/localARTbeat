@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,17 +62,10 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
       }
 
       // Upload image
-      final storageService = StorageService();
-      final imageUrl = await storageService.uploadCaptureImage(
-        widget.imageFile,
-        user.uid,
-      );
-
-      // Create capture model
       final capture = CaptureModel(
         id: '',
         userId: user.uid,
-        imageUrl: imageUrl,
+        imageUrl: '',
         createdAt: DateTime.now(),
         title: widget.title.trim(),
         artistName: widget.artistName.trim().isNotEmpty
@@ -87,21 +81,27 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         status: CaptureStatus.approved,
       );
 
-      // Save to Firestore
       final captureService = CaptureService();
-      await captureService.createCapture(capture);
+      final outcome = await captureService.createCaptureFromLocalImage(
+        capture: capture,
+        localImagePath: widget.imageFile.path,
+      );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_upload_success'.tr())));
+        final message = outcome.queuedOffline
+            ? 'Capture saved to the offline queue. It will upload automatically when connection improves.'
+            : 'capture_upload_success'.tr();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
       AppLogger.error('Error submitting capture: $e');
       if (mounted) {
+        final message = kDebugMode
+            ? 'Failed to submit capture: $e'
+            : 'capture_upload_error_generic'.tr();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_upload_error_generic'.tr())),
+          SnackBar(content: Text(message)),
         );
       }
     } finally {

@@ -31,6 +31,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool _isTyping = false;
   bool _isAttachmentMenuOpen = false;
   bool _showSmartReplies = false;
+  bool _isSendingMedia = false;
   MessageModel? _replyingToMessage;
   late AnimationController _animationController;
 
@@ -211,54 +212,32 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _handleImagePick() async {
+    if (_isSendingMedia) return;
     final XFile? image = await _imagePicker.pickImage(
       source: ImageSource.gallery,
     );
     if (image == null) return;
 
-    // ignore: use_build_context_synchronously
-    final chatService = Provider.of<ChatService>(context, listen: false);
-    try {
-      // Show loading indicator
-      _showSendingMediaIndicator();
-
-      await chatService.sendImage(widget.chat.id, image.path);
-
-      // Hide attachment menu if open
-      if (_isAttachmentMenuOpen) {
-        setState(() {
-          _isAttachmentMenuOpen = false;
-        });
-        _animationController.reverse();
-      }
-
-      // Scroll to bottom after sending
-      _scrollToBottom();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('messaging_chat_error_failed_to_send_2'.tr()),
-            backgroundColor: ArtbeatColors.error,
-          ),
-        );
-      }
-    }
+    await _sendImagePath(image.path);
   }
 
   Future<void> _handleCameraPick() async {
+    if (_isSendingMedia) return;
     final XFile? image = await _imagePicker.pickImage(
       source: ImageSource.camera,
     );
     if (image == null) return;
 
-    // ignore: use_build_context_synchronously
-    final chatService = Provider.of<ChatService>(context, listen: false);
-    try {
-      // Show loading indicator
-      _showSendingMediaIndicator();
+    await _sendImagePath(image.path);
+  }
 
-      await chatService.sendImage(widget.chat.id, image.path);
+  Future<void> _sendImagePath(String imagePath) async {
+    if (_isSendingMedia) return;
+    final chatService = Provider.of<ChatService>(context, listen: false);
+    setState(() => _isSendingMedia = true);
+    try {
+      _showSendingMediaIndicator();
+      await chatService.sendImage(widget.chat.id, imagePath);
 
       // Hide attachment menu if open
       if (_isAttachmentMenuOpen) {
@@ -272,12 +251,24 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('messaging_chat_error_failed_to_send_2'.tr()),
             backgroundColor: ArtbeatColors.error,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () {
+                _sendImagePath(imagePath);
+              },
+            ),
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSendingMedia = false);
       }
     }
   }
@@ -409,6 +400,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _showSendingMediaIndicator() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -427,13 +419,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Text('messaging_chat_text_sending_media'.tr()),
           ],
         ),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(minutes: 1),
         backgroundColor: Colors.black87,
       ),
     );
   }
 
   void _toggleAttachmentMenu() {
+    if (_isSendingMedia) return;
     setState(() {
       _isAttachmentMenuOpen = !_isAttachmentMenuOpen;
     });

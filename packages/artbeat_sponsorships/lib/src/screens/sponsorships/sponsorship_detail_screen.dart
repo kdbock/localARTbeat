@@ -70,6 +70,10 @@ class SponsorshipDetailScreen extends StatelessWidget {
                           value: (sponsorship.paymentStatus ?? '--')
                               .toUpperCase(),
                         ),
+                        SponsorshipReviewRow(
+                          label: 'Payment follow-up',
+                          value: sponsorship.paymentFollowUpStatus ?? '--',
+                        ),
                       ],
                     ),
                   ),
@@ -131,6 +135,10 @@ class SponsorshipDetailScreen extends StatelessWidget {
                           value: sponsorship.moderationNotes ?? '--',
                         ),
                         SponsorshipReviewRow(
+                          label: 'Payment follow-up notes',
+                          value: sponsorship.paymentFollowUpNotes ?? '--',
+                        ),
+                        SponsorshipReviewRow(
                           label: 'Reviewed by',
                           value: sponsorship.reviewedBy ?? '--',
                         ),
@@ -148,6 +156,10 @@ class SponsorshipDetailScreen extends StatelessWidget {
                         SponsorshipReviewRow(
                           label: 'sponsorship_detail_label_stripe_price'.tr(),
                           value: sponsorship.stripePriceId ?? '--',
+                        ),
+                        SponsorshipReviewRow(
+                          label: 'Stripe payment intent',
+                          value: sponsorship.stripePaymentIntentStatus ?? '--',
                         ),
                       ],
                     ),

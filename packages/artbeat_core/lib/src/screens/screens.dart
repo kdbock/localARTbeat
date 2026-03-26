@@ -14,7 +14,6 @@ export 'coupon_management_screen.dart';
 export 'help_support_screen.dart';
 export 'subscription_plans_screen.dart';
 export 'subscription_purchase_screen.dart';
-export 'simple_subscription_plans_screen.dart';
 export 'art_market_screen.dart';
 export 'auth_required_screen.dart';
 export 'artist_onboarding/welcome_screen.dart';

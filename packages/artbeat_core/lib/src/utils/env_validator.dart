@@ -49,9 +49,44 @@ class EnvValidator {
 
   /// Validate all environment variables
   bool validateAll() {
-    final List<bool> validations = [validateRequiredVars(), validateApiUrl()];
+    final List<bool> validations = [
+      validateRequiredVars(),
+      validateApiUrl(),
+      validateStripeEnvironment(),
+    ];
 
     return !validations.contains(false);
+  }
+
+  /// Validate Stripe key mode against the runtime environment.
+  bool validateStripeEnvironment() {
+    final stripeKey = _envLoader.get('STRIPE_PUBLISHABLE_KEY').trim();
+    if (stripeKey.isEmpty) {
+      return false;
+    }
+
+    const environment = String.fromEnvironment(
+      'ENVIRONMENT',
+      defaultValue: 'development',
+    );
+
+    if (!kReleaseMode && stripeKey.startsWith('pk_live_')) {
+      AppLogger.error(
+        '❌ Debug/development builds must not use a live Stripe publishable key.',
+      );
+      return false;
+    }
+
+    if (kReleaseMode && environment == 'production') {
+      if (!stripeKey.startsWith('pk_live_')) {
+        AppLogger.error(
+          '❌ Production release builds must use a live Stripe publishable key.',
+        );
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /// Print environment diagnostics

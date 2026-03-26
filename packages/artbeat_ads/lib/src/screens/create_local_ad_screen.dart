@@ -304,6 +304,10 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               '4. Apple manages the monthly billing for this ad subscription.',
               style: TextStyle(color: Colors.white70, height: 1.35),
             ),
+            Text(
+              '5. If the ad is rejected, subscription follow-up may still be needed until an admin closes the payment review.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
           ],
         ),
         actions: [
@@ -365,6 +369,10 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               '2. An admin will need to recover or recreate the paid ad manually.',
               style: TextStyle(color: Colors.white70, height: 1.35),
             ),
+            const Text(
+              '3. Keep the purchase receipt or App Store billing history available until the recovery is resolved.',
+              style: TextStyle(color: Colors.white70, height: 1.35),
+            ),
             if (recoveryId != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -378,6 +386,17 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
           ],
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(
+                  builder: (context) => const MyAdsScreen(),
+                ),
+              );
+            },
+            child: const Text('Open My Ads'),
+          ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();

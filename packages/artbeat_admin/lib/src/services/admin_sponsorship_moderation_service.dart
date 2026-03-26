@@ -31,9 +31,29 @@ class AdminSponsorshipModerationService {
     String? moderationNotes,
   }) async {
     try {
+      final paymentFollowUpStatus = switch (status) {
+        'approved' || 'active' => 'active_subscription',
+        'needsCreative' => 'creative_required_after_payment',
+        'rejected' => 'pending_refund_review',
+        _ => 'paid_pending_review',
+      };
+
+      final paymentFollowUpNotes = switch (status) {
+        'approved' || 'active' => null,
+        'needsCreative' =>
+          moderationNotes ??
+              'Creative assets or destination link still need business follow-up.',
+        'rejected' =>
+          moderationNotes ??
+              'Rejected after payment. Review Stripe subscription cancellation or refund handling.',
+        _ => moderationNotes,
+      };
+
       await _firestore.collection(_collection).doc(sponsorshipId).update({
         'status': status,
         'moderationNotes': moderationNotes,
+        'paymentFollowUpStatus': paymentFollowUpStatus,
+        'paymentFollowUpNotes': paymentFollowUpNotes,
         'reviewedBy': adminId,
         'reviewedAt': Timestamp.now(),
       });

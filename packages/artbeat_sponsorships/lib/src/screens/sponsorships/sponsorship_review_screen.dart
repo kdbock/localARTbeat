@@ -53,6 +53,14 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    _businessNameController.text = user?.displayName?.trim() ?? '';
+    _contactEmailController.text = user?.email?.trim() ?? '';
+  }
+
+  @override
   void dispose() {
     _businessNameController.dispose();
     _contactEmailController.dispose();
@@ -297,6 +305,12 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         businessName: _businessNameController.text.trim(),
         contactEmail: _contactEmailController.text.trim(),
       );
+      final paymentStatus = _normalizePaymentStatus(checkout);
+      final paymentFollowUpStatus = _paymentFollowUpStatusFor(checkout);
+      final paymentFollowUpNotes = _paymentFollowUpNotesFor(
+        tier: tier,
+        checkout: checkout,
+      );
 
       final now = DateTime.now();
       final sponsorshipId = FirebaseFirestore.instance
@@ -334,18 +348,25 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
             ? null
             : _brandingNotesController.text.trim(),
         additionalNotes: widget.notes,
-        paymentStatus: checkout.status ?? 'pending',
+        paymentStatus: paymentStatus,
+        paymentFollowUpStatus: paymentFollowUpStatus,
+        paymentFollowUpNotes: paymentFollowUpNotes,
         stripeCustomerId: checkout.customerId,
         stripeSubscriptionId: checkout.subscriptionId,
         stripePriceId: checkout.priceId,
         stripeProductId: checkout.productId,
+        stripePaymentIntentStatus: checkout.paymentIntentStatus,
       );
 
       await _sponsorshipRepository.createSponsorship(sponsorship);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('sponsorship_review_submit_success'.tr())),
+        const SnackBar(
+          content: Text(
+            'Sponsorship submitted. Payment is on file and the request is now queued for review.',
+          ),
+        ),
       );
       Navigator.pop(context);
     } on Exception catch (e) {
@@ -413,5 +434,60 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     final match = RegExp(r'([0-9]+(?:\.[0-9]+)?)').firstMatch(notes);
     if (match == null) return null;
     return double.tryParse(match.group(1)!);
+  }
+
+  String _normalizePaymentStatus(SponsorshipCheckoutResult checkout) {
+    final status = checkout.status?.trim();
+    if (status != null && status.isNotEmpty) {
+      return status;
+    }
+
+    final intentStatus = checkout.paymentIntentStatus?.trim();
+    if (intentStatus != null && intentStatus.isNotEmpty) {
+      return intentStatus;
+    }
+
+    return 'payment_method_attached';
+  }
+
+  String _paymentFollowUpStatusFor(SponsorshipCheckoutResult checkout) {
+    final status = _normalizePaymentStatus(checkout).toLowerCase();
+    if (status == 'active' || status == 'trialing' || status == 'paid') {
+      return 'paid_pending_review';
+    }
+    if (status == 'processing' ||
+        status == 'requires_action' ||
+        status == 'requires_confirmation') {
+      return 'payment_processing_pending_review';
+    }
+    if (status == 'incomplete' || status == 'past_due') {
+      return 'payment_attention_required';
+    }
+    return 'paid_pending_review';
+  }
+
+  String _paymentFollowUpNotesFor({
+    required SponsorshipTier tier,
+    required SponsorshipCheckoutResult checkout,
+  }) {
+    final pieces = <String>[
+      'Recurring sponsorship checkout completed for ${tier.value}.',
+      'Subscription ${checkout.subscriptionId} was created for admin review.',
+    ];
+
+    final status = checkout.status?.trim();
+    if (status != null && status.isNotEmpty) {
+      pieces.add('Stripe subscription status: $status.');
+    }
+
+    final paymentIntentStatus = checkout.paymentIntentStatus?.trim();
+    if (paymentIntentStatus != null && paymentIntentStatus.isNotEmpty) {
+      pieces.add('Initial payment intent status: $paymentIntentStatus.');
+    }
+
+    pieces.add(
+      'Creative assets and destination link still need moderation follow-through before activation.',
+    );
+    return pieces.join(' ');
   }
 }

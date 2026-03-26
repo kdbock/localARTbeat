@@ -14,12 +14,15 @@ class AdminSponsorship {
     this.businessAddress,
     this.relatedEntityName,
     this.paymentStatus,
+    this.paymentFollowUpStatus,
+    this.paymentFollowUpNotes,
     this.contactEmail,
     this.phone,
     this.logoUrl,
     this.linkUrl,
     this.stripeSubscriptionId,
     this.stripePriceId,
+    this.stripePaymentIntentStatus,
     this.moderationNotes,
     this.reviewedBy,
     this.reviewedAt,
@@ -37,12 +40,15 @@ class AdminSponsorship {
   final String? businessAddress;
   final String? relatedEntityName;
   final String? paymentStatus;
+  final String? paymentFollowUpStatus;
+  final String? paymentFollowUpNotes;
   final String? contactEmail;
   final String? phone;
   final String? logoUrl;
   final String? linkUrl;
   final String? stripeSubscriptionId;
   final String? stripePriceId;
+  final String? stripePaymentIntentStatus;
   final String? moderationNotes;
   final String? reviewedBy;
   final DateTime? reviewedAt;
@@ -68,12 +74,15 @@ class AdminSponsorship {
           data['relatedEntityName'] as String? ??
           data['relatedEntityId'] as String?,
       paymentStatus: data['paymentStatus'] as String?,
+      paymentFollowUpStatus: data['paymentFollowUpStatus'] as String?,
+      paymentFollowUpNotes: data['paymentFollowUpNotes'] as String?,
       contactEmail: data['contactEmail'] as String?,
       phone: data['phone'] as String?,
       logoUrl: data['logoUrl'] as String?,
       linkUrl: data['linkUrl'] as String?,
       stripeSubscriptionId: data['stripeSubscriptionId'] as String?,
       stripePriceId: data['stripePriceId'] as String?,
+      stripePaymentIntentStatus: data['stripePaymentIntentStatus'] as String?,
       moderationNotes: data['moderationNotes'] as String?,
       reviewedBy: data['reviewedBy'] as String?,
       reviewedAt: (data['reviewedAt'] as Timestamp?)?.toDate(),

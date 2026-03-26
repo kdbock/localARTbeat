@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'logger.dart';
 
@@ -14,15 +15,21 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // 1. Load the single local runtime env file when present.
+      // 1. Load the single local runtime env file only for non-release builds.
       // `.env.example` is documentation only and is not used at runtime.
-      try {
-        await dotenv.load(fileName: '.env');
-        _envVars.addAll(dotenv.env);
-        AppLogger.info('📝 Loaded local .env file');
-      } catch (_) {
+      if (!kReleaseMode) {
+        try {
+          await dotenv.load(fileName: '.env');
+          _envVars.addAll(dotenv.env);
+          AppLogger.info('📝 Loaded local .env file');
+        } catch (_) {
+          AppLogger.info(
+            '📝 No local .env file found. Falling back to build-time defines.',
+          );
+        }
+      } else {
         AppLogger.info(
-          '📝 No local .env file found. Falling back to build-time defines.',
+          '📝 Release mode detected. Skipping local .env and using build-time defines only.',
         );
       }
 

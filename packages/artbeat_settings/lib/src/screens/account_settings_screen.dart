@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import '../models/models.dart';
+import '../services/integrated_settings_service.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
   final bool useOwnScaffold;
@@ -23,6 +23,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   final _userService = UserService();
   final _auth = FirebaseAuth.instance;
   final _imagePicker = ImagePicker();
+  final _settingsService = IntegratedSettingsService();
 
   // Form controllers
   final _displayNameController = TextEditingController();
@@ -44,6 +45,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   void dispose() {
+    _settingsService.dispose();
     _displayNameController.dispose();
     _emailController.dispose();
     _usernameController.dispose();
@@ -62,24 +64,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         throw Exception('User not authenticated');
       }
 
-      final userModel = await _userService.getUserModel(user.uid);
-
-      _accountSettings = AccountSettingsModel(
-        userId: user.uid,
-        email: user.email ?? userModel.email,
-        username: userModel.username,
-        displayName: userModel.fullName,
-        phoneNumber: user.phoneNumber ?? '',
-        bio: userModel.bio,
-        profileImageUrl: userModel.profileImageUrl,
-        emailVerified: user.emailVerified,
-        phoneVerified: user.phoneNumber != null && user.phoneNumber!.isNotEmpty,
-        createdAt: user.metadata.creationTime ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      _accountSettings = await _settingsService.getAccountSettings();
 
       if (mounted) {
         _populateFormFields();
+        _hasChanges = false;
       }
     } catch (e) {
       if (mounted) {
@@ -121,18 +110,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       var updatedSettings = _accountSettings!.copyWith(
         displayName: _displayNameController.text.trim(),
         email: _emailController.text.trim(),
-        username: _usernameController.text.trim(),
+        username: _usernameController.text.trim().toLowerCase(),
         phoneNumber: _phoneController.text.trim(),
         bio: _bioController.text.trim(),
       );
-
-      // Update user document in Firestore
-      await _userService.firestore.collection('users').doc(user.uid).update({
-        'displayName': updatedSettings.displayName,
-        'username': updatedSettings.username,
-        'bio': updatedSettings.bio,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
 
       // Update email in Firebase Auth if changed
       if (updatedSettings.email != _accountSettings!.email) {
@@ -145,6 +126,13 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       if (updatedSettings.displayName != _accountSettings!.displayName) {
         await user.updateDisplayName(updatedSettings.displayName);
       }
+
+      await _userService.updateUserProfile(
+        fullName: updatedSettings.displayName,
+        bio: updatedSettings.bio,
+      );
+
+      await _settingsService.updateAccountSettings(updatedSettings);
 
       if (mounted) {
         setState(() {
@@ -483,11 +471,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         userId: user.uid,
       );
 
-      // Update user profile in Firestore
-      await _userService.firestore.collection('users').doc(user.uid).update({
-        'profileImageUrl': imageUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await _settingsService.updateAccountSettings(
+        _accountSettings!.copyWith(profileImageUrl: imageUrl),
+      );
 
       // Update Firebase Auth profile
       await user.updatePhotoURL(imageUrl);
@@ -721,15 +707,31 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                 // Update phone number
                 await user.updatePhoneNumber(credential);
 
-                // Update Firestore
-                await _userService.firestore
-                    .collection('users')
-                    .doc(user.uid)
-                    .update({
-                      'phoneNumber': phoneNumber,
-                      'phoneVerified': true,
-                      'updatedAt': FieldValue.serverTimestamp(),
-                    });
+                await _settingsService.updateAccountSettings(
+                  (_accountSettings ??
+                          AccountSettingsModel(
+                            userId: user.uid,
+                            email: user.email ?? '',
+                            username: _usernameController.text.trim(),
+                            displayName: _displayNameController.text.trim(),
+                            createdAt:
+                                user.metadata.creationTime ?? DateTime.now(),
+                            updatedAt: DateTime.now(),
+                          ))
+                      .copyWith(
+                        phoneNumber: phoneNumber,
+                        phoneVerified: true,
+                      ),
+                );
+
+                if (mounted && _accountSettings != null) {
+                  setState(() {
+                    _accountSettings = _accountSettings!.copyWith(
+                      phoneNumber: phoneNumber,
+                      phoneVerified: true,
+                    );
+                  });
+                }
 
                 if (mounted) {
                   // ignore: use_build_context_synchronously

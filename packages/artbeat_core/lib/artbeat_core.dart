@@ -142,8 +142,6 @@ export 'src/repositories/known_entity_repository.dart'
 // Export Screens
 export 'src/screens/leaderboard_screen.dart' show LeaderboardScreen;
 export 'src/screens/help_support_screen.dart' show HelpSupportScreen;
-export 'src/screens/subscriptions/subscriptions_screen.dart'
-    show SubscriptionsScreen;
 export 'src/screens/subscription_plans_screen.dart'
     show SubscriptionPlansScreen;
 export 'src/screens/boosts/artist_boosts_screen.dart' show ArtistBoostsScreen;

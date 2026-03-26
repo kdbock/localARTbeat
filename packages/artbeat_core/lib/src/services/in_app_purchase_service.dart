@@ -23,6 +23,7 @@ class InAppPurchaseService {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   bool _isAvailable = false;
   List<ProductDetails> _products = [];
+  String? _lastPurchaseError;
 
   // Development bypass for testing without StoreKit (set to true for testing)
   static const bool _developmentBypass =
@@ -58,6 +59,8 @@ class InAppPurchaseService {
   void Function(CompletedPurchase)? onPurchaseCompleted;
   void Function(String)? onPurchaseError;
   void Function(String)? onPurchaseCancelled;
+
+  String? get lastPurchaseError => _lastPurchaseError;
 
   void initializeDependencies() {
     _authInstance ??= FirebaseAuth.instance;
@@ -565,7 +568,15 @@ class InAppPurchaseService {
     Map<String, dynamic>? metadata,
   }) async {
     try {
+      _lastPurchaseError = null;
       AppLogger.info('🛍️ Starting purchase flow for product: $productId');
+
+      if (!_isAvailable || _products.isEmpty) {
+        AppLogger.info(
+          '🔄 IAP service not ready for $productId. Reinitializing before purchase...',
+        );
+        await initialize();
+      }
 
       // Development bypass for testing without real store
       if (_developmentBypass) {
@@ -634,6 +645,7 @@ class InAppPurchaseService {
       if (!_isAvailable) {
         AppLogger.error('❌ In-app purchases not available on this device');
         AppLogger.info('Available products: ${_products.length}');
+        _lastPurchaseError = 'In-app purchases are not available on this device.';
         throw Exception('In-app purchases are not available on this device');
       }
 
@@ -644,6 +656,8 @@ class InAppPurchaseService {
         AppLogger.info(
           'Available products: ${_products.map((p) => p.id).join(", ")}',
         );
+        _lastPurchaseError =
+            'Product "$productId" not found in loaded store products.';
         throw Exception(
           'Product "$productId" not found. Please ensure it\'s configured in the store.',
         );
@@ -733,6 +747,17 @@ class InAppPurchaseService {
         AppLogger.info(
           '✅ Purchase initiated successfully: $productId - Result: $result',
         );
+
+        if (!result) {
+          _lastPurchaseError =
+              'Store did not start the purchase flow for "$productId".';
+          AppLogger.error(
+            '❌ Purchase initiation returned false for $productId. '
+            'Loaded products: ${_products.map((p) => p.id).join(", ")}',
+          );
+          onPurchaseError?.call(_lastPurchaseError!);
+        }
+
         return result;
       } catch (e) {
         // Check if this is a PendingIntent-related crash
@@ -748,11 +773,13 @@ class InAppPurchaseService {
         }
 
         AppLogger.error('Error during purchase initiation: $e', error: e);
+        _lastPurchaseError = e.toString();
         rethrow;
       }
     } catch (e) {
+      _lastPurchaseError ??= e.toString();
       AppLogger.error('❌ Error purchasing product "$productId": $e', error: e);
-      onPurchaseError?.call(e.toString());
+      onPurchaseError?.call(_lastPurchaseError!);
       return false;
     }
   }

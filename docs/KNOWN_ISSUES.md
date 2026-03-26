@@ -16,12 +16,29 @@ Keep visible issues in one place with impact, workaround, and target action.
 - Impact: blocks confidence in deletion workflow and canary sign-off
 - Workaround: use the updated admin queue UI and
   `scripts/legal_staging_regression.sh` to inspect `processingError` and
-  `processingFailedAt` once a credentialed staging repro is run; non-admin
-  staging smoke checks were revalidated locally on 2026-03-19
+  `processingFailedAt`; the admin queue now also surfaces `deletionSummary`
+  pipeline state, latest steps, and explicit destructive confirmation before
+  reruns; non-admin staging smoke checks were revalidated locally on
+  2026-03-19
 - Target action: fixed in staging on 2026-03-19 by removing
   `FieldValue.serverTimestamp()` values from `deletionSummary.pipelineSteps`
   array items; rerun manual QA and keep this issue open only if the admin UI
   still fails against the fixed callable
+
+### Recently hardened release-critical flows still need fresh manual QA
+
+- Severity: high
+- Area: account / monetization / capture / messaging
+- Evidence:
+  - `docs/RELEASE_CONFIDENCE_QA_CHECKLIST.md`
+  - recent fixes in account settings, paid local ads, sponsorship review,
+    capture upload queueing, and chat media retry paths
+- Impact: code-side reliability improved, but release confidence still depends
+  on a fresh real-device pass across the hardened flows
+- Workaround: use `docs/RELEASE_CONFIDENCE_QA_CHECKLIST.md` for the next QA
+  session and log any failures back here
+- Target action: complete the checklist and either clear this issue or split it
+  into concrete remaining blockers
 
 ### Package boundaries are highly coupled
 

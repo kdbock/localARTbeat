@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 /// Account settings model for user account information
 /// Implementation Date: September 5, 2025
 class AccountSettingsModel {
@@ -32,18 +35,48 @@ class AccountSettingsModel {
       userId: map['userId'] as String? ?? '',
       email: map['email'] as String? ?? '',
       username: map['username'] as String? ?? '',
-      displayName: map['displayName'] as String? ?? '',
+      displayName:
+          map['displayName'] as String? ?? map['fullName'] as String? ?? '',
       phoneNumber: map['phoneNumber'] as String? ?? '',
-      profileImageUrl: map['profileImageUrl'] as String? ?? '',
+      profileImageUrl:
+          map['profileImageUrl'] as String? ?? map['photoUrl'] as String? ?? '',
       bio: map['bio'] as String? ?? '',
       emailVerified: map['emailVerified'] as bool? ?? false,
       phoneVerified: map['phoneVerified'] as bool? ?? false,
-      createdAt: DateTime.parse(
-        map['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      ),
-      updatedAt: DateTime.parse(
-        map['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
-      ),
+      createdAt: _parseDateTime(map['createdAt']),
+      updatedAt: _parseDateTime(map['updatedAt']),
+    );
+  }
+
+  factory AccountSettingsModel.fromUserDocument(
+    Map<String, dynamic> map, {
+    User? authUser,
+  }) {
+    return AccountSettingsModel(
+      userId:
+          map['userId'] as String? ??
+          authUser?.uid ??
+          (map['id'] as String? ?? ''),
+      email: authUser?.email ?? map['email'] as String? ?? '',
+      username: map['username'] as String? ?? '',
+      displayName:
+          map['fullName'] as String? ??
+          map['displayName'] as String? ??
+          authUser?.displayName ??
+          '',
+      phoneNumber: authUser?.phoneNumber ?? map['phoneNumber'] as String? ?? '',
+      profileImageUrl:
+          map['profileImageUrl'] as String? ??
+          map['photoUrl'] as String? ??
+          authUser?.photoURL ??
+          '',
+      bio: map['bio'] as String? ?? '',
+      emailVerified: authUser?.emailVerified ?? map['emailVerified'] as bool? ?? false,
+      phoneVerified:
+          (authUser?.phoneNumber?.isNotEmpty ?? false) ||
+          (map['phoneVerified'] as bool? ?? false),
+      createdAt: _parseDateTime(map['createdAt'], fallback: authUser?.metadata.creationTime),
+      updatedAt: _parseDateTime(map['updatedAt']),
     );
   }
 
@@ -95,4 +128,17 @@ class AccountSettingsModel {
       email.isNotEmpty &&
       username.isNotEmpty &&
       displayName.isNotEmpty;
+
+  static DateTime _parseDateTime(dynamic value, {DateTime? fallback}) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    if (value is DateTime) {
+      return value;
+    }
+    if (value is String && value.isNotEmpty) {
+      return DateTime.tryParse(value) ?? fallback ?? DateTime.now();
+    }
+    return fallback ?? DateTime.now();
+  }
 }

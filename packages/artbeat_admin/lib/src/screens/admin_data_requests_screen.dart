@@ -16,6 +16,7 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
   final _functions = FirebaseFunctions.instance;
 
   String _statusFilter = 'all';
+  final Set<String> _requestIdsInFlight = <String>{};
 
   String _formatTimestamp(dynamic value) {
     if (value is Timestamp) {
@@ -62,8 +63,74 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
       ];
       lines.add('Processing error: ${errorParts.join(' ')}');
     }
+    lines.addAll(_buildDeletionPipelineLines(data));
 
     return lines.join('\n');
+  }
+
+  List<String> _buildDeletionPipelineLines(Map<String, dynamic> data) {
+    final requestType =
+        (data['requestType'] ?? data['type'] ?? '').toString().trim();
+    if (requestType != 'deletion') {
+      return const <String>[];
+    }
+
+    final summary =
+        data['deletionSummary'] is Map<String, dynamic>
+            ? data['deletionSummary'] as Map<String, dynamic>
+            : const <String, dynamic>{};
+    final startedAt = data['processingStartedAt'];
+    final completedAt = data['processingCompletedAt'];
+    final currentStep = (summary['currentStep'] ?? '').toString().trim();
+    final failedStep = (summary['failedStep'] ?? '').toString().trim();
+    final authDeleted = summary['authDeleted'];
+    final authAlreadyMissing = summary['authAlreadyMissing'];
+    final deletedDocuments = summary['deletedDocuments'];
+    final storageErrors = summary['storageErrors'];
+    final pipelineSteps = summary['pipelineSteps'];
+
+    final lines = <String>[
+      'Processing started: ${_formatTimestamp(startedAt)}',
+      'Processing completed: ${_formatTimestamp(completedAt)}',
+    ];
+
+    if (currentStep.isNotEmpty) {
+      lines.add('Current step: $currentStep');
+    }
+    if (failedStep.isNotEmpty) {
+      lines.add('Failed step: $failedStep');
+    }
+    if (authDeleted is bool) {
+      lines.add('Auth user deleted: ${authDeleted ? 'yes' : 'no'}');
+    }
+    if (authAlreadyMissing == true) {
+      lines.add('Auth user was already missing before deletion.');
+    }
+    if (deletedDocuments is List) {
+      lines.add('Deleted root docs: ${deletedDocuments.length}');
+    }
+    if (storageErrors is List && storageErrors.isNotEmpty) {
+      lines.add('Storage cleanup warnings: ${storageErrors.length}');
+    }
+    if (pipelineSteps is List && pipelineSteps.isNotEmpty) {
+      final latestSteps = pipelineSteps.reversed.take(3).map((step) {
+        if (step is! Map<String, dynamic>) {
+          return step.toString();
+        }
+        final name = (step['step'] ?? '').toString().trim();
+        final status = (step['status'] ?? '').toString().trim();
+        final error = (step['error'] ?? '').toString().trim();
+        final pieces = <String>[
+          if (name.isNotEmpty) name,
+          if (status.isNotEmpty) '($status)',
+          if (error.isNotEmpty) '- $error',
+        ];
+        return pieces.join(' ');
+      }).toList();
+      lines.add('Latest steps: ${latestSteps.join(' | ')}');
+    }
+
+    return lines;
   }
 
   Future<void> _updateStatus(
@@ -169,7 +236,12 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.check_circle_outline_rounded),
-                title: const Text('Set Fulfilled'),
+                title: Text(
+                  ((data['requestType'] ?? data['type'] ?? '').toString() ==
+                          'deletion')
+                      ? 'Run deletion pipeline'
+                      : 'Set Fulfilled',
+                ),
                 onTap: () async {
                   Navigator.of(context).pop();
                   await _applyStatusChange(
@@ -207,6 +279,20 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
     Map<String, dynamic> data, {
     String? reviewNotes,
   }) async {
+    if (_requestIdsInFlight.contains(ref.id)) {
+      return;
+    }
+
+    final requestType =
+        (data['requestType'] ?? data['type'] ?? '').toString().trim();
+    if (status == 'fulfilled' && requestType == 'deletion') {
+      final shouldProceed = await _confirmDeletionFulfillment(data);
+      if (shouldProceed != true) {
+        return;
+      }
+    }
+
+    setState(() => _requestIdsInFlight.add(ref.id));
     try {
       await _updateStatus(ref, status, data, reviewNotes: reviewNotes);
       if (!mounted) return;
@@ -237,7 +323,55 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _requestIdsInFlight.remove(ref.id));
+      }
     }
+  }
+
+  Future<bool?> _confirmDeletionFulfillment(Map<String, dynamic> data) {
+    final userId = (data['userId'] ?? '').toString().trim();
+    final status = (data['status'] ?? 'pending').toString();
+    final processingError =
+        data['processingError'] is Map<String, dynamic>
+            ? data['processingError'] as Map<String, dynamic>
+            : const <String, dynamic>{};
+    final errorMessage = (processingError['message'] ?? '').toString().trim();
+
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Run Deletion Pipeline'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This will run the account deletion pipeline for user `$userId`.'),
+            const SizedBox(height: 12),
+            Text('Current request status: $status'),
+            if (errorMessage.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text('Last processing error: $errorMessage'),
+            ],
+            const SizedBox(height: 12),
+            const Text(
+              'Only continue if staging/manual validation for this case is complete and you intend to fulfill the legal deletion request now.',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Run deletion'),
+          ),
+        ],
+      ),
+    );
   }
 
   bool _isSlaOverdue(Map<String, dynamic> data) {
@@ -321,9 +455,16 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
                   ),
                   subtitle: Text(_buildRequestDetails(data)),
                   trailing: IconButton(
-                    icon: const Icon(Icons.more_horiz),
-                    onPressed: () =>
-                        _showActionSheet(context, doc.reference, data),
+                    icon: _requestIdsInFlight.contains(doc.id)
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.more_horiz),
+                    onPressed: _requestIdsInFlight.contains(doc.id)
+                        ? null
+                        : () => _showActionSheet(context, doc.reference, data),
                   ),
                 ),
               );

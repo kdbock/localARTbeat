@@ -212,4 +212,33 @@ class AdminLocalAd {
       purchaseId != null ||
       transactionId != null ||
       monthlyPrice != null;
+
+  String get paymentSummaryLabel {
+    final price = monthlyPrice;
+    final currency = currencyCode?.trim();
+    if (price == null) {
+      return autoRenewing ? 'Monthly subscription' : 'Paid placement';
+    }
+
+    final formattedPrice = price.toStringAsFixed(2);
+    if (currency != null && currency.isNotEmpty) {
+      return autoRenewing
+          ? '$currency $formattedPrice / month'
+          : '$currency $formattedPrice';
+    }
+    return autoRenewing ? '$formattedPrice / month' : formattedPrice;
+  }
+
+  String get paymentFollowUpDisplayLabel {
+    final raw = purchaseFollowUpStatus?.trim();
+    if (raw == null || raw.isEmpty) {
+      return hasPaidSubscription ? 'paid_submission' : 'none';
+    }
+
+    return raw
+        .split('_')
+        .where((part) => part.isNotEmpty)
+        .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+        .join(' ');
+  }
 }

@@ -124,37 +124,96 @@ class ChatService extends ChangeNotifier {
 
   Future<void> sendImage(String chatId, String imagePath) async {
     final file = File(imagePath);
+    if (!await file.exists()) {
+      throw Exception('Selected image file is no longer available');
+    }
+
     final sanitizedName = imagePath.split(Platform.pathSeparator).last;
     final fileName =
         '${DateTime.now().millisecondsSinceEpoch}_${sanitizedName.replaceAll(' ', '_')}';
     final storagePath = 'chat_images/$chatId/$fileName';
     final ref = _storage.ref().child(storagePath);
 
-    await ref.putFile(
-      file,
-      SettableMetadata(
-        contentType: 'image/jpeg',
-        customMetadata: {'uploaderId': currentUserId, 'chatId': chatId},
-      ),
-    );
-    final imageUrl = await ref.getDownloadURL();
+    try {
+      final imageUrl = await _uploadChatImageWithRetry(
+        file: file,
+        ref: ref,
+        chatId: chatId,
+      );
 
-    final message = MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: currentUserId,
-      content: imageUrl,
-      timestamp: DateTime.now(),
-      type: MessageType.image,
-      storagePath: storagePath,
-      uploaderId: currentUserId,
-      chatId: chatId,
-      metadata: {
-        'storagePath': storagePath,
-        'uploaderId': currentUserId,
-        'chatId': chatId,
-      },
-    );
-    return _sendMessage(chatId, message);
+      final message = MessageModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        senderId: currentUserId,
+        content: imageUrl,
+        timestamp: DateTime.now(),
+        type: MessageType.image,
+        storagePath: storagePath,
+        uploaderId: currentUserId,
+        chatId: chatId,
+        metadata: {
+          'storagePath': storagePath,
+          'uploaderId': currentUserId,
+          'chatId': chatId,
+        },
+      );
+      await _sendMessage(chatId, message);
+    } catch (error) {
+      await _cleanupFailedImageUpload(ref);
+      rethrow;
+    }
+  }
+
+  Future<String> _uploadChatImageWithRetry({
+    required File file,
+    required Reference ref,
+    required String chatId,
+  }) async {
+    const maxAttempts = 3;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await ref.putFile(
+          file,
+          SettableMetadata(
+            contentType: 'image/jpeg',
+            customMetadata: {'uploaderId': currentUserId, 'chatId': chatId},
+          ),
+        );
+        return await ref.getDownloadURL();
+      } catch (error) {
+        final shouldRetry =
+            attempt < maxAttempts && _isRetryableMediaUploadError(error);
+        core.AppLogger.error(
+          'Chat image upload attempt $attempt failed: $error',
+        );
+
+        if (!shouldRetry) {
+          throw Exception('Failed to upload chat image: $error');
+        }
+
+        await Future<void>.delayed(Duration(seconds: attempt));
+      }
+    }
+
+    throw Exception('Failed to upload chat image');
+  }
+
+  bool _isRetryableMediaUploadError(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('network') ||
+        message.contains('socket') ||
+        message.contains('timeout') ||
+        message.contains('unavailable') ||
+        message.contains('connection') ||
+        message.contains('retry-limit-exceeded');
+  }
+
+  Future<void> _cleanupFailedImageUpload(Reference ref) async {
+    try {
+      await ref.delete();
+    } catch (_) {
+      // Ignore cleanup failures; the main upload/send error is more important.
+    }
   }
 
   Future<void> _sendMessage(String chatId, MessageModel message) async {
