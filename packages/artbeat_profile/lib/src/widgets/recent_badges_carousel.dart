@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -74,9 +75,9 @@ class RecentBadgesCarousel extends StatelessWidget {
               if (onViewAll != null)
                 TextButton(
                   onPressed: onViewAll,
-                  child: const Text(
-                    'View All',
-                    style: TextStyle(
+                  child: Text(
+                    'common_view_all'.tr(),
+                    style: const TextStyle(
                       color: ArtbeatColors.accentYellow,
                       fontSize: 12,
                     ),

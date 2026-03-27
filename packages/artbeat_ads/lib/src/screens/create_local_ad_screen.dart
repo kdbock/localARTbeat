@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'dart:io';
 import '../models/index.dart';
 import '../services/index.dart';
@@ -98,14 +99,22 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         final reference = FirebaseStorage.instance.ref().child(fileName);
 
         try {
-          await reference.putFile(uploadFile);
+          await FirebaseStorageUploadService().uploadFileWithRetry(
+            ref: reference,
+            file: uploadFile,
+            operationLabel: 'local ad image upload',
+          );
         } catch (e) {
           if (e.toString().contains('NSURLFileProtectionComplete') ||
               e.toString().contains('file protection')) {
             final tempDir = Directory.systemTemp;
             final tempFile = File('${tempDir.path}/temp_ad_image.jpg');
             await uploadFile.copy(tempFile.path);
-            await reference.putFile(tempFile);
+            await FirebaseStorageUploadService().uploadFileWithRetry(
+              ref: reference,
+              file: tempFile,
+              operationLabel: 'local ad image upload',
+            );
             await tempFile.delete();
           } else {
             rethrow;
@@ -267,46 +276,46 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF111827),
-        title: const Text(
-          'Ad submitted',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          'ads_create_local_ad_submission_title'.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your monthly ad subscription was confirmed and your ad is now waiting for review.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
+              'ads_create_local_ad_submission_body'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.4),
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             Text(
-              'What happens next:',
-              style: TextStyle(
+              'ads_create_local_ad_next_steps_title'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              '1. It appears in My Ads under Pending review.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+              'ads_create_local_ad_submission_step_1'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
             Text(
-              '2. It stays hidden from the live app until approval.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+              'ads_create_local_ad_submission_step_2'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
             Text(
-              '3. Once approved, it will publish in the placement you selected.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+              'ads_create_local_ad_submission_step_3'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
             Text(
-              '4. Apple manages the monthly billing for this ad subscription.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+              'ads_create_local_ad_submission_step_4'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
             Text(
-              '5. If the ad is rejected, subscription follow-up may still be needed until an admin closes the payment review.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+              'ads_create_local_ad_submission_step_5'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
           ],
         ),
@@ -316,7 +325,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               Navigator.of(dialogContext).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('Done'),
+            child: Text('ads_create_local_ad_done'.tr()),
           ),
           FilledButton(
             onPressed: () {
@@ -327,7 +336,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               );
             },
-            child: const Text('View My Ads'),
+            child: Text('ads_create_local_ad_view_my_ads'.tr()),
           ),
         ],
       ),
@@ -340,43 +349,45 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF111827),
-        title: const Text(
-          'Purchase completed',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          'ads_create_local_ad_recovery_title'.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Your monthly ad subscription was charged successfully, but the ad record needs manual recovery before review can continue.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
+            Text(
+              'ads_create_local_ad_recovery_body'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.4),
             ),
             const SizedBox(height: 14),
-            const Text(
-              'What happens next:',
-              style: TextStyle(
+            Text(
+              'ads_create_local_ad_next_steps_title'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '1. ARTbeat has recorded the failed ad creation attempt.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+            Text(
+              'ads_create_local_ad_recovery_step_1'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
-            const Text(
-              '2. An admin will need to recover or recreate the paid ad manually.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+            Text(
+              'ads_create_local_ad_recovery_step_2'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
-            const Text(
-              '3. Keep the purchase receipt or App Store billing history available until the recovery is resolved.',
-              style: TextStyle(color: Colors.white70, height: 1.35),
+            Text(
+              'ads_create_local_ad_recovery_step_3'.tr(),
+              style: const TextStyle(color: Colors.white70, height: 1.35),
             ),
             if (recoveryId != null) ...[
               const SizedBox(height: 12),
               Text(
-                'Recovery ID: $recoveryId',
+                'ads_create_local_ad_recovery_id'.tr(
+                  namedArgs: {'id': recoveryId},
+                ),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -395,14 +406,14 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               );
             },
-            child: const Text('Open My Ads'),
+            child: Text('ads_create_local_ad_open_my_ads'.tr()),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('Close'),
+            child: Text('common_close'.tr()),
           ),
         ],
       ),
@@ -451,7 +462,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Create a local ad that fits the ARTbeat experience',
+                  'ads_create_local_ad_hero_title'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -460,7 +471,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Choose a monthly banner or inline placement and stay visible to local art explorers without building a full campaign.',
+                  'ads_create_local_ad_hero_subtitle'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -506,7 +517,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Create compelling ad content that captures attention',
+          'ads_create_local_ad_content_subtitle'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.6),
             fontSize: 13,
@@ -514,7 +525,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 20),
         _buildToggleRow(
-          label: 'Show Title',
+          label: 'ads_create_local_ad_toggle_show_title'.tr(),
           value: _showTitle,
           onChanged: (value) {
             setState(() => _showTitle = value);
@@ -523,20 +534,19 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         if (_showTitle) ...[
           const SizedBox(height: 12),
           _buildLabeledField(
-            label: 'Ad Title',
+            label: 'ads_create_local_ad_title_label'.tr(),
             required: true,
-            description:
-                'A catchy headline that grabs attention (max 60 characters)',
+            description: 'ads_create_local_ad_title_description'.tr(),
             child: _buildGlassField(
               controller: _titleController,
-              hint: 'e.g., "Fresh Artisan Coffee - 20% Off This Week!"',
-              validatorMessage: 'Title is required',
+              hint: 'ads_create_local_ad_title_hint'.tr(),
+              validatorMessage: 'ads_create_local_ad_title_required'.tr(),
             ),
           ),
         ],
         const SizedBox(height: 20),
         _buildToggleRow(
-          label: 'Show Description',
+          label: 'ads_create_local_ad_toggle_show_description'.tr(),
           value: _showDescription,
           onChanged: (value) {
             setState(() => _showDescription = value);
@@ -545,13 +555,14 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         if (_showDescription) ...[
           const SizedBox(height: 12),
           _buildLabeledField(
-            label: 'Description',
+            label: 'common_description'.tr(),
             required: true,
-            description: 'Explain your offer and why locals should care',
+            description: 'ads_create_local_ad_description_description'.tr(),
             child: _buildGlassField(
               controller: _descriptionController,
-              hint: 'Describe your business, products, or special offers...',
-              validatorMessage: 'Description is required',
+              hint: 'ads_create_local_ad_description_hint'.tr(),
+              validatorMessage:
+                  'ads_create_local_ad_description_required'.tr(),
               maxLines: 5,
             ),
           ),
@@ -560,20 +571,20 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         _buildImageSection(context),
         const SizedBox(height: 20),
         _buildLabeledField(
-          label: 'Contact Information',
-          description: 'How can customers reach you?',
+          label: 'ads_create_local_ad_contact_label'.tr(),
+          description: 'ads_create_local_ad_contact_description'.tr(),
           child: _buildGlassField(
             controller: _contactController,
-            hint: 'Phone: (555) 123-4567 or @yourhandle',
+            hint: 'ads_create_local_ad_contact_hint'.tr(),
           ),
         ),
         const SizedBox(height: 20),
         _buildLabeledField(
-          label: 'Website URL',
-          description: 'Link to your website or online presence',
+          label: 'ads_create_local_ad_website_label'.tr(),
+          description: 'ads_create_local_ad_website_description'.tr(),
           child: _buildGlassField(
             controller: _websiteController,
-            hint: 'https://yourbusiness.com',
+            hint: 'ads_create_local_ad_website_hint'.tr(),
             keyboardType: TextInputType.url,
           ),
         ),
@@ -672,7 +683,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         Row(
           children: [
             Text(
-              'Ad Images',
+              'ads_create_local_ad_images_title'.tr(),
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white,
                 fontSize: 15,
@@ -688,7 +699,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'Optional',
+                'ads_create_local_ad_optional'.tr(),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 10,
@@ -785,8 +796,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       const SizedBox(height: 6),
                       Text(
                         _selectedSize == LocalAdSize.small
-                            ? 'Add banner image'
-                            : 'Add inline ad image',
+                            ? 'ads_create_local_ad_add_banner_image'.tr()
+                            : 'ads_create_local_ad_add_inline_image'.tr(),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -810,7 +821,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose your ad type',
+          'ads_create_local_ad_type_title'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontSize: 18,
@@ -819,7 +830,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Select the placement style that best fits how people browse ARTbeat.',
+          'ads_create_local_ad_type_subtitle'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -886,7 +897,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          'Choose a placement',
+          'ads_create_local_ad_placement_title'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -956,7 +967,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Apple checkout opens when you submit. Paid monthly ad subscriptions are reviewed before they go live.',
+                  'ads_create_local_ad_checkout_notice'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white.withValues(alpha: 0.72),
                     fontSize: 12,
@@ -969,7 +980,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Available now: Community feed, Artists and artwork, and Events.',
+          'ads_create_local_ad_available_now'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.58),
             fontSize: 12,
@@ -1006,7 +1017,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               )
             : Text(
-                'Pay & submit • \$${price.toStringAsFixed(2)}/month',
+                'ads_create_local_ad_submit_cta'.tr(
+                  namedArgs: {'price': price.toStringAsFixed(2)},
+                ),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.black,
                   fontSize: 16,
@@ -1031,7 +1044,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ad Preview',
+                'ads_create_local_ad_preview_title'.tr(),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white,
                   fontSize: 18,
@@ -1040,7 +1053,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'How your ad will appear to users',
+                'ads_create_local_ad_preview_subtitle'.tr(),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 12,
@@ -1052,7 +1065,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             ],
           ),
         Text(
-          'Your Monthly Ad Subscription',
+          'ads_create_local_ad_subscription_title'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontSize: 18,
@@ -1090,7 +1103,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       ),
                     ),
                     Text(
-                      'Monthly subscription',
+                      'ads_create_local_ad_subscription_frequency'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
@@ -1109,7 +1122,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               ),
               Text(
-                '\$${price.toStringAsFixed(2)}/mo',
+                'ads_create_local_ad_subscription_price'.tr(
+                  namedArgs: {'price': price.toStringAsFixed(2)},
+                ),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white,
                   fontSize: 18,
@@ -1121,7 +1136,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Apple collects payment first. This ad then stays pending until it is reviewed and approved.',
+          'ads_create_local_ad_subscription_note'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.6),
             fontSize: 12,
@@ -1316,7 +1331,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       ),
                     ),
                     child: Text(
-                      'Sponsored',
+                      'ads_create_local_ad_preview_sponsored'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 9,
@@ -1370,7 +1385,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${_selectedImages.length} rotating images',
+                  'ads_create_local_ad_preview_rotating_images'.tr(
+                    namedArgs: {'count': '${_selectedImages.length}'},
+                  ),
                   style: GoogleFonts.spaceGrotesk(
                     color: const Color(0xFF22D3EE).withValues(alpha: 0.7),
                     fontSize: 10,
@@ -1387,14 +1404,14 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   String _imageSizeHint() {
     final size = widget.initialSize ?? _selectedSize;
     if (size == LocalAdSize.big) {
-      return 'Recommended: 4:3 or square artwork for inline feed placements';
+      return 'ads_create_local_ad_image_hint_inline'.tr();
     } else {
-      return 'Recommended: wide artwork for banner placements between sections';
+      return 'ads_create_local_ad_image_hint_banner'.tr();
     }
   }
 
   String _imageRotationHint() {
-    return 'Upload 2-4 images and they will automatically rotate every few seconds in your ad';
+    return 'ads_create_local_ad_image_rotation_hint'.tr();
   }
 
   List<LocalAdZone> get _availablePlacementsForSelectedType =>

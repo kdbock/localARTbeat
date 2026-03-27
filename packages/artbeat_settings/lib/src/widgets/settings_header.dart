@@ -116,7 +116,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
         IconButton(
           icon: const Icon(Icons.developer_mode, color: _iconTextColor),
           onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
-          tooltip: 'Developer Tools',
+          tooltip: 'common_developer_tools'.tr(),
         ),
       );
     }

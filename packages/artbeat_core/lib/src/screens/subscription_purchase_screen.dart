@@ -439,7 +439,7 @@ class _SubscriptionPurchaseScreenState
                     ),
                   ),
                   child: Text(
-                    'Terms of Service',
+                    'common_terms_of_service'.tr(),
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w600,
                     ),
@@ -462,7 +462,7 @@ class _SubscriptionPurchaseScreenState
                     ),
                   ),
                   child: Text(
-                    'Privacy Policy',
+                    'common_privacy_policy'.tr(),
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w600,
                     ),

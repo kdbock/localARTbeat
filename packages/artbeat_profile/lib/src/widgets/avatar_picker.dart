@@ -33,10 +33,16 @@ class _AvatarPickerState extends State<AvatarPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final trimmedImageUrl = widget.imageUrl?.trim();
+    final hasValidNetworkImage =
+        trimmedImageUrl != null &&
+        trimmedImageUrl.isNotEmpty &&
+        (trimmedImageUrl.startsWith('http://') ||
+            trimmedImageUrl.startsWith('https://'));
     final displayImage = _selectedImage != null
         ? FileImage(_selectedImage!)
-        : (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
-        ? NetworkImage(widget.imageUrl!)
+        : hasValidNetworkImage
+        ? NetworkImage(trimmedImageUrl)
         : null;
 
     return GestureDetector(

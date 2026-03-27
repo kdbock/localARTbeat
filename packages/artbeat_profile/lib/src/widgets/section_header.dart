@@ -1,5 +1,6 @@
 // 📁 lib/artbeat_profile/widgets/section_header.dart
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -31,7 +32,7 @@ class SectionHeader extends StatelessWidget {
           if (trailing != null)
             trailing!
           else if (onViewAll != null)
-            TextButton(onPressed: onViewAll, child: const Text('View All')),
+            TextButton(onPressed: onViewAll, child: Text('common_view_all'.tr())),
         ],
       ),
     );

@@ -465,11 +465,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 const SizedBox(height: 10),
                 CircleAvatar(
                   radius: 22,
-                  backgroundImage: profileImageUrl != null
+                  backgroundImage:
+                      profileImageUrl != null && profileImageUrl.trim().isNotEmpty
                       ? CachedNetworkImageProvider(profileImageUrl)
                       : null,
                   backgroundColor: Colors.white.withValues(alpha: 0.1),
-                  child: profileImageUrl == null
+                  child:
+                      profileImageUrl == null || profileImageUrl.trim().isEmpty
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),

@@ -87,7 +87,7 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
           ),
         ),
         DashboardSectionButton(
-          label: 'View All',
+          label: 'common_view_all'.tr(),
           icon: Icons.explore,
           onTap: () => Navigator.pushNamed(context, '/artist/browse'),
         ),

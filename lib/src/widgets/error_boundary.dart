@@ -1,3 +1,6 @@
+import 'dart:ui' as ui;
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -66,7 +69,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   Widget _buildDefaultErrorWidget() =>
       // Always wrap in Directionality and Material
       Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: Directionality.maybeOf(context) ?? ui.TextDirection.ltr,
         child: Material(
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -152,7 +155,7 @@ class _NetworkErrorBoundaryState extends State<NetworkErrorBoundary> {
                 widget.onRetry!();
               }
             },
-            child: const Text('Retry'),
+            child: Text('common_retry'.tr()),
           ),
         ],
       ),

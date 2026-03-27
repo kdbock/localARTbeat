@@ -126,7 +126,7 @@ Future<void> main() async {
                 const SizedBox(height: 8),
                 Text(e.toString(), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
-                const ElevatedButton(onPressed: main, child: Text('Retry')),
+                ElevatedButton(onPressed: main, child: Text('common_retry'.tr())),
               ],
             ),
           ),

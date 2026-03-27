@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Modern Unified Admin Upload Tools Screen
 /// Consolidates all administrative data upload utilities into one modern interface.
@@ -26,7 +27,7 @@ class _ModernUnifiedAdminUploadToolsScreenState
     'Captures': 'captures',
   };
 
-  String _selectedLabel = 'Artist Profiles';
+  String _selectedLabel = 'admin_upload_tool_artist_profiles'.tr();
   late String _selectedType;
 
   @override
@@ -38,8 +39,8 @@ class _ModernUnifiedAdminUploadToolsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const EnhancedUniversalHeader(
-        title: 'Admin Upload Tools',
+      appBar: EnhancedUniversalHeader(
+        title: 'admin_upload_tools_title'.tr(),
         showBackButton: true,
       ),
       body: Container(
@@ -64,8 +65,10 @@ class _ModernUnifiedAdminUploadToolsScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                     child: ModernAdminUploadForm(
-                      label: 'Upload $_selectedLabel',
-                      hint: 'Enter $_selectedLabel data (JSON, ID, etc)',
+                      label: 'admin_upload_tools_form_label'
+                          .tr(namedArgs: {'type': _selectedLabel}),
+                      hint: 'admin_upload_tools_form_hint'
+                          .tr(namedArgs: {'type': _selectedLabel}),
                       uploadType: _selectedType,
                     ),
                   ),
@@ -136,7 +139,7 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
   void _upload() async {
     if (_controller.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter data to upload')),
+        SnackBar(content: Text('admin_upload_tools_error_empty'.tr())),
       );
       return;
     }
@@ -152,7 +155,8 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
     if (mounted) {
       setState(() {
         _loading = false;
-        _result = 'Successfully uploaded to \'${widget.uploadType}\'';
+        _result = 'admin_upload_tools_success'
+            .tr(namedArgs: {'type': widget.uploadType});
         _controller.clear();
       });
     }
@@ -175,7 +179,7 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Type: ${widget.uploadType}',
+            'admin_upload_tools_type'.tr(namedArgs: {'type': widget.uploadType}),
             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
           const SizedBox(height: 24),
@@ -211,9 +215,9 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Execute Upload',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                : Text('admin_upload_tools_execute'.tr(),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           if (_result != null) ...[
             const SizedBox(height: 16),

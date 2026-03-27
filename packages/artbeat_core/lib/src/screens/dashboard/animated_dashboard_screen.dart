@@ -1927,7 +1927,7 @@ class _LeaderboardSectionState extends State<_LeaderboardSection> {
                           ),
                           TextButton(
                             onPressed: _loadData,
-                            child: const Text('Retry'),
+                            child: Text('common_retry'.tr()),
                           ),
                         ],
                       ),
@@ -2143,6 +2143,12 @@ class _AvatarCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trimmedUrl = url?.trim();
+    final hasValidUrl =
+        trimmedUrl != null &&
+        trimmedUrl.isNotEmpty &&
+        (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://'));
+
     return Container(
       width: 36,
       height: 36,
@@ -2152,10 +2158,14 @@ class _AvatarCircle extends StatelessWidget {
       ),
       child: CircleAvatar(
         backgroundColor: Colors.white.withValues(alpha: 0.1),
-        backgroundImage: url != null ? NetworkImage(url!) : null,
-        child: url == null
-            ? Icon(Icons.person, size: 20, color: color.withValues(alpha: 0.5))
-            : null,
+        backgroundImage: hasValidUrl ? NetworkImage(trimmedUrl) : null,
+        child: hasValidUrl
+            ? null
+            : Icon(
+                Icons.person,
+                size: 20,
+                color: color.withValues(alpha: 0.5),
+              ),
       ),
     );
   }

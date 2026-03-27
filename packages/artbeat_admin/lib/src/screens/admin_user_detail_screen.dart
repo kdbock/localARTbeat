@@ -94,7 +94,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       backgroundColor: Colors.white,
       drawer: const AdminDrawer(),
       appBar: EnhancedUniversalHeader(
-        title: 'User Details',
+        title: 'admin_user_detail_title'.tr(),
         showBackButton: true,
         showSearch: true,
         showDeveloperTools: true,
@@ -110,11 +110,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               unselectedLabelColor:
                   const Color(0xFF00BF63).withValues(alpha: 0.7),
               indicatorColor: const Color(0xFF00BF63),
-              tabs: const [
-                Tab(text: 'Overview', icon: Icon(Icons.person)),
-                Tab(text: 'Details', icon: Icon(Icons.info)),
-                Tab(text: 'Activity', icon: Icon(Icons.history)),
-                Tab(text: 'Admin', icon: Icon(Icons.admin_panel_settings)),
+              tabs: [
+                Tab(text: 'admin_user_detail_tab_overview'.tr(), icon: const Icon(Icons.person)),
+                Tab(text: 'admin_user_detail_tab_details'.tr(), icon: const Icon(Icons.info)),
+                Tab(text: 'admin_user_detail_tab_activity'.tr(), icon: const Icon(Icons.history)),
+                Tab(text: 'admin_user_detail_tab_admin'.tr(), icon: const Icon(Icons.admin_panel_settings)),
               ],
             ),
           ),
@@ -224,37 +224,38 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
             mainAxisSpacing: 16,
             children: [
               _buildStatCard(
-                'Level',
+                'admin_user_detail_stat_level'.tr(),
                 _currentUser.level.toString(),
                 Icons.star,
                 Colors.orange,
               ),
               _buildStatCard(
-                'Experience',
-                '${_currentUser.experiencePoints} XP',
+                'admin_user_detail_stat_experience'.tr(),
+                'admin_user_detail_stat_xp_value'
+                    .tr(namedArgs: {'value': '${_currentUser.experiencePoints}'}),
                 Icons.trending_up,
                 Colors.green,
               ),
               _buildStatCard(
-                'Followers',
+                'admin_user_detail_stat_followers'.tr(),
                 _currentUser.followersCount.toString(),
                 Icons.people,
                 Colors.blue,
               ),
               _buildStatCard(
-                'Following',
+                'admin_user_detail_stat_following'.tr(),
                 _currentUser.followingCount.toString(),
                 Icons.person_add,
                 Colors.purple,
               ),
               _buildStatCard(
-                'Posts',
+                'admin_user_detail_stat_posts'.tr(),
                 _currentUser.postsCount.toString(),
                 Icons.post_add,
                 Colors.teal,
               ),
               _buildStatCard(
-                'Captures',
+                'admin_user_detail_stat_captures'.tr(),
                 _currentUser.capturesCount.toString(),
                 Icons.camera_alt,
                 Colors.red,
@@ -272,51 +273,51 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDetailSection('Personal Information', [
-            _buildDetailRow('Full Name', _currentUser.fullName),
+          _buildDetailSection('admin_user_detail_section_personal_information'.tr(), [
+            _buildDetailRow('admin_user_detail_field_full_name'.tr(), _currentUser.fullName),
             _buildDetailRow(
-                'Username',
+                'admin_user_detail_field_username'.tr(),
                 _currentUser.username.isEmpty
-                    ? 'Not set'
+                    ? 'admin_user_detail_not_set'.tr()
                     : _currentUser.username),
-            _buildDetailRow('Email', _currentUser.email),
-            _buildDetailRow('Location', _currentUser.location),
-            _buildDetailRow('Zip Code', _currentUser.zipCode ?? 'Not set'),
-            _buildDetailRow('Gender', _currentUser.gender ?? 'Not set'),
+            _buildDetailRow('admin_user_detail_field_email'.tr(), _currentUser.email),
+            _buildDetailRow('admin_user_detail_field_location'.tr(), _currentUser.location),
+            _buildDetailRow('admin_user_detail_field_zip_code'.tr(), _currentUser.zipCode ?? 'admin_user_detail_not_set'.tr()),
+            _buildDetailRow('admin_user_detail_field_gender'.tr(), _currentUser.gender ?? 'admin_user_detail_not_set'.tr()),
             if (_currentUser.birthDate != null)
-              _buildDetailRow('Birth Date',
+              _buildDetailRow('admin_user_detail_field_birth_date'.tr(),
                   '${_currentUser.birthDate!.day}/${_currentUser.birthDate!.month}/${_currentUser.birthDate!.year}'),
           ]),
           const SizedBox(height: 24),
-          _buildDetailSection('Account Information', [
+          _buildDetailSection('admin_user_detail_section_account_information'.tr(), [
             _buildDetailRow(
-                'User Type',
+                'admin_user_detail_field_user_type'.tr(),
                 _getUserTypeFromString(_currentUser.userType)
                     .name
                     .toUpperCase()),
-            _buildDetailRow('Status', _currentUser.statusText),
-            _buildDetailRow('Verified', _currentUser.isVerified ? 'Yes' : 'No'),
+            _buildDetailRow('admin_user_detail_field_status'.tr(), _currentUser.statusText),
+            _buildDetailRow('admin_user_detail_field_verified'.tr(), _currentUser.isVerified ? 'common_yes'.tr() : 'common_no'.tr()),
             _buildDetailRow(
-                'Created At', _formatDateTime(_currentUser.createdAt)),
+                'admin_user_detail_field_created_at'.tr(), _formatDateTime(_currentUser.createdAt)),
             if (_currentUser.updatedAt != null)
               _buildDetailRow(
-                  'Updated At', _formatDateTime(_currentUser.updatedAt!)),
+                  'admin_user_detail_field_updated_at'.tr(), _formatDateTime(_currentUser.updatedAt!)),
             if (_currentUser.lastActiveAt != null)
               _buildDetailRow(
-                  'Last Active', _formatDateTime(_currentUser.lastActiveAt!)),
+                  'admin_user_detail_field_last_active'.tr(), _formatDateTime(_currentUser.lastActiveAt!)),
             if (_currentUser.lastLoginAt != null)
               _buildDetailRow(
-                  'Last Login', _formatDateTime(_currentUser.lastLoginAt!)),
+                  'admin_user_detail_field_last_login'.tr(), _formatDateTime(_currentUser.lastLoginAt!)),
           ]),
           if (_currentUser.bio.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _buildDetailSection('Biography', [
+            _buildDetailSection('admin_user_detail_section_biography'.tr(), [
               Text(_currentUser.bio),
             ]),
           ],
           if (_currentUser.achievements.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _buildDetailSection('Achievements', [
+            _buildDetailSection('admin_user_detail_section_achievements'.tr(), [
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -344,7 +345,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Activity History',
+              'admin_user_detail_activity_history'.tr(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -362,7 +363,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                         Icon(Icons.history,
                             size: 48, color: Colors.grey.shade400),
                         const SizedBox(height: 16),
-                        Text('No recent activity found for this user',
+                        Text('admin_user_detail_no_recent_activity'.tr(),
                             style: TextStyle(color: Colors.grey.shade600)),
                       ],
                     ),
@@ -405,7 +406,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               ),
             const SizedBox(height: 24),
             Text(
-              'Activity Summary',
+              'admin_user_detail_activity_summary'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -419,27 +420,27 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   children: [
                     if (_currentUser.lastActiveAt != null)
                       _buildActivityItem(
-                        'Last Active',
+                        'admin_user_detail_field_last_active'.tr(),
                         _formatDateTime(_currentUser.lastActiveAt!),
                         Icons.access_time,
                         Colors.green,
                       ),
                     if (_currentUser.lastLoginAt != null)
                       _buildActivityItem(
-                        'Last Login',
+                        'admin_user_detail_field_last_login'.tr(),
                         _formatDateTime(_currentUser.lastLoginAt!),
                         Icons.login,
                         Colors.blue,
                       ),
                     _buildActivityItem(
-                      'Account Created',
+                      'admin_user_detail_account_created'.tr(),
                       _formatDateTime(_currentUser.createdAt),
                       Icons.person_add,
                       Colors.purple,
                     ),
                     _buildActivityItem(
-                      'Active User',
-                      _currentUser.isActiveUser ? 'Yes' : 'No',
+                      'admin_user_detail_active_user'.tr(),
+                      _currentUser.isActiveUser ? 'common_yes'.tr() : 'common_no'.tr(),
                       Icons.check_circle,
                       _currentUser.isActiveUser ? Colors.green : Colors.red,
                     ),
@@ -517,9 +518,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Admin Information',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          Text(
+            'admin_user_detail_admin_information'.tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 16),
           if (_currentUser.isSuspended) ...[
@@ -530,13 +531,13 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.block, color: Colors.red),
-                        SizedBox(width: 8),
+                        const Icon(Icons.block, color: Colors.red),
+                        const SizedBox(width: 8),
                         Text(
-                          'User Suspended',
-                          style: TextStyle(
+                          'admin_user_detail_user_suspended'.tr(),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.red,
                             fontSize: 16,
@@ -553,7 +554,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     if (_currentUser.suspendedAt != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                          'Suspended: ${_formatDateTime(_currentUser.suspendedAt!)}'),
+                          'admin_user_detail_suspended_at'.tr(namedArgs: {
+                        'timestamp': _formatDateTime(_currentUser.suspendedAt!)
+                      })),
                     ],
                     if (_currentUser.suspendedBy != null) ...[
                       const SizedBox(height: 4),
@@ -573,34 +576,36 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Admin Actions',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    'admin_user_detail_admin_actions'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 12),
                   _buildAdminActionTile(
-                    'Report Count',
-                    '${_currentUser.reportCount} reports',
+                    'admin_user_detail_report_count'.tr(),
+                    'admin_user_detail_report_count_value'
+                        .tr(namedArgs: {'count': '${_currentUser.reportCount}'}),
                     Icons.report,
                     Colors.red,
                   ),
                   _buildAdminActionTile(
-                    'Admin Flags',
-                    '${_currentUser.adminFlags.length} flags',
+                    'admin_user_detail_admin_flags'.tr(),
+                    'admin_user_detail_admin_flags_value'
+                        .tr(namedArgs: {'count': '${_currentUser.adminFlags.length}'}),
                     Icons.flag,
                     Colors.orange,
                   ),
                   _buildAdminActionTile(
-                    'Email Verified',
-                    _currentUser.emailVerifiedAt != null ? 'Yes' : 'No',
+                    'admin_user_detail_email_verified'.tr(),
+                    _currentUser.emailVerifiedAt != null ? 'common_yes'.tr() : 'common_no'.tr(),
                     Icons.email,
                     _currentUser.emailVerifiedAt != null
                         ? Colors.green
                         : Colors.red,
                   ),
                   _buildAdminActionTile(
-                    'Password Reset Required',
-                    _currentUser.requiresPasswordReset ? 'Yes' : 'No',
+                    'admin_user_detail_password_reset_required'.tr(),
+                    _currentUser.requiresPasswordReset ? 'common_yes'.tr() : 'common_no'.tr(),
                     Icons.lock_reset,
                     _currentUser.requiresPasswordReset
                         ? Colors.red
@@ -620,26 +625,26 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Admin Notes',
-                        style: TextStyle(
+                      Text(
+                        'admin_user_detail_admin_notes'.tr(),
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       IconButton(
                         onPressed: _addAdminNote,
                         icon: const Icon(Icons.add_comment, size: 20),
-                        tooltip: 'Add Note',
+                        tooltip: 'admin_user_detail_add_note'.tr(),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   if (_currentUser.adminNotes.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(
                         child: Text(
-                          'No admin notes yet',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          'admin_user_detail_no_admin_notes'.tr(),
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                       ),
                     )
@@ -662,7 +667,12 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'By: ${noteData['addedBy'] ?? 'Unknown'} • ${noteData['addedAt'] != null ? _formatDateTime((noteData['addedAt'] as Timestamp).toDate()) : 'Unknown time'}',
+                              'admin_user_detail_note_meta'.tr(namedArgs: {
+                                'admin': '${noteData['addedBy'] ?? 'admin_user_detail_unknown'.tr()}',
+                                'time': noteData['addedAt'] != null
+                                    ? _formatDateTime((noteData['addedAt'] as Timestamp).toDate())
+                                    : 'admin_user_detail_unknown_time'.tr(),
+                              }),
                             ),
                           ],
                         ),
@@ -680,10 +690,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Admin Flags',
+                    Text(
+                      'admin_user_detail_admin_flags'.tr(),
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
                     Wrap(
@@ -711,9 +721,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'User Management',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    'admin_user_detail_user_management'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 16),
                   // Edit Profile Section
@@ -723,33 +733,33 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     const SizedBox(height: 12),
                     TextField(
                       controller: _fullNameController,
-                      decoration: const InputDecoration(labelText: 'Full Name'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_full_name'.tr()),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _usernameController,
-                      decoration: const InputDecoration(labelText: 'Username'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_username'.tr()),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_email'.tr()),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _bioController,
-                      decoration: const InputDecoration(labelText: 'Bio'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_bio'.tr()),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _locationController,
-                      decoration: const InputDecoration(labelText: 'Location'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_location'.tr()),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _zipCodeController,
-                      decoration: const InputDecoration(labelText: 'Zip Code'),
+                      decoration: InputDecoration(labelText: 'admin_user_detail_field_zip_code'.tr()),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -786,8 +796,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   ],
                   const SizedBox(height: 16),
                   // Image Management
-                  const Text('Image Management',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text('admin_user_detail_image_management'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   if (_currentUser.profileImageUrl.isNotEmpty) ...[
                     ElevatedButton.icon(
@@ -805,8 +815,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   ],
                   // User Type Management
                   const SizedBox(height: 16),
-                  const Text('User Type',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text('admin_user_detail_field_user_type'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   DropdownButton<UserType>(
                     value: _getUserTypeFromString(_currentUser.userType),
@@ -835,8 +845,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   // Verification and Featured Status
-                  const Text('Status Management',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text('admin_user_detail_status_management'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   SwitchListTile(
                     title: Text('admin_admin_user_detail_text_verified'.tr()),
@@ -849,16 +859,16 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     onChanged: (_) => _toggleFeaturedStatus(),
                   ),
                   SwitchListTile(
-                    title: const Text('Shadow Banned'),
-                    subtitle: const Text(
-                        'User can post, but content is hidden from others'),
+                    title: Text('admin_user_detail_shadow_banned'.tr()),
+                    subtitle: Text(
+                        'admin_user_detail_shadow_banned_subtitle'.tr()),
                     value: _currentUser.isShadowBanned,
                     onChanged: (_) => _toggleShadowBanStatus(),
                   ),
                   const SizedBox(height: 16),
                   // Critical Account Actions
-                  const Text('Critical Actions',
-                      style: TextStyle(
+                  Text('admin_user_detail_critical_actions'.tr(),
+                      style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
                           fontSize: 16)),
@@ -870,7 +880,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                           child: ElevatedButton.icon(
                             onPressed: _suspendUser,
                             icon: const Icon(Icons.block),
-                            label: const Text('Suspend'),
+                            label: Text('admin_user_detail_suspend'.tr()),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange,
                               foregroundColor: Colors.white,
@@ -882,7 +892,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                           child: ElevatedButton.icon(
                             onPressed: _unsuspendUser,
                             icon: const Icon(Icons.check_circle_outline),
-                            label: const Text('Unsuspend'),
+                            label: Text('admin_user_detail_unsuspend'.tr()),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -895,7 +905,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                           child: ElevatedButton.icon(
                             onPressed: _deleteUser,
                             icon: const Icon(Icons.delete_forever),
-                            label: const Text('Delete'),
+                            label: Text('admin_user_detail_delete'.tr()),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -1181,8 +1191,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_user_detail_text_remove_profile_image'.tr()),
-        content: const Text(
-            'Are you sure you want to remove this user\'s profile image?'),
+        content: Text(
+            'admin_user_detail_remove_profile_image_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -1245,16 +1255,23 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'User ${newFeaturedStatus ? 'marked as featured' : 'unfeatured'} successfully')),
+            content: Text(
+              'admin_user_detail_featured_status_updated'.tr(namedArgs: {
+                'status': newFeaturedStatus
+                    ? 'admin_user_detail_featured_status_featured'.tr()
+                    : 'admin_user_detail_featured_status_unfeatured'.tr(),
+              }),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'admin_admin_user_detail_error_failed_to_update_28'.tr())),
+            content:
+                Text('admin_admin_user_detail_error_failed_to_update_28'.tr()),
+          ),
         );
       }
     } finally {
@@ -1276,16 +1293,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'admin_admin_user_detail_success_user_type_updated'.tr())),
+            content:
+                Text('admin_admin_user_detail_success_user_type_updated'.tr()),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'admin_admin_user_detail_error_failed_to_update_30'.tr())),
+            content:
+                Text('admin_admin_user_detail_error_failed_to_update_30'.tr()),
+          ),
         );
       }
     } finally {
@@ -1312,16 +1331,23 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'User ${!_currentUser.isVerified ? 'verified' : 'unverified'} successfully')),
+            content: Text(
+              'admin_user_detail_verification_status_updated'.tr(namedArgs: {
+                'status': !_currentUser.isVerified
+                    ? 'admin_user_detail_verification_status_verified'.tr()
+                    : 'admin_user_detail_verification_status_unverified'.tr(),
+              }),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'admin_admin_user_detail_error_failed_to_update_31'.tr())),
+            content:
+                Text('admin_admin_user_detail_error_failed_to_update_31'.tr()),
+          ),
         );
       }
     } finally {
@@ -1353,14 +1379,23 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'User ${newStatus ? 'shadow banned' : 'unshadow banned'} successfully')),
+            content: Text(
+              'admin_user_detail_shadow_ban_status_updated'.tr(namedArgs: {
+                'status': newStatus
+                    ? 'admin_user_detail_shadow_ban_status_banned'.tr()
+                    : 'admin_user_detail_shadow_ban_status_unbanned'.tr(),
+              }),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text(
+                'admin_user_detail_error_generic'.tr(namedArgs: {'error': '$e'})),
+          ),
         );
       }
     } finally {
@@ -1374,17 +1409,17 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Suspend User'),
+        title: Text('admin_user_detail_suspend_user'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Are you sure you want to suspend this user?'),
+            Text('admin_user_detail_suspend_confirm'.tr()),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
-                labelText: 'Reason for suspension',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: 'admin_user_detail_reason_for_suspension'.tr(),
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -1397,7 +1432,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Suspend', style: TextStyle(color: Colors.red)),
+            child: Text('admin_user_detail_suspend'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -1441,13 +1476,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User suspended successfully')),
+            SnackBar(
+              content: Text('admin_user_detail_user_suspended_success'.tr()),
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(
+              content: Text(
+                  'admin_user_detail_error_generic'.tr(namedArgs: {'error': '$e'})),
+            ),
           );
         }
       } finally {
@@ -1456,7 +1496,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     } else if (confirmed == true && reasonController.text.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please provide a reason for suspension')),
+        SnackBar(content: Text('admin_user_detail_reason_required'.tr())),
       );
     }
   }
@@ -1466,8 +1506,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Unsuspend User'),
-        content: const Text('Are you sure you want to unsuspend this user?'),
+        title: Text('admin_user_detail_unsuspend_user'.tr()),
+        content: Text('admin_user_detail_unsuspend_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -1475,7 +1515,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Unsuspend'),
+            child: Text('admin_user_detail_unsuspend'.tr()),
           ),
         ],
       ),
@@ -1506,13 +1546,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User unsuspended successfully')),
+            SnackBar(
+              content: Text('admin_user_detail_user_unsuspended_success'.tr()),
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(
+              content: Text(
+                  'admin_user_detail_error_generic'.tr(namedArgs: {'error': '$e'})),
+            ),
           );
         }
       } finally {
@@ -1526,9 +1571,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete User'),
-        content: const Text(
-            'Are you sure you want to delete this user? This is a soft delete and the user will no longer be able to access the platform.'),
+        title: Text('admin_user_detail_delete_user'.tr()),
+        content: Text(
+            'admin_user_detail_delete_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -1536,7 +1581,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('admin_user_detail_delete'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -1562,13 +1607,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User soft-deleted successfully')),
+            SnackBar(
+              content: Text('admin_user_detail_user_deleted_success'.tr()),
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(
+              content: Text(
+                  'admin_user_detail_error_generic'.tr(namedArgs: {'error': '$e'})),
+            ),
           );
         }
       } finally {
@@ -1583,12 +1633,12 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Admin Note'),
+        title: Text('admin_user_detail_add_admin_note'.tr()),
         content: TextField(
           controller: noteController,
-          decoration: const InputDecoration(
-            labelText: 'Note',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'admin_user_detail_note'.tr(),
+            border: const OutlineInputBorder(),
           ),
           maxLines: 5,
         ),
@@ -1599,7 +1649,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Add Note'),
+            child: Text('admin_user_detail_add_note'.tr()),
           ),
         ],
       ),
@@ -1647,13 +1697,15 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Note added successfully')),
+            SnackBar(content: Text('admin_user_detail_note_added_success'.tr())),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(
+                content: Text('admin_user_detail_error_generic'
+                    .tr(namedArgs: {'error': '$e'}))),
           );
         }
       } finally {

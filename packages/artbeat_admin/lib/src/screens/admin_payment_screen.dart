@@ -1296,7 +1296,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
               if (transaction.itemTitle != null)
                 _buildDetailRow('Item', transaction.itemTitle!),
               if (transaction.description != null)
-                _buildDetailRow('Description', transaction.description!),
+                _buildDetailRow('common_description'.tr(), transaction.description!),
             ],
           ),
         ),
@@ -1501,7 +1501,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
                       ),
-                      child: const Text('Reject'),
+                      child: Text('common_reject'.tr()),
                     ),
                   ],
                 ),
@@ -1550,11 +1550,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, reasonController.text),
-            child: const Text('Reject'),
+            child: Text('common_reject'.tr()),
           ),
         ],
       ),

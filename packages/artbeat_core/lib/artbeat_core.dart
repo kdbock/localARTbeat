@@ -89,6 +89,8 @@ export 'src/services/leaderboard_service.dart'
 export 'src/services/enhanced_storage_service.dart' show EnhancedStorageService;
 export 'src/services/firebase_storage_auth_service.dart'
     show FirebaseStorageAuthService;
+export 'src/services/firebase_storage_upload_service.dart'
+    show FirebaseStorageUploadService;
 export 'src/services/coupon_service.dart' show CouponService;
 export 'src/services/user_block_service.dart' show UserBlockService;
 export 'src/services/capture_service_interface.dart'

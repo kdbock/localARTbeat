@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -264,9 +265,9 @@ class _ProfileMenuContent extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.gavel_rounded, color: Colors.white),
-              title: const Text(
-                'Terms of Service',
-                style: TextStyle(color: Colors.white),
+              title: Text(
+                'common_terms_of_service'.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -300,9 +301,9 @@ class _ProfileMenuContent extends StatelessWidget {
                 Icons.privacy_tip_outlined,
                 color: Colors.white,
               ),
-              title: const Text(
-                'Privacy Policy',
-                style: TextStyle(color: Colors.white),
+              title: Text(
+                'common_privacy_policy'.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.of(sheetContext).pop();

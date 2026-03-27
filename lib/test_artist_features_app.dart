@@ -1,6 +1,7 @@
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:logging/logging.dart';
 
 /// Test app to verify all artist features work properly
@@ -335,7 +336,7 @@ class _ArtistFeatureTestAppState extends State<ArtistFeatureTestApp> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text('common_close'.tr()),
           ),
         ],
       ),

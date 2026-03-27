@@ -21,7 +21,16 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [x] Age policy baseline approved:
 - [x] 13+ globally.
 - [x] App not directed to children under 13.
-- [ ] School/student mode policy flow (middle/high school) still TBD.
+- [x] Under-18 users allowed with restrictions on messaging, location sharing,
+  public profile discovery, and event participation.
+- [x] Artistic nudity policy approved: artistic nudity allowed in artistic
+  context; pornography prohibited; pedophile-related content prohibited;
+  ARTbeat recommended for ages 18+.
+- [x] Copyright / DMCA intake contact approved: info@localartbeat.com.
+- [x] Law enforcement intake contact approved: kristy@kristykelly.com.
+- [x] Reported private-message review approved for moderation investigations.
+- [x] Abuse-response enforcement baseline approved: restrict abused sections,
+  delete violating accounts, block or remove abusive access as needed.
 
 ## 0B) Implementation Status Snapshot (Current)
 
@@ -66,21 +75,25 @@ This checklist is for building a user-safe legal system and reducing legal expos
 
 ## 1) Canonical Legal Documents
 
-- [ ] Terms of Service (ToS) finalized by counsel.
+- [x] Terms of Service owner-approved and updated in product.
+- [ ] Terms of Service finalized by counsel.
+- [x] Privacy Policy owner-approved and updated in product.
 - [ ] Privacy Policy finalized by counsel.
-- [ ] Community Guidelines / Acceptable Use Policy finalized.
-- [ ] Copyright/IP Policy (DMCA process, repeat infringer policy).
+- [x] Community Guidelines / Acceptable Use Policy finalized for current
+  owner-approved operating baseline.
+- [x] Copyright/IP Policy (DMCA process, repeat infringer policy) drafted and
+  published for current owner-approved operating baseline.
 - [ ] Refund/Cancellation Policy (subscriptions, events, ads, commissions).
-- [ ] Safety Disclaimer for location-based features.
-- [ ] Children/age policy and parental rights policy.
+- [x] Safety Disclaimer for location-based features.
+- [x] Children/age policy baseline documented for the current operating model.
 - [ ] Data Processing Addendum (if B2B/galleries/business users).
 - [ ] Cookie/Tracking notice (if web tracking applies).
 - [x] Arbitration/class-action/jurisdiction clauses reviewed per jurisdiction.
-- [ ] Ensure all docs have:
-- [ ] Effective date.
-- [ ] Last updated date.
-- [ ] Version ID (e.g., `tos_v3`, `privacy_v4`).
-- [ ] Clear contact channel.
+- [x] Ensure all docs have:
+- [x] Effective date.
+- [x] Last updated date.
+- [x] Version ID (e.g., `tos_v3`, `privacy_v4`).
+- [x] Clear contact channel.
 
 ## 2) Policy-to-Product Mapping
 
@@ -110,7 +123,7 @@ This checklist is for building a user-safe legal system and reducing legal expos
 
 ## 4) UX Clarity Requirements
 
-- [ ] Add plain-language “What this means” summaries before full legal text.
+- [x] Add plain-language “What this means” summaries before full legal text.
 - [ ] Link full legal docs from:
 - [x] Registration
 - [x] Settings > Legal/Privacy
@@ -118,7 +131,9 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [x] Upload flow
 - [x] Use consistent legal copy across app/web/email/help.
 - [x] Ensure labels match destination (no mislabeled legal screens).
-- [ ] Provide concise pre-action warnings for risky actions (upload, location, payments).
+- [x] Provide concise pre-action warnings for risky actions where already
+  implemented; registration warning added for mature-content recommendation and
+  under-18 restrictions.
 
 ## 5) Data Rights (GDPR/CCPA/State Privacy)
 
@@ -182,15 +197,15 @@ This checklist is for building a user-safe legal system and reducing legal expos
 
 ## 9) Content, IP, and Moderation
 
-- [ ] Community rules published and enforced consistently.
+- [x] Community rules published for the current operating baseline.
 - [ ] Upload attestations: user confirms rights to post content.
-- [ ] Repeat infringer policy implemented.
-- [ ] Notice-and-takedown process (DMCA-like) operational.
-- [ ] Counter-notice process defined where applicable.
+- [x] Repeat infringer policy implemented at the policy level.
+- [x] Notice-and-takedown process (DMCA-like) operational.
+- [x] Counter-notice process defined where applicable.
 - [ ] Moderation action appeal process implemented.
 - [ ] Moderation logs stored and reviewable by admins.
-- [ ] Illegal/harmful content escalation workflow documented.
-- [ ] High-risk category handling (nudity, harassment, threats, doxxing).
+- [x] Illegal/harmful content escalation workflow documented.
+- [x] High-risk category handling (nudity, harassment, threats, doxxing).
 
 ## 10) Location and Real-World Safety
 
@@ -205,7 +220,7 @@ This checklist is for building a user-safe legal system and reducing legal expos
 
 - [x] Age threshold and jurisdiction-specific digital consent handling.
 - [ ] Age gate and parent/guardian consent flow where required.
-- [ ] Restricted features for minors defined and enforced.
+- [x] Restricted features for minors defined in policy and signup language.
 - [ ] Child account reporting and parental deletion request process.
 - [ ] COPPA/UK/EU child data obligations reviewed by counsel.
 

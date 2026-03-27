@@ -620,9 +620,9 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
               // Description
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'common_description'.tr(),
+                  border: const OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 minLines: 3,

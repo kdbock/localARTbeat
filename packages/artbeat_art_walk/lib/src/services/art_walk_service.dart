@@ -1063,7 +1063,12 @@ class ArtWalkService {
           .child(userId)
           .child(fileName);
 
-      final uploadTask = await ref.putFile(file);
+      final uploadTask = await core.FirebaseStorageUploadService()
+          .uploadFileWithRetry(
+            ref: ref,
+            file: file,
+            operationLabel: 'public art image upload',
+          );
       return await uploadTask.ref.getDownloadURL();
     } catch (e) {
       _logger.e('Error uploading public art image: $e');
@@ -1101,7 +1106,12 @@ class ArtWalkService {
       // Use the 'uploads' path which has permissive rules for authenticated users
       final ref = _storage.ref().child('uploads').child(fileName);
 
-      final uploadTask = await ref.putFile(imageFile);
+      final uploadTask = await core.FirebaseStorageUploadService()
+          .uploadFileWithRetry(
+            ref: ref,
+            file: imageFile,
+            operationLabel: 'art walk image upload',
+          );
       final downloadUrl = await uploadTask.ref.getDownloadURL();
 
       _logger.i('Successfully uploaded image to: uploads/$fileName');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/biometric_auth_service.dart';
 import '../services/unified_payment_service.dart';
 import '../utils/logger.dart';
@@ -369,7 +370,7 @@ class _BiometricPaymentDialogState extends State<BiometricPaymentDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: widget.onCancel, child: const Text('Cancel')),
+        TextButton(onPressed: widget.onCancel, child: Text('common_cancel'.tr())),
         ElevatedButton(
           onPressed: _isAuthenticating ? null : _authenticateAndConfirm,
           child: const Text('Confirm with Biometric'),

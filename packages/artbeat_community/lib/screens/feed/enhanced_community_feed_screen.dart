@@ -75,7 +75,7 @@ class _EnhancedCommunityFeedScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.admin_panel_settings),
-            tooltip: 'Developer Tools',
+            tooltip: 'common_developer_tools'.tr(),
             onPressed: () => _showDeveloperMenu(context),
           ),
         ],
@@ -808,9 +808,9 @@ class _EnhancedCommunityFeedScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Developer Tools',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'common_developer_tools'.tr(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
@@ -843,7 +843,7 @@ class _EnhancedCommunityFeedScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),

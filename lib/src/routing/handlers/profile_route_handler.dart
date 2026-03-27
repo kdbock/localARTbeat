@@ -1,5 +1,6 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -665,7 +666,7 @@ class _ProfileActivityContentState extends State<_ProfileActivityContent> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('common_close'.tr()),
           ),
           if (!activity.isRead)
             TextButton(

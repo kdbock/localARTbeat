@@ -148,7 +148,9 @@ class _AchievementRunnerState extends State<AchievementRunner>
                         ],
                       ),
                       child: Text(
-                        '${'achievement_level_prefix'.tr()} ${widget.currentLevel}',
+                        'achievement_runner_level_badge'.tr(
+                          namedArgs: {'level': '${widget.currentLevel}'},
+                        ),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -173,7 +175,9 @@ class _AchievementRunnerState extends State<AchievementRunner>
               ),
               const SizedBox(width: 8),
               Text(
-                '${widget.experiencePoints} ${'achievement_xp_suffix'.tr()}',
+                'achievement_runner_current_xp'.tr(
+                  namedArgs: {'xp': '${widget.experiencePoints}'},
+                ),
                 style: const TextStyle(
                   color: ArtbeatColors.textSecondary,
                   fontWeight: FontWeight.w500,
@@ -339,7 +343,11 @@ class _AchievementRunnerState extends State<AchievementRunner>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${'achievement_next_level_prefix'.tr()}: ${_getNextLevelTitle(widget.currentLevel + 1)}',
+                'achievement_runner_next_level'.tr(
+                  namedArgs: {
+                    'title': _getNextLevelTitle(widget.currentLevel + 1),
+                  },
+                ),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
@@ -347,7 +355,11 @@ class _AchievementRunnerState extends State<AchievementRunner>
                 ),
               ),
               Text(
-                '${_getXPForNextLevel(widget.currentLevel)} ${'achievement_xp_suffix'.tr()}',
+                'achievement_runner_next_level_xp'.tr(
+                  namedArgs: {
+                    'xp': '${_getXPForNextLevel(widget.currentLevel)}',
+                  },
+                ),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,

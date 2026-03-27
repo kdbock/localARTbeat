@@ -12,6 +12,25 @@ Execution labels:
 
 This checklist focuses on the highest-value flows that were recently hardened in code and now need real-device verification.
 
+## Current Status
+
+Manual QA pass completed on 2026-03-26.
+
+Outcome:
+
+- account and profile persistence passed
+- paid local ads and sponsorship review flows passed for the targeted release-confidence checks performed in this session
+- capture upload reliability passed
+- chat media upload reliability passed for location, gallery, and camera sends after storage/upload hardening and Storage rule alignment
+- admin data-rights deletion handling passed
+
+Notes:
+
+- chat media upload reliability required a foundation fix, not a UI-only fix:
+  - shared Firebase Storage upload retry/token-refresh behavior was standardized
+  - chat Storage authorization in `storage.rules` was aligned with the actual chat participant contract and redeployed
+- no blocking failures remained at closeout for the checklist items exercised in this pass
+
 ## Priority Order
 
 1. account and profile persistence
@@ -145,3 +164,8 @@ After the session:
 - update [KNOWN_ISSUES.md](/Volumes/ExternalDrive/DevProjects/artbeat/docs/KNOWN_ISSUES.md) with any still-reproducible failures
 - update [WORK_QUEUE.md](/Volumes/ExternalDrive/DevProjects/artbeat/docs/WORK_QUEUE.md) if release risk changed
 - capture screenshots or short notes for any blocking issue
+
+Closeout completed for the 2026-03-26 pass:
+
+- no checklist blocker remained reproducible
+- messaging media authorization issue was resolved through shared upload hardening plus `storage.rules` changes and Firebase Storage rules redeploy

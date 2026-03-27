@@ -344,7 +344,7 @@ class _AdminPlatformCurationScreenState
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
+              child: Text('common_cancel'.tr())),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Send')),

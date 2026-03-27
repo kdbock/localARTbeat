@@ -168,44 +168,20 @@ class ChatService extends ChangeNotifier {
     required Reference ref,
     required String chatId,
   }) async {
-    const maxAttempts = 3;
-
-    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await ref.putFile(
-          file,
-          SettableMetadata(
-            contentType: 'image/jpeg',
-            customMetadata: {'uploaderId': currentUserId, 'chatId': chatId},
-          ),
-        );
-        return await ref.getDownloadURL();
-      } catch (error) {
-        final shouldRetry =
-            attempt < maxAttempts && _isRetryableMediaUploadError(error);
-        core.AppLogger.error(
-          'Chat image upload attempt $attempt failed: $error',
-        );
-
-        if (!shouldRetry) {
-          throw Exception('Failed to upload chat image: $error');
-        }
-
-        await Future<void>.delayed(Duration(seconds: attempt));
-      }
+    try {
+      await core.FirebaseStorageUploadService().uploadFileWithRetry(
+        ref: ref,
+        file: file,
+        metadata: SettableMetadata(
+          contentType: 'image/jpeg',
+          customMetadata: {'uploaderId': currentUserId, 'chatId': chatId},
+        ),
+        operationLabel: 'chat image upload',
+      );
+      return await ref.getDownloadURL();
+    } catch (error) {
+      throw Exception('Failed to upload chat image: $error');
     }
-
-    throw Exception('Failed to upload chat image');
-  }
-
-  bool _isRetryableMediaUploadError(Object error) {
-    final message = error.toString().toLowerCase();
-    return message.contains('network') ||
-        message.contains('socket') ||
-        message.contains('timeout') ||
-        message.contains('unavailable') ||
-        message.contains('connection') ||
-        message.contains('retry-limit-exceeded');
   }
 
   Future<void> _cleanupFailedImageUpload(Reference ref) async {

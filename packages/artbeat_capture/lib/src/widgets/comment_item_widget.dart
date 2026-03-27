@@ -252,9 +252,9 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
                                 color: Colors.grey,
                               ),
                             const SizedBox(width: 4),
-                            const Text(
-                              'Delete',
-                              style: TextStyle(
+                            Text(
+                              'common_delete'.tr(),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),

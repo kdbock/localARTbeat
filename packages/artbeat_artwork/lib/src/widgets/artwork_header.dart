@@ -151,7 +151,7 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
         IconButton(
           icon: const Icon(Icons.developer_mode, color: _iconTextColor),
           onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
-          tooltip: 'Developer Tools',
+          tooltip: 'common_developer_tools'.tr(),
         ),
       );
     }

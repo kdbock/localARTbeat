@@ -254,7 +254,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_chat_error_failed_to_send_2'.tr()),
+            content: Text(_formatMediaSendError(e)),
             backgroundColor: ArtbeatColors.error,
             action: SnackBarAction(
               label: 'Retry',
@@ -271,6 +271,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         setState(() => _isSendingMedia = false);
       }
     }
+  }
+
+  String _formatMediaSendError(Object error) {
+    final raw = error.toString().trim();
+    final message = raw.startsWith('Exception: ')
+        ? raw.substring('Exception: '.length)
+        : raw;
+    return 'Failed to send image: $message';
   }
 
   void _showEmojiPicker() {

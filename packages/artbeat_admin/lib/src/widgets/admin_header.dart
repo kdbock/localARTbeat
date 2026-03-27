@@ -167,7 +167,7 @@ class _AdminHeaderState extends State<AdminHeader> {
             color: _iconTextColor,
           ),
           onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
-          tooltip: 'Developer Tools',
+          tooltip: 'common_developer_tools'.tr(),
         ),
       );
     }
@@ -280,9 +280,9 @@ class _AdminHeaderState extends State<AdminHeader> {
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'Developer Tools',
-              style: TextStyle(
+            title: Text(
+              'common_developer_tools'.tr(),
+              style: const TextStyle(
                 fontFamily: 'Limelight',
                 color: _headerColor,
               ),

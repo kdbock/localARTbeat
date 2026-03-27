@@ -40,6 +40,13 @@ Primary contact: support@localartbeat.com
 - Payment incident response template
 - DMCA intake/response template
 
+Reference operating docs:
+
+- `docs/COPYRIGHT_AND_DMCA_POLICY.md`
+- `docs/SAFETY_AND_ABUSE_RESPONSE_POLICY.md`
+- `docs/LAW_ENFORCEMENT_REQUEST_POLICY.md`
+- `docs/COMMUNITY_GUIDELINES.md`
+
 ## 6) Evidence and Audit Requirements
 
 - Keep immutable incident log with:
@@ -64,3 +71,9 @@ Primary contact: support@localartbeat.com
 - Test notification workflows.
 - Verify contact lists and templates quarterly.
 
+## 9) Current Intake Contacts
+
+- General support: support@localartbeat.com
+- Copyright / DMCA: info@localartbeat.com
+- Law enforcement: kristy@kristykelly.com
+- Mailing address: PO BOX 232, Kinston, NC 28502

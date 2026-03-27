@@ -27,7 +27,7 @@ service firebase.storage {
     }
 
     function isChatParticipant(chatId) {
-      return isAuthorized() &&
+      return isAuthenticated() &&
         firestore.exists(/databases/(default)/documents/chats/$(chatId)) &&
         request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participantIds;
     }
@@ -446,7 +446,9 @@ service firebase.storage {
     match /chat_images/{chatId}/{fileName} {
       allow read: if isChatParticipant(chatId) || isAdmin(request.auth.uid);
       allow write: if isChatParticipant(chatId) &&
-        hasValidChatUploadMetadata(chatId);
+        request.resource != null &&
+        request.resource.size < 15 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
       allow delete: if isChatParticipant(chatId) && (
         isAdmin(request.auth.uid) ||
         (resource.metadata != null &&
@@ -459,7 +461,8 @@ service firebase.storage {
     match /chat_media/{chatId}/{fileName} {
       allow read: if isChatParticipant(chatId) || isAdmin(request.auth.uid);
       allow write: if isChatParticipant(chatId) &&
-        hasValidChatUploadMetadata(chatId);
+        request.resource != null &&
+        request.resource.size < 25 * 1024 * 1024;
       allow delete: if isChatParticipant(chatId) && (
         isAdmin(request.auth.uid) ||
         (resource.metadata != null &&

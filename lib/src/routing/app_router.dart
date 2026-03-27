@@ -11,6 +11,7 @@ import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 import 'package:artbeat_settings/artbeat_settings.dart' as settings_pkg;
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart' as sponsorships;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -1128,13 +1129,13 @@ class AppRouter {
 
       case '/privacy-policy':
         return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Privacy Policy'),
+          appBar: RouteUtils.createAppBar('common_privacy_policy'.tr()),
           child: const PrivacyPolicyScreen(),
         );
 
       case '/terms-of-service':
         return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Terms of Service'),
+          appBar: RouteUtils.createAppBar('common_terms_of_service'.tr()),
           child: const TermsOfServiceScreen(),
         );
 

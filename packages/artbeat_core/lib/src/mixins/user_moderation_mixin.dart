@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../utils/logger.dart';
 import '../services/user_block_service.dart';
 
@@ -18,7 +19,9 @@ mixin UserModerationMixin {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Blocked $userName'),
+            content: Text(
+              'user_moderation_blocked_user'.tr(namedArgs: {'user': userName}),
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -30,7 +33,9 @@ mixin UserModerationMixin {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error blocking user: $e'),
+            content: Text(
+              'user_moderation_error_blocking'.tr(namedArgs: {'error': '$e'}),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -51,7 +56,11 @@ mixin UserModerationMixin {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Unblocked $userName'),
+            content: Text(
+              'user_moderation_unblocked_user'.tr(
+                namedArgs: {'user': userName},
+              ),
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -63,7 +72,11 @@ mixin UserModerationMixin {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error unblocking user: $e'),
+            content: Text(
+              'user_moderation_error_unblocking'.tr(
+                namedArgs: {'error': '$e'},
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -105,8 +118,12 @@ mixin UserModerationMixin {
               // Block option
               ListTile(
                 leading: const Icon(Icons.block, color: Colors.red),
-                title: const Text('Block this user'),
-                subtitle: Text('Stop seeing posts and messages from $userName'),
+                title: Text('user_moderation_menu_block_title'.tr()),
+                subtitle: Text(
+                  'user_moderation_menu_block_subtitle'.tr(
+                    namedArgs: {'user': userName},
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   blockUser(context, userId, userName);
@@ -118,8 +135,8 @@ mixin UserModerationMixin {
               if (onReportPressed != null)
                 ListTile(
                   leading: const Icon(Icons.flag, color: Colors.orange),
-                  title: const Text('Report this user'),
-                  subtitle: const Text('Inappropriate behavior or content'),
+                  title: Text('user_moderation_menu_report_title'.tr()),
+                  subtitle: Text('user_moderation_menu_report_subtitle'.tr()),
                   onTap: () {
                     Navigator.pop(context);
                     onReportPressed();
@@ -140,20 +157,19 @@ mixin UserModerationMixin {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Block User?'),
+        title: Text('user_moderation_confirm_title'.tr()),
         content: Text(
-          'You won\'t see posts or messages from $userName anymore. '
-          'You can unblock them later in your settings.',
+          'user_moderation_confirm_body'.tr(namedArgs: {'user': userName}),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('user_moderation_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Block'),
+            child: Text('user_moderation_block_action'.tr()),
           ),
         ],
       ),
@@ -182,17 +198,21 @@ mixin UserModerationMixin {
             children: [
               const Icon(Icons.block, color: Colors.red, size: 18),
               const SizedBox(width: 8),
-              Text('Block $userName'),
+              Text(
+                'user_moderation_popup_block_user'.tr(
+                  namedArgs: {'user': userName},
+                ),
+              ),
             ],
           ),
         ),
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: 'report',
           child: Row(
             children: [
-              Icon(Icons.flag, color: Colors.orange, size: 18),
-              SizedBox(width: 8),
-              Text('Report'),
+              const Icon(Icons.flag, color: Colors.orange, size: 18),
+              const SizedBox(width: 8),
+              Text('user_moderation_popup_report'.tr()),
             ],
           ),
         ),

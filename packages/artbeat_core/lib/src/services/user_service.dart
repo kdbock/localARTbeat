@@ -10,7 +10,7 @@ import '../models/user_model.dart';
 import '../models/user_type.dart';
 import '../models/artist_profile_model.dart';
 import '../models/achievement_model.dart';
-import '../services/firebase_storage_auth_service.dart';
+import '../services/firebase_storage_upload_service.dart';
 import '../storage/enhanced_storage_service.dart';
 import '../utils/logger.dart';
 
@@ -306,9 +306,6 @@ class UserService extends ChangeNotifier {
       },
     );
 
-    final tokenService = FirebaseStorageAuthService();
-    await tokenService.refreshTokens();
-
     String? authToken;
     try {
       authToken = await auth.currentUser?.getIdToken();
@@ -319,28 +316,18 @@ class UserService extends ChangeNotifier {
     );
 
     try {
-      await ref.putFile(imageFile, metadata);
+      await FirebaseStorageUploadService().uploadFileWithRetry(
+        ref: ref,
+        file: imageFile,
+        metadata: metadata,
+        operationLabel: 'profile image upload',
+      );
     } on FirebaseException catch (e, s) {
       debugPrint(
         '👤 UserService uploadProfileImage failed: code=${e.code}, message=${e.message}, plugin=${e.plugin}',
       );
       _logError('Profile photo upload failed', e, s);
-
-      if (e.code == 'unauthorized') {
-        debugPrint(
-          '👤 UserService uploadProfileImage: retrying after token refresh',
-        );
-        await tokenService.refreshTokens();
-        try {
-          authToken = await auth.currentUser?.getIdToken();
-        } catch (_) {}
-        debugPrint(
-          '👤 UserService uploadProfileImage retry: currentUid=${auth.currentUser?.uid}, targetUserId=$targetUserId, path=$storagePath, hasAuthToken=${authToken?.isNotEmpty == true}',
-        );
-        await ref.putFile(imageFile, metadata);
-      } else {
-        rethrow;
-      }
+      rethrow;
     }
 
     return ref.getDownloadURL();

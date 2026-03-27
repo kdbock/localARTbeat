@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,20 +25,18 @@ class PermissionUtils {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text('Location Safety Notice'),
-          content: const Text(
-            'Location features can guide you through real-world spaces. '
-            'Stay aware of your surroundings, follow local laws, do not trespass, '
-            'and use emergency services if you are in immediate danger.',
+          title: Text('permission_location_safety_notice_title'.tr()),
+          content: Text(
+            'permission_location_safety_notice_body'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Not Now'),
+              child: Text('permission_not_now'.tr()),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('I Understand'),
+              child: Text('permission_i_understand'.tr()),
             ),
           ],
         ),
@@ -81,17 +80,17 @@ class PermissionUtils {
           final shouldOpenSettings = await showDialog<bool>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
-              title: const Text('Permission Required'),
-              content: const Text(
-                'Photo library access is permanently denied. Please enable it in your device settings to upload artwork.',
+              title: Text('permission_required_title'.tr()),
+              content: Text(
+                'permission_photo_permanently_denied'.tr(),
               ),
               actions: [
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: Text('common_cancel'.tr()),
                   onPressed: () => Navigator.pop(context, false),
                 ),
                 TextButton(
-                  child: const Text('Open Settings'),
+                  child: Text('permission_open_settings'.tr()),
                   onPressed: () => Navigator.pop(context, true),
                 ),
               ],
@@ -113,11 +112,9 @@ class PermissionUtils {
       // Permission denied
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Photo library permission is required to upload artwork',
-            ),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('permission_photo_required'.tr()),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -127,7 +124,9 @@ class PermissionUtils {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to request permission: $e'),
+            content: Text(
+              'permission_request_failed'.tr(namedArgs: {'error': '$e'}),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -150,17 +149,17 @@ class PermissionUtils {
           final shouldOpenSettings = await showDialog<bool>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
-              title: const Text('Permission Required'),
-              content: const Text(
-                'Camera access is permanently denied. Please enable it in your device settings to capture artwork.',
+              title: Text('permission_required_title'.tr()),
+              content: Text(
+                'permission_camera_permanently_denied'.tr(),
               ),
               actions: [
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: Text('common_cancel'.tr()),
                   onPressed: () => Navigator.pop(context, false),
                 ),
                 TextButton(
-                  child: const Text('Open Settings'),
+                  child: Text('permission_open_settings'.tr()),
                   onPressed: () => Navigator.pop(context, true),
                 ),
               ],
@@ -180,9 +179,9 @@ class PermissionUtils {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Camera permission is required to capture artwork'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('permission_camera_required'.tr()),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -192,7 +191,9 @@ class PermissionUtils {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to request permission: $e'),
+            content: Text(
+              'permission_request_failed'.tr(namedArgs: {'error': '$e'}),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -226,17 +227,17 @@ class PermissionUtils {
             context: context,
             barrierDismissible: false,
             builder: (BuildContext context) => AlertDialog(
-              title: const Text('Permission Required'),
-              content: const Text(
-                'Location access is permanently denied. Please enable it in your device settings to discover nearby art.',
+              title: Text('permission_required_title'.tr()),
+              content: Text(
+                'permission_location_permanently_denied'.tr(),
               ),
               actions: [
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: Text('common_cancel'.tr()),
                   onPressed: () => Navigator.pop(context, false),
                 ),
                 TextButton(
-                  child: const Text('Open Settings'),
+                  child: Text('permission_open_settings'.tr()),
                   onPressed: () => Navigator.pop(context, true),
                 ),
               ],
@@ -253,9 +254,9 @@ class PermissionUtils {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Location permission is required for this feature'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('permission_location_required'.tr()),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -265,7 +266,9 @@ class PermissionUtils {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to request permission: $e'),
+            content: Text(
+              'permission_request_failed'.tr(namedArgs: {'error': '$e'}),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );

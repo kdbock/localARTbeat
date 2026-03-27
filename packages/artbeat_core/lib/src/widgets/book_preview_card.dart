@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../models/artwork_model.dart';
 
@@ -90,7 +91,7 @@ class BookPreviewCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                'Ongoing',
+                                'book_preview_status_ongoing'.tr(),
                                 style: Theme.of(
                                   context,
                                 ).textTheme.bodySmall?.copyWith(fontSize: 8),
@@ -103,7 +104,7 @@ class BookPreviewCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                'Complete',
+                                'book_preview_status_complete'.tr(),
                                 style: Theme.of(
                                   context,
                                 ).textTheme.bodySmall?.copyWith(fontSize: 8),

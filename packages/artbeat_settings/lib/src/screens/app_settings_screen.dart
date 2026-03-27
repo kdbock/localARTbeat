@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide HudTopBar;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/hud_top_bar.dart';
@@ -138,7 +139,7 @@ class AppSettingsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import '../utils/image_utils.dart';
 import '../utils/logger.dart';
+import 'firebase_storage_upload_service.dart';
 
 /// Enhanced storage service with image compression and optimization
 class EnhancedStorageService {
@@ -15,6 +16,8 @@ class EnhancedStorageService {
 
   FirebaseStorage? _storageInstance;
   FirebaseStorage get _storage => _storageInstance ??= FirebaseStorage.instance;
+  final FirebaseStorageUploadService _uploadService =
+      FirebaseStorageUploadService();
 
   // Image compression settings
   static const int maxImageWidth = 1920;
@@ -268,8 +271,12 @@ class EnhancedStorageService {
       },
     );
 
-    final uploadTask = ref.putData(jpegBytes, metadata);
-    final snapshot = await uploadTask;
+    final snapshot = await _uploadService.uploadDataWithRetry(
+      ref: ref,
+      data: jpegBytes,
+      metadata: metadata,
+      operationLabel: 'optimized image upload',
+    );
     return snapshot.ref.getDownloadURL();
   }
 

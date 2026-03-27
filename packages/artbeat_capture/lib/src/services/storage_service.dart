@@ -3,7 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedStorageService, AppLogger;
+    show EnhancedStorageService, AppLogger, FirebaseStorageUploadService;
 
 class StorageService {
   static final StorageService _instance = StorageService._internal();
@@ -194,19 +194,19 @@ class StorageService {
       );
 
       // Upload file
-      final uploadTask = ref.putFile(file, metadata);
-
-      // Listen to upload progress
-      uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
-        final progress =
-            (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100;
-        debugPrint(
-          'StorageService: Upload progress: ${progress.toStringAsFixed(2)}%',
-        );
-      });
-
-      // Wait for upload completion
-      final snapshot = await uploadTask;
+      final snapshot = await FirebaseStorageUploadService().uploadFileWithRetry(
+        ref: ref,
+        file: file,
+        metadata: metadata,
+        operationLabel: 'capture image upload',
+        onSnapshotEvent: (TaskSnapshot taskSnapshot) {
+          final progress =
+              (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100;
+          debugPrint(
+            'StorageService: Upload progress: ${progress.toStringAsFixed(2)}%',
+          );
+        },
+      );
       AppLogger.info('StorageService: Upload completed successfully');
 
       // Get download URL

@@ -154,10 +154,14 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
                 backgroundColor: ArtbeatColors.primaryPurple.withValues(
                   alpha: 0.1,
                 ),
-                backgroundImage: artist.profileImageUrl != null
+                backgroundImage:
+                    artist.profileImageUrl != null &&
+                        artist.profileImageUrl!.trim().isNotEmpty
                     ? CachedNetworkImageProvider(artist.profileImageUrl!)
                     : null,
-                child: artist.profileImageUrl == null
+                child:
+                    artist.profileImageUrl == null ||
+                        artist.profileImageUrl!.trim().isEmpty
                     ? const Icon(
                         Icons.person,
                         size: 30,

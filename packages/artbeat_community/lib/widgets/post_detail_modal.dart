@@ -311,7 +311,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -391,7 +391,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Developer Tools'),
+        title: Text('common_developer_tools'.tr()),
         content: const Text(
           'Developer tools will be available in a future update.',
         ),

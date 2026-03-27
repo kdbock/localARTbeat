@@ -451,9 +451,9 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
                   child: const Icon(Icons.code, color: Colors.orange, size: 24),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Developer Tools',
-                  style: TextStyle(
+                Text(
+                  'common_developer_tools'.tr(),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: ArtbeatColors.textPrimary,

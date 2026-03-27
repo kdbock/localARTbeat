@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ArtCaptureWarningDialog extends StatelessWidget {
   const ArtCaptureWarningDialog({super.key});
@@ -6,26 +7,26 @@ class ArtCaptureWarningDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Art Capture Guidelines'),
-      content: const SingleChildScrollView(
+      title: Text('art_capture_warning_title'.tr()),
+      content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Please follow these guidelines when capturing art:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              'art_capture_warning_intro'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
-            Text('• Only capture art in public spaces'),
-            Text('• Do not photograph private property'),
-            Text('• Respect "No Photography" signs'),
-            Text('• Ask permission when photographing commissioned works'),
-            Text('• Credit artists when known'),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            Text('art_capture_warning_rule_public_spaces'.tr()),
+            Text('art_capture_warning_rule_private_property'.tr()),
+            Text('art_capture_warning_rule_no_photography'.tr()),
+            Text('art_capture_warning_rule_commissioned_works'.tr()),
+            Text('art_capture_warning_rule_credit_artists'.tr()),
+            const SizedBox(height: 16),
             Text(
-              'By proceeding, you confirm that you will follow these guidelines.',
-              style: TextStyle(fontStyle: FontStyle.italic),
+              'art_capture_warning_confirmation'.tr(),
+              style: const TextStyle(fontStyle: FontStyle.italic),
             ),
           ],
         ),
@@ -33,11 +34,11 @@ class ArtCaptureWarningDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text('common_cancel'.tr()),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('I Understand'),
+          child: Text('permission_i_understand'.tr()),
         ),
       ],
     );

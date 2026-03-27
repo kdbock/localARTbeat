@@ -11,8 +11,11 @@ place so the team does not need to reconstruct status from archived notes.
 - Engineering deploy verification: pass
 - GitHub Actions legal staging workflow validation: pass
 - Credentialed staging deletion repro: pass
-- Manual in-app QA: stale fail from 2026-02-27; rerun required
-- Production canary sign-off: blocked pending fresh QA and non-engineering sign-off
+- Manual in-app QA: pass on 2026-03-26
+- Product/legal owner approval: captured on 2026-03-26
+- Support readiness approval: captured on 2026-03-26 for the current
+  owner-operated support path and runbooks
+- Production canary sign-off: blocked pending explicit canary scheduling
 
 ## Evidence
 
@@ -32,8 +35,8 @@ Impact:
 
 - the concrete callable failure has been reproduced and fixed
 - staging deletion workflow is now verified end-to-end
-- production canary still remains blocked until fresh manual QA and current
-  product/legal + support sign-off are captured
+- production canary still remains blocked until current product/legal +
+  support approvals are captured and a canary window is scheduled
 
 ## What Is Verified
 
@@ -60,10 +63,23 @@ Impact:
 
 ## What Is Not Verified Yet
 
-- fresh product/legal owner sign-off against current evidence
-- fresh support readiness sign-off against current evidence
-- fresh manual in-app QA evidence after the 2026-03-19 fix
-- production canary execution against current evidence
+- production canary execution against the current passing evidence
+
+## What "Non-Engineering Sign-Off" Means
+
+In this repo, "non-engineering sign-off" means two specific approvals:
+
+1. Product/legal owner sign-off
+   Meaning: the person responsible for privacy/legal product risk agrees that
+   the current deletion/data-rights behavior and evidence are acceptable for
+   release.
+2. Support readiness sign-off
+   Meaning: support has the current runbook, knows what changed, knows how to
+   identify a deletion/data-rights problem, and knows where escalation paths
+   and evidence live.
+
+This is not a hidden technical task. It is a release-approval step for the
+people who handle legal/product acceptance and user support.
 
 ## Current Diagnostic Path
 
@@ -76,14 +92,19 @@ Impact:
 
 ## Required Next Actions
 
-1. Re-run manual in-app QA and capture fresh evidence against the fixed staging
+1. Record that manual in-app QA passed on 2026-03-26 against the fixed staging
    deletion flow.
-2. Confirm the admin queue UI also behaves correctly with the fixed callable,
-   not just the scripted path.
-3. Reconfirm product/legal owner sign-off and support readiness sign-off.
-4. Only then reopen production canary rollout.
+2. Reconfirm that the admin queue UI behaved correctly with the fixed callable.
+3. Keep the owner-approved policy set and incident/runbook docs in sync with any
+   future product changes.
+4. Schedule the production canary window.
+5. Only then reopen production canary rollout.
 
 ## Release Rule
 
-Do not treat the legal/data-rights rollout as release-ready while the deletion
-fulfillment path remains unverified in staging.
+Do not treat the legal/data-rights rollout as release-ready until:
+
+- staging deletion fulfillment is verified
+- manual QA is current
+- product/legal owner approval is captured
+- support readiness approval is captured

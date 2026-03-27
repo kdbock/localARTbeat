@@ -2825,7 +2825,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                       textStyle: const TextStyle(fontWeight: FontWeight.w900),
                     ),
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text('common_cancel'.tr()),
                   ),
                 ),
                 const SizedBox(width: 10),

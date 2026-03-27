@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 
 /// A themed achievement badge widget to display individual achievements
@@ -224,13 +225,13 @@ class _AchievementBadgeState extends State<AchievementBadge>
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
-                            'UNLOCKED',
+                            'achievement_badge_unlocked',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 7,
                               fontWeight: FontWeight.bold,
                             ),
-                          ),
+                          ).tr(),
                         ),
                       ],
                     ],
@@ -302,9 +303,9 @@ class AchievementBadgeList extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'No achievements yet',
+                        'achievement_badge_empty',
                         style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                      ),
+                      ).tr(),
                     ],
                   ),
                 )

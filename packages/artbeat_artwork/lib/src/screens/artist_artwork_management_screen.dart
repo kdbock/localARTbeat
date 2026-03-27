@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/artwork_model.dart';
@@ -191,7 +192,7 @@ class _ArtistArtworkManagementScreenState
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _refreshArtwork,
-              child: const Text('Retry'),
+              child: Text('common_retry'.tr()),
             ),
           ],
         ),

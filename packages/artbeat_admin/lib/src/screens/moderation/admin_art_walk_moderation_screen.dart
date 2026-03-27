@@ -203,7 +203,7 @@ class _AdminArtWalkModerationScreenState
                   ),
                   const SizedBox(height: 16),
                 ],
-                _buildDetailRow('Description', walk.description),
+                _buildDetailRow('common_description'.tr(), walk.description),
                 _buildDetailRow('Creator ID', walk.userId),
                 _buildDetailRow('Created', _formatDate(walk.createdAt)),
                 _buildDetailRow('Public', walk.isPublic ? 'Yes' : 'No'),
@@ -454,7 +454,7 @@ class _AdminArtWalkModerationScreenState
               TextButton.icon(
                 onPressed: () => _showArtWalkDetails(walk),
                 icon: const Icon(Icons.visibility_outlined, size: 18),
-                label: const Text('Details'),
+                label: Text('common_details'.tr()),
                 style: TextButton.styleFrom(foregroundColor: Colors.white),
               ),
               const Spacer(),
@@ -468,7 +468,7 @@ class _AdminArtWalkModerationScreenState
               IconButton(
                 onPressed: () => _deleteArtWalk(walk),
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-                tooltip: 'Delete',
+                tooltip: 'common_delete'.tr(),
               ),
             ],
           ),

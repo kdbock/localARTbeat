@@ -780,7 +780,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                   style: GoogleFonts.spaceGrotesk(color: Colors.white),
                   maxLines: 2,
                   decoration: _glassInputDecoration(
-                    'Description',
+                    'common_description'.tr(),
                     hint: 'core_coupon_description_hint'.tr(),
                   ),
                   validator: (value) =>
@@ -1047,7 +1047,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
                 controller: _descriptionController,
                 style: GoogleFonts.spaceGrotesk(color: Colors.white),
                 maxLines: 2,
-                decoration: _glassInputDecoration('Description'),
+                decoration: _glassInputDecoration('common_description'.tr()),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<CouponStatus>(

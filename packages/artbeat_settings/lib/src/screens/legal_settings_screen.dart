@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/settings_category_header.dart';
@@ -58,14 +59,14 @@ class LegalSettingsScreen extends StatelessWidget {
                             children: [
                               SettingsListItem(
                                 icon: Icons.policy_rounded,
-                                title: 'Privacy Policy',
+                                title: 'common_privacy_policy'.tr(),
                                 onTap: () => _openUrl(
                                   'https://localartbeat.com/privacy',
                                 ),
                               ),
                               SettingsListItem(
                                 icon: Icons.gavel_rounded,
-                                title: 'Terms of Service',
+                                title: 'common_terms_of_service'.tr(),
                                 onTap: () =>
                                     _openUrl('https://localartbeat.com/terms'),
                               ),

@@ -577,7 +577,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                   Navigator.pushNamed(context, '/artwork/discovery');
                 },
                 child: Text(
-                  'View All',
+                  'common_view_all'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     color: const Color(0xFF22D3EE),
                     fontSize: 14,

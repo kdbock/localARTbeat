@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class NetworkErrorWidget extends StatelessWidget {
   final VoidCallback onRetry;
@@ -39,7 +40,7 @@ class NetworkErrorWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(onPressed: onRetry, child: Text('common_retry'.tr())),
           ],
         ),
       ),

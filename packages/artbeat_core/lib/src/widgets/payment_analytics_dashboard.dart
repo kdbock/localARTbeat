@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/payment_analytics_service.dart';
 import '../models/payment_models.dart';
 
@@ -36,14 +37,26 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Analytics'),
+        title: Text('payment_analytics_title'.tr()),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
-            Tab(text: 'Risk Analysis', icon: Icon(Icons.security)),
-            Tab(text: 'Performance', icon: Icon(Icons.trending_up)),
-            Tab(text: 'Reports', icon: Icon(Icons.analytics)),
+          tabs: [
+            Tab(
+              text: 'payment_analytics_tab_overview'.tr(),
+              icon: const Icon(Icons.dashboard),
+            ),
+            Tab(
+              text: 'payment_analytics_tab_risk_analysis'.tr(),
+              icon: const Icon(Icons.security),
+            ),
+            Tab(
+              text: 'payment_analytics_tab_performance'.tr(),
+              icon: const Icon(Icons.trending_up),
+            ),
+            Tab(
+              text: 'payment_analytics_tab_reports'.tr(),
+              icon: const Icon(Icons.analytics),
+            ),
           ],
         ),
       ),
@@ -64,7 +77,13 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
       stream: _analyticsService.getPaymentMetricsStream(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Text(
+              'payment_analytics_error_generic'.tr(
+                namedArgs: {'error': '${snapshot.error}'},
+              ),
+            ),
+          );
         }
 
         if (!snapshot.hasData) {
@@ -94,25 +113,25 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
       physics: const NeverScrollableScrollPhysics(),
       children: [
         _buildMetricCard(
-          'Total Transactions',
+          'payment_analytics_metric_total_transactions'.tr(),
           metrics.totalTransactions.toString(),
           Icons.payment,
           Colors.blue,
         ),
         _buildMetricCard(
-          'Success Rate',
+          'payment_analytics_metric_success_rate'.tr(),
           '${(metrics.successRate * 100).toStringAsFixed(1)}%',
           Icons.check_circle,
           Colors.green,
         ),
         _buildMetricCard(
-          'Total Revenue',
+          'payment_analytics_metric_total_revenue'.tr(),
           '\$${metrics.totalRevenue.toStringAsFixed(2)}',
           Icons.attach_money,
           Colors.purple,
         ),
         _buildMetricCard(
-          'Avg Transaction',
+          'payment_analytics_metric_avg_transaction'.tr(),
           '\$${metrics.averageTransactionValue.toStringAsFixed(2)}',
           Icons.trending_up,
           Colors.orange,
@@ -169,9 +188,9 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Recent Activity',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'payment_analytics_recent_activity'.tr(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListView.builder(
@@ -191,7 +210,10 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
                   ),
                   title: Text('\$${event.amount.toStringAsFixed(2)}'),
                   subtitle: Text(event.timestamp.toString()),
-                  trailing: Text(event.paymentMethod ?? 'Unknown'),
+                  trailing: Text(
+                    event.paymentMethod ??
+                        'payment_analytics_unknown'.tr(),
+                  ),
                 );
               },
             ),
@@ -224,7 +246,11 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
                 ),
                 title: Text(trend.category),
                 subtitle: Text(
-                  'Risk Score: ${trend.riskScore.toStringAsFixed(2)}',
+                  'payment_analytics_risk_score'.tr(
+                    namedArgs: {
+                      'score': trend.riskScore.toStringAsFixed(2),
+                    },
+                  ),
                 ),
                 trailing: Text('${trend.trend}%'),
               ),
@@ -248,17 +274,17 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
           padding: const EdgeInsets.all(16),
           children: [
             _buildPerformanceMetric(
-              'Conversion Rate',
+              'payment_analytics_metric_conversion_rate'.tr(),
               '${(performance['conversionRate'] * 100).toStringAsFixed(2)}%',
               Icons.trending_up,
             ),
             _buildPerformanceMetric(
-              'Average Processing Time',
+              'payment_analytics_metric_average_processing_time'.tr(),
               '${performance['avgProcessingTime']}ms',
               Icons.timer,
             ),
             _buildPerformanceMetric(
-              'Failure Rate',
+              'payment_analytics_metric_failure_rate'.tr(),
               '${(performance['failureRate'] * 100).toStringAsFixed(2)}%',
               Icons.error,
             ),
@@ -289,31 +315,35 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
         ElevatedButton.icon(
           onPressed: () => _generateReport('daily'),
           icon: const Icon(Icons.calendar_today),
-          label: const Text('Generate Daily Report'),
+          label: Text('payment_analytics_generate_daily_report'.tr()),
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
           onPressed: () => _generateReport('weekly'),
           icon: const Icon(Icons.calendar_view_week),
-          label: const Text('Generate Weekly Report'),
+          label: Text('payment_analytics_generate_weekly_report'.tr()),
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
           onPressed: () => _generateReport('monthly'),
           icon: const Icon(Icons.calendar_month),
-          label: const Text('Generate Monthly Report'),
+          label: Text('payment_analytics_generate_monthly_report'.tr()),
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Report History',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          'payment_analytics_report_history'.tr(),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         // Report history list
         _isLoadingReports
             ? const Center(child: CircularProgressIndicator())
             : _reports.isEmpty
-            ? const Center(child: Text('No reports generated yet'))
+            ? Center(
+                child: Text(
+                  'payment_analytics_no_reports_generated_yet'.tr(),
+                ),
+              )
             : _buildReportHistoryList(),
       ],
     );
@@ -332,8 +362,8 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
             leading: const Icon(Icons.description),
             title: Text(report.title),
             subtitle: Text(
-              'Generated: ${report.generatedAt.toString().split('.')[0]}\n'
-              'Period: ${report.period}',
+              '${'payment_analytics_generated'.tr(namedArgs: {'timestamp': report.generatedAt.toString().split('.')[0]})}\n'
+              '${'payment_analytics_period'.tr(namedArgs: {'period': _periodLabel(report.period)})}',
             ),
             trailing: IconButton(
               icon: const Icon(Icons.download),
@@ -354,10 +384,12 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
       // Create report metadata
       final report = AnalyticsReport(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: '$period Payment Analytics Report',
+        title: 'payment_analytics_report_title'.tr(
+          namedArgs: {'period': _periodLabel(period)},
+        ),
         period: period,
         generatedAt: DateTime.now(),
-        generatedBy: 'System', // In a real app, this would be the current user
+        generatedBy: 'payment_analytics_generated_by_system'.tr(),
         data: reportData,
       );
 
@@ -369,13 +401,28 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$period report generated successfully')),
+          SnackBar(
+            content: Text(
+              'payment_analytics_generate_success'.tr(
+                namedArgs: {'period': _periodLabel(period)},
+              ),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate $period report: $e')),
+          SnackBar(
+            content: Text(
+              'payment_analytics_generate_error'.tr(
+                namedArgs: {
+                  'period': _periodLabel(period),
+                  'error': '$e',
+                },
+              ),
+            ),
+          ),
         );
       }
     }
@@ -447,9 +494,15 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
 
   void _downloadReport(AnalyticsReport report) {
     // In a real implementation, this would download the report file
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Downloading ${report.title}...')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'payment_analytics_downloading'.tr(
+            namedArgs: {'title': report.title},
+          ),
+        ),
+      ),
+    );
   }
 
   void _viewReport(AnalyticsReport report) {
@@ -462,27 +515,54 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Period: ${report.period}'),
-            Text('Generated: ${report.generatedAt.toString().split('.')[0]}'),
+            Text(
+              'payment_analytics_period'.tr(
+                namedArgs: {'period': _periodLabel(report.period)},
+              ),
+            ),
+            Text(
+              'payment_analytics_generated'.tr(
+                namedArgs: {
+                  'timestamp': report.generatedAt.toString().split('.')[0],
+                },
+              ),
+            ),
             const SizedBox(height: 16),
-            Text('Report contains ${report.data.length} data points'),
+            Text(
+              'payment_analytics_report_contains'.tr(
+                namedArgs: {'count': '${report.data.length}'},
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text('common_close'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               _downloadReport(report);
             },
-            child: const Text('Download'),
+            child: Text('commission_detail_file_download'.tr()),
           ),
         ],
       ),
     );
+  }
+
+  String _periodLabel(String period) {
+    switch (period.toLowerCase()) {
+      case 'daily':
+        return 'payment_analytics_period_daily'.tr();
+      case 'weekly':
+        return 'payment_analytics_period_weekly'.tr();
+      case 'monthly':
+        return 'payment_analytics_period_monthly'.tr();
+      default:
+        return period;
+    }
   }
 
   IconData _getRiskIcon(String riskLevel) {

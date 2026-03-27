@@ -74,7 +74,7 @@ class DashboardEventsSection extends StatelessWidget {
           ),
         ),
         DashboardSectionButton(
-          label: 'View All',
+          label: 'common_view_all'.tr(),
           icon: Icons.explore,
           onTap: () => Navigator.pushNamed(context, '/events'),
         ),

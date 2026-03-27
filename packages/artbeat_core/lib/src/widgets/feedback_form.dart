@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/feedback_model.dart';
 import '../services/feedback_service.dart';
@@ -39,7 +40,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Submit Feedback'),
+        title: Text('feedback_form_title'.tr()),
         backgroundColor: ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,
       ),
@@ -85,7 +86,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 const Icon(Icons.feedback, color: ArtbeatColors.primaryPurple),
                 const SizedBox(width: 8),
                 Text(
-                  'Help Improve ARTbeat',
+                  'feedback_form_intro_title'.tr(),
                   style: ArtbeatTypography.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -94,7 +95,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your feedback is valuable! Report bugs, request features, or share suggestions to help us make ARTbeat better.',
+              'feedback_form_intro_body'.tr(),
               style: ArtbeatTypography.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -108,18 +109,18 @@ class _FeedbackFormState extends State<FeedbackForm> {
   Widget _buildTitleField() {
     return TextFormField(
       controller: _titleController,
-      decoration: const InputDecoration(
-        labelText: 'Title *',
-        hintText: 'Brief summary of your feedback',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.title),
+      decoration: InputDecoration(
+        labelText: 'feedback_form_title_label'.tr(),
+        hintText: 'feedback_form_title_hint'.tr(),
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.title),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter a title';
+          return 'feedback_form_title_error_required'.tr();
         }
         if (value.trim().length < 5) {
-          return 'Title must be at least 5 characters';
+          return 'feedback_form_title_error_min_length'.tr();
         }
         return null;
       },
@@ -132,7 +133,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Feedback Type *',
+          'feedback_form_type_label'.tr(),
           style: ArtbeatTypography.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -172,7 +173,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Priority *',
+          'feedback_form_priority_label'.tr(),
           style: ArtbeatTypography.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -228,14 +229,14 @@ class _FeedbackFormState extends State<FeedbackForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Related Modules * (Select one or more)',
+          'feedback_form_modules_label'.tr(),
           style: ArtbeatTypography.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Select the modules related to your feedback',
+          'feedback_form_modules_hint'.tr(),
           style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
             color: Colors.grey[600],
           ),
@@ -275,7 +276,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
-              'Please select at least one module',
+              'feedback_form_modules_error_required'.tr(),
               style: TextStyle(color: Colors.red[700], fontSize: 12),
             ),
           ),
@@ -286,20 +287,19 @@ class _FeedbackFormState extends State<FeedbackForm> {
   Widget _buildDescriptionField() {
     return TextFormField(
       controller: _descriptionController,
-      decoration: const InputDecoration(
-        labelText: 'Description *',
-        hintText:
-            'Detailed description of your feedback...\n\nFor bugs: Steps to reproduce, expected vs actual behavior\nFor features: Use case and specific requirements',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: 'feedback_form_description_label'.tr(),
+        hintText: 'feedback_form_description_hint'.tr(),
+        border: const OutlineInputBorder(),
         alignLabelWithHint: true,
       ),
       maxLines: 6,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter a description';
+          return 'feedback_form_description_error_required'.tr();
         }
         if (value.trim().length < 20) {
-          return 'Description must be at least 20 characters';
+          return 'feedback_form_description_error_min_length'.tr();
         }
         return null;
       },
@@ -312,14 +312,14 @@ class _FeedbackFormState extends State<FeedbackForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Screenshots (Optional)',
+          'feedback_form_screenshots_label'.tr(),
           style: ArtbeatTypography.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Add screenshots to help illustrate your feedback',
+          'feedback_form_screenshots_hint'.tr(),
           style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
             color: Colors.grey[600],
           ),
@@ -384,8 +384,13 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 icon: const Icon(Icons.add_photo_alternate),
                 label: Text(
                   _selectedImages.isEmpty
-                      ? 'Add Screenshots'
-                      : 'Add More (${_selectedImages.length}/5)',
+                      ? 'feedback_form_add_screenshots'.tr()
+                      : 'feedback_form_add_more_screenshots'.tr(
+                          namedArgs: {
+                            'count': '${_selectedImages.length}',
+                            'max': '5',
+                          },
+                        ),
                 ),
               ),
             ),
@@ -407,10 +412,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: _isSubmitting
-            ? const Row(
+            ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -418,13 +423,13 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Text('Submitting...'),
+                  const SizedBox(width: 12),
+                  Text('feedback_form_submitting'.tr()),
                 ],
               )
-            : const Text(
-                'Submit Feedback',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            : Text(
+                'feedback_form_title'.tr(),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
       ),
     );
@@ -432,20 +437,20 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   String _getPackageDisplayName(String packageName) {
     final displayNames = {
-      'artbeat_core': 'Core System',
-      'artbeat_auth': 'Authentication',
-      'artbeat_profile': 'User Profile',
-      'artbeat_artist': 'Artist Features',
-      'artbeat_artwork': 'Artwork Management',
-      'artbeat_art_walk': 'Art Walks',
-      'artbeat_community': 'Community Features',
-      'artbeat_capture': 'Photo Capture',
-      'artbeat_messaging': 'Messaging',
-      'artbeat_settings': 'Settings',
-      'artbeat_admin': 'Admin Features',
-      'artbeat_ads': 'Advertisements',
-      'main_app': 'Main App',
-      'general': 'General/Other',
+      'artbeat_core': 'feedback_form_module_artbeat_core'.tr(),
+      'artbeat_auth': 'feedback_form_module_artbeat_auth'.tr(),
+      'artbeat_profile': 'feedback_form_module_artbeat_profile'.tr(),
+      'artbeat_artist': 'feedback_form_module_artbeat_artist'.tr(),
+      'artbeat_artwork': 'feedback_form_module_artbeat_artwork'.tr(),
+      'artbeat_art_walk': 'feedback_form_module_artbeat_art_walk'.tr(),
+      'artbeat_community': 'feedback_form_module_artbeat_community'.tr(),
+      'artbeat_capture': 'feedback_form_module_artbeat_capture'.tr(),
+      'artbeat_messaging': 'feedback_form_module_artbeat_messaging'.tr(),
+      'artbeat_settings': 'feedback_form_module_artbeat_settings'.tr(),
+      'artbeat_admin': 'feedback_form_module_artbeat_admin'.tr(),
+      'artbeat_ads': 'feedback_form_module_artbeat_ads'.tr(),
+      'main_app': 'feedback_form_module_main_app'.tr(),
+      'general': 'feedback_form_module_general'.tr(),
     };
     return displayNames[packageName] ?? packageName;
   }
@@ -471,7 +476,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to pick images: $e'),
+            content: Text(
+              'feedback_form_images_error'.tr(namedArgs: {'error': '$e'}),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -487,8 +494,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
     // Validate that at least one package is selected
     if (_selectedPackages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one module'),
+        SnackBar(
+          content: Text('feedback_form_modules_error_required'.tr()),
           backgroundColor: Colors.orange,
         ),
       );
@@ -511,12 +518,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Feedback submitted successfully! Thank you for helping improve ARTbeat.',
-            ),
+          SnackBar(
+            content: Text('feedback_form_submit_success'.tr()),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
         Navigator.pop(context);
@@ -525,7 +530,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit feedback: $e'),
+            content: Text(
+              'feedback_form_submit_error'.tr(namedArgs: {'error': '$e'}),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

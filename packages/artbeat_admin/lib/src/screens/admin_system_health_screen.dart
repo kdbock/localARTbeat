@@ -177,12 +177,14 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 }
               });
             },
-            tooltip: _isRealTimeEnabled ? 'Pause Real-time' : 'Start Real-time',
+            tooltip: _isRealTimeEnabled
+                ? 'admin_admin_system_monitoring_tooltip_pause_realtime'.tr()
+                : 'admin_admin_system_monitoring_tooltip_start_realtime'.tr(),
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadSystemData,
-            tooltip: 'Refresh Data',
+            tooltip: 'admin_admin_system_monitoring_tooltip_refresh_data'.tr(),
           ),
         ],
         bottom: TabBar(
@@ -191,14 +193,35 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
-            Tab(text: 'Performance', icon: Icon(Icons.speed)),
-            Tab(text: 'Alerts', icon: Icon(Icons.warning)),
-            Tab(text: 'Users', icon: Icon(Icons.people)),
-            Tab(text: 'Remote Config', icon: Icon(Icons.settings_remote)),
-            Tab(text: 'App Check', icon: Icon(Icons.verified_user)),
-            Tab(text: 'Feedback', icon: Icon(Icons.feedback)),
+          tabs: [
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_overview'.tr(),
+              icon: const Icon(Icons.dashboard),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_performance'.tr(),
+              icon: const Icon(Icons.speed),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_alerts'.tr(),
+              icon: const Icon(Icons.warning),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_users'.tr(),
+              icon: const Icon(Icons.people),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_remote_config'.tr(),
+              icon: const Icon(Icons.settings_remote),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_app_check'.tr(),
+              icon: const Icon(Icons.verified_user),
+            ),
+            Tab(
+              text: 'admin_admin_system_monitoring_tab_feedback'.tr(),
+              icon: const Icon(Icons.feedback),
+            ),
           ],
         ),
       ),
@@ -242,13 +265,24 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'System Status: ${_systemMetrics['systemHealth']?.toString().toUpperCase() ?? 'UNKNOWN'}',
+                    'admin_admin_system_monitoring_system_status'.tr(
+                      namedArgs: {
+                        'status': _systemMetrics['systemHealth']
+                                ?.toString()
+                                .toUpperCase() ??
+                            'UNKNOWN',
+                      },
+                    ),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   Text(
-                    'Last updated: ${DateTime.now().toString().substring(0, 19)}',
+                    'admin_admin_system_monitoring_last_updated'.tr(
+                      namedArgs: {
+                        'timestamp': DateTime.now().toString().substring(0, 19),
+                      },
+                    ),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -273,7 +307,9 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _isRealTimeEnabled ? 'LIVE' : 'PAUSED',
+                      _isRealTimeEnabled
+                          ? 'admin_admin_system_monitoring_status_live'.tr()
+                          : 'admin_admin_system_monitoring_status_paused'.tr(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -297,7 +333,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
             childAspectRatio: 1.5,
             children: [
               AdminMetricsCard(
-                title: 'CPU Usage',
+                title: 'admin_admin_system_monitoring_text_cpu_usage'.tr(),
                 value:
                     '${(_systemMetrics['cpuUsage'] ?? 0).toStringAsFixed(1)}%',
                 icon: Icons.memory,
@@ -305,7 +341,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 trend: (_systemMetrics['cpuTrend'] as num?)?.toDouble(),
               ),
               AdminMetricsCard(
-                title: 'Memory Usage',
+                title: 'admin_admin_system_monitoring_text_memory_usage'.tr(),
                 value:
                     '${(_systemMetrics['memoryUsage'] ?? 0).toStringAsFixed(1)}%',
                 icon: Icons.storage,
@@ -314,14 +350,14 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 trend: (_systemMetrics['memoryTrend'] as num?)?.toDouble(),
               ),
               AdminMetricsCard(
-                title: 'Active Users',
+                title: 'admin_admin_system_monitoring_text_active_users'.tr(),
                 value: '${_systemMetrics['activeUsers'] ?? 0}',
                 icon: Icons.people,
                 color: Colors.blue,
                 trend: (_systemMetrics['usersTrend'] as num?)?.toDouble(),
               ),
               AdminMetricsCard(
-                title: 'Response Time',
+                title: 'admin_admin_system_monitoring_text_response_time'.tr(),
                 value:
                     '${(_systemMetrics['responseTime'] ?? 0).toStringAsFixed(0)}ms',
                 icon: Icons.speed,
@@ -341,7 +377,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Server Status',
+                    'admin_admin_system_monitoring_server_status'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -366,7 +402,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Recent Alerts',
+                        'admin_admin_system_monitoring_recent_alerts'.tr(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -415,7 +451,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Real-time Performance',
+                    'admin_admin_system_monitoring_realtime_performance'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -439,7 +475,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Performance Metrics',
+                    'admin_admin_system_monitoring_performance_metrics'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -484,7 +520,8 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
             children: [
               Expanded(
                 child: AdminMetricsCard(
-                  title: 'Critical Alerts',
+                  title:
+                      'admin_admin_system_monitoring_text_critical_alerts'.tr(),
                   value:
                       '${_systemAlerts.where((a) => a['severity'] == 'critical').length}',
                   icon: Icons.error,
@@ -494,7 +531,8 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: AdminMetricsCard(
-                  title: 'Warning Alerts',
+                  title:
+                      'admin_admin_system_monitoring_text_warning_alerts'.tr(),
                   value:
                       '${_systemAlerts.where((a) => a['severity'] == 'warning').length}',
                   icon: Icons.warning,
@@ -513,7 +551,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'System Alerts',
+                    'admin_admin_system_monitoring_system_alerts'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -556,19 +594,19 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
             childAspectRatio: 1.2,
             children: [
               AdminMetricsCard(
-                title: 'Online Users',
+                title: 'admin_admin_system_monitoring_text_online_users'.tr(),
                 value: '${_systemMetrics['onlineUsers'] ?? 0}',
                 icon: Icons.circle,
                 color: Colors.green,
               ),
               AdminMetricsCard(
-                title: 'Peak Today',
+                title: 'admin_admin_system_monitoring_text_peak_today'.tr(),
                 value: '${_systemMetrics['peakUsers'] ?? 0}',
                 icon: Icons.trending_up,
                 color: Colors.blue,
               ),
               AdminMetricsCard(
-                title: 'Avg Session',
+                title: 'admin_admin_system_monitoring_text_avg_session'.tr(),
                 value:
                     '${(_systemMetrics['avgSession'] ?? 0).toStringAsFixed(1)}m',
                 icon: Icons.timer,
@@ -586,7 +624,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Active Users',
+                    'admin_admin_system_monitoring_text_active_users'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -784,11 +822,11 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
-          'Performance Chart\n(Real-time data visualization)',
+          'admin_admin_system_monitoring_performance_chart_placeholder'.tr(),
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.grey,
             fontSize: 16,
           ),
@@ -825,7 +863,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
           child: Row(
             children: [
               Text(
-                'Firebase Remote Config',
+                'admin_admin_system_monitoring_remote_config_title'.tr(),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -834,7 +872,10 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
               ElevatedButton.icon(
                 onPressed: _loadRemoteConfig,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Fetch & Activate'),
+                label: Text(
+                  'admin_admin_system_monitoring_remote_config_fetch_activate'
+                      .tr(),
+                ),
               ),
             ],
           ),
@@ -851,7 +892,11 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                 child: ListTile(
                   title: Text(key,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Value: ${value.asString()}'),
+                  subtitle: Text(
+                    'admin_admin_system_monitoring_remote_config_value'.tr(
+                      namedArgs: {'value': value.asString()},
+                    ),
+                  ),
                   trailing: const Icon(Icons.edit),
                   onTap: () => _showEditConfigDialog(key, value.asString()),
                 ),
@@ -886,15 +931,24 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'App Check is ${_appCheckEnabled ? 'ENABLED' : 'DISABLED'}',
+                          'admin_admin_system_monitoring_app_check_status'.tr(
+                            namedArgs: {
+                              'status': _appCheckEnabled
+                                  ? 'admin_admin_system_monitoring_app_check_enabled'
+                                      .tr()
+                                  : 'admin_admin_system_monitoring_app_check_disabled'
+                                      .tr(),
+                            },
+                          ),
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
-                          'Protecting your backend resources from abuse.',
-                          style: TextStyle(color: Colors.black54),
+                        Text(
+                          'admin_admin_system_monitoring_app_check_subtitle'
+                              .tr(),
+                          style: const TextStyle(color: Colors.black54),
                         ),
                       ],
                     ),
@@ -905,26 +959,37 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
           ),
           const SizedBox(height: 24),
           Text(
-            'Enforcement Status',
+            'admin_admin_system_monitoring_app_check_enforcement_status'.tr(),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 16),
-          _buildAppCheckStatusItem('Cloud Firestore', 'Enforced', Colors.green),
-          _buildAppCheckStatusItem('Cloud Storage', 'Enforced', Colors.green),
-          _buildAppCheckStatusItem('Authentication', 'Enforced', Colors.green),
           _buildAppCheckStatusItem(
-              'Cloud Functions', 'Unenforced', Colors.orange),
+              'admin_admin_system_monitoring_service_firestore'.tr(),
+              'admin_admin_system_monitoring_enforced'.tr(),
+              Colors.green),
+          _buildAppCheckStatusItem(
+              'admin_admin_system_monitoring_service_storage'.tr(),
+              'admin_admin_system_monitoring_enforced'.tr(),
+              Colors.green),
+          _buildAppCheckStatusItem(
+              'admin_admin_system_monitoring_service_auth'.tr(),
+              'admin_admin_system_monitoring_enforced'.tr(),
+              Colors.green),
+          _buildAppCheckStatusItem(
+              'admin_admin_system_monitoring_service_functions'.tr(),
+              'admin_admin_system_monitoring_unenforced'.tr(),
+              Colors.orange),
           const SizedBox(height: 24),
-          const Card(
+          Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   Text(
-                    'Note: App Check statistics and token management should be performed via the Firebase Console for production environments.',
-                    style: TextStyle(
+                    'admin_admin_system_monitoring_app_check_note'.tr(),
+                    style: const TextStyle(
                         fontStyle: FontStyle.italic, color: Colors.grey),
                   ),
                 ],
@@ -960,13 +1025,14 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
   Widget _buildFeedbackTab() {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Search feedback...',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
+              hintText: 'admin_admin_system_monitoring_feedback_search_hint'
+                  .tr(),
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
             ),
           ),
         ),
@@ -981,9 +1047,13 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
                     backgroundColor: Colors.blue[100],
                     child: const Icon(Icons.person, color: Colors.blue),
                   ),
-                  title: Text('Feedback #${1000 + index}'),
-                  subtitle: const Text(
-                    'This app is amazing! I love the new art walk feature.',
+                  title: Text(
+                    'admin_admin_system_monitoring_feedback_item_title'.tr(
+                      namedArgs: {'id': '${1000 + index}'},
+                    ),
+                  ),
+                  subtitle: Text(
+                    'admin_admin_system_monitoring_feedback_item_summary'.tr(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1004,28 +1074,39 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit Config: $key'),
+        title: Text(
+          'admin_admin_system_monitoring_edit_config_title'.tr(
+            namedArgs: {'key': key},
+          ),
+        ),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'Value'),
+          decoration: InputDecoration(
+            labelText:
+                'admin_admin_system_monitoring_remote_config_value_label'.tr(),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
               // Note: Remote config cannot be updated from the client SDK directly for security
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                      'Note: Remote Config values must be updated in the Firebase Console.'),
+                    'admin_admin_system_monitoring_remote_config_update_note'
+                        .tr(),
+                  ),
                 ),
               );
             },
-            child: const Text('Update'),
+            child: Text(
+              'admin_admin_system_monitoring_remote_config_update_button'.tr(),
+            ),
           ),
         ],
       ),
@@ -1036,31 +1117,53 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Feedback #${1000 + index}'),
-        content: const Column(
+        title: Text(
+          'admin_admin_system_monitoring_feedback_item_title'.tr(
+            namedArgs: {'id': '${1000 + index}'},
+          ),
+        ),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('User: user_456',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Message:'),
             Text(
-                'This app is amazing! I love the new art walk feature. It would be great if we could add our own custom pins.'),
-            SizedBox(height: 16),
-            Text('Metadata:', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text('Device: iPhone 15 Pro'),
-            Text('OS: iOS 17.4'),
+              'admin_admin_system_monitoring_feedback_user'.tr(
+                namedArgs: {'user': 'user_456'},
+              ),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text('admin_admin_system_monitoring_feedback_message_label'.tr()),
+            Text(
+              'admin_admin_system_monitoring_feedback_message_body'.tr(),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'admin_admin_system_monitoring_feedback_metadata_label'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'admin_admin_system_monitoring_feedback_device'.tr(
+                namedArgs: {'device': 'iPhone 15 Pro'},
+              ),
+            ),
+            Text(
+              'admin_admin_system_monitoring_feedback_os'.tr(
+                namedArgs: {'os': 'iOS 17.4'},
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('common_close'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Mark as Resolved'),
+            child: Text(
+              'admin_admin_system_monitoring_feedback_mark_resolved'.tr(),
+            ),
           ),
         ],
       ),

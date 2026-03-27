@@ -386,18 +386,18 @@ class _AdminContentModerationScreenState
                   onPressed: () => _approveCapture(capture),
                   icon: const Icon(Icons.check_circle_outline,
                       color: Colors.green),
-                  tooltip: 'Approve',
+                  tooltip: 'common_approve'.tr(),
                 ),
               if (_selectedTab == 'pending' || _selectedTab == 'reported')
                 IconButton(
                   onPressed: () => _rejectCapture(capture),
                   icon: const Icon(Icons.highlight_off, color: Colors.orange),
-                  tooltip: 'Reject',
+                  tooltip: 'common_reject'.tr(),
                 ),
               IconButton(
                 onPressed: () => _deleteCapture(capture),
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-                tooltip: 'Delete',
+                tooltip: 'common_delete'.tr(),
               ),
             ],
           ),

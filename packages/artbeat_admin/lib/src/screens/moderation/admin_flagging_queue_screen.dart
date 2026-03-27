@@ -74,7 +74,9 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
               backgroundColor: approve ? Colors.green : Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: Text(approve ? 'Approve' : 'Reject'),
+            child: Text(
+              approve ? 'common_approve'.tr() : 'common_reject'.tr(),
+            ),
           ),
         ],
       ),
@@ -224,14 +226,16 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
                 TextButton.icon(
                   onPressed: () => _handleResolve(item, false),
                   icon: const Icon(Icons.close, color: Colors.red),
-                  label:
-                      const Text('Reject', style: TextStyle(color: Colors.red)),
+                  label: Text(
+                    'common_reject'.tr(),
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () => _handleResolve(item, true),
                   icon: const Icon(Icons.check),
-                  label: const Text('Approve'),
+                  label: Text('common_approve'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,

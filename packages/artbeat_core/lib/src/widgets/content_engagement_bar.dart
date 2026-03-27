@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/engagement_model.dart';
@@ -118,7 +119,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'content_engagement_error_generic'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -142,31 +151,32 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
     String message;
     switch (type) {
       case EngagementType.like:
-        message = newEngagementState ? 'Demo liked! ❤️' : 'Demo unliked';
+        message = newEngagementState
+            ? 'content_engagement_demo_liked'.tr()
+            : 'content_engagement_demo_unliked'.tr();
         break;
       case EngagementType.comment:
-        message = 'Demo comment feature! 💬';
+        message = 'content_engagement_demo_comment_feature'.tr();
         break;
       case EngagementType.share:
-        message = 'Demo share feature! 📤';
+        message = 'content_engagement_demo_share_feature'.tr();
         break;
       case EngagementType.boost:
-        message = newEngagementState ? 'Demo boosted! 🚀' : 'Demo unboosted';
+        message = newEngagementState
+            ? 'content_engagement_demo_boosted'.tr()
+            : 'content_engagement_demo_unboosted'.tr();
         break;
       case EngagementType.commission:
-        message =
-            'Demo commission feature! 🎨 (Commission functionality available in full app)';
+        message = 'content_engagement_demo_commission_feature'.tr();
         break;
       case EngagementType.sponsor:
-        message =
-            'Demo sponsor feature! 💖 (Sponsorship functionality available in full app)';
+        message = 'content_engagement_demo_sponsor_feature'.tr();
         break;
       case EngagementType.message:
-        message =
-            'Demo message feature! 💌 (Messaging functionality available in full app)';
+        message = 'content_engagement_demo_message_feature'.tr();
         break;
       default:
-        message = 'Demo engagement! ✨';
+        message = 'content_engagement_demo_generic'.tr();
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -444,11 +454,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Rate this artwork'),
+              title: Text('content_engagement_rate_title'.tr()),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('How would you rate this artwork?'),
+                  Text('content_engagement_rate_prompt'.tr()),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -474,13 +484,13 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(null),
-                  child: const Text('Cancel'),
+                  child: Text('common_cancel'.tr()),
                 ),
                 TextButton(
                   onPressed: selectedRating > 0
                       ? () => Navigator.of(context).pop(selectedRating)
                       : null,
-                  child: const Text('Rate'),
+                  child: Text('content_engagement_rate_action'.tr()),
                 ),
               ],
             );
@@ -502,18 +512,18 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Write a review'),
+          title: Text('content_engagement_review_title'.tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Share your thoughts about this artwork:'),
+              Text('content_engagement_review_prompt'.tr()),
               const SizedBox(height: 16),
               TextField(
                 controller: reviewController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Write your review here...',
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: 'content_engagement_review_hint'.tr(),
                 ),
               ),
             ],
@@ -521,11 +531,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(null),
-              child: const Text('Cancel'),
+              child: Text('common_cancel'.tr()),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(reviewController.text),
-              child: const Text('Submit'),
+              child: Text('content_engagement_submit'.tr()),
             ),
           ],
         );
@@ -541,8 +551,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
   Future<void> _showBoostDialog() async {
     if (widget.artistId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot send boost - artist not found.'),
+        SnackBar(
+          content: Text('content_engagement_boost_artist_not_found'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -550,9 +560,9 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Processing boost...'),
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: Text('content_engagement_boost_processing'.tr()),
+        duration: const Duration(seconds: 1),
       ),
     );
 
@@ -562,18 +572,18 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Boost purchase initiated! 🚀'),
+        SnackBar(
+          content: Text('content_engagement_boost_success'.tr()),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to send boost. Please try again.'),
+        SnackBar(
+          content: Text('content_engagement_boost_error'.tr()),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -599,7 +609,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error sharing: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'content_engagement_share_error'.tr(
+                namedArgs: {'error': '$e'},
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -620,22 +638,22 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Share Artwork',
+                'content_engagement_share_artwork_title',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              ).tr(),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildShareOption(
                     icon: Icons.message,
-                    label: 'Messages',
+                    label: 'content_engagement_share_messages'.tr(),
                     onTap: () async {
                       Navigator.pop(context);
                       await SharePlus.instance.share(
                         ShareParams(
                           text: shareText,
-                          subject: 'Amazing artwork on ARTbeat',
+                          subject: 'content_engagement_share_subject'.tr(),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -645,12 +663,14 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   ),
                   _buildShareOption(
                     icon: Icons.copy,
-                    label: 'Copy Link',
+                    label: 'content_engagement_share_copy_link'.tr(),
                     onTap: () async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Link copied to clipboard'),
+                        SnackBar(
+                          content: Text(
+                            'content_engagement_share_link_copied'.tr(),
+                          ),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -660,13 +680,13 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   ),
                   _buildShareOption(
                     icon: Icons.share,
-                    label: 'More',
+                    label: 'content_engagement_share_more'.tr(),
                     onTap: () async {
                       Navigator.pop(context);
                       await SharePlus.instance.share(
                         ShareParams(
                           text: shareText,
-                          subject: 'Amazing artwork on ARTbeat',
+                          subject: 'content_engagement_share_subject'.tr(),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -682,13 +702,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                 children: [
                   _buildShareOption(
                     icon: Icons.camera_alt,
-                    label: 'Stories',
+                    label: 'content_engagement_share_stories'.tr(),
                     color: Colors.purple,
                     onTap: () async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Stories sharing coming soon!'),
+                        SnackBar(
+                          content: Text(
+                            'content_engagement_share_stories_coming_soon'.tr(),
+                          ),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -698,13 +720,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   ),
                   _buildShareOption(
                     icon: Icons.facebook,
-                    label: 'Facebook',
+                    label: 'artist_artist_public_profile_tooltip_facebook'.tr(),
                     color: Colors.blue,
                     onTap: () async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Facebook sharing coming soon!'),
+                        SnackBar(
+                          content: Text(
+                            'content_engagement_share_facebook_coming_soon'.tr(),
+                          ),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -714,13 +738,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   ),
                   _buildShareOption(
                     icon: Icons.photo_camera,
-                    label: 'Instagram',
+                    label: 'artist_artist_public_profile_tooltip_instagram'.tr(),
                     color: Colors.pink,
                     onTap: () async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Instagram sharing coming soon!'),
+                        SnackBar(
+                          content: Text(
+                            'content_engagement_share_instagram_coming_soon'.tr(),
+                          ),
                         ),
                       );
                       await _submitEngagement(EngagementType.share, {
@@ -733,7 +759,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
               const SizedBox(height: 24),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text('common_cancel'.tr()),
               ),
             ],
           ),
@@ -810,19 +836,19 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         String message;
         switch (type) {
           case EngagementType.rate:
-            message = 'Thank you for rating!';
+            message = 'content_engagement_submit_rating_success'.tr();
             break;
           case EngagementType.review:
-            message = 'Review submitted successfully!';
+            message = 'content_engagement_submit_review_success'.tr();
             break;
           case EngagementType.boost:
-            message = 'Boost sent to the artist! 🚀';
+            message = 'content_engagement_submit_boost_success'.tr();
             break;
           case EngagementType.share:
-            message = 'Thank you for sharing!';
+            message = 'content_engagement_submit_share_success'.tr();
             break;
           default:
-            message = 'Thank you for your engagement!';
+            message = 'content_engagement_submit_generic_success'.tr();
         }
 
         ScaffoldMessenger.of(
@@ -842,7 +868,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'content_engagement_error_generic'.tr(
+                namedArgs: {'error': '$e'},
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -854,12 +888,12 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add Comment'),
+          title: Text('content_engagement_comment_title'.tr()),
           content: TextField(
             controller: commentController,
-            decoration: const InputDecoration(
-              hintText: 'Write your comment...',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: 'content_engagement_comment_hint'.tr(),
+              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
             maxLength: 500,
@@ -867,7 +901,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('common_cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -876,7 +910,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   Navigator.pop(context, text);
                 }
               },
-              child: const Text('Comment'),
+              child: Text('content_engagement_comment_action'.tr()),
             ),
           ],
         );
@@ -904,7 +938,9 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Comment added successfully!')),
+            SnackBar(
+              content: Text('content_engagement_comment_success'.tr()),
+            ),
           );
         }
       } catch (e) {
@@ -914,7 +950,15 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           });
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Error adding comment: $e')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(
+                'content_engagement_comment_error'.tr(
+                  namedArgs: {'error': '$e'},
+                ),
+              ),
+            ),
+          );
         }
       }
     }
@@ -925,11 +969,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.volunteer_activism, color: Colors.pink),
-              SizedBox(width: 8),
-              Text('Sponsor Artist'),
+              const Icon(Icons.volunteer_activism, color: Colors.pink),
+              const SizedBox(width: 8),
+              Text('content_engagement_sponsor_title'.tr()),
             ],
           ),
           content: Column(
@@ -937,26 +981,26 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
             children: [
               if (widget.artistName != null)
                 Text(
-                  'Sponsor ${widget.artistName}\'s creative work',
+                  'content_engagement_sponsor_artist_prompt'.tr(
+                    namedArgs: {'artistName': widget.artistName!},
+                  ),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 )
               else
-                const Text(
-                  'Support an artist\'s creative work',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                Text(
+                  'content_engagement_sponsor_prompt'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               const SizedBox(height: 16),
-              const Text(
-                'Artist sponsorship features are coming soon! You\'ll be able to:\n\n'
-                '• Provide monthly support to artists\n'
-                '• Get exclusive access to their work\n'
-                '• Receive personalized updates\n'
-                '• Support emerging talent\n'
-                '• Build long-term relationships',
-                style: TextStyle(fontSize: 14),
+              Text(
+                'content_engagement_sponsor_coming_soon'.tr(),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
               Container(
@@ -971,7 +1015,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'For now, you can show support by liking their work and boosting them.',
+                        'content_engagement_sponsor_fallback'.tr(),
                         style: TextStyle(color: Colors.pink.shade700),
                       ),
                     ),
@@ -983,7 +1027,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('common_cancel'.tr()),
             ),
             if (widget.artistId != null && widget.artistName != null)
               ElevatedButton.icon(
@@ -992,12 +1036,12 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   _showBoostDialog();
                 },
                 icon: const Icon(Icons.rocket_launch, size: 16),
-                label: const Text('Boost Artist'),
+                label: Text('content_engagement_boost_artist'.tr()),
               )
             else
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text('common_ok'.tr()),
               ),
           ],
         );
@@ -1042,11 +1086,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.palette, color: Colors.purple),
-              SizedBox(width: 8),
-              Text('Commission Request'),
+              const Icon(Icons.palette, color: Colors.purple),
+              const SizedBox(width: 8),
+              Text('content_engagement_commission_title'.tr()),
             ],
           ),
           content: Column(
@@ -1054,26 +1098,26 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
             children: [
               if (widget.artistName != null)
                 Text(
-                  'Request a custom commission from ${widget.artistName}',
+                  'content_engagement_commission_artist_prompt'.tr(
+                    namedArgs: {'artistName': widget.artistName!},
+                  ),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 )
               else
-                const Text(
-                  'Request a custom artwork commission',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                Text(
+                  'content_engagement_commission_prompt'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               const SizedBox(height: 16),
-              const Text(
-                'Commission features are coming soon! You\'ll be able to:\n\n'
-                '• Request custom artwork\n'
-                '• Set your budget and timeline\n'
-                '• Communicate directly with artists\n'
-                '• Track progress with milestones\n'
-                '• Secure payment processing',
-                style: TextStyle(fontSize: 14),
+              Text(
+                'content_engagement_commission_coming_soon'.tr(),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
               Container(
@@ -1088,7 +1132,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'For now, you can message the artist directly to discuss commission details.',
+                        'content_engagement_commission_fallback'.tr(),
                         style: TextStyle(color: Colors.blue.shade700),
                       ),
                     ),
@@ -1100,7 +1144,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('common_cancel'.tr()),
             ),
             if (widget.artistId != null)
               ElevatedButton.icon(
@@ -1109,12 +1153,12 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   _showMessageDialog();
                 },
                 icon: const Icon(Icons.message, size: 16),
-                label: const Text('Message Artist'),
+                label: Text('content_engagement_message_artist'.tr()),
               )
             else
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text('common_ok'.tr()),
               ),
           ],
         );
@@ -1127,11 +1171,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.message, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Send Message'),
+              const Icon(Icons.message, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text('content_engagement_message_title'.tr()),
             ],
           ),
           content: Column(
@@ -1139,26 +1183,26 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
             children: [
               if (widget.artistName != null)
                 Text(
-                  'Send a message to ${widget.artistName}',
+                  'content_engagement_message_artist_prompt'.tr(
+                    namedArgs: {'artistName': widget.artistName!},
+                  ),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 )
               else
-                const Text(
-                  'Send a direct message',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                Text(
+                  'content_engagement_message_prompt'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               const SizedBox(height: 16),
-              const Text(
-                'Direct messaging features are coming soon! You\'ll be able to:\n\n'
-                '• Send private messages to artists\n'
-                '• Share artwork and inspiration\n'
-                '• Discuss collaborations\n'
-                '• Get instant notifications\n'
-                '• Organize conversations by topic',
-                style: TextStyle(fontSize: 14),
+              Text(
+                'content_engagement_message_coming_soon'.tr(),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
               Container(
@@ -1173,7 +1217,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'For now, you can connect through the community feed and comments.',
+                        'content_engagement_message_fallback'.tr(),
                         style: TextStyle(color: Colors.green.shade700),
                       ),
                     ),
@@ -1185,11 +1229,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('common_cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text('common_ok'.tr()),
             ),
           ],
         );

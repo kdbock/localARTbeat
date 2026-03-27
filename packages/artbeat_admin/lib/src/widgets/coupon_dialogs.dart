@@ -60,8 +60,8 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
+                decoration: InputDecoration(
+                  labelText: 'common_description'.tr(),
                   hintText: 'Brief description of the coupon',
                 ),
                 maxLines: 2,
@@ -373,8 +373,8 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
+                decoration: InputDecoration(
+                  labelText: 'common_description'.tr(),
                 ),
                 maxLines: 2,
                 validator: (value) {

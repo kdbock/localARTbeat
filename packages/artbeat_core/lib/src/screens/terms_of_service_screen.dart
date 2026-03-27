@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../config/legal_config.dart';
 
@@ -8,7 +9,7 @@ class TermsOfServiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Terms of Service'),
+      title: Text('common_terms_of_service'.tr()),
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
     ),
@@ -42,7 +43,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '2. Eligibility',
             content:
-                'You must be at least 13 years old (or the minimum digital consent age in your country).\n\nIf you are under 18, you may use the Platform only with the consent of a parent or guardian.\n\nBy registering, you confirm that the information provided is accurate and up-to-date.',
+                'You must be at least 13 years old (or the minimum digital consent age in your country).\n\nIf you are under 18, you may use the Platform only with the consent of a parent or guardian.\n\nBecause ARTbeat may contain artistic nudity and mature artistic subject matter, ARTbeat is recommended for users 18 and older.\n\nBy registering, you confirm that the information provided is accurate and up-to-date.',
           ),
 
           _TermsSection(
@@ -60,7 +61,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '5. User Content & Intellectual Property',
             content:
-                'You retain ownership of artwork, captures, events, and other content you upload.\n\nBy posting, you grant ARTbeat a worldwide, non-exclusive, royalty-free license to store, display, distribute, and promote your content for Platform operation and marketing.\n\nContent must comply with community standards: no hate speech, harassment, nudity (outside artistic context), or unlawful materials.',
+                'You retain ownership of artwork, captures, events, and other content you upload.\n\nBy posting, you grant ARTbeat a worldwide, non-exclusive, royalty-free license to store, display, distribute, and promote your content for Platform operation and marketing.\n\nYou may only upload content you own or have the legal right to use.\n\nARTbeat may remove allegedly infringing content, process copyright complaints, request additional information, and terminate repeat infringers.\n\nContent must comply with community standards, including rules against harassment, doxxing, impersonation, scams, unlawful materials, non-consensual imagery, child sexual abuse material, and pornography.',
           ),
 
           _TermsSection(
@@ -78,19 +79,19 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '8. Events & Ticketing',
             content:
-                'Artists and galleries may create public or private events.\n\nTickets (free, paid, VIP) are sold through Stripe.\n\nRefunds depend on the event\'s Refund Policy; ARTbeat is not liable for disputes between buyers and event hosts.',
+                'Artists and galleries may create public or private events.\n\nTickets (free, paid, VIP) are sold through Stripe.\n\nFor app-level billing or platform processing issues, ARTbeat may investigate and resolve the issue.\n\nFor creator-run auctions, commissions, sales, and event disputes, the creator or host is primarily responsible for fulfillment, policies, and dispute handling unless ARTbeat states otherwise in writing.',
           ),
 
           _TermsSection(
             title: '9. Messaging & Community Conduct',
             content:
-                'Messaging is provided for personal and professional communication.\n\nUsers must not engage in spam, harassment, illegal solicitation, or unauthorized data collection.\n\nARTbeat may monitor reported messages for violations but does not read private messages by default.',
+                'Messaging is provided for personal and professional communication.\n\nUsers must not engage in spam, harassment, stalking, doxxing, impersonation, illegal solicitation, off-platform scam solicitation, non-consensual sexual content, or unauthorized data collection.\n\nARTbeat does not read private messages by default, but admins and moderators may review reported threads, attachments, and directly related metadata when investigating abuse, safety, or policy violations.',
           ),
 
           _TermsSection(
             title: '10. Location-Based Features',
             content:
-                'Features such as Art Walks rely on GPS and mapping.\n\nYou consent to ARTbeat\'s use of your location data to provide navigation, recommendations, and achievements.\n\nARTbeat is not responsible for accidents, injuries, or damages during real-world activities.',
+                'Features such as Art Walks rely on GPS and mapping.\n\nYou consent to ARTbeat\'s use of your location data to provide navigation, recommendations, and achievements.\n\nUsers under 18 may have location sharing and public discovery features limited or disabled.\n\nARTbeat is not responsible for accidents, injuries, or damages during real-world activities, including travel to events, public art locations, or user-organized meetups.',
           ),
 
           _TermsSection(
@@ -102,13 +103,13 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '12. Moderation & Enforcement',
             content:
-                'ARTbeat reserves the right to remove content, suspend accounts, or ban users at its discretion.\n\nUsers may appeal moderation actions by contacting ${LegalConfig.supportEmail}.\n\nRepeated violations may result in permanent account termination.',
+                'ARTbeat reserves the right to remove content, restrict features, revoke access to abused sections of the Platform, suspend accounts, or permanently ban users at its discretion.\n\nUsers may appeal moderation actions by contacting ${LegalConfig.supportEmail}.\n\nRepeated violations, severe safety violations, copyright abuse, child safety violations, or fraudulent behavior may result in immediate permanent account termination.',
           ),
 
           _TermsSection(
             title: '13. Prohibited Uses',
             content:
-                'You may not:\n\n• Upload unlawful, infringing, defamatory, or harmful content.\n• Circumvent security systems or attempt to reverse-engineer the app.\n• Use ARTbeat for unauthorized advertising or pyramid schemes.\n• Impersonate others or misrepresent affiliation.',
+                'You may not:\n\n• Upload unlawful, infringing, defamatory, or harmful content.\n• Harass, stalk, threaten, exploit, or dox other people.\n• Post pornography, child sexual abuse material, or non-consensual sexual imagery.\n• Use ARTbeat for unauthorized advertising, off-platform scams, or pyramid schemes.\n• Circumvent security systems or attempt to reverse-engineer the app.\n• Impersonate others or misrepresent affiliation.',
           ),
 
           _TermsSection(
@@ -150,7 +151,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '20. Contact',
             content:
-                'Questions or complaints may be directed to:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\n${LegalConfig.supportEmail}',
+                'Questions or complaints may be directed to:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\nGeneral support: ${LegalConfig.supportEmail}\nCopyright / DMCA: ${LegalConfig.dmcaEmail}\nLaw enforcement requests: ${LegalConfig.lawEnforcementEmail}',
           ),
 
           SizedBox(height: 32),

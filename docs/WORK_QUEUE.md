@@ -27,16 +27,16 @@ Risk values:
 | Define and enforce package dependency rules | in_progress | high | architecture | indirect | analyze + targeted regression | Policy exists; Stage 1 cuts are done. Stage 2 cleanup cuts are landing, and the remaining work is shifting from manifest cleanup to targeted refactors |
 | Reduce `artbeat_core` feature ownership | done | high | architecture | indirect | package tests + app smoke | `artbeat_core` no longer depends on sibling feature packages; the unreferenced temporary XP repair widget was removed and the last `artbeat_core -> artbeat_art_walk` edge is gone |
 | Standardize translation validation workflow | done | medium | localization | low | locale parity report + parity test | Canonical report script added, locale files aligned, parity test added |
-| Consolidate deployment and release process into canonical runbook | done | low | operations | none | doc review | Durable release/testing steps folded into `docs/RELEASE_CHECKLIST.md`; older docs now reference-only |
-| Finish open legal/security follow-up items from `TODO.md` | in_progress | high | compliance | direct | staging validation | Automated staging checks passed; on 2026-03-19 the concrete deletion failure was fixed, `functions:processDataDeletionRequest` was redeployed, and a credentialed staging repro passed end-to-end with `result.ok=true`; remaining work is fresh manual QA plus current non-engineering sign-off; see `docs/security/LEGAL_RELEASE_STATUS.md` |
-| Run targeted release-confidence manual QA on hardened user flows | in_progress | high | QA/release | direct | manual QA | Use `docs/RELEASE_CONFIDENCE_QA_CHECKLIST.md`; focus on account persistence, paid flows, capture upload queueing, chat media retry, and admin deletion pipeline visibility |
+| Consolidate deployment and release process into canonical runbook | done | low | operations | none | doc review | Canonical checklist now lives at `docs/RELEASE_CHECKLIST.md`; archive copy is reference-only |
+| Finish open legal/security follow-up items from `TODO.md` | in_progress | high | compliance | direct | staging validation | Automated staging checks passed; on 2026-03-19 the concrete deletion failure was fixed, `functions:processDataDeletionRequest` was redeployed, and a credentialed staging repro passed end-to-end with `result.ok=true`; manual QA for admin deletion also passed on 2026-03-26; owner policy decisions and support-readiness sign-off were recorded on 2026-03-26; remaining work is production canary scheduling and final production execution; see `docs/security/LEGAL_RELEASE_STATUS.md` |
+| Run targeted release-confidence manual QA on hardened user flows | done | high | QA/release | direct | manual QA | Completed on 2026-03-26. Account/profile persistence, paid-flow visibility checks, capture upload reliability, chat media upload reliability, and admin deletion handling passed. Messaging media required a foundation fix: shared Firebase Storage upload hardening plus chat Storage rule alignment and redeploy. |
 | Split large backend function domains into clearer modules | todo | medium | backend | medium | function smoke tests | Start after release process is tighter |
 
 ## Blocked Or Watch Items
 
 | Item | Status | Risk | Blocker | Notes |
 | --- | --- | --- | --- | --- |
-| Production canary sign-off completion | blocked | high | fresh manual QA and non-engineering sign-off still required after the 2026-03-19 deletion fix | See `docs/security/LEGAL_RELEASE_STATUS.md` |
+| Production canary sign-off completion | blocked | high | canary scheduling and production execution still required | See `docs/security/LEGAL_RELEASE_STATUS.md` |
 | Admin deletion fulfillment reliability | done | high | Credentialed staging repro passed on 2026-03-19 after redeploying the fix to `processDataDeletionRequest` | See `docs/security/LEGAL_RELEASE_STATUS.md` |
 
 ## Completed Recently
@@ -44,6 +44,7 @@ Risk values:
 | Item | Status | Notes |
 | --- | --- | --- |
 | Documentation system scaffolded | done | Keep docs current as part of normal work |
+| Release-confidence QA pass completed | done | 2026-03-26 pass succeeded across the targeted hardened flows; no checklist blocker remained reproducible |
 
 ## Repo Hygiene Subtasks
 

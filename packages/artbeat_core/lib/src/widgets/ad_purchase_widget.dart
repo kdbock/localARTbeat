@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Legacy compatibility widget for older routes that previously opened the
 /// retired ad-package flow.
@@ -23,7 +24,7 @@ class AdPurchaseWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Local Ads')),
+      appBar: AppBar(title: Text('ad_purchase_title'.tr())),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
@@ -38,36 +39,36 @@ class AdPurchaseWidget extends StatelessWidget {
                   children: [
                     const Icon(Icons.campaign, size: 36),
                     const SizedBox(height: 16),
-                    const Text(
-                      'The old ad-package purchase flow has been retired.',
-                      style: TextStyle(
+                    Text(
+                      'ad_purchase_retired_title'.tr(),
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Local ads now use the dedicated ARTbeat ad submission flow. '
-                      'Businesses choose Banner or Inline, select a placement, '
-                      'complete monthly store checkout, and then wait for review before publishing.',
+                    Text(
+                      'ad_purchase_retired_body'.tr(),
                     ),
                     if (artworkTitle != null) ...[
                       const SizedBox(height: 16),
                       Text(
-                        'Legacy context: ${artworkTitle!}',
+                        'ad_purchase_legacy_context'.tr(
+                          namedArgs: {'artworkTitle': artworkTitle!},
+                        ),
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
                     const SizedBox(height: 20),
-                    const Text(
-                      'Use the Local Ads screens in the app to create or manage ad subscriptions.',
+                    Text(
+                      'ad_purchase_manage_prompt'.tr(),
                     ),
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Close'),
+                        child: Text('common_close'.tr()),
                       ),
                     ),
                   ],

@@ -4,6 +4,7 @@
 /// cross-package operations and resolve integration conflicts.
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artist/artbeat_artist.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
@@ -203,7 +204,7 @@ class IntegrationExamples {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text('common_cancel'.tr()),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),

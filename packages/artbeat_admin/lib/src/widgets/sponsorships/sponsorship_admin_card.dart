@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/admin_sponsorship.dart';
@@ -91,9 +92,9 @@ class SponsorshipAdminCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onApprove,
                 icon: const Icon(Icons.check, size: 16, color: Colors.green),
-                label: const Text(
-                  'Approve',
-                  style: TextStyle(color: Colors.green),
+                label: Text(
+                  'common_approve'.tr(),
+                  style: const TextStyle(color: Colors.green),
                 ),
               ),
               OutlinedButton.icon(
@@ -107,15 +108,15 @@ class SponsorshipAdminCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onReject,
                 icon: const Icon(Icons.close, size: 16, color: Colors.red),
-                label: const Text(
-                  'Reject',
-                  style: TextStyle(color: Colors.red),
+                label: Text(
+                  'common_reject'.tr(),
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
               TextButton.icon(
                 onPressed: onViewDetails,
                 icon: const Icon(Icons.visibility, size: 16),
-                label: const Text('Details'),
+                label: Text('common_details'.tr()),
               ),
             ],
           ),

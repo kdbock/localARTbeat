@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -72,9 +73,9 @@ class DashboardFeaturedPostsSection extends StatelessWidget {
                 TextButton(
                   onPressed: () =>
                       Navigator.pushNamed(context, '/community/featured'),
-                  child: const Text(
-                    'View All',
-                    style: TextStyle(
+                  child: Text(
+                    'common_view_all'.tr(),
+                    style: const TextStyle(
                       color: ArtbeatColors.primaryGreen,
                       fontWeight: FontWeight.w600,
                     ),

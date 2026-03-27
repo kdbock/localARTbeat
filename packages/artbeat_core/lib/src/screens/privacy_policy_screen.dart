@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../config/legal_config.dart';
 
@@ -8,7 +9,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Privacy Policy'),
+      title: Text('common_privacy_policy'.tr()),
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
     ),
@@ -42,25 +43,25 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '2. Information We Collect',
             content:
-                'a) Information You Provide:\n• Account Information: Name, email, password, ZIP/postal code.\n• Profile Information: Bio, profile photo, customization settings.\n• Artist/Gallery Information: Portfolio, subscription details, payout information.\n• Payment Information: Processed by Stripe; ARTbeat never stores full card details.\n• Content: Artwork, captures, events, ads, comments, messages.\n\nb) Information We Collect Automatically:\n• Device Information: Device type, operating system, app version, crash reports.\n• Usage Data: Logins, navigation, feature usage, interactions (favorites, likes, shares).\n• Location Data: GPS data when you use Art Walks, map features, or location-tagged captures.\n• Analytics Data: Firebase Analytics, engagement tracking, ad performance metrics.\n\nc) Information from Third Parties:\n• App Stores (Apple/Google): For app downloads, in-app purchases, refunds.\n• Social & Sharing Platforms: If you share content via external apps (e.g., Instagram, Facebook).\n• Payment Processors (Stripe): Payment confirmations, refunds, and chargeback details.',
+                'a) Information You Provide:\n• Account Information: Name, email, password, ZIP/postal code.\n• Profile Information: Bio, profile photo, customization settings.\n• Artist/Gallery Information: Portfolio, subscription details, payout information.\n• Payment Information: Processed by Stripe; ARTbeat never stores full card details.\n• Content: Artwork, captures, events, ads, comments, messages, and reports you submit.\n\nb) Information We Collect Automatically:\n• Device Information: Device type, operating system, app version, crash reports.\n• Usage Data: Logins, navigation, feature usage, interactions (favorites, likes, shares).\n• Location Data: GPS data when you use Art Walks, map features, or location-tagged captures.\n• Analytics Data: Firebase Analytics, engagement tracking, ad performance metrics.\n\nc) Information from Third Parties:\n• App Stores (Apple/Google): For app downloads, in-app purchases, refunds.\n• Social & Sharing Platforms: If you share content via external apps (e.g., Instagram, Facebook).\n• Payment Processors (Stripe): Payment confirmations, refunds, and chargeback details.',
           ),
 
           _TermsSection(
             title: '3. How We Use Your Information',
             content:
-                'We use data to:\n• Provide and improve ARTbeat features (profiles, artwork, events, ads, community).\n• Process payments, subscriptions, and refunds.\n• Enable GPS navigation and location-based discovery.\n• Send notifications (reminders, purchases, account alerts).\n• Moderate content and enforce policies.\n• Provide analytics to artists, galleries, and advertisers.\n• Ensure safety, prevent fraud, and comply with legal requirements.',
+                'We use data to:\n• Provide and improve ARTbeat features (profiles, artwork, events, ads, community).\n• Process payments, subscriptions, and refunds.\n• Enable GPS navigation and location-based discovery.\n• Send notifications (reminders, purchases, account alerts).\n• Moderate content, investigate reports, review reported message threads, and enforce policies.\n• Provide analytics to artists, galleries, and advertisers.\n• Ensure safety, prevent fraud, and comply with legal requirements.',
           ),
 
           _TermsSection(
             title: '4. Sharing of Information',
             content:
-                'We share your data only as needed:\n• With Service Providers: Stripe (payments), Firebase (storage, authentication, analytics).\n• With Other Users: Profile details, artwork, captures, events, ads, or comments you choose to make public.\n• For Moderation/Legal Compliance: To comply with DMCA, law enforcement, or platform security.\n• In Business Transfers: If ARTbeat undergoes a merger, acquisition, or asset sale.\n\nWe do not sell your personal information.',
+                'We share your data only as needed:\n• With Service Providers: Stripe (payments), Firebase (storage, authentication, analytics).\n• With Other Users: Profile details, artwork, captures, events, ads, or comments you choose to make public.\n• For Moderation/Legal Compliance: To investigate abuse reports, process copyright complaints, respond to law enforcement requests, or protect platform security.\n• In Business Transfers: If ARTbeat undergoes a merger, acquisition, or asset sale.\n\nWe do not sell your personal information.',
           ),
 
           _TermsSection(
             title: '5. Data Retention',
             content:
-                '• Content remains until deleted by you or moderated.\n• Account data is retained while your account is active.\n• You may request deletion of your account and associated data at any time.\n• Account deletion: primary user data is removed within ${LegalConfig.accountDeletionPrimaryDays} days, and backup systems are purged within ${LegalConfig.backupPurgeDays} days.\n• We retain financial/tax/legal records for up to ${LegalConfig.financialRetentionYears} years where required by law.',
+                '• Content remains until deleted by you or moderated.\n• Account data is retained while your account is active.\n• You may request deletion of your account and associated data at any time.\n• Account deletion: primary user data is removed within ${LegalConfig.accountDeletionPrimaryDays} days, and backup systems are purged within ${LegalConfig.backupPurgeDays} days.\n• We retain financial, tax, legal, abuse-report, moderation, and takedown records for up to ${LegalConfig.moderationEvidenceRetentionYears} years where required by law, needed for dispute handling, or needed to protect the platform and its users.',
           ),
 
           _TermsSection(
@@ -84,7 +85,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '9. Children\'s Privacy',
             content:
-                '• ARTbeat is not directed to children under 13.\n• If you are under 13, do not register.\n• Parents who believe their child has registered may request deletion via ${LegalConfig.supportEmail}.',
+                '• ARTbeat is not directed to children under 13.\n• If you are under 13, do not register.\n• ARTbeat is recommended for users 18 and older because some content may include artistic nudity or mature artistic subject matter.\n• Users under 18 may have restricted messaging, location sharing, public profile discovery, and event participation features.\n• Parents who believe their child has registered may request deletion via ${LegalConfig.supportEmail}.',
           ),
 
           _TermsSection(
@@ -96,7 +97,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '11. Contact Us',
             content:
-                'For questions or data requests:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\nEmail: ${LegalConfig.supportEmail}\n\nData rights request SLA:\n• Acknowledgment within ${LegalConfig.dataRequestAckHours} hours\n• Fulfillment target within ${LegalConfig.dataRequestFulfillmentDays} days',
+                'For questions or data requests:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\nGeneral support: ${LegalConfig.supportEmail}\nCopyright / DMCA: ${LegalConfig.dmcaEmail}\nLaw enforcement requests: ${LegalConfig.lawEnforcementEmail}\n\nData rights request SLA:\n• Acknowledgment within ${LegalConfig.dataRequestAckHours} hours\n• Fulfillment target within ${LegalConfig.dataRequestFulfillmentDays} days',
           ),
 
           SizedBox(height: 32),

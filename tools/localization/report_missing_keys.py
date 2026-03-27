@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Generate a localization parity report from assets/translations/*.json."""
+"""Generate a localization coverage report from assets/translations/*.json."""
 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 
@@ -11,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 TRANSLATIONS_DIR = ROOT / "assets" / "translations"
 OUTPUT_PATH = TRANSLATIONS_DIR / "missing_keys.md"
 SOURCE_LOCALE = "en"
+LETTER_PATTERN = re.compile(r"[A-Za-z]")
 
 
 def load_locale(path: Path) -> dict[str, str]:
@@ -19,6 +21,18 @@ def load_locale(path: Path) -> dict[str, str]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} does not contain a top-level JSON object")
     return data
+
+
+def is_blank(value: object) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
+def is_same_as_source(value: object, source_value: object) -> bool:
+    return isinstance(value, str) and isinstance(source_value, str) and value == source_value
+
+
+def looks_translatable(text: str) -> bool:
+    return bool(LETTER_PATTERN.search(text))
 
 
 def main() -> None:
@@ -33,16 +47,10 @@ def main() -> None:
 
     source_data = load_locale(source_path)
     source_keys = set(source_data)
+    source_blank = sorted(key for key, value in source_data.items() if is_blank(value))
 
-    lines: list[str] = []
-    lines.append("# Localization Missing Keys")
-    lines.append("")
-    lines.append(f"Source locale: `{SOURCE_LOCALE}.json`")
-    lines.append("")
-    lines.append("Compared files:")
-    for path in locale_paths:
-        lines.append(f"- `{path.name}`")
-    lines.append("")
+    summary_rows: list[tuple[str, int, int, int, int]] = []
+    locale_sections: list[str] = []
 
     for path in locale_paths:
         if path == source_path:
@@ -52,29 +60,90 @@ def main() -> None:
         locale_keys = set(locale_data)
         missing = sorted(source_keys - locale_keys)
         extra = sorted(locale_keys - source_keys)
+        blank = sorted(
+            key
+            for key, value in locale_data.items()
+            if is_blank(value) and not is_blank(source_data.get(key))
+        )
+        same_as_source = sorted(
+            key
+            for key in source_keys & locale_keys
+            if is_same_as_source(locale_data[key], source_data[key])
+            and looks_translatable(source_data[key])
+        )
+        summary_rows.append((path.name, len(missing), len(extra), len(blank), len(same_as_source)))
 
-        lines.append(f"## {path.name}")
-        lines.append("")
-        lines.append(f"- Missing keys: {len(missing)}")
-        lines.append(f"- Extra keys: {len(extra)}")
-        lines.append("")
+        locale_sections.append(f"## {path.name}")
+        locale_sections.append("")
+        locale_sections.append(f"- Missing keys: {len(missing)}")
+        locale_sections.append(f"- Extra keys: {len(extra)}")
+        locale_sections.append(f"- Blank values: {len(blank)}")
+        locale_sections.append(f"- Same as English: {len(same_as_source)}")
+        locale_sections.append("")
 
         if missing:
-            lines.append("Missing:")
+            locale_sections.append("Missing:")
             for key in missing:
-                lines.append(f"- `{key}`")
-            lines.append("")
+                locale_sections.append(f"- `{key}`")
+            locale_sections.append("")
 
         if extra:
-            lines.append("Extra:")
+            locale_sections.append("Extra:")
             for key in extra:
-                lines.append(f"- `{key}`")
-            lines.append("")
+                locale_sections.append(f"- `{key}`")
+            locale_sections.append("")
 
+        if blank:
+            locale_sections.append("Blank values:")
+            for key in blank:
+                locale_sections.append(f"- `{key}`")
+            locale_sections.append("")
+
+        if same_as_source:
+            locale_sections.append("Same as English:")
+            for key in same_as_source:
+                locale_sections.append(f"- `{key}`")
+            locale_sections.append("")
+
+    lines: list[str] = []
+    lines.append("# Localization Coverage Report")
+    lines.append("")
+    lines.append(f"Source locale: `{SOURCE_LOCALE}.json`")
+    lines.append("")
+    lines.append(f"Source blank values: {len(source_blank)}")
+    lines.append("")
+    if source_blank:
+        lines.append("Blank values in source locale:")
+        for key in source_blank:
+            lines.append(f"- `{key}`")
+        lines.append("")
+    lines.append("## Summary")
+    lines.append("")
+    lines.append("| Locale | Missing keys | Extra keys | Blank values | Same as English |")
+    lines.append("| --- | ---: | ---: | ---: | ---: |")
+    for locale_name, missing_count, extra_count, blank_count, same_count in summary_rows:
+        lines.append(
+            f"| `{locale_name}` | {missing_count} | {extra_count} | {blank_count} | {same_count} |"
+        )
+    lines.append("")
+    lines.append("Compared files:")
+    for path in locale_paths:
+        lines.append(f"- `{path.name}`")
+    lines.append("")
+    lines.extend(locale_sections)
     lines.append("## Notes")
     lines.append("")
     lines.append(
         "This file is generated by `python3 tools/localization/report_missing_keys.py`."
+    )
+    lines.append(
+        "Key parity alone does not mean a locale is fully translated."
+    )
+    lines.append(
+        "`Same as English` flags values that still match the source text and likely need translation review."
+    )
+    lines.append(
+        "`Blank values` counts locale entries that are empty while the English source contains text."
     )
     lines.append(
         "Do not hand-edit this report unless you are also changing the generator."

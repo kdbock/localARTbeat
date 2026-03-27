@@ -852,9 +852,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: const Text(
-              'View All',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            child: Text(
+              'common_view_all'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
           ),
         ),

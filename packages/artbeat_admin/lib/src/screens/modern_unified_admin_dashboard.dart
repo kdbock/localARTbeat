@@ -75,7 +75,7 @@ class _ModernUnifiedAdminDashboardState
       TextEditingController();
 
   // Content filter state
-  String _selectedContentFilter = 'All';
+  String _selectedContentFilter = 'admin_modern_dashboard_filter_all';
   AdminContentType _selectedContentType = AdminContentType.all;
 
   @override
@@ -118,7 +118,8 @@ class _ModernUnifiedAdminDashboardState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Failed to load admin data: $e';
+        _error = 'admin_modern_dashboard_error_load_admin_data'
+            .tr(namedArgs: {'error': '$e'});
       });
     } finally {
       if (mounted) {
@@ -154,7 +155,8 @@ class _ModernUnifiedAdminDashboardState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Failed to load dashboard data: $e';
+        _error = 'admin_modern_dashboard_error_load_dashboard_data'
+            .tr(namedArgs: {'error': '$e'});
         _isLoading = false;
       });
     }
@@ -250,7 +252,7 @@ class _ModernUnifiedAdminDashboardState
 
   PreferredSizeWidget _buildModernAppBar() {
     return EnhancedUniversalHeader(
-      title: 'Admin Command Center',
+      title: 'admin_modern_dashboard_app_bar_title'.tr(),
       showBackButton: false,
       showSearch: true,
       showDeveloperTools: true,
@@ -268,7 +270,7 @@ class _ModernUnifiedAdminDashboardState
           child: IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: _loadAllData,
-            tooltip: 'Refresh Data',
+            tooltip: 'admin_modern_dashboard_refresh_data'.tr(),
           ),
         ),
       ],
@@ -323,10 +325,15 @@ class _ModernUnifiedAdminDashboardState
             fontSize: 14,
           ),
           tabs: [
-            _buildModernTab('Dashboard', Icons.dashboard_rounded),
-            _buildModernTab('Users', Icons.people_rounded),
-            _buildModernTab('Content', Icons.content_copy_rounded),
-            _buildModernTab('Financial', Icons.analytics_rounded),
+            _buildModernTab(
+                'admin_modern_dashboard_tab_dashboard'.tr(),
+                Icons.dashboard_rounded),
+            _buildModernTab('admin_modern_dashboard_tab_users'.tr(),
+                Icons.people_rounded),
+            _buildModernTab('admin_modern_dashboard_tab_content'.tr(),
+                Icons.content_copy_rounded),
+            _buildModernTab('admin_modern_dashboard_tab_financial'.tr(),
+                Icons.analytics_rounded),
           ],
         ),
       ),
@@ -369,7 +376,7 @@ class _ModernUnifiedAdminDashboardState
           ),
           const SizedBox(height: 20),
           Text(
-            'Loading admin data...',
+            'admin_modern_dashboard_loading_admin_data'.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 16,
@@ -407,9 +414,9 @@ class _ModernUnifiedAdminDashboardState
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Oops! Something went wrong',
-              style: TextStyle(
+            Text(
+              'admin_modern_dashboard_error_title'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -417,7 +424,7 @@ class _ModernUnifiedAdminDashboardState
             ),
             const SizedBox(height: 8),
             Text(
-              _error ?? 'Unknown error occurred',
+              _error ?? 'admin_modern_dashboard_unknown_error'.tr(),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
@@ -426,7 +433,7 @@ class _ModernUnifiedAdminDashboardState
             ),
             const SizedBox(height: 20),
             _buildModernButton(
-              'Try Again',
+              'admin_modern_dashboard_try_again'.tr(),
               Icons.refresh_rounded,
               _loadAllData,
               isPrimary: true,
@@ -489,10 +496,10 @@ class _ModernUnifiedAdminDashboardState
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Performance Overview',
-                  style: TextStyle(
+                  'admin_modern_dashboard_performance_overview'.tr(),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -515,38 +522,40 @@ class _ModernUnifiedAdminDashboardState
                 childAspectRatio: 0.9,
                 children: [
                   _buildModernKPICard(
-                    'Total Users',
+                    'admin_modern_dashboard_total_users'.tr(),
                     _users.length.toString(),
                     Icons.people_rounded,
                     const Color(0xFF4FC3F7),
-                    '+12%',
+                    'admin_modern_dashboard_trend_users'.tr(),
                     true,
                   ),
                   _buildModernKPICard(
-                    'Pending Reviews',
+                    'admin_modern_dashboard_pending_reviews'.tr(),
                     _pendingReviews.length.toString(),
                     Icons.rate_review_rounded,
                     const Color(0xFFFFB74D),
-                    '${_pendingReviews.length > 10 ? 'High' : 'Normal'}',
+                    _pendingReviews.length > 10
+                        ? 'admin_modern_dashboard_status_high'.tr()
+                        : 'admin_modern_dashboard_status_normal'.tr(),
                     _pendingReviews.length <= 10,
                   ),
                   _buildModernKPICard(
-                    'Total Content',
+                    'admin_modern_dashboard_total_content'.tr(),
                     _allContent.length.toString(),
                     Icons.content_copy_rounded,
                     const Color(0xFF81C784),
-                    '+8%',
+                    'admin_modern_dashboard_trend_content'.tr(),
                     true,
                   ),
                   _buildModernKPICard(
-                    'Revenue',
+                    'admin_modern_dashboard_revenue'.tr(),
                     _analytics?.financialMetrics != null
                         ? _formatCurrency(
                             _analytics!.financialMetrics.totalRevenue)
                         : '\$0',
                     Icons.trending_up_rounded,
                     const Color(0xFFBA68C8),
-                    '+15%',
+                    'admin_modern_dashboard_trend_revenue'.tr(),
                     true,
                   ),
                 ],
@@ -662,10 +671,10 @@ class _ModernUnifiedAdminDashboardState
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Quick Actions',
-                  style: TextStyle(
+                  'admin_modern_dashboard_quick_actions'.tr(),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -681,8 +690,8 @@ class _ModernUnifiedAdminDashboardState
             runSpacing: 12,
             children: [
               _buildModernActionCard(
-                'Review Content',
-                'Moderate pending submissions',
+                'admin_modern_dashboard_action_review_content'.tr(),
+                'admin_modern_dashboard_action_review_content_subtitle'.tr(),
                 Icons.rate_review_rounded,
                 const Color(0xFFFFB74D),
                 () => _mainTabController.animateTo(2),
@@ -691,22 +700,22 @@ class _ModernUnifiedAdminDashboardState
                     : null,
               ),
               _buildModernActionCard(
-                'Manage Users',
-                'User administration tools',
+                'admin_modern_dashboard_action_manage_users'.tr(),
+                'admin_modern_dashboard_action_manage_users_subtitle'.tr(),
                 Icons.people_rounded,
                 const Color(0xFF4FC3F7),
                 () => _mainTabController.animateTo(1),
               ),
               _buildModernActionCard(
-                'Financial Reports',
-                'Revenue and analytics',
+                'admin_modern_dashboard_action_financial_reports'.tr(),
+                'admin_modern_dashboard_action_financial_reports_subtitle'.tr(),
                 Icons.analytics_rounded,
                 const Color(0xFFBA68C8),
                 () => _mainTabController.animateTo(3),
               ),
               _buildModernActionCard(
-                'System Settings',
-                'Configure platform settings',
+                'admin_modern_dashboard_action_system_settings'.tr(),
+                'admin_modern_dashboard_action_system_settings_subtitle'.tr(),
                 Icons.settings_rounded,
                 const Color(0xFF81C784),
                 () => Navigator.pushNamed(context, '/admin/settings'),
@@ -838,10 +847,10 @@ class _ModernUnifiedAdminDashboardState
                 ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Recent Activity',
-                  style: TextStyle(
+                  'admin_modern_dashboard_recent_activity'.tr(),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -863,7 +872,7 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'No recent activity',
+                    'admin_modern_dashboard_no_recent_activity'.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
@@ -966,10 +975,10 @@ class _ModernUnifiedAdminDashboardState
                 ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'System Health',
-                  style: TextStyle(
+                  'admin_modern_dashboard_system_health'.tr(),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -983,13 +992,19 @@ class _ModernUnifiedAdminDashboardState
           Column(
             children: [
               _buildModernHealthIndicator(
-                  'Database', true, Icons.storage_rounded),
+                  'admin_modern_dashboard_health_database'.tr(),
+                  true,
+                  Icons.storage_rounded),
               const SizedBox(height: 12),
               _buildModernHealthIndicator(
-                  'API Services', true, Icons.api_rounded),
+                  'admin_modern_dashboard_health_api_services'.tr(),
+                  true,
+                  Icons.api_rounded),
               const SizedBox(height: 12),
               _buildModernHealthIndicator(
-                  'File Storage', true, Icons.cloud_rounded),
+                  'admin_modern_dashboard_health_file_storage'.tr(),
+                  true,
+                  Icons.cloud_rounded),
             ],
           ),
         ],
@@ -1038,7 +1053,9 @@ class _ModernUnifiedAdminDashboardState
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isHealthy ? 'Healthy' : 'Error',
+              isHealthy
+                  ? 'admin_modern_dashboard_health_healthy'.tr()
+                  : 'admin_modern_dashboard_health_error'.tr(),
               style: TextStyle(
                 color: color,
                 fontSize: 10,
@@ -1087,9 +1104,9 @@ class _ModernUnifiedAdminDashboardState
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'User Management',
-                        style: TextStyle(
+                      Text(
+                        'admin_modern_dashboard_user_management'.tr(),
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -1110,25 +1127,25 @@ class _ModernUnifiedAdminDashboardState
                         childAspectRatio: 1.2,
                         children: [
                           _buildUserStatCard(
-                            'Total Users',
+                            'admin_modern_dashboard_total_users'.tr(),
                             _users.length.toString(),
                             Icons.people_rounded,
                             const Color(0xFF4FC3F7),
                           ),
                           _buildUserStatCard(
-                            'Verified Users',
+                            'admin_modern_dashboard_verified_users'.tr(),
                             _users.where((u) => u.isVerified).length.toString(),
                             Icons.verified_rounded,
                             const Color(0xFF81C784),
                           ),
                           _buildUserStatCard(
-                            'Featured Users',
+                            'admin_modern_dashboard_featured_users'.tr(),
                             _users.where((u) => u.isFeatured).length.toString(),
                             Icons.star_rounded,
                             const Color(0xFFFFB74D),
                           ),
                           _buildUserStatCard(
-                            'Suspended Users',
+                            'admin_modern_dashboard_suspended_users'.tr(),
                             _users
                                 .where((u) => u.isSuspended)
                                 .length
@@ -1156,7 +1173,8 @@ class _ModernUnifiedAdminDashboardState
                     controller: _userSearchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Search users by name, email, or username...',
+                      hintText:
+                          'admin_modern_dashboard_search_users_hint'.tr(),
                       hintStyle:
                           TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                       prefixIcon: Icon(Icons.search_rounded,
@@ -1185,15 +1203,17 @@ class _ModernUnifiedAdminDashboardState
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip('All', _getFilteredUsers().length),
+                        _buildFilterChip(
+                            'admin_modern_dashboard_filter_all'.tr(),
+                            _getFilteredUsers().length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Verified',
+                        _buildFilterChip('admin_modern_dashboard_filter_verified'.tr(),
                             _users.where((u) => u.isVerified).length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Featured',
+                        _buildFilterChip('admin_modern_dashboard_filter_featured'.tr(),
                             _users.where((u) => u.isFeatured).length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Suspended',
+                        _buildFilterChip('admin_modern_dashboard_filter_suspended'.tr(),
                             _users.where((u) => u.isSuspended).length),
                       ],
                     ),
@@ -1284,7 +1304,9 @@ class _ModernUnifiedAdminDashboardState
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Text(
-        '$label ($count)',
+        'admin_modern_dashboard_filter_chip'.tr(
+          namedArgs: {'label': label, 'count': '$count'},
+        ),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
@@ -1422,7 +1444,9 @@ class _ModernUnifiedAdminDashboardState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Joined ${_formatDate(user.createdAt)}',
+                        'admin_modern_dashboard_joined_date'.tr(
+                          namedArgs: {'date': _formatDate(user.createdAt)},
+                        ),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 12,
@@ -1531,12 +1555,12 @@ class _ModernUnifiedAdminDashboardState
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Content Moderation',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                  Text(
+                    'admin_modern_dashboard_content_moderation'.tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                         ),
                       ),
                     ],
@@ -1556,7 +1580,7 @@ class _ModernUnifiedAdminDashboardState
                         childAspectRatio: 1.2,
                         children: [
                           _buildContentStatCard(
-                            'General Reviews',
+                            'admin_modern_dashboard_general_reviews'.tr(),
                             _pendingModerationSummary['generalReviews']
                                     ?.toString() ??
                                 '0',
@@ -1564,7 +1588,7 @@ class _ModernUnifiedAdminDashboardState
                             const Color(0xFFFFB74D),
                           ),
                           _buildContentStatCard(
-                            'Pending Events',
+                            'admin_modern_dashboard_pending_events'.tr(),
                             _pendingModerationSummary['pendingEvents']
                                     ?.toString() ??
                                 '0',
@@ -1572,7 +1596,7 @@ class _ModernUnifiedAdminDashboardState
                             const Color(0xFFCE93D8),
                           ),
                           _buildContentStatCard(
-                            'Reported Walks',
+                            'admin_modern_dashboard_reported_walks'.tr(),
                             _pendingModerationSummary['reportedArtWalks']
                                     ?.toString() ??
                                 '0',
@@ -1580,7 +1604,7 @@ class _ModernUnifiedAdminDashboardState
                             const Color(0xFFFF5722),
                           ),
                           _buildContentStatCard(
-                            'Pending Captures',
+                            'admin_modern_dashboard_pending_captures'.tr(),
                             _pendingModerationSummary['pendingCaptures']
                                     ?.toString() ??
                                 '0',
@@ -1588,14 +1612,14 @@ class _ModernUnifiedAdminDashboardState
                             const Color(0xFF4FC3F7),
                           ),
                           _buildContentStatCard(
-                            'Total Content',
+                            'admin_modern_dashboard_total_content'.tr(),
                             (_contentStats?['total'] ?? _allContent.length)
                                 .toString(),
                             Icons.content_copy_rounded,
                             Colors.white70,
                           ),
                           _buildContentStatCard(
-                            'Approved',
+                            'admin_modern_dashboard_filter_approved'.tr(),
                             _allContent
                                 .where((c) => c.status == 'approved')
                                 .length
@@ -1619,9 +1643,9 @@ class _ModernUnifiedAdminDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Moderation Management Suites',
-                    style: TextStyle(
+                  Text(
+                    'admin_modern_dashboard_moderation_suites'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -1629,7 +1653,7 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Deep-dive into specific content categories for comprehensive moderation.',
+                    'admin_modern_dashboard_moderation_suites_subtitle'.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -1643,8 +1667,8 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Events',
-                          'Approve and manage community events',
+                          'admin_modern_dashboard_suite_events'.tr(),
+                          'admin_modern_dashboard_suite_events_subtitle'.tr(),
                           Icons.event_rounded,
                           Colors.purpleAccent,
                           () => Navigator.pushNamed(
@@ -1656,8 +1680,8 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Art Walks',
-                          'Review and moderate user-created walks',
+                          'admin_modern_dashboard_suite_art_walks'.tr(),
+                          'admin_modern_dashboard_suite_art_walks_subtitle'.tr(),
                           Icons.route_rounded,
                           Colors.tealAccent,
                           () => Navigator.pushNamed(
@@ -1670,8 +1694,8 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Captures',
-                          'Moderate artwork captures and reports',
+                          'admin_modern_dashboard_suite_captures'.tr(),
+                          'admin_modern_dashboard_suite_captures_subtitle'.tr(),
                           Icons.camera_rounded,
                           Colors.orangeAccent,
                           () => Navigator.pushNamed(
@@ -1683,8 +1707,8 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Artworks',
-                          'Moderate community-uploaded artworks',
+                          'admin_modern_dashboard_suite_artworks'.tr(),
+                          'admin_modern_dashboard_suite_artworks_subtitle'.tr(),
                           Icons.brush_rounded,
                           Colors.pinkAccent,
                           () => Navigator.pushNamed(
@@ -1696,8 +1720,8 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Community',
-                          'Moderate flagged posts and comments',
+                          'admin_modern_dashboard_suite_community'.tr(),
+                          'admin_modern_dashboard_suite_community_subtitle'.tr(),
                           Icons.forum_rounded,
                           Colors.blueAccent,
                           () => Navigator.pushNamed(
@@ -1712,8 +1736,9 @@ class _ModernUnifiedAdminDashboardState
                       SizedBox(
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
-                          'Upload Tools',
-                          'Administrative data upload utilities',
+                          'admin_modern_dashboard_suite_upload_tools'.tr(),
+                          'admin_modern_dashboard_suite_upload_tools_subtitle'
+                              .tr(),
                           Icons.upload_file_rounded,
                           Colors.indigoAccent,
                           () => Navigator.pushNamed(
@@ -1738,8 +1763,7 @@ class _ModernUnifiedAdminDashboardState
                     controller: _contentSearchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText:
-                          'Search content by title, author, or description...',
+                      hintText: 'admin_modern_dashboard_search_content_hint'.tr(),
                       hintStyle:
                           TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                       prefixIcon: Icon(Icons.search_rounded,
@@ -1769,25 +1793,27 @@ class _ModernUnifiedAdminDashboardState
                     child: Row(
                       children: [
                         _buildContentFilterChip(
-                            'All', _getFilteredContent().length),
+                            'admin_modern_dashboard_filter_all'.tr(),
+                            _getFilteredContent().length),
                         const SizedBox(width: 8),
                         _buildContentFilterChip(
-                            'Pending', _pendingReviews.length),
+                            'admin_modern_dashboard_filter_pending'.tr(),
+                            _pendingReviews.length),
                         const SizedBox(width: 8),
                         _buildContentFilterChip(
-                            'Approved',
+                            'admin_modern_dashboard_filter_approved'.tr(),
                             _allContent
                                 .where((c) => c.status == 'approved')
                                 .length),
                         const SizedBox(width: 8),
                         _buildContentFilterChip(
-                            'Rejected',
+                            'admin_modern_dashboard_filter_rejected'.tr(),
                             _allContent
                                 .where((c) => c.status == 'rejected')
                                 .length),
                         const SizedBox(width: 8),
                         _buildContentFilterChip(
-                            'Reported',
+                            'admin_modern_dashboard_filter_reported'.tr(),
                             _allContent
                                 .where((c) => c.status == 'flagged')
                                 .length),
@@ -1831,9 +1857,9 @@ class _ModernUnifiedAdminDashboardState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Pending Reviews',
-                      style: TextStyle(
+                    Text(
+                      'admin_modern_dashboard_pending_reviews'.tr(),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -1862,9 +1888,9 @@ class _ModernUnifiedAdminDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Recent Content',
-                    style: TextStyle(
+                  Text(
+                    'admin_modern_dashboard_recent_content'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -2010,7 +2036,9 @@ class _ModernUnifiedAdminDashboardState
                   ],
                 ),
                 child: Text(
-                  badgeCount > 99 ? '99+' : badgeCount.toString(),
+                  badgeCount > 99
+                      ? 'admin_modern_dashboard_badge_99_plus'.tr()
+                      : badgeCount.toString(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -2043,7 +2071,9 @@ class _ModernUnifiedAdminDashboardState
           ),
         ),
         child: Text(
-          '$label ($count)',
+          'admin_modern_dashboard_filter_chip'.tr(
+            namedArgs: {'label': label, 'count': '$count'},
+          ),
           style: TextStyle(
             color: Colors.white,
             fontSize: 12,
@@ -2077,7 +2107,12 @@ class _ModernUnifiedAdminDashboardState
           ),
         ),
         child: Text(
-          '${contentType.displayName} ($count)',
+          'admin_modern_dashboard_filter_chip'.tr(
+            namedArgs: {
+              'label': contentType.displayName,
+              'count': '$count',
+            },
+          ),
           style: TextStyle(
             color: Colors.white,
             fontSize: 12,
@@ -2101,24 +2136,24 @@ class _ModernUnifiedAdminDashboardState
 
     // Then filter by status
     List<ContentModel> filteredByStatus = filteredByType;
-    if (_selectedContentFilter != 'All') {
+    if (_selectedContentFilter != 'admin_modern_dashboard_filter_all') {
       switch (_selectedContentFilter) {
-        case 'Pending':
+        case 'admin_modern_dashboard_filter_pending':
           final pendingContentIds =
               _pendingReviews.map((r) => r.contentId).toSet();
           filteredByStatus = filteredByType
               .where((c) => pendingContentIds.contains(c.id))
               .toList();
           break;
-        case 'Approved':
+        case 'admin_modern_dashboard_filter_approved':
           filteredByStatus =
               filteredByType.where((c) => c.status == 'approved').toList();
           break;
-        case 'Rejected':
+        case 'admin_modern_dashboard_filter_rejected':
           filteredByStatus =
               filteredByType.where((c) => c.status == 'rejected').toList();
           break;
-        case 'Reported':
+        case 'admin_modern_dashboard_filter_reported':
           filteredByStatus =
               filteredByType.where((c) => c.status == 'flagged').toList();
           break;
@@ -2166,9 +2201,9 @@ class _ModernUnifiedAdminDashboardState
                   color: const Color(0xFFFFB74D).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'PENDING',
-                  style: TextStyle(
+                child: Text(
+                  'admin_modern_dashboard_filter_pending'.tr().toUpperCase(),
+                  style: const TextStyle(
                     color: Color(0xFFFFB74D),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -2179,7 +2214,9 @@ class _ModernUnifiedAdminDashboardState
           ),
           const SizedBox(height: 8),
           Text(
-            'By ${review.authorName}',
+            'admin_modern_dashboard_by_author'.tr(
+              namedArgs: {'author': review.authorName},
+            ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
@@ -2295,7 +2332,9 @@ class _ModernUnifiedAdminDashboardState
                   children: [
                     Expanded(
                       child: Text(
-                        'By ${content.authorName}',
+                        'admin_modern_dashboard_by_author'.tr(
+                          namedArgs: {'author': content.authorName},
+                        ),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 12,
@@ -2336,21 +2375,23 @@ class _ModernUnifiedAdminDashboardState
             color: const Color(0xFF8C52FF),
             onSelected: (value) => _handleContentAction(content, value),
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'view',
                 child:
-                    Text('View Details', style: TextStyle(color: Colors.white)),
+                    Text('admin_modern_dashboard_view_details'.tr(),
+                        style: const TextStyle(color: Colors.white)),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child:
-                    Text('Edit Content', style: TextStyle(color: Colors.white)),
+                    Text('admin_modern_dashboard_edit_content'.tr(),
+                        style: const TextStyle(color: Colors.white)),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
-                child: Text('Delete Content',
-                    style: TextStyle(color: Colors.white)),
+                child: Text('admin_modern_dashboard_delete_content'.tr(),
+                    style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -2621,9 +2662,9 @@ class _ModernUnifiedAdminDashboardState
                               (content.metadata['videoUrl'] as String?)
                                       ?.isNotEmpty ==
                                   true)) ...[
-                        const Text(
-                          'Media',
-                          style: TextStyle(
+                        Text(
+                          'admin_modern_dashboard_media'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -2703,9 +2744,9 @@ class _ModernUnifiedAdminDashboardState
 
                       // Description
                       if (content.description.isNotEmpty) ...[
-                        const Text(
-                          'Description',
-                          style: TextStyle(
+                        Text(
+                          'admin_modern_dashboard_description'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -2724,32 +2765,39 @@ class _ModernUnifiedAdminDashboardState
                       ],
 
                       // Author info
-                      _buildDetailRow('Author', content.authorName),
                       _buildDetailRow(
-                          'Created', _formatDate(content.createdAt)),
+                          'admin_modern_dashboard_author'.tr(),
+                          content.authorName),
+                      _buildDetailRow(
+                          'admin_modern_dashboard_created'.tr(),
+                          _formatDate(content.createdAt)),
                       if (content.updatedAt != null)
                         _buildDetailRow(
-                            'Updated', _formatDate(content.updatedAt!)),
+                            'admin_modern_dashboard_updated'.tr(),
+                            _formatDate(content.updatedAt!)),
 
                       // Stats
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          _buildStatChip('Views', content.viewCount.toString()),
+                          _buildStatChip('admin_modern_dashboard_views'.tr(),
+                              content.viewCount.toString()),
                           const SizedBox(width: 12),
-                          _buildStatChip('Likes', content.likeCount.toString()),
+                          _buildStatChip('admin_modern_dashboard_likes'.tr(),
+                              content.likeCount.toString()),
                           const SizedBox(width: 12),
                           _buildStatChip(
-                              'Reports', content.reportCount.toString()),
+                              'admin_modern_dashboard_reports'.tr(),
+                              content.reportCount.toString()),
                         ],
                       ),
 
                       // Tags
                       if (content.tags.isNotEmpty) ...[
                         const SizedBox(height: 24),
-                        const Text(
-                          'Tags',
-                          style: TextStyle(
+                        Text(
+                          'admin_modern_dashboard_tags'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -2801,8 +2849,9 @@ class _ModernUnifiedAdminDashboardState
                                     // ignore: use_build_context_synchronously
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: const Text(
-                                            'Review cleared successfully'),
+                                        content: Text(
+                                            'admin_modern_dashboard_review_cleared_successfully'
+                                                .tr()),
                                         backgroundColor: Colors.green,
                                         behavior: SnackBarBehavior.floating,
                                         shape: RoundedRectangleBorder(
@@ -2947,7 +2996,9 @@ class _ModernUnifiedAdminDashboardState
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Text(
-        '$label: $value',
+        'admin_modern_dashboard_stat_chip'.tr(
+          namedArgs: {'label': label, 'value': value},
+        ),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
@@ -2994,9 +3045,9 @@ class _ModernUnifiedAdminDashboardState
                 size: 24,
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Edit Content',
-                style: TextStyle(
+              Text(
+                'admin_modern_dashboard_edit_content'.tr(),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3009,9 +3060,9 @@ class _ModernUnifiedAdminDashboardState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title field
-                const Text(
-                  'Title',
-                  style: TextStyle(
+                Text(
+                  'admin_modern_dashboard_title_label'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -3021,7 +3072,7 @@ class _ModernUnifiedAdminDashboardState
                   controller: titleController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Enter title',
+                    hintText: 'admin_modern_dashboard_enter_title'.tr(),
                     hintStyle: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5),
                     ),
@@ -3047,9 +3098,9 @@ class _ModernUnifiedAdminDashboardState
                 const SizedBox(height: 16),
 
                 // Description field
-                const Text(
-                  'Description',
-                  style: TextStyle(
+                Text(
+                  'admin_modern_dashboard_description'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -3060,7 +3111,7 @@ class _ModernUnifiedAdminDashboardState
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Enter description',
+                    hintText: 'admin_modern_dashboard_enter_description'.tr(),
                     hintStyle: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5),
                     ),
@@ -3086,9 +3137,9 @@ class _ModernUnifiedAdminDashboardState
                 const SizedBox(height: 16),
 
                 // Status dropdown
-                const Text(
-                  'Status',
-                  style: TextStyle(
+                Text(
+                  'admin_modern_dashboard_status'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -3141,9 +3192,9 @@ class _ModernUnifiedAdminDashboardState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                'admin_modern_dashboard_cancel'.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
             ElevatedButton(
@@ -3179,17 +3230,17 @@ class _ModernUnifiedAdminDashboardState
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.warning_rounded,
               color: Colors.red,
               size: 24,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Text(
-              'Delete Content',
-              style: TextStyle(
+              'admin_modern_dashboard_delete_content'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
@@ -3201,7 +3252,9 @@ class _ModernUnifiedAdminDashboardState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Are you sure you want to delete this ${content.type}?',
+              'admin_modern_dashboard_delete_confirmation'.tr(
+                namedArgs: {'type': content.type},
+              ),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -3226,7 +3279,9 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'by ${content.authorName}',
+                    'admin_modern_dashboard_by_author_lower'.tr(
+                      namedArgs: {'author': content.authorName},
+                    ),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
@@ -3236,9 +3291,9 @@ class _ModernUnifiedAdminDashboardState
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'This action cannot be undone.',
-              style: TextStyle(
+            Text(
+              'admin_modern_dashboard_delete_irreversible'.tr(),
+              style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
               ),
@@ -3248,9 +3303,9 @@ class _ModernUnifiedAdminDashboardState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              'admin_modern_dashboard_cancel'.tr(),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           ElevatedButton(
@@ -3452,9 +3507,9 @@ class _ModernUnifiedAdminDashboardState
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Financial Analytics',
-                        style: TextStyle(
+                      Text(
+                        'admin_modern_dashboard_financial_analytics'.tr(),
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -3475,7 +3530,7 @@ class _ModernUnifiedAdminDashboardState
                         childAspectRatio: 1.4, // Increased to prevent overflow
                         children: [
                           _buildFinancialKPICard(
-                            'Total Revenue',
+                            'admin_modern_dashboard_total_revenue'.tr(),
                             _analytics?.financialMetrics != null
                                 ? _formatCurrency(
                                     _analytics!.financialMetrics.totalRevenue)
@@ -3491,7 +3546,7 @@ class _ModernUnifiedAdminDashboardState
                                 : true,
                           ),
                           _buildFinancialKPICard(
-                            'Monthly Recurring',
+                            'admin_modern_dashboard_monthly_recurring'.tr(),
                             _analytics?.financialMetrics != null
                                 ? _formatCurrency(_analytics!
                                     .financialMetrics.monthlyRecurringRevenue)
@@ -3508,7 +3563,7 @@ class _ModernUnifiedAdminDashboardState
                                 : true,
                           ),
                           _buildFinancialKPICard(
-                            'Total Transactions',
+                            'admin_modern_dashboard_total_transactions'.tr(),
                             _analytics?.financialMetrics != null
                                 ? _analytics!.financialMetrics.totalTransactions
                                     .toString()
@@ -3521,7 +3576,7 @@ class _ModernUnifiedAdminDashboardState
                             true,
                           ),
                           _buildFinancialKPICard(
-                            'Avg Transaction',
+                            'admin_modern_dashboard_avg_transaction'.tr(),
                             _analytics?.financialMetrics != null
                                 ? _formatCurrency(_analytics!
                                     .financialMetrics.averageRevenuePerUser)
@@ -3549,9 +3604,9 @@ class _ModernUnifiedAdminDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Revenue Breakdown',
-                    style: TextStyle(
+                  Text(
+                    'admin_modern_dashboard_revenue_breakdown'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -3564,7 +3619,7 @@ class _ModernUnifiedAdminDashboardState
                     children: [
                       Expanded(
                         child: _buildRevenueSourceCard(
-                          'Advertisements',
+                          'admin_modern_dashboard_revenue_source_ads'.tr(),
                           _revenueBreakdown['Advertisements']?.round() ?? 0,
                           const Color(0xFF4FC3F7),
                         ),
@@ -3572,7 +3627,8 @@ class _ModernUnifiedAdminDashboardState
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildRevenueSourceCard(
-                          'Subscriptions',
+                          'admin_modern_dashboard_revenue_source_subscriptions'
+                              .tr(),
                           _revenueBreakdown['Subscriptions']?.round() ?? 0,
                           const Color(0xFF81C784),
                         ),
@@ -3580,7 +3636,8 @@ class _ModernUnifiedAdminDashboardState
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildRevenueSourceCard(
-                          'Artwork Sales',
+                          'admin_modern_dashboard_revenue_source_artwork_sales'
+                              .tr(),
                           _revenueBreakdown['Artwork Sales']?.round() ?? 0,
                           const Color(0xFFFFB74D),
                         ),
@@ -3599,9 +3656,9 @@ class _ModernUnifiedAdminDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Recent Transactions',
-                    style: TextStyle(
+                  Text(
+                    'admin_modern_dashboard_recent_transactions'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -3621,9 +3678,9 @@ class _ModernUnifiedAdminDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Financial Insights',
-                    style: TextStyle(
+                  Text(
+                    'admin_modern_dashboard_financial_insights'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -3631,7 +3688,7 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 20),
                   _buildFinancialInsightCard(
-                    'Revenue Growth',
+                    'admin_modern_dashboard_revenue_growth'.tr(),
                     _analytics?.financialMetrics != null
                         ? 'Revenue ${_analytics!.financialMetrics.revenueGrowth >= 0 ? 'increased' : 'decreased'} by ${_analytics!.financialMetrics.revenueGrowth.abs().toStringAsFixed(1)}% compared to last period'
                         : 'Revenue growth data will appear here',
@@ -3643,7 +3700,7 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 12),
                   _buildFinancialInsightCard(
-                    'Transaction Volume',
+                    'admin_modern_dashboard_transaction_volume'.tr(),
                     _analytics?.financialMetrics != null
                         ? '${_analytics!.financialMetrics.totalTransactions} transactions processed'
                         : 'Transaction data will appear here',
@@ -3652,7 +3709,7 @@ class _ModernUnifiedAdminDashboardState
                   ),
                   const SizedBox(height: 12),
                   _buildFinancialInsightCard(
-                    'Average Revenue',
+                    'admin_modern_dashboard_average_revenue'.tr(),
                     _analytics?.financialMetrics != null
                         ? 'Average revenue per transaction: ${_formatCurrency(_analytics!.financialMetrics.averageRevenuePerUser)}'
                         : 'Average revenue data will appear here',
@@ -3770,7 +3827,7 @@ class _ModernUnifiedAdminDashboardState
           ),
           const SizedBox(height: 16),
           Text(
-            'Revenue Chart',
+            'admin_modern_dashboard_revenue_chart'.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
@@ -3779,7 +3836,7 @@ class _ModernUnifiedAdminDashboardState
           ),
           const SizedBox(height: 8),
           Text(
-            'Chart visualization will be implemented\nwith real Firebase data using fl_chart',
+            'admin_modern_dashboard_revenue_chart_placeholder'.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 12,
@@ -3837,7 +3894,7 @@ class _ModernUnifiedAdminDashboardState
             ),
             const SizedBox(height: 16),
             Text(
-              'No Recent Transactions',
+              'admin_modern_dashboard_no_recent_transactions'.tr(),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
@@ -3846,7 +3903,7 @@ class _ModernUnifiedAdminDashboardState
             ),
             const SizedBox(height: 8),
             Text(
-              'Transaction data will appear here once payments are processed.',
+              'admin_modern_dashboard_transactions_placeholder'.tr(),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 14,

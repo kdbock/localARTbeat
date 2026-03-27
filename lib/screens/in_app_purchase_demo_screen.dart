@@ -1,4 +1,5 @@
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Demo screen to test in-app purchase functionality
@@ -178,7 +179,7 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {

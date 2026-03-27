@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdsPreviewCard extends StatelessWidget {
@@ -37,7 +38,7 @@ class AdsPreviewCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Local Ads',
+                  'ads_preview_title'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -45,7 +46,7 @@ class AdsPreviewCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Promote your local business and help fund art in your city.',
+                  'ads_preview_subtitle'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,

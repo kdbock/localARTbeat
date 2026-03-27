@@ -462,6 +462,31 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 onTapPrivacy: _navigateToPrivacyPolicy,
                               ),
 
+                              const SizedBox(height: 10),
+
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.04),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                  ),
+                                ),
+                                child: Text(
+                                  'ARTbeat is recommended for ages 18 and older because some content may include artistic nudity or mature artistic subject matter. Users under 18 may have messaging, location sharing, public discovery, and event features restricted.',
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white.withValues(alpha: 0.72),
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+
                               const SizedBox(height: 14),
 
                               // Primary CTA (quest sweep)

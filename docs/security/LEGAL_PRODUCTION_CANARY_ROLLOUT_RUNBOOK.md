@@ -7,11 +7,14 @@ Target project: production Firebase project (set explicitly at runtime)
 ## Preconditions
 
 - [x] Staging regression is green (`scripts/legal_staging_regression.sh`).
-- [ ] Manual in-app QA checklist completed successfully:
+- [x] Manual in-app QA checklist completed successfully:
 - `docs/LEGAL_STAGING_MANUAL_QA_CHECKLIST.md`
+- Current passing evidence refreshed on 2026-03-26 in
+  `docs/RELEASE_CONFIDENCE_QA_CHECKLIST.md` and
+  `docs/security/LEGAL_RELEASE_STATUS.md`.
 - [ ] On-call window reserved (minimum 24-48h observation after deploy).
 - [ ] Rollback operator available.
-- [ ] Support contact channels confirmed.
+- [x] Support contact channels confirmed.
 
 ## Canary Deploy Command
 
@@ -68,8 +71,8 @@ firebase deploy --project <prod-project-id> --only functions:processDataDeletion
 ## Sign-Off
 
 - [x] Engineering sign-off
-- [ ] Product/legal owner sign-off confirmed against current evidence
-- [ ] Support readiness sign-off confirmed against current evidence
+- [x] Product/legal owner sign-off confirmed against current evidence
+- [x] Support readiness sign-off confirmed against current evidence
 
 ## Execution Log
 
@@ -82,6 +85,8 @@ firebase deploy --project <prod-project-id> --only functions:processDataDeletion
 - [x] 2026-02-26: Manual in-app UI checklist session executed and attached.
 - Attachment target: `docs/LEGAL_STAGING_UI_QA_SESSION_REPORT_YYYY-MM-DD.md`
 - [x] 2026-02-26: GitHub Actions workflow run evidence attached (`22424833231` success).
-- [ ] 2026-02-27: Follow-up manual QA exposed blocking deletion fulfillment
-  failure (`[firebase_functions/internal] INTERNAL`); production canary remains
-  blocked until fresh passing evidence exists.
+- [x] 2026-03-26: Follow-up manual QA re-run passed after deletion fix,
+  messaging upload hardening, and rules alignment; blocker cleared in
+  `docs/security/LEGAL_RELEASE_STATUS.md`.
+- [ ] Next action: reserve canary window, identify rollback operator, and
+  execute the production canary against the current passing evidence set.

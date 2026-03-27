@@ -1,6 +1,7 @@
 import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -227,7 +228,7 @@ class CaptureRouteHandler {
         ElevatedButton(
           onPressed:
               () => Navigator.of(context).pushReplacementNamed(retryRouteName),
-          child: const Text('Retry'),
+          child: Text('common_retry'.tr()),
         ),
       ],
     ),
