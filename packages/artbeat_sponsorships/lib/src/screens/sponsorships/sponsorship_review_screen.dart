@@ -44,6 +44,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   final SponsorshipCheckoutService _checkoutService =
       SponsorshipCheckoutService();
   final SponsorshipRepository _sponsorshipRepository = SponsorshipRepository();
+  final MonetizationFunnelService _funnelService = MonetizationFunnelService();
   final _formKey = GlobalKey<FormState>();
   final _businessNameController = TextEditingController();
   final _contactEmailController = TextEditingController();
@@ -58,6 +59,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     final user = FirebaseAuth.instance.currentUser;
     _businessNameController.text = user?.displayName?.trim() ?? '';
     _contactEmailController.text = user?.email?.trim() ?? '';
+    _trackFunnelStage(stage: 'form_viewed', userId: user?.uid);
   }
 
   @override
@@ -288,6 +290,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
 
     setState(() => _isSubmitting = true);
     try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
       final tier = _resolveTier(widget.type);
       final radiusMiles = widget.radiusMiles ?? _radiusFromNotes(widget.notes);
       if (tier.isRadiusBased && radiusMiles == null) {
@@ -295,6 +298,16 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
           'A valid radius is required for this sponsorship type.',
         );
       }
+      await _trackFunnelStage(
+        stage: 'checkout_started',
+        userId: userId,
+        metadata: <String, Object?>{
+          'tier': tier.value,
+          'duration': widget.duration,
+          'selected_event': widget.selectedEvent?.displayName,
+          'radius_miles': radiusMiles,
+        },
+      );
       final businessAddress = _businessAddressController.text.trim();
       final targetLocation = await _resolveTargetLocation(
         tier: tier,
@@ -310,6 +323,19 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       final paymentFollowUpNotes = _paymentFollowUpNotesFor(
         tier: tier,
         checkout: checkout,
+      );
+
+      await _trackFunnelStage(
+        stage: 'checkout_completed',
+        userId: userId,
+        status: paymentStatus,
+        metadata: <String, Object?>{
+          'tier': tier.value,
+          'subscription_id': checkout.subscriptionId,
+          'product_id': checkout.productId,
+          'price_id': checkout.priceId,
+          'payment_intent_status': checkout.paymentIntentStatus,
+        },
       );
 
       final now = DateTime.now();
@@ -359,6 +385,16 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       );
 
       await _sponsorshipRepository.createSponsorship(sponsorship);
+      await _trackFunnelStage(
+        stage: 'review_queued',
+        userId: userId,
+        status: paymentFollowUpStatus,
+        metadata: <String, Object?>{
+          'tier': tier.value,
+          'sponsorship_id': sponsorshipId,
+          'subscription_id': checkout.subscriptionId,
+        },
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -370,6 +406,16 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       );
       Navigator.pop(context);
     } on Exception catch (e) {
+      await _trackFunnelStage(
+        stage: 'checkout_failed',
+        userId: FirebaseAuth.instance.currentUser?.uid,
+        status: 'submit_failed',
+        metadata: <String, Object?>{
+          'type': widget.type,
+          'duration': widget.duration,
+          'error': '$e',
+        },
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -384,6 +430,21 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       }
     }
   }
+
+  Future<void> _trackFunnelStage({
+    required String stage,
+    String? userId,
+    String? status,
+    Map<String, Object?> metadata = const <String, Object?>{},
+  }) => _funnelService.trackStage(
+    flow: 'sponsorships',
+    stage: stage,
+    productFamily: 'sponsorship',
+    placement: widget.type,
+    status: status,
+    userId: userId,
+    metadata: metadata,
+  );
 
   Future<Location?> _resolveTargetLocation({
     required SponsorshipTier tier,

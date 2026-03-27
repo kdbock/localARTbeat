@@ -4,6 +4,7 @@ import 'package:artbeat_capture/src/widgets/tour/capture_tour_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -102,7 +103,6 @@ class _EnhancedCaptureDashboardScreenState
   }
 
   // Services
-  final CaptureService _captureService = CaptureService();
   final UserService _userService = UserService();
 
   // Animations
@@ -156,19 +156,20 @@ class _EnhancedCaptureDashboardScreenState
     setState(() => _isLoading = true);
 
     try {
+      final captureService = context.read<CaptureService>();
       final user = await _userService.getCurrentUserModel();
 
       List<CaptureModel> recentCaptures = [];
       List<CaptureModel> communityCaptures = [];
 
       if (user != null) {
-        recentCaptures = await _captureService.getUserCaptures(
+        recentCaptures = await captureService.getUserCaptures(
           userId: user.id,
           limit: 6,
         );
       }
 
-      communityCaptures = await _captureService.getAllCaptures(limit: 8);
+      communityCaptures = await captureService.getAllCaptures(limit: 8);
 
       if (!mounted) return;
       setState(() {

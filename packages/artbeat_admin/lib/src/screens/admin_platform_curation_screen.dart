@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/admin_service.dart';
 import '../services/admin_broadcast_service.dart';

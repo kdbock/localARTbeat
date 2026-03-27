@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/src/theme/artbeat_typography.dart';
+import 'package:artbeat_core/artbeat_core.dart' show ArtbeatTypography;
 
 class ArtworkThemeWrapper extends StatelessWidget {
   final Widget child;

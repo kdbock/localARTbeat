@@ -1,4 +1,6 @@
 import '../utils/artist_logger.dart';
+import 'package:artbeat_core/subscription_model.dart'
+    as core_subscription;
 import 'package:artbeat_core/artbeat_core.dart'
     show
         UserService,
@@ -6,8 +8,6 @@ import 'package:artbeat_core/artbeat_core.dart'
         ArtistProfileModel,
         UserModel,
         UserType;
-import 'package:artbeat_core/src/models/subscription_model.dart'
-    as core_subscription;
 import '../models/subscription_model.dart' as artist_subscription;
 import 'subscription_service.dart' as artist_service;
 

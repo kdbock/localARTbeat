@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_core/src/utils/coordinate_validator.dart'
-    show SimpleLatLng;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ArtistProfileService {
@@ -571,7 +569,7 @@ class ArtistProfileService {
     if (trimmed.isEmpty) return null;
 
     final zip = _extractZip(trimmed);
-    SimpleLatLng? coords;
+    core.SimpleLatLng? coords;
     if (zip != null) {
       coords = await core.LocationUtils.getCoordinatesFromZipCode(zip);
     } else {

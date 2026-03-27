@@ -6,14 +6,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedStorageService, CaptureModel;
+    show EnhancedStorageService, CaptureModel, ConnectivityService;
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 
-// Core package imports with prefix
-import 'package:artbeat_core/src/services/connectivity_service.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 // Local imports

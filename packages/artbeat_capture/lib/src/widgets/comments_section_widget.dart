@@ -4,6 +4,7 @@ import 'package:artbeat_capture/src/services/capture_service.dart';
 import 'comment_item_widget.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show AppLogger, ImageUrlValidator;
+import 'package:provider/provider.dart';
 
 /// Widget for displaying and managing comments on a capture
 class CommentsSectionWidget extends StatefulWidget {
@@ -27,7 +28,7 @@ class CommentsSectionWidget extends StatefulWidget {
 }
 
 class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
-  final _captureService = CaptureService();
+  late final CaptureService _captureService;
   final _commentController = TextEditingController();
   late Future<List<dynamic>> _commentsFuture;
   bool _isSubmitting = false;
@@ -35,6 +36,7 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
   @override
   void initState() {
     super.initState();
+    _captureService = context.read<CaptureService>();
     _loadComments();
   }
 

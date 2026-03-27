@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/utils/coordinate_validator.dart';
 
 class GeoWeightingUtils {
   static final Map<String, SimpleLatLng?> _locationCache = {};

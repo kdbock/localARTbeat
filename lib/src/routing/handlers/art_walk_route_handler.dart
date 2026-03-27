@@ -5,6 +5,7 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../route_utils.dart';
 
@@ -100,7 +101,9 @@ class ArtWalkRouteHandler {
                 );
               }
               return FutureBuilder<List<capture.CaptureModel>>(
-                future: capture.CaptureService().getCapturesForUser(userId),
+                future: context.read<capture.CaptureService>().getCapturesForUser(
+                  userId,
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

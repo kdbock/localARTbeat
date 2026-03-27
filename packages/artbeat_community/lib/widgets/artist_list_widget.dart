@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/utils/coordinate_validator.dart'
-    show SimpleLatLng;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 

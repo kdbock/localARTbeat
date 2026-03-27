@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_capture/src/services/capture_service.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
+import 'package:provider/provider.dart';
 
 /// A reusable like button widget for captures
 class LikeButtonWidget extends StatefulWidget {
@@ -24,13 +25,14 @@ class LikeButtonWidget extends StatefulWidget {
 
 class _LikeButtonWidgetState extends State<LikeButtonWidget> {
   late int _likeCount;
+  late final CaptureService _captureService;
   bool _isLiked = false;
   bool _isLoading = false;
-  final _captureService = CaptureService();
 
   @override
   void initState() {
     super.initState();
+    _captureService = context.read<CaptureService>();
     _likeCount = widget.initialLikeCount;
     _isLiked = false; // Ensure initialized before async call
     _checkIfLiked();

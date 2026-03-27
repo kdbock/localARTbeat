@@ -41,6 +41,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
   late LocalAdService _adService;
   late LocalAdIapService _adIapService;
+  final MonetizationFunnelService _funnelService = MonetizationFunnelService();
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     _selectedPlacement = _availablePlacementsForSelectedType.first;
     _adService = LocalAdService();
     _adIapService = LocalAdIapService();
+    _trackFunnelStage(stage: 'form_viewed');
   }
 
   @override
@@ -146,6 +148,17 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
+      await _trackFunnelStage(
+        stage: 'checkout_started',
+        userId: user.uid,
+        metadata: <String, Object?>{
+          'size': _selectedSize.name,
+          'duration_days': _selectedDuration.days,
+          'placement': _selectedPlacement.name,
+          'has_images': _selectedImages.isNotEmpty,
+        },
+      );
+
       _uploadedImageUrls = await _uploadImages();
       if (_selectedImages.isNotEmpty &&
           _uploadedImageUrls.length != _selectedImages.length) {
@@ -154,6 +167,19 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
       final purchase = await _adIapService.purchaseAdSubscription(
         size: _selectedSize,
+      );
+
+      await _trackFunnelStage(
+        stage: 'checkout_completed',
+        userId: user.uid,
+        status: 'purchase_succeeded',
+        amount: purchase.price,
+        currencyCode: purchase.currencyCode,
+        metadata: <String, Object?>{
+          'product_id': purchase.productId,
+          'purchase_id': purchase.purchaseId,
+          'transaction_id': purchase.transactionId,
+        },
       );
 
       final now = DateTime.now();
@@ -195,6 +221,19 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         verificationData: purchase.verificationData,
       );
 
+      await _trackFunnelStage(
+        stage: creationOutcome.adId != null ? 'review_queued' : 'recovery_required',
+        userId: user.uid,
+        status: creationOutcome.adId != null ? 'pending_review' : 'verification_pending',
+        amount: purchase.price,
+        currencyCode: purchase.currencyCode,
+        metadata: <String, Object?>{
+          'ad_id': creationOutcome.adId,
+          'recovery_id': creationOutcome.recoveryId,
+          'product_id': purchase.productId,
+        },
+      );
+
       if (mounted) {
         if (creationOutcome.adId != null) {
           await _showSubmissionSuccessDialog();
@@ -203,6 +242,17 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         }
       }
     } catch (e) {
+      await _trackFunnelStage(
+        stage: 'checkout_failed',
+        userId: FirebaseAuth.instance.currentUser?.uid,
+        status: 'submit_failed',
+        metadata: <String, Object?>{
+          'error': e.toString(),
+          'size': _selectedSize.name,
+          'duration_days': _selectedDuration.days,
+          'placement': _selectedPlacement.name,
+        },
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -220,6 +270,25 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       }
     }
   }
+
+  Future<void> _trackFunnelStage({
+    required String stage,
+    String? userId,
+    String? status,
+    String? currencyCode,
+    double? amount,
+    Map<String, Object?> metadata = const <String, Object?>{},
+  }) => _funnelService.trackStage(
+    flow: 'local_ads',
+    stage: stage,
+    productFamily: 'local_ad',
+    placement: _selectedPlacement.name,
+    status: status,
+    userId: userId,
+    currencyCode: currencyCode,
+    amount: amount,
+    metadata: metadata,
+  );
 
   @override
   Widget build(BuildContext context) {

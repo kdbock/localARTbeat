@@ -88,6 +88,18 @@ jobs:
             fi
           done
 
+      - name: Check provider-owned capture service boundaries
+        run: bash tools/architecture/check_provider_owned_capture_service.sh
+
+      - name: Check package boundaries
+        run: python3 tools/architecture/check_package_boundaries.py
+
+      - name: Check sibling dependency drift
+        run: python3 tools/architecture/check_sibling_dependency_drift.py
+
+      - name: Check package dependency inventory
+        run: python3 tools/architecture/generate_package_dependency_inventory.py --check
+
   # Unit tests for main app
   main_app_tests:
     name: Main App Tests

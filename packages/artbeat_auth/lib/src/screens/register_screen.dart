@@ -9,11 +9,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import '../constants/routes.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
-import 'package:artbeat_core/artbeat_core.dart' show UserService;
-import 'package:artbeat_core/artbeat_core.dart' show LegalConsentService;
-import 'package:artbeat_core/src/screens/terms_of_service_screen.dart';
-import 'package:artbeat_core/src/screens/privacy_policy_screen.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    show
+        ArtbeatInput,
+        LegalConsentService,
+        PrivacyPolicyScreen,
+        TermsOfServiceScreen,
+        UserService;
 
 /// Registration screen with email/password account creation (Quest theme)
 class RegisterScreen extends StatefulWidget {

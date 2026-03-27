@@ -13,6 +13,7 @@ import 'package:artbeat_core/src/services/filter_service.dart';
 import 'package:artbeat_core/src/services/in_app_purchase_service.dart';
 import 'package:artbeat_core/src/services/in_app_subscription_service.dart';
 import 'package:artbeat_core/src/services/leaderboard_service.dart';
+import 'package:artbeat_core/src/services/monetization_funnel_service.dart';
 import 'package:artbeat_core/src/services/payment_analytics_service.dart';
 import 'package:artbeat_core/src/services/search/search_analytics.dart';
 import 'package:artbeat_core/src/services/social_activity_read_service.dart';
@@ -126,6 +127,13 @@ void main() {
       'LeaderboardService can be constructed without eager Firebase access',
       () {
         expect(LeaderboardService.new, returnsNormally);
+      },
+    );
+
+    test(
+      'MonetizationFunnelService can be constructed without eager Firebase access',
+      () {
+        expect(MonetizationFunnelService.new, returnsNormally);
       },
     );
 

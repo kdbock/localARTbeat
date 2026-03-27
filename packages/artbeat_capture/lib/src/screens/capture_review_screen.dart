@@ -2,6 +2,7 @@ import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -27,8 +28,6 @@ class _CaptureReviewScreenState extends State<CaptureReviewScreen> {
   bool _isSubmitting = false;
   CaptureModel? _capture;
 
-  final CaptureService _captureService = CaptureService();
-
   @override
   void initState() {
     super.initState();
@@ -44,7 +43,9 @@ class _CaptureReviewScreenState extends State<CaptureReviewScreen> {
 
   Future<void> _loadCapture() async {
     try {
-      final capture = await _captureService.getCaptureById(widget.captureId);
+      final capture = await context.read<CaptureService>().getCaptureById(
+        widget.captureId,
+      );
       if (mounted) {
         setState(() => _capture = capture);
       }

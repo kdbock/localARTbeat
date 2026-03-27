@@ -4,6 +4,7 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../route_utils.dart';
 
@@ -27,7 +28,8 @@ class CaptureRouteHandler {
 
       case core.AppRoutes.captureBrowse:
         return _buildCaptureListRoute(
-          future: capture.CaptureService().getAllCapturesFresh(),
+          futureBuilder: (context) =>
+              context.read<capture.CaptureService>().getAllCapturesFresh(),
           errorText: 'Error loading community captures',
           builder: (captures) => capture.CapturesListScreen(captures: captures),
         );
@@ -62,17 +64,23 @@ class CaptureRouteHandler {
           return RouteUtils.createErrorRoute('Capture ID is required');
         }
         return RouteUtils.createMainLayoutRoute(
-          child: FutureBuilder<core.CaptureModel?>(
-            future: capture.CaptureService().getCaptureById(captureId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError || snapshot.data == null) {
-                return const Center(child: Text('Error loading capture'));
-              }
-              return capture.CaptureDetailViewerScreen(capture: snapshot.data!);
-            },
+          child: Builder(
+            builder: (context) => FutureBuilder<core.CaptureModel?>(
+              future: context.read<capture.CaptureService>().getCaptureById(
+                captureId,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError || snapshot.data == null) {
+                  return const Center(child: Text('Error loading capture'));
+                }
+                return capture.CaptureDetailViewerScreen(
+                  capture: snapshot.data!,
+                );
+              },
+            ),
           ),
         );
 
@@ -90,7 +98,8 @@ class CaptureRouteHandler {
 
       case core.AppRoutes.captureNearby:
         return _buildCaptureListRoute(
-          future: capture.CaptureService().getPublicCaptures(),
+          futureBuilder: (context) =>
+              context.read<capture.CaptureService>().getPublicCaptures(),
           useLoadingScreen: true,
           retryRouteName: core.AppRoutes.captureNearby,
           builder: (captures) => capture.CapturesListScreen(captures: captures),
@@ -98,7 +107,8 @@ class CaptureRouteHandler {
 
       case core.AppRoutes.capturePopular:
         return _buildCaptureListRoute(
-          future: capture.CaptureService().getAllCapturesFresh(),
+          futureBuilder: (context) =>
+              context.read<capture.CaptureService>().getAllCapturesFresh(),
           useLoadingScreen: true,
           retryRouteName: core.AppRoutes.capturePopular,
           builder: (captures) => capture.CapturesListScreen(captures: captures),
@@ -139,7 +149,9 @@ class CaptureRouteHandler {
               );
             }
             return FutureBuilder<List<capture.CaptureModel>>(
-              future: capture.CaptureService().getCapturesForUser(userId),
+              future: context.read<capture.CaptureService>().getCapturesForUser(
+                userId,
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -174,33 +186,36 @@ class CaptureRouteHandler {
       );
 
   Route<dynamic> _buildCaptureListRoute({
-    required Future<List<capture.CaptureModel>> future,
+    required Future<List<capture.CaptureModel>> Function(BuildContext context)
+    futureBuilder,
     required Widget Function(List<capture.CaptureModel> captures) builder,
     String errorText = 'Error loading captures',
     bool useLoadingScreen = false,
     String? retryRouteName,
   }) => RouteUtils.createMainLayoutRoute(
-    child: FutureBuilder<List<capture.CaptureModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          if (useLoadingScreen) {
-            return const core.LoadingScreen();
+    child: Builder(
+      builder: (context) => FutureBuilder<List<capture.CaptureModel>>(
+        future: futureBuilder(context),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            if (useLoadingScreen) {
+              return const core.LoadingScreen();
+            }
+            return const Center(child: CircularProgressIndicator());
           }
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          if (retryRouteName != null) {
-            return _buildRetryableErrorState(
-              context,
-              error: snapshot.error.toString(),
-              retryRouteName: retryRouteName,
-            );
+          if (snapshot.hasError) {
+            if (retryRouteName != null) {
+              return _buildRetryableErrorState(
+                context,
+                error: snapshot.error.toString(),
+                retryRouteName: retryRouteName,
+              );
+            }
+            return Center(child: Text(errorText));
           }
-          return Center(child: Text(errorText));
-        }
-        return builder(snapshot.data ?? []);
-      },
+          return builder(snapshot.data ?? []);
+        },
+      ),
     ),
   );
 

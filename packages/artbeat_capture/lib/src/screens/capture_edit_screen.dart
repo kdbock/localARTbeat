@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:provider/provider.dart';
 
 class CaptureEditScreen extends StatefulWidget {
   final CaptureModel capture;
@@ -59,7 +60,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final captureService = CaptureService();
+      final captureService = context.read<CaptureService>();
       final updates = <String, dynamic>{
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),

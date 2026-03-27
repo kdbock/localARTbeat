@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_core/src/services/connectivity_service.dart';
+import 'package:artbeat_core/artbeat_core.dart' show ConnectivityService;
 
 import 'art_walk_service_test.mocks.dart';
 

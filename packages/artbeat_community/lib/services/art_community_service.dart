@@ -5,8 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/art_models.dart';
 import '../models/post_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/utils/coordinate_validator.dart'
-    show SimpleLatLng;
 
 /// Unified service for art community operations
 /// Simplified and focused on core art-sharing functionality

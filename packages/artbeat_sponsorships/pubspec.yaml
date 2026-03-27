@@ -9,10 +9,6 @@ environment:
   flutter: ">=3.35.0"
 
 dependencies:
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-  artbeat_auth:
-    path: ../artbeat_auth
   artbeat_core:
     path: ../artbeat_core
   cloud_firestore: ^6.1.2

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/achievement_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,6 @@ import 'package:artbeat_profile/src/widgets/progress_tab.dart';
 import 'package:artbeat_profile/src/widgets/enhanced_stats_grid.dart';
 import 'package:artbeat_profile/src/widgets/level_progress_bar.dart';
 import 'package:artbeat_profile/src/widgets/streak_display.dart';
-import 'package:artbeat_core/src/services/achievement_service.dart';
 import '../services/profile_connection_service.dart';
 
 class ProfileViewScreen extends StatefulWidget {

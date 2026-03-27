@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/src/services/auth_service.dart';
+import 'package:artbeat_core/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../routes/admin_routes.dart';
 

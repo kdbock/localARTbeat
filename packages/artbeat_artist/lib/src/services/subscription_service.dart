@@ -5,8 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/subscription_model.dart';
 import '../models/top_follower_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/utils/coordinate_validator.dart'
-    show SimpleLatLng;
 import 'error_monitoring_service.dart';
 import '../utils/artist_logger.dart';
 import '../utils/input_validator.dart';

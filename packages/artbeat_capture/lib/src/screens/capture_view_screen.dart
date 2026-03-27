@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show AppLogger, CaptureStatus, CaptureModel;
+import 'package:provider/provider.dart';
 
 class CaptureViewScreen extends StatefulWidget {
   final File imageFile;
@@ -35,6 +36,8 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      final captureService = context.read<CaptureService>();
+
       // Get current user
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -81,7 +84,6 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         status: CaptureStatus.approved,
       );
 
-      final captureService = CaptureService();
       final outcome = await captureService.createCaptureFromLocalImage(
         capture: capture,
         localImagePath: widget.imageFile.path,

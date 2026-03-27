@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_capture/src/services/capture_service.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show AppLogger, ImageUrlValidator;
+import 'package:provider/provider.dart';
 
 /// Widget for displaying a single comment
 class CommentItemWidget extends StatefulWidget {
@@ -27,12 +28,13 @@ class CommentItemWidget extends StatefulWidget {
 class _CommentItemWidgetState extends State<CommentItemWidget> {
   late bool _isLiked;
   late int _likeCount;
+  late final CaptureService _captureService;
   bool _isDeleting = false;
-  final _captureService = CaptureService();
 
   @override
   void initState() {
     super.initState();
+    _captureService = context.read<CaptureService>();
     _likeCount = (widget.comment['likeCount'] as int?) ?? 0;
     _isLiked =
         (widget.comment['likedBy'] as List?)?.contains(widget.currentUserId) ??

@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:artbeat_core/src/services/purchase_verification_service.dart';
+import 'package:artbeat_core/artbeat_core.dart' show PurchaseVerificationService;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

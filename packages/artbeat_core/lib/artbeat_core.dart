@@ -60,6 +60,7 @@ export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 // 2025 Enhanced Services (Consolidated into UnifiedPaymentService)
 export 'src/services/unified_payment_service.dart'
     show
+        PaymentMethod,
         UnifiedPaymentService,
         PaymentResult,
         SubscriptionResult,
@@ -79,10 +80,14 @@ export 'src/services/notification_service.dart'
     show NotificationService, NotificationType;
 export 'src/services/messaging_status_service.dart'
     show MessagingStatusService;
+export 'src/services/purchase_verification_service.dart'
+    show PurchaseVerificationService;
 export 'src/services/feedback_service.dart' show FeedbackService;
 export 'src/services/legal_consent_service.dart' show LegalConsentService;
 export 'src/services/maps_diagnostic_service.dart' show MapsDiagnosticService;
 export 'src/services/image_management_service.dart' show ImageManagementService;
+export 'src/services/monetization_funnel_service.dart'
+    show MonetizationFunnelService;
 export 'src/services/onboarding_service.dart' show OnboardingService;
 export 'src/services/leaderboard_service.dart'
     show LeaderboardService, LeaderboardCategory, LeaderboardEntry;
@@ -241,6 +246,8 @@ export 'src/utils/image_url_validator.dart' show ImageUrlValidator;
 export 'src/utils/distance_utils.dart' show DistanceUtils;
 export 'src/utils/device_utils.dart' show DeviceUtils;
 export 'src/utils/firestore_utils.dart' show FirestoreUtils;
+export 'src/utils/coordinate_validator.dart'
+    show CoordinateValidator, SimpleLatLng;
 
 // Export Screens
 export 'src/screens/splash_screen.dart' show SplashScreen;
