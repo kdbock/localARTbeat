@@ -26,6 +26,13 @@ Before upload, confirm these are true:
 - verify version/build numbers are correct
 - review relevant decisions in `DECISIONS.md`
 - confirm required env vars and secrets are available
+- run the release config gate:
+  `bash tools/architecture/check_release_payment_config.sh`
+- run the monetization prerequisite gate:
+  `bash tools/architecture/check_release_monetization_prereqs.sh`
+- if using the convenience build script, confirm it still runs both gates before
+  building:
+  `scripts/build_secure.sh`
 
 ## Code Quality
 
@@ -38,6 +45,8 @@ Before upload, confirm these are true:
 Recommended baseline commands:
 
 ```bash
+bash tools/architecture/check_release_payment_config.sh
+bash tools/architecture/check_release_monetization_prereqs.sh
 flutter analyze
 flutter test
 flutter test test/localization_key_parity_test.dart
@@ -75,10 +84,16 @@ Checks:
 - confirm callable/function names and secrets are unchanged or intentionally
   migrated
 - check for rollback path before production deploy
+- confirm the monetization prerequisite gate still passes after any backend
+  change:
+  `bash tools/architecture/check_release_monetization_prereqs.sh`
 
 ## Android Release
 
 - run `flutter pub get`
+- run release hardening gates before building:
+  - `bash tools/architecture/check_release_payment_config.sh`
+  - `bash tools/architecture/check_release_monetization_prereqs.sh`
 - build release AAB
 - verify release build succeeds cleanly
 - test critical flows on at least one Android device/emulator
@@ -88,6 +103,9 @@ Checks:
 Recommended commands:
 
 ```bash
+bash tools/architecture/check_release_payment_config.sh
+bash tools/architecture/check_release_monetization_prereqs.sh
+./scripts/build_secure.sh
 flutter build appbundle --release
 flutter build apk --release
 ```
@@ -95,6 +113,9 @@ flutter build apk --release
 ## iOS Release
 
 - run `flutter pub get`
+- run release hardening gates before building:
+  - `bash tools/architecture/check_release_payment_config.sh`
+  - `bash tools/architecture/check_release_monetization_prereqs.sh`
 - build iOS release
 - verify archive/signing flow
 - test critical flows on at least one iOS device/simulator where practical
@@ -104,6 +125,8 @@ flutter build apk --release
 Recommended command:
 
 ```bash
+bash tools/architecture/check_release_payment_config.sh
+bash tools/architecture/check_release_monetization_prereqs.sh
 flutter build ios --release --no-codesign
 ```
 

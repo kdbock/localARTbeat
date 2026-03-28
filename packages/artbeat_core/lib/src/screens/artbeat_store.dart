@@ -1,10 +1,10 @@
 import 'dart:ui';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ArtbeatStoreScreen extends StatefulWidget {
   const ArtbeatStoreScreen({super.key});
@@ -15,6 +15,13 @@ class ArtbeatStoreScreen extends StatefulWidget {
 
 class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   final ScrollController _scrollController = ScrollController();
+  late StorePreviewReadService _storePreviewReadService;
+
+  @override
+  void initState() {
+    super.initState();
+    _storePreviewReadService = context.read<StorePreviewReadService>();
+  }
 
   @override
   void dispose() {
@@ -298,37 +305,13 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   Widget _buildAuctionsPreview() {
     return SizedBox(
       height: 200,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('artwork')
-            .where('isPublic', isEqualTo: true)
-            .where('isAuction', isEqualTo: true)
-            .limit(5)
-            .snapshots(),
+      child: StreamBuilder<List<ArtworkModel>>(
+        stream: _storePreviewReadService.watchAuctionPreviewArtworks(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            // Fallback to auctionEnabled if isAuction is not yet used in DB
-            return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('artwork')
-                  .where('isPublic', isEqualTo: true)
-                  .where('auctionEnabled', isEqualTo: true)
-                  .limit(5)
-                  .snapshots(),
-              builder: (context, snap2) {
-                if (!snap2.hasData || snap2.data!.docs.isEmpty) {
-                  return _buildEmptySection('store_empty_auctions'.tr());
-                }
-                final artworks = snap2.data!.docs
-                    .map((doc) => ArtworkModel.fromFirestore(doc))
-                    .toList();
-                return _buildMarketList(artworks);
-              },
-            );
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return _buildEmptySection('store_empty_auctions'.tr());
           }
-          final artworks = snapshot.data!.docs
-              .map((doc) => ArtworkModel.fromFirestore(doc))
-              .toList();
+          final artworks = snapshot.data!;
           return _buildMarketList(artworks);
         },
       ),
@@ -348,20 +331,13 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   Widget _buildArtMarketPreview() {
     return SizedBox(
       height: 240,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('artwork')
-            .where('isPublic', isEqualTo: true)
-            .where('isForSale', isEqualTo: true)
-            .limit(5)
-            .snapshots(),
+      child: StreamBuilder<List<ArtworkModel>>(
+        stream: _storePreviewReadService.watchSalePreviewArtworks(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return _buildEmptySection('store_empty_sale'.tr());
           }
-          final artworks = snapshot.data!.docs
-              .map((doc) => ArtworkModel.fromFirestore(doc))
-              .toList();
+          final artworks = snapshot.data!;
           return _buildMarketList(artworks);
         },
       ),
@@ -574,28 +550,18 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   Widget _buildKioskLanePreview() {
     return SizedBox(
       height: 60,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('artistProfiles')
-            .where(
-              'kioskLaneUntil',
-              isGreaterThan: Timestamp.fromDate(DateTime.now()),
-            )
-            .orderBy('kioskLaneUntil', descending: true)
-            .limit(10)
-            .snapshots(),
+      child: StreamBuilder<List<ArtistProfileModel>>(
+        stream: _storePreviewReadService.watchKioskLaneArtists(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SizedBox();
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const SizedBox();
           }
 
-          final artists = snapshot.data!.docs
-              .map((doc) => ArtistProfileModel.fromFirestore(doc))
-              .toList();
+          final artists = snapshot.data!;
 
           return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 24),

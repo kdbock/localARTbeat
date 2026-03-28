@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
 
-// Import the models and services from our packages
-import 'package:artbeat_artist/src/services/visibility_service.dart';
-import 'package:artbeat_artist/src/services/artwork_service.dart';
-import 'package:artbeat_artist/src/models/artwork_model.dart';
-import 'package:artbeat_artist/src/services/subscription_service.dart'
-    as artist_subscription;
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' as core;
-// Import provider for subscriptions
+import '../models/artwork_model.dart';
 
 /// Visibility Insights Screen for Artists with Pro and Gallery plans
 class VisibilityInsightsScreen extends StatefulWidget {
@@ -22,11 +17,10 @@ class VisibilityInsightsScreen extends StatefulWidget {
 }
 
 class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final artist_subscription.SubscriptionService _subscriptionService =
-      artist_subscription.SubscriptionService();
-  final ArtworkService _artworkService = ArtworkService();
-  final VisibilityService _visibilityService = VisibilityService();
+  late final core.UserService _userService;
+  late final artist.SubscriptionService _subscriptionService;
+  late final artist.ArtworkService _artworkService;
+  late final artist.VisibilityService _visibilityService;
 
   bool _isLoading = true;
   bool _hasProAccess = false;
@@ -41,6 +35,10 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
   @override
   void initState() {
     super.initState();
+    _userService = context.read<core.UserService>();
+    _subscriptionService = context.read<artist.SubscriptionService>();
+    _artworkService = context.read<artist.ArtworkService>();
+    _visibilityService = context.read<artist.VisibilityService>();
     _loadData();
   }
 
@@ -50,8 +48,11 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
     });
 
     try {
-      // Check if user has pro subscription
-      final String userId = _auth.currentUser?.uid ?? '';
+      final userId = _userService.currentUserId;
+      if (userId == null || userId.isEmpty) {
+        throw Exception('User not authenticated');
+      }
+
       final userSubscription = await _subscriptionService
           .getCurrentSubscription(userId);
       final hasProAccess =
@@ -218,8 +219,8 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
     }
 
     // Get values with proper type casting
-    final int profileViews = getIntValue('profileViews');
-    final int artworkViews = getIntValue('artworkViews');
+    final int profileViews = getIntValue('profileViewsCount');
+    final int artworkViews = getIntValue('artworkViewsCount');
     final int favorites = getIntValue('favorites');
     final int leadClicks = getIntValue('leadClicks');
 

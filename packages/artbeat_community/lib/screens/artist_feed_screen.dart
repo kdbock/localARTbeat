@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/post_model.dart';
@@ -31,7 +31,6 @@ class ArtistFeedScreen extends StatefulWidget {
 }
 
 class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
-  final ArtCommunityService _communityService = ArtCommunityService();
   List<PostModel> _posts = [];
   bool _isLoading = true;
 
@@ -41,18 +40,14 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
     _loadArtistAndPosts();
   }
 
-  @override
-  void dispose() {
-    _communityService.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadArtistAndPosts() async {
     setState(() => _isLoading = true);
 
     try {
       AppLogger.info('🎨 Loading artist feed for: ${widget.artistId}');
-      final allPosts = await _communityService.getFeed(limit: 100);
+      final allPosts = await context.read<ArtCommunityService>().getFeed(
+        limit: 100,
+      );
       final artistPosts = allPosts
           .where((post) => post.userId == widget.artistId)
           .toList();
@@ -87,8 +82,8 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
 
   void _handleLike(PostModel post) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('community_artist_feed.sign_in_like'.tr())),
@@ -118,7 +113,9 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
         });
       }
 
-      final success = await _communityService.toggleLike(post.id);
+      final success = await context.read<ArtCommunityService>().toggleLike(
+        post.id,
+      );
       if (!success && postIndex != -1) {
         setState(() {
           final currentLikeCount = _posts[postIndex].engagementStats.likeCount;
@@ -153,8 +150,8 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
 
   void _handleShare(PostModel post) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('community_artist_feed.sign_in_share'.tr())),
@@ -192,7 +189,8 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
 
       final shareContent = sections.join('\n\n');
 
-      final postId = await _communityService.createPost(
+      final communityService = context.read<ArtCommunityService>();
+      final postId = await communityService.createPost(
         content: shareContent,
         imageUrls: post.imageUrls,
         tags: post.tags,
@@ -207,7 +205,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
         }
 
         await _loadArtistAndPosts();
-        _communityService.incrementShareCount(post.id);
+        communityService.incrementShareCount(post.id);
       } else {
         throw Exception('share_failed');
       }
@@ -295,7 +293,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
-              communityService: _communityService,
+              communityService: context.read<ArtCommunityService>(),
               onTap: () => _handlePostTap(post),
               onLike: () => _handleLike(post),
               onShare: () => _handleShare(post),

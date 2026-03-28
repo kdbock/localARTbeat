@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/achievement_service.dart';
+import 'package:artbeat_core/auth_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_profile/src/widgets/recent_badges_carousel.dart';
@@ -30,12 +30,9 @@ class ProfileViewScreen extends StatefulWidget {
 
 class _ProfileViewScreenState extends State<ProfileViewScreen>
     with SingleTickerProviderStateMixin {
-  final User? currentUser = FirebaseAuth.instance.currentUser;
-  final UserService _userService = UserService();
-  final ProfileConnectionService _connectionService =
-      ProfileConnectionService();
+  late AuthService _authService;
+  late UserService _userService;
   late TabController _tabController;
-  final AchievementService _achievementService = AchievementService();
 
   bool _isLoading = true;
   UserModel? _userModel;
@@ -54,6 +51,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
   @override
   void initState() {
     super.initState();
+    _authService = context.read<AuthService>();
+    _userService = context.read<UserService>();
     _tabController = TabController(length: 3, vsync: this);
     _loadUserProfile();
     _loadUserCaptures();
@@ -113,7 +112,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
         // Try to reload user data from authentication
         try {
-          final currentUser = FirebaseAuth.instance.currentUser;
+          final currentUser = _authService.currentUser;
           if (currentUser != null) {
             userModel = userModel.copyWith(
               email: currentUser.email,
@@ -194,7 +193,9 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
   Future<void> _loadUserAchievements() async {
     try {
-      final achievements = await _achievementService.getUserAchievements();
+      final achievements = await context
+          .read<AchievementService>()
+          .getUserAchievements();
       if (mounted) {
         setState(() {
           _userAchievements = achievements;
@@ -207,45 +208,16 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
   Future<void> _loadStreakData() async {
     try {
-      // Fetch streak data from Firestore stats field
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .get();
-
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-        final stats = userData?['stats'] as Map<String, dynamic>?;
-        final categoryStreaks =
-            userData?['categoryStreaks'] as Map<String, dynamic>?;
-
-        if (mounted) {
-          setState(() {
-            _loginStreak = stats?['loginStreak'] as int? ?? 0;
-            // Try to get challenge streak from stats or categoryStreaks
-            _challengeStreak = stats?['challengeStreak'] as int? ?? 0;
-
-            // Get category streak data
-            if (categoryStreaks != null && categoryStreaks.isNotEmpty) {
-              // Get the first category with highest streak
-              int maxStreak = 0;
-              String? topCategory;
-
-              categoryStreaks.forEach((category, data) {
-                if (data is Map) {
-                  final currentStreak = data['currentStreak'] as int? ?? 0;
-                  if (currentStreak > maxStreak) {
-                    maxStreak = currentStreak;
-                    topCategory = category;
-                  }
-                }
-              });
-
-              _categoryStreak = maxStreak;
-              _categoryName = topCategory;
-            }
-          });
-        }
+      final streakSummary = await _userService.getUserStreakSummary(
+        widget.userId,
+      );
+      if (mounted) {
+        setState(() {
+          _loginStreak = streakSummary.loginStreak;
+          _challengeStreak = streakSummary.challengeStreak;
+          _categoryStreak = streakSummary.categoryStreak;
+          _categoryName = streakSummary.categoryName;
+        });
       }
     } catch (e) {
       AppLogger.error('Error loading streak data: $e');
@@ -295,10 +267,14 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
   }
 
   Future<void> _blockUser() async {
+    final currentUser = _authService.currentUser;
     if (currentUser == null) return;
 
     try {
-      await _connectionService.blockConnection(currentUser!.uid, widget.userId);
+      await context.read<ProfileConnectionService>().blockConnection(
+        currentUser.uid,
+        widget.userId,
+      );
       if (mounted) {
         setState(() {
           _isUserBlocked = true;
@@ -540,29 +516,21 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
             style: _heroSectionTitleStyle,
           ),
           const SizedBox(height: 10),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .doc(widget.userId)
-                .collection('boost_badges')
-                .orderBy('awardedAt', descending: true)
-                .limit(12)
-                .snapshots(),
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: _userService.watchUserBoostBadges(widget.userId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Text(
                   'profile_supporter_badges_empty'.tr(),
                   style: _heroMetaStyle,
                 );
               }
 
-              final badges = snapshot.data!.docs
-                  .map((doc) => doc.data() as Map<String, dynamic>)
-                  .toList();
+              final badges = snapshot.data!;
 
               return Wrap(
                 spacing: 8,

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +11,7 @@ import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
 
 import '../../models/direct_commission_model.dart';
 import '../../models/group_models.dart';
+import '../../services/community_service.dart';
 import '../../services/direct_commission_service.dart';
 import '../../widgets/widgets.dart';
 
@@ -43,10 +43,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   late ScrollController _scrollController;
   bool _isCurrentUserArtist = false;
   final ArtistBoostService _giftService = ArtistBoostService();
+  late CommunityService _communityService;
 
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     _checkIfCurrentUserArtist();
@@ -76,8 +78,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   void _checkIfCurrentUserArtist() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && user.uid == widget.artist.userId) {
+    if (_communityService.currentUserId == widget.artist.userId) {
       _isCurrentUserArtist = true;
     }
   }
@@ -91,33 +92,20 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       _lastDocument = null;
     });
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('groupType', isEqualTo: 'artist')
-          .where('userId', isEqualTo: widget.artist.userId)
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(_postsPerPage)
-          .get();
+      final result = await _communityService.getArtistFeedPosts(
+        widget.artist.userId,
+        limit: _postsPerPage,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
-        final loadedPosts = <ArtistGroupPost>[];
-        for (final doc in postsSnapshot.docs) {
-          try {
-            final post = ArtistGroupPost.fromFirestore(doc);
-            loadedPosts.add(post);
-          } catch (e) {
-            // debugPrint('Error parsing post ${doc.id}: $e');
-          }
-        }
-        // Posts loaded successfully
+      _lastDocument = result.lastDocument;
+
+      if (result.posts.isNotEmpty) {
         setState(() {
-          _posts.addAll(loadedPosts);
+          _posts.addAll(result.posts);
           _filteredPosts.clear();
-          _filteredPosts.addAll(loadedPosts);
+          _filteredPosts.addAll(result.posts);
           _isLoading = false;
         });
       } else {
@@ -144,35 +132,21 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     setState(() => _isLoadingMore = true);
 
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('groupType', isEqualTo: 'artist')
-          .where('userId', isEqualTo: widget.artist.userId)
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(_postsPerPage)
-          .get();
+      final result = await _communityService.getArtistFeedPosts(
+        widget.artist.userId,
+        limit: _postsPerPage,
+        lastDocument: _lastDocument,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
+      _lastDocument = result.lastDocument;
 
-        final morePosts = <ArtistGroupPost>[];
-        for (final doc in postsSnapshot.docs) {
-          try {
-            final post = ArtistGroupPost.fromFirestore(doc);
-            morePosts.add(post);
-          } catch (e) {
-            // debugPrint('Error parsing post ${doc.id}: $e');
-          }
-        }
-
+      if (result.posts.isNotEmpty) {
         if (mounted) {
           setState(() {
-            _posts.addAll(morePosts);
-            _filteredPosts.addAll(morePosts);
+            _posts.addAll(result.posts);
+            _filteredPosts.addAll(result.posts);
           });
         }
       }
@@ -195,48 +169,32 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   Future<void> _handleAppreciate(ArtistGroupPost post) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+    final result = await _communityService.appreciatePost(post.id);
+    if (!mounted) return;
 
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(post.id);
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final postDoc = await transaction.get(postRef);
-        if (!postDoc.exists) return;
-
-        final currentCount = postDoc.data()?['applauseCount'] ?? 0;
-        transaction.update(postRef, {'applauseCount': currentCount + 1});
-
-        // Track user appreciation to prevent duplicate appreciations
-        final userAppreciationRef = FirebaseFirestore.instance
-            .collection('user_appreciations')
-            .doc('${user.uid}_${post.id}');
-
-        transaction.set(userAppreciationRef, {
-          'userId': user.uid,
-          'postId': post.id,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      });
-
-      if (mounted) {
+    switch (result) {
+      case PostAppreciationResult.added:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('artist_feed_appreciate_success'.tr())),
         );
-      }
-    } catch (e) {
-      if (mounted) {
+        await _loadArtistPosts();
+      case PostAppreciationResult.alreadyAppreciated:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('already_appreciated'.tr())),
+        );
+      case PostAppreciationResult.unauthenticated:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('sign_in_to_appreciate'.tr())),
+        );
+      case PostAppreciationResult.postNotFound:
+      case PostAppreciationResult.error:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'artist_feed_appreciate_error'.tr(namedArgs: {'error': '$e'}),
+              'artist_feed_appreciate_error'.tr(namedArgs: {'error': post.id}),
             ),
           ),
         );
-      }
     }
   }
 
@@ -246,42 +204,17 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   void _handleFeature(BaseGroupPost post) async {
-    try {
-      // Mark post as featured in Firestore
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(post.id);
+    final didFeature = await _communityService.featurePost(post.id);
+    if (!mounted) return;
 
-      // First check if the document exists
-      final postDoc = await postRef.get();
-      if (!postDoc.exists) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('artist_feed_feature_missing'.tr())),
-          );
-        }
-        return;
-      }
-
-      // Update the post to mark it as featured
-      await postRef.update({'isFeatured': true});
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_feed_feature_success'.tr())),
-        );
-      }
-    } catch (e) {
-      // debugPrint('Error featuring post: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'artist_feed_feature_error'.tr(namedArgs: {'error': '$e'}),
-            ),
-          ),
-        );
-      }
+    if (didFeature) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('artist_feed_feature_success'.tr())),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('artist_feed_feature_missing'.tr())),
+      );
     }
   }
 
@@ -337,27 +270,13 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
   /// Update share count in Firestore
   Future<void> _updateShareCount(String postId) async {
-    try {
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(postId);
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final postDoc = await transaction.get(postRef);
-        if (!postDoc.exists) return;
-
-        final currentCount = postDoc.data()?['shareCount'] ?? 0;
-        transaction.update(postRef, {'shareCount': currentCount + 1});
-      });
-    } catch (e) {
-      // debugPrint('Failed to update share count: $e');
-    }
+    await _communityService.incrementPostShareCount(postId);
   }
 
   void _handleDirectMessage() {
     // Navigate to direct messaging with this artist
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null && currentUser.uid != widget.artist.userId) {
+    final currentUserId = _communityService.currentUserId;
+    if (currentUserId != null && currentUserId != widget.artist.userId) {
       // Create or navigate to chat with this artist
       Navigator.pushNamed(
         context,
@@ -552,7 +471,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     // Show commission request dialog with form
     showDialog<void>(
       context: context,
-      builder: (context) => _CommissionRequestDialog(artist: widget.artist),
+      builder: (context) => _CommissionRequestDialog(
+        artist: widget.artist,
+        communityService: _communityService,
+      ),
     );
   }
 
@@ -1239,7 +1161,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
           final post = _filteredPosts[index];
           final showEngagement =
               !_isCurrentUserArtist ||
-              post.userId != FirebaseAuth.instance.currentUser?.uid;
+              post.userId != _communityService.currentUserId;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -1310,8 +1232,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 /// Commission request dialog with form and image upload
 class _CommissionRequestDialog extends StatefulWidget {
   final ArtistProfileModel artist;
+  final CommunityService communityService;
 
-  const _CommissionRequestDialog({required this.artist});
+  const _CommissionRequestDialog({
+    required this.artist,
+    required this.communityService,
+  });
 
   @override
   _CommissionRequestDialogState createState() =>
@@ -1396,10 +1322,8 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
         _isUploadingImage = true;
       });
 
-      // Upload to Firebase Storage
       final File imageFile = File(pickedFile.path);
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      if (widget.communityService.currentUserId == null) {
         throw Exception('User must be authenticated');
       }
 
@@ -1498,7 +1422,7 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
     try {
       // Create commission request
       final requesterName =
-          FirebaseAuth.instance.currentUser?.displayName ??
+          widget.communityService.currentUser?.displayName ??
           'artist_feed_commission_request_client'.tr();
       final commissionId = await _commissionService.createCommissionRequest(
         artistId: widget.artist.userId,

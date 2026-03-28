@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/post_model.dart';
 import '../models/group_models.dart';
 import '../models/comment_model.dart';
+import '../services/community_service.dart';
 import '../widgets/group_post_card.dart';
 
 class PostDetailModal extends StatefulWidget {
@@ -76,6 +76,7 @@ class _PostModelWrapper extends ArtistGroupPost {
 class _PostDetailModalState extends State<PostDetailModal> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _commentController = TextEditingController();
+  late CommunityService _communityService;
 
   List<CommentModel> _comments = [];
   bool _isLoadingComments = true;
@@ -84,7 +85,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
   String? _replyingToCommentId;
   String? _replyingToUserName;
 
-  String get _currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+  String get _currentUserId => _communityService.currentUserId ?? '';
 
   /// Determine the group type based on the post type
   GroupType _getGroupType(BaseGroupPost post) {
@@ -166,6 +167,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _loadComments();
   }
 
@@ -178,18 +180,9 @@ class _PostDetailModalState extends State<PostDetailModal> {
 
   Future<void> _loadComments() async {
     try {
-      // Load comments from the post's comments subcollection to respect
-      // Firestore security rules which allow access to posts/{postId}/comments
-      final commentsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .collection('comments')
-          .orderBy('createdAt', descending: false)
-          .get();
-
-      final comments = commentsSnapshot.docs
-          .map((doc) => CommentModel.fromFirestore(doc))
-          .toList();
+      final comments = await _communityService.getAllCommentsForPost(
+        widget.post.id,
+      );
 
       if (mounted) {
         setState(() {
@@ -211,49 +204,18 @@ class _PostDetailModalState extends State<PostDetailModal> {
     final content = _commentController.text.trim();
     if (content.isEmpty || _isSendingComment) return;
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (_communityService.currentUserId == null) return;
 
     setState(() {
       _isSendingComment = true;
     });
 
     try {
-      // Get user data
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final userData = userDoc.data() ?? {};
-      final userName = userData['displayName'] as String? ?? 'Anonymous';
-      final userPhotoUrl = userData['profileImageUrl'] as String? ?? '';
-
-      // Create comment data
-      final commentData = {
-        'postId': widget.post.id,
-        'userId': user.uid,
-        'userName': userName,
-        'userPhotoUrl': userPhotoUrl,
-        'content': content,
-        'createdAt': FieldValue.serverTimestamp(),
-        'parentCommentId': _replyingToCommentId,
-        'likes': 0,
-        'isReported': false,
-      };
-
-      // Add comment to the post's comments subcollection
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .collection('comments')
-          .add(commentData);
-
-      // Increment the comment count on the parent post document
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .update({'commentCount': FieldValue.increment(1)});
+      await _communityService.addDetailedCommentForCurrentUser(
+        postId: widget.post.id,
+        content: content,
+        parentCommentId: _replyingToCommentId ?? '',
+      );
 
       // Clear input and reply state
       _commentController.clear();
@@ -326,27 +288,20 @@ class _PostDetailModalState extends State<PostDetailModal> {
   }
 
   Future<void> _submitCommentReport(CommentModel comment) async {
-    try {
-      // Update the comment document in the post's comments subcollection
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .collection('comments')
-          .doc(comment.id)
-          .update({'isReported': true});
+    final reported = await _communityService.reportComment(
+      postId: widget.post.id,
+      commentId: comment.id,
+    );
+    if (!mounted) return;
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment reported successfully')),
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error reporting comment: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error reporting comment: $e')));
-      }
+    if (reported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment reported successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error reporting comment')));
     }
   }
 

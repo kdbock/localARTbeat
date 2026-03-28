@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../models/user_admin_model.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/admin_service.dart';
@@ -25,7 +25,10 @@ class AdminUserDetailScreen extends StatefulWidget {
 
 class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     with SingleTickerProviderStateMixin {
-  final RecentActivityService _activityService = RecentActivityService();
+  late RecentActivityService _activityService;
+  late AdminService _adminService;
+  late AuditTrailService _auditTrailService;
+  late UserService _userService;
   late TabController _tabController;
   late UserAdminModel _currentUser;
   List<RecentActivityModel> _userActivities = [];
@@ -42,6 +45,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   @override
   void initState() {
     super.initState();
+    _activityService = context.read<RecentActivityService>();
+    _adminService = context.read<AdminService>();
+    _auditTrailService = context.read<AuditTrailService>();
+    _userService = context.read<UserService>();
     _tabController = TabController(length: 4, vsync: this);
     _currentUser = widget.user;
 
@@ -1141,7 +1148,6 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Future<void> _updateUserProfile() async {
     setState(() => _isLoading = true);
     try {
-      final adminService = AdminService();
       final profileData = {
         'fullName': _fullNameController.text.trim(),
         'username': _usernameController.text.trim(),
@@ -1151,7 +1157,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
         'zipCode': _zipCodeController.text.trim(),
       };
 
-      await adminService.updateUserProfile(_currentUser.id, profileData);
+      await _adminService.updateUserProfile(_currentUser.id, profileData);
 
       setState(() {
         _currentUser = _currentUser.copyWithAdmin(
@@ -1209,8 +1215,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        final adminService = AdminService();
-        await adminService.removeUserProfileImage(_currentUser.id);
+        await _adminService.removeUserProfileImage(_currentUser.id);
 
         setState(() {
           _currentUser = _currentUser.copyWithAdmin(profileImageUrl: '');
@@ -1242,10 +1247,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Future<void> _toggleFeaturedStatus() async {
     setState(() => _isLoading = true);
     try {
-      final adminService = AdminService();
       final newFeaturedStatus = !_currentUser.isFeatured;
 
-      await adminService.setUserFeatured(_currentUser.id, newFeaturedStatus);
+      await _adminService.setUserFeatured(_currentUser.id, newFeaturedStatus);
 
       setState(() {
         _currentUser =
@@ -1283,8 +1287,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Future<void> _updateUserType(UserType newType) async {
     setState(() => _isLoading = true);
     try {
-      final adminService = AdminService();
-      await adminService.updateUserType(_currentUser.id, newType);
+      await _adminService.updateUserType(_currentUser.id, newType);
 
       setState(() {
         _currentUser = _currentUser.copyWithAdmin(userType: newType.name);
@@ -1316,11 +1319,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Future<void> _toggleVerificationStatus() async {
     setState(() => _isLoading = true);
     try {
-      final adminService = AdminService();
       if (_currentUser.isVerified) {
-        await adminService.unverifyUser(_currentUser.id);
+        await _adminService.unverifyUser(_currentUser.id);
       } else {
-        await adminService.verifyUser(_currentUser.id);
+        await _adminService.verifyUser(_currentUser.id);
       }
 
       setState(() {
@@ -1359,12 +1361,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Future<void> _toggleShadowBanStatus() async {
     setState(() => _isLoading = true);
     try {
-      final adminService = AdminService();
       final newStatus = !_currentUser.isShadowBanned;
-      await adminService.toggleShadowBan(_currentUser.id, newStatus);
+      await _adminService.toggleShadowBan(_currentUser.id, newStatus);
 
       // Audit Trail
-      await AuditTrailService().logAdminAction(
+      await _auditTrailService.logAdminAction(
         action: newStatus ? 'shadow_ban_user' : 'unshadow_ban_user',
         category: 'user',
         targetUserId: _currentUser.id,
@@ -1441,11 +1442,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     if (confirmed == true && reasonController.text.isNotEmpty) {
       setState(() => _isLoading = true);
       try {
-        final adminService = AdminService();
         final currentAdminId =
-            FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+            _userService.currentUserId ?? 'unknown_admin';
 
-        await adminService.suspendUser(
+        await _adminService.suspendUser(
             _currentUser.id, reasonController.text.trim(), currentAdminId);
 
         // Log the action
@@ -1456,7 +1456,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
             reasonController.text.trim());
 
         // Audit Trail
-        await AuditTrailService().logAdminAction(
+        await _auditTrailService.logAdminAction(
           action: 'suspend_user',
           category: 'user',
           targetUserId: _currentUser.id,
@@ -1524,11 +1524,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        final adminService = AdminService();
-        await adminService.unsuspendUser(_currentUser.id);
+        await _adminService.unsuspendUser(_currentUser.id);
 
         // Audit Trail
-        await AuditTrailService().logAdminAction(
+        await _auditTrailService.logAdminAction(
           action: 'unsuspend_user',
           category: 'user',
           targetUserId: _currentUser.id,
@@ -1590,11 +1589,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        final adminService = AdminService();
-        await adminService.deleteUser(_currentUser.id);
+        await _adminService.deleteUser(_currentUser.id);
 
         // Audit Trail
-        await AuditTrailService().logAdminAction(
+        await _auditTrailService.logAdminAction(
           action: 'delete_user',
           category: 'user',
           targetUserId: _currentUser.id,
@@ -1658,19 +1656,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     if (confirmed == true && noteController.text.isNotEmpty) {
       setState(() => _isLoading = true);
       try {
-        final adminService = AdminService();
         final currentAdminId =
-            FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+            _userService.currentUserId ?? 'unknown_admin';
         final noteText = noteController.text.trim();
 
-        await adminService.addAdminNote(
+        await _adminService.addAdminNote(
           _currentUser.id,
           noteText,
           currentAdminId,
         );
 
         // Audit Trail
-        await AuditTrailService().logAdminAction(
+        await _auditTrailService.logAdminAction(
           action: 'add_user_note',
           category: 'user',
           targetUserId: _currentUser.id,

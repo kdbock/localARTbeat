@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
@@ -72,7 +73,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   late AnimationController _pulseController;
   late AnimationController _particleController;
   late AnimationController _gridController;
-  final InstantDiscoveryService _discoveryService = InstantDiscoveryService();
+  late final InstantDiscoveryService _discoveryService;
 
   // Discovery statistics
   int _todayDiscoveries = 0;
@@ -87,6 +88,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   @override
   void initState() {
     super.initState();
+    _discoveryService = context.read<InstantDiscoveryService>();
     _sweepController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),

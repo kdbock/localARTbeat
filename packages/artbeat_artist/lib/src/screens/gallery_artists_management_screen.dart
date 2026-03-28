@@ -1,64 +1,11 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import '../models/gallery_invitation_model.dart';
+import '../services/artist_gallery_discovery_read_service.dart';
 import '../services/artist_profile_service.dart';
-
-/// Model for gallery invitations
-class GalleryInvitation {
-  final String id;
-  final String galleryId;
-  final String artistId;
-  final String artistName;
-  final String artistEmail;
-  final String? artistProfileImage;
-  final String status; // 'pending', 'accepted', 'declined'
-  final DateTime createdAt;
-  final DateTime? respondedAt;
-
-  GalleryInvitation({
-    required this.id,
-    required this.galleryId,
-    required this.artistId,
-    required this.artistName,
-    required this.artistEmail,
-    this.artistProfileImage,
-    required this.status,
-    required this.createdAt,
-    this.respondedAt,
-  });
-
-  factory GalleryInvitation.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return GalleryInvitation(
-      id: doc.id,
-      galleryId: data['galleryId'] as String,
-      artistId: data['artistId'] as String,
-      artistName: data['artistName'] as String,
-      artistEmail: data['artistEmail'] as String,
-      artistProfileImage: data['artistProfileImage'] as String?,
-      status: data['status'] as String,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      respondedAt: data['respondedAt'] != null
-          ? (data['respondedAt'] as Timestamp).toDate()
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'galleryId': galleryId,
-      'artistId': artistId,
-      'artistName': artistName,
-      'artistEmail': artistEmail,
-      'artistProfileImage': artistProfileImage,
-      'status': status,
-      'createdAt': createdAt,
-      'respondedAt': respondedAt,
-    };
-  }
-}
 
 class GalleryArtistsManagementScreen extends StatefulWidget {
   const GalleryArtistsManagementScreen({super.key});
@@ -72,12 +19,9 @@ class _GalleryArtistsManagementScreenState
     extends State<GalleryArtistsManagementScreen>
     with TickerProviderStateMixin {
   late final TabController _tabController;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ArtistProfileService _artistProfileService = ArtistProfileService();
 
   List<core.ArtistProfileModel> _galleryArtists = [];
-  List<GalleryInvitation> _pendingInvitations = [];
+  List<GalleryInvitationModel> _pendingInvitations = [];
   Map<String, core.ArtistProfileModel> _artistProfiles = {};
   bool _isLoading = true;
   String? _error;
@@ -102,47 +46,16 @@ class _GalleryArtistsManagementScreenState
         _isLoading = true;
         _error = null;
       });
-
-      // Load gallery artists from Firestore
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get current gallery profile
-      final galleryProfile = await _artistProfileService
-          .getArtistProfileByUserId(currentUser.uid);
-      if (galleryProfile == null) {
-        throw Exception('Gallery profile not found');
-      }
-
-      // Get gallery-artist relationships
-      final relationshipQuery = await _firestore
-          .collection('galleryArtists')
-          .where('galleryId', isEqualTo: galleryProfile.id)
-          .where('status', isEqualTo: 'active')
-          .get();
-
-      final artistIds = relationshipQuery.docs
-          .map((doc) => doc.data()['artistId'] as String)
-          .toList();
-
-      // Load artist profiles
-      final Map<String, core.ArtistProfileModel> artistProfiles = {};
-      for (final artistId in artistIds) {
-        final artistDoc = await _firestore
-            .collection('artistProfiles')
-            .doc(artistId)
-            .get();
-        if (artistDoc.exists) {
-          final artist = core.ArtistProfileModel.fromFirestore(artistDoc);
-          artistProfiles[artistId] = artist;
-        }
-      }
+      final artists = await context
+          .read<ArtistGalleryDiscoveryReadService>()
+          .loadCurrentGalleryArtists();
+      final artistProfiles = <String, core.ArtistProfileModel>{
+        for (final artist in artists) artist.id: artist,
+      };
 
       setState(() {
         _artistProfiles = artistProfiles;
-        _galleryArtists = artistProfiles.values.toList();
+        _galleryArtists = artists;
         _isLoading = false;
       });
     } catch (e) {
@@ -155,25 +68,9 @@ class _GalleryArtistsManagementScreenState
 
   Future<void> _loadPendingInvitations() async {
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) return;
-
-      // Get current gallery profile
-      final galleryProfile = await _artistProfileService
-          .getArtistProfileByUserId(currentUser.uid);
-      if (galleryProfile == null) return;
-
-      // Load pending invitations from Firestore
-      final invitationQuery = await _firestore
-          .collection('galleryInvitations')
-          .where('galleryId', isEqualTo: galleryProfile.id)
-          .where('status', isEqualTo: 'pending')
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      final invitations = invitationQuery.docs
-          .map((doc) => GalleryInvitation.fromFirestore(doc))
-          .toList();
+      final invitations = await context
+          .read<ArtistGalleryDiscoveryReadService>()
+          .loadPendingInvitations();
 
       setState(() {
         _pendingInvitations = invitations;
@@ -185,68 +82,9 @@ class _GalleryArtistsManagementScreenState
 
   Future<void> _sendInvitation(core.ArtistProfileModel artist) async {
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get current gallery profile
-      final galleryProfile = await _artistProfileService
-          .getArtistProfileByUserId(currentUser.uid);
-      if (galleryProfile == null) {
-        throw Exception('Gallery profile not found');
-      }
-
-      // Get artist user information for email
-      final artistUserDoc = await _firestore
-          .collection('users')
-          .doc(artist.userId)
-          .get();
-
-      final artistEmail = artistUserDoc.data()?['email'] as String? ?? '';
-
-      // Check if invitation already exists
-      final existingInvitation = await _firestore
-          .collection('galleryInvitations')
-          .where('galleryId', isEqualTo: galleryProfile.id)
-          .where('artistId', isEqualTo: artist.id)
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
-
-      if (existingInvitation.docs.isNotEmpty) {
-        throw Exception('Invitation already sent to this artist');
-      }
-
-      // Create new invitation
-      final invitation = GalleryInvitation(
-        id: '',
-        galleryId: galleryProfile.id,
-        artistId: artist.id,
-        artistName: artist.displayName,
-        artistEmail: artistEmail,
-        artistProfileImage: artist.profileImageUrl,
-        status: 'pending',
-        createdAt: DateTime.now(),
+      await context.read<ArtistGalleryDiscoveryReadService>().sendInvitation(
+        artist: artist,
       );
-
-      await _firestore.collection('galleryInvitations').add(invitation.toMap());
-
-      // Send notification to artist
-      await _firestore.collection('notifications').add({
-        'userId': artist.userId,
-        'title': 'Gallery Invitation',
-        'message':
-            '${galleryProfile.displayName} has invited you to join their gallery',
-        'type': 'galleryInvitation',
-        'read': false,
-        'createdAt': FieldValue.serverTimestamp(),
-        'data': {
-          'galleryId': galleryProfile.id,
-          'galleryName': galleryProfile.displayName,
-          'artistId': artist.id,
-        },
-      });
 
       // Refresh invitations
       await _loadPendingInvitations();
@@ -278,13 +116,9 @@ class _GalleryArtistsManagementScreenState
 
   Future<void> _cancelInvitation(String invitationId) async {
     try {
-      await _firestore
-          .collection('galleryInvitations')
-          .doc(invitationId)
-          .update({
-            'status': 'cancelled',
-            'respondedAt': FieldValue.serverTimestamp(),
-          });
+      await context.read<ArtistGalleryDiscoveryReadService>().cancelInvitation(
+        invitationId,
+      );
 
       // Refresh invitations
       await _loadPendingInvitations();
@@ -314,35 +148,9 @@ class _GalleryArtistsManagementScreenState
 
   Future<void> _removeArtistFromGallery(String artistId) async {
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get current gallery profile
-      final galleryProfile = await _artistProfileService
-          .getArtistProfileByUserId(currentUser.uid);
-      if (galleryProfile == null) {
-        throw Exception('Gallery profile not found');
-      }
-
-      // Update gallery-artist relationship to inactive
-      final relationshipQuery = await _firestore
-          .collection('galleryArtists')
-          .where('galleryId', isEqualTo: galleryProfile.id)
-          .where('artistId', isEqualTo: artistId)
-          .limit(1)
-          .get();
-
-      if (relationshipQuery.docs.isNotEmpty) {
-        await _firestore
-            .collection('galleryArtists')
-            .doc(relationshipQuery.docs.first.id)
-            .update({
-              'status': 'inactive',
-              'updatedAt': FieldValue.serverTimestamp(),
-            });
-      }
+      await context
+          .read<ArtistGalleryDiscoveryReadService>()
+          .removeArtistFromGallery(artistId);
 
       setState(() {
         _galleryArtists.removeWhere((artist) => artist.id == artistId);
@@ -528,7 +336,10 @@ class _GalleryArtistsManagementScreenState
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) {
+      return 'Just now';
+    }
     final now = DateTime.now();
     final difference = now.difference(date);
 
@@ -543,7 +354,7 @@ class _GalleryArtistsManagementScreenState
     }
   }
 
-  void _showCancelInvitationDialog(GalleryInvitation invitation) {
+  void _showCancelInvitationDialog(GalleryInvitationModel invitation) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -570,35 +381,11 @@ class _GalleryArtistsManagementScreenState
     );
   }
 
-  Future<void> _resendInvitation(GalleryInvitation invitation) async {
+  Future<void> _resendInvitation(GalleryInvitationModel invitation) async {
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get current gallery profile
-      final galleryProfile = await _artistProfileService
-          .getArtistProfileByUserId(currentUser.uid);
-      if (galleryProfile == null) {
-        throw Exception('Gallery profile not found');
-      }
-
-      // Send notification to artist again
-      await _firestore.collection('notifications').add({
-        'userId': invitation.artistId,
-        'title': 'Gallery Invitation Reminder',
-        'message':
-            '${galleryProfile.displayName} has sent you a reminder about their gallery invitation',
-        'type': 'galleryInvitation',
-        'read': false,
-        'createdAt': FieldValue.serverTimestamp(),
-        'data': {
-          'galleryId': galleryProfile.id,
-          'galleryName': galleryProfile.displayName,
-          'artistId': invitation.artistId,
-        },
-      });
+      await context.read<ArtistGalleryDiscoveryReadService>().resendInvitation(
+        invitation,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -667,7 +454,7 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
 
     try {
       // Use ArtistProfileService to search for artists
-      final artistProfileService = ArtistProfileService();
+      final artistProfileService = context.read<ArtistProfileService>();
       final results = await artistProfileService.searchArtists(
         query,
         limit: 20,

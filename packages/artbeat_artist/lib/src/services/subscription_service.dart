@@ -11,9 +11,17 @@ import '../utils/input_validator.dart';
 
 /// Service for managing artist subscriptions
 class SubscriptionService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final UserService _userService = UserService();
+  SubscriptionService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    UserService? userService,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _userService = userService ?? UserService();
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final UserService _userService;
   SimpleLatLng? _cachedViewerLocation;
   DateTime? _viewerLocationUpdatedAt;
   static const Duration _viewerLocationTtl = Duration(minutes: 5);

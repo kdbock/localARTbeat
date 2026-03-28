@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart' as share_plus;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../services/event_service.dart';
@@ -24,14 +23,10 @@ class EventDetailsScreen extends StatefulWidget {
 }
 
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
-  final EventService _eventService = EventService();
-  final CalendarIntegrationService _calendarService =
-      CalendarIntegrationService();
-  final EventNotificationService _notificationService =
-      EventNotificationService();
-  final UserService _userService = UserService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final EventService _eventService;
+  late final CalendarIntegrationService _calendarService;
+  late final EventNotificationService _notificationService;
+  late final UserService _userService;
 
   ArtbeatEvent? _event;
   bool _isLoading = true;
@@ -42,6 +37,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    _eventService = context.read<EventService>();
+    _calendarService = context.read<CalendarIntegrationService>();
+    _notificationService = context.read<EventNotificationService>();
+    _userService = context.read<UserService>();
     _loadEvent();
   }
 
@@ -1209,38 +1208,21 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   Future<void> _submitReport(String reason) async {
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
+      final currentUserId = _userService.currentUserId;
+      if (currentUserId == null) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('events_login_to_report'.tr())));
         return;
       }
 
-      // Submit report to Firestore
-      await _firestore.collection('reports').add({
-        'type': 'event',
-        'targetId': widget.eventId,
-        'reportedBy': currentUser.uid,
-        'reason': reason,
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending',
-        'additionalInfo': {
-          'eventTitle': _event?.title ?? 'Unknown Event',
-          'eventType': _event?.category ?? 'Unknown',
-        },
-      });
-
-      // Send notification to moderators
-      await _firestore.collection('moderationQueue').add({
-        'type': 'event_report',
-        'eventId': widget.eventId,
-        'reportedBy': currentUser.uid,
-        'reason': reason,
-        'priority': _getPriorityLevel(reason),
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending',
-      });
+      await _eventService.submitEventReport(
+        eventId: widget.eventId,
+        reportedBy: currentUserId,
+        reason: reason,
+        eventTitle: _event?.title,
+        eventCategory: _event?.category,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1261,20 +1243,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           ),
         );
       }
-    }
-  }
-
-  String _getPriorityLevel(String reason) {
-    switch (reason.toLowerCase()) {
-      case 'inappropriate content':
-      case 'harassment':
-      case 'spam':
-        return 'high';
-      case 'misleading information':
-      case 'copyright violation':
-        return 'medium';
-      default:
-        return 'low';
     }
   }
 

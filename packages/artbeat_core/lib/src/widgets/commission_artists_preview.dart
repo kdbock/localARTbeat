@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../models/commission_artist_preview_model.dart';
 import '../routing/app_routes.dart';
@@ -22,8 +23,7 @@ class CommissionArtistsPreview extends StatefulWidget {
 }
 
 class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
-  final CommissionArtistPreviewService _service =
-      CommissionArtistPreviewService();
+  late final CommissionArtistPreviewService _service;
   final Map<String, String> _artistNames = {};
 
   bool _isLoading = false;
@@ -32,6 +32,7 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
   @override
   void initState() {
     super.initState();
+    _service = context.read<CommissionArtistPreviewService>();
     _loadArtists();
   }
 

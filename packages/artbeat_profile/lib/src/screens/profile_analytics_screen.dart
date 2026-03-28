@@ -18,8 +18,6 @@ class ProfileAnalyticsScreen extends StatefulWidget {
 }
 
 class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
-  final ProfileAnalyticsService _analyticsService = ProfileAnalyticsService();
-
   bool _isLoading = true;
   ProfileAnalyticsModel? _analytics;
   Map<String, dynamic> _engagementMetrics = {};
@@ -34,9 +32,10 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
     try {
       final user = Provider.of<UserService>(context, listen: false).currentUser;
       if (user != null) {
+        final analyticsService = context.read<ProfileAnalyticsService>();
         final [analytics, metrics] = await Future.wait([
-          _analyticsService.getProfileAnalytics(user.uid),
-          _analyticsService.getEngagementMetrics(user.uid),
+          analyticsService.getProfileAnalytics(user.uid),
+          analyticsService.getEngagementMetrics(user.uid),
         ]);
 
         setState(() {

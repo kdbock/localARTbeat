@@ -33,17 +33,17 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
     with TickerProviderStateMixin {
   late AnimationController _radarController;
   late Animation<double> _radarAnimation;
+  late PublicArtReadService _publicArtService;
 
   int _nearbyArtCount = 0;
   int _activeUsersNearby = 0;
   int _userStreak = 0;
   bool _isLoading = true;
 
-  final PublicArtReadService _publicArtService = PublicArtReadService();
-
   @override
   void initState() {
     super.initState();
+    _publicArtService = context.read<PublicArtReadService>();
     _setupAnimations();
     _loadHeroData();
   }

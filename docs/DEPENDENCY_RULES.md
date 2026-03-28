@@ -55,6 +55,20 @@ safe to change.
 
 Current automated boundary checks live in:
 
+- `tools/architecture/check_monetization_ui_boundaries.sh`
+- `tools/architecture/check_artist_monetization_ui_boundaries.sh`
+- `tools/architecture/check_artist_analytics_ui_boundaries.sh`
+- `tools/architecture/check_artist_profile_ui_boundaries.sh`
+- `tools/architecture/check_artist_gallery_ui_boundaries.sh`
+- `tools/architecture/check_core_shell_ui_boundaries.sh`
+- `tools/architecture/check_core_dashboard_ui_boundaries.sh`
+- `tools/architecture/check_art_walk_shell_ui_boundaries.sh`
+- `tools/architecture/check_ads_ui_boundaries.sh`
+- `tools/architecture/check_artwork_ui_boundaries.sh`
+- `tools/architecture/check_events_ui_boundaries.sh`
+- `tools/architecture/check_profile_ui_boundaries.sh`
+- `tools/architecture/check_community_ui_boundaries.sh`
+- `tools/architecture/check_admin_ui_boundaries.sh`
 - `tools/architecture/check_package_boundaries.py`
 - `tools/architecture/check_sibling_dependency_drift.py`
 - `tools/architecture/check_provider_owned_capture_service.sh`

@@ -43,6 +43,8 @@ Use:
 
 Required execution steps:
 
+- run `bash tools/architecture/check_release_payment_config.sh`
+- run `bash tools/architecture/check_release_monetization_prereqs.sh`
 - run `flutter analyze`
 - run `flutter test`
 - run `flutter test test/localization_key_parity_test.dart`
@@ -51,6 +53,7 @@ Required execution steps:
 - build iOS release artifacts
 - test critical flows on at least one Android device/emulator and one iOS
   device/simulator
+- if using the secure release path, run `./scripts/build_secure.sh`
 
 ### 3. Submission Metadata / Store Ops
 
@@ -66,7 +69,6 @@ Not blocked by engineering, but still required:
 
 These should not stop submission unless you choose a stricter bar:
 
-- payment/config hygiene and audit logging
 - funnel instrumentation and monetization telemetry
 - CI/package ownership/process scaling
 - broader moat/defensibility work
@@ -74,6 +76,6 @@ These should not stop submission unless you choose a stricter bar:
 ## Practical Next Order
 
 1. Schedule and execute the legal/data-rights production canary.
-2. Run release analyze/tests/builds.
+2. Run release hardening gates, analyze/tests/builds, and secure release build execution.
 3. Confirm store metadata and release notes.
 4. Upload to internal/staged tracks first.

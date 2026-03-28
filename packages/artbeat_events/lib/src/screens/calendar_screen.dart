@@ -3,6 +3,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/shared_widgets.dart';
 import '../widgets/widgets.dart';
 
@@ -17,8 +18,6 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  final EventService _eventService = EventService();
-
   DateTime _focusedMonth = DateTime.now();
   DateTime? _selectedDate;
 
@@ -39,7 +38,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
 
     try {
-      final events = await _eventService.getEvents();
+      final events = await context.read<EventService>().getEvents();
       setState(() {
         _events = events;
         _loading = false;

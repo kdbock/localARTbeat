@@ -1,15 +1,14 @@
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/sponsorship.dart';
 import '../../models/sponsorship_status.dart';
 import '../../models/sponsorship_tier.dart';
 import '../../services/sponsorship_checkout_service.dart';
-import '../../services/sponsorship_repository.dart';
+import '../../services/sponsorship_submission_service.dart';
 import '../../utils/sponsorship_placements.dart';
 import '../../utils/sponsorship_pricing.dart';
 import '../../utils/tour_events.dart';
@@ -41,9 +40,6 @@ class SponsorshipReviewScreen extends StatefulWidget {
 }
 
 class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
-  final SponsorshipCheckoutService _checkoutService =
-      SponsorshipCheckoutService();
-  final SponsorshipRepository _sponsorshipRepository = SponsorshipRepository();
   final MonetizationFunnelService _funnelService = MonetizationFunnelService();
   final _formKey = GlobalKey<FormState>();
   final _businessNameController = TextEditingController();
@@ -51,15 +47,23 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   final _businessAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _brandingNotesController = TextEditingController();
+  late SponsorshipCheckoutService _checkoutService;
+  late SponsorshipSubmissionService _submissionService;
   bool _isSubmitting = false;
+  bool _didSeedDefaults = false;
 
   @override
-  void initState() {
-    super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    _businessNameController.text = user?.displayName?.trim() ?? '';
-    _contactEmailController.text = user?.email?.trim() ?? '';
-    _trackFunnelStage(stage: 'form_viewed', userId: user?.uid);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkoutService = context.read<SponsorshipCheckoutService>();
+    _submissionService = context.read<SponsorshipSubmissionService>();
+
+    if (_didSeedDefaults) return;
+    final defaults = _submissionService.currentBusinessDefaults();
+    _businessNameController.text = defaults.businessName;
+    _contactEmailController.text = defaults.contactEmail;
+    _trackFunnelStage(stage: 'form_viewed', userId: defaults.businessId);
+    _didSeedDefaults = true;
   }
 
   @override
@@ -290,7 +294,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final userId = _submissionService.requireCurrentBusinessId();
       final tier = _resolveTier(widget.type);
       final radiusMiles = widget.radiusMiles ?? _radiusFromNotes(widget.notes);
       if (tier.isRadiusBased && radiusMiles == null) {
@@ -339,14 +343,10 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       );
 
       final now = DateTime.now();
-      final sponsorshipId = FirebaseFirestore.instance
-          .collection('sponsorships')
-          .doc()
-          .id;
+      final sponsorshipId = _submissionService.nextSponsorshipId();
       final sponsorship = Sponsorship(
         id: sponsorshipId,
-        businessId:
-            FirebaseAuth.instance.currentUser?.uid ?? 'unknown_business',
+        businessId: userId,
         businessName: _businessNameController.text.trim(),
         businessDescription: _brandingNotesController.text.trim().isEmpty
             ? null
@@ -384,7 +384,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         stripePaymentIntentStatus: checkout.paymentIntentStatus,
       );
 
-      await _sponsorshipRepository.createSponsorship(sponsorship);
+      await _submissionService.submitForReview(sponsorship);
       await _trackFunnelStage(
         stage: 'review_queued',
         userId: userId,
@@ -408,7 +408,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     } on Exception catch (e) {
       await _trackFunnelStage(
         stage: 'checkout_failed',
-        userId: FirebaseAuth.instance.currentUser?.uid,
+        userId: _submissionService.currentBusinessId,
         status: 'submit_failed',
         metadata: <String, Object?>{
           'type': widget.type,

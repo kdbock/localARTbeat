@@ -196,6 +196,13 @@ class UnifiedPaymentService {
     'processPayout': 'processPayout',
   };
 
+  static const Map<SubscriptionTier, String> _subscriptionPriceEnvKeys = {
+    SubscriptionTier.starter: 'STRIPE_PRICE_SUBSCRIPTION_STARTER_MONTHLY',
+    SubscriptionTier.creator: 'STRIPE_PRICE_SUBSCRIPTION_CREATOR_MONTHLY',
+    SubscriptionTier.business: 'STRIPE_PRICE_SUBSCRIPTION_BUSINESS_MONTHLY',
+    SubscriptionTier.enterprise: 'STRIPE_PRICE_SUBSCRIPTION_ENTERPRISE_MONTHLY',
+  };
+
   // ========================================================================
   // INITIALIZATION
   // ========================================================================
@@ -212,21 +219,25 @@ class UnifiedPaymentService {
 
   void _initializeStripe() {
     try {
-      final publishableKey = EnvLoader().get('STRIPE_PUBLISHABLE_KEY');
-      if (publishableKey.isNotEmpty) {
-        Stripe.publishableKey = publishableKey;
+      final publishableKey = EnvLoader()
+          .getRequired('STRIPE_PUBLISHABLE_KEY')
+          .trim();
+      if (_looksLikePlaceholderPublishableKey(publishableKey)) {
+        throw StateError(
+          'STRIPE_PUBLISHABLE_KEY must be a real Stripe publishable key.',
+        );
+      }
 
-        // Configure Stripe for better 3D Secure / SCA handling
-        if (Platform.isAndroid) {
-          // Enable merchant-side confirmation for 3D Secure challenges
-          // This prevents NoArgsException crashes in PassiveChallengeViewModel
-          Stripe.merchantIdentifier = 'com.wordnerd.artbeat';
-          AppLogger.info('✅ Stripe initialized with Android 3DS configuration');
-        } else {
-          AppLogger.info('✅ Stripe initialized');
-        }
+      Stripe.publishableKey = publishableKey;
+
+      // Configure Stripe for better 3D Secure / SCA handling
+      if (Platform.isAndroid) {
+        // Enable merchant-side confirmation for 3D Secure challenges
+        // This prevents NoArgsException crashes in PassiveChallengeViewModel
+        Stripe.merchantIdentifier = 'com.wordnerd.artbeat';
+        AppLogger.info('✅ Stripe initialized with Android 3DS configuration');
       } else {
-        AppLogger.warning('⚠️ Stripe publishable key not found');
+        AppLogger.info('✅ Stripe initialized');
       }
     } catch (e) {
       AppLogger.error('❌ Error initializing Stripe: $e');
@@ -240,6 +251,9 @@ class UnifiedPaymentService {
 
   /// Get device fingerprint (public)
   String? getDeviceFingerprint() => _deviceFingerprint;
+
+  /// Get the currently authenticated user.
+  User? get currentUser => _auth.currentUser;
 
   /// Make authenticated request (public for advanced use)
   Future<http.Response> makeAuthenticatedRequest({
@@ -324,7 +338,53 @@ class UnifiedPaymentService {
     }
 
     final baseUrl = EnvLoader().cloudFunctionsBaseUrl;
-    return '$baseUrl/$functionName';
+    return Uri.parse(baseUrl).resolve(functionName).toString();
+  }
+
+  static String? tryResolveSubscriptionPriceIdForTier(SubscriptionTier tier) {
+    if (tier == SubscriptionTier.free) {
+      return '';
+    }
+
+    final envKey = _subscriptionPriceEnvKeys[tier];
+    if (envKey == null) {
+      return null;
+    }
+
+    final priceId = EnvLoader().get(envKey).trim();
+    if (priceId.isEmpty || _looksLikePlaceholderStripeId(priceId)) {
+      return null;
+    }
+
+    return priceId;
+  }
+
+  static String resolveSubscriptionPriceIdForTier(SubscriptionTier tier) {
+    final priceId = tryResolveSubscriptionPriceIdForTier(tier);
+    if (priceId == null) {
+      throw StateError(
+        'Stripe subscription price is not configured for ${tier.apiName}. '
+        'Set ${_subscriptionPriceEnvKeys[tier]} with a real Stripe price ID.',
+      );
+    }
+    return priceId;
+  }
+
+  static bool _looksLikePlaceholderStripeId(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return true;
+    return normalized.contains('XXXXXXXX') ||
+        normalized.startsWith('your_') ||
+        normalized.startsWith('price_') && normalized.endsWith('_2025') ||
+        normalized.startsWith('price_') && normalized.endsWith('_2026');
+  }
+
+  static bool _looksLikePlaceholderPublishableKey(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return true;
+    return normalized.contains('your_publishable_key_here') ||
+        normalized.startsWith('pk_test_your_') ||
+        normalized.startsWith('pk_live_your_');
   }
 
   /// Create a payment intent for Stripe
@@ -484,7 +544,7 @@ class UnifiedPaymentService {
       final userId = _auth.currentUser?.uid;
       if (userId == null) throw Exception('User not authenticated');
 
-      final priceId = _getPriceIdForTier(tier);
+      final priceId = resolveSubscriptionPriceIdForTier(tier);
       final response = await _makeAuthenticatedRequest(
         functionKey: 'createSubscription',
         body: {
@@ -569,21 +629,6 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error creating free subscription: $e');
       rethrow;
-    }
-  }
-
-  String _getPriceIdForTier(SubscriptionTier tier) {
-    switch (tier) {
-      case SubscriptionTier.starter:
-        return 'price_starter_monthly_2025';
-      case SubscriptionTier.creator:
-        return 'price_creator_monthly_2025';
-      case SubscriptionTier.business:
-        return 'price_business_monthly_2025';
-      case SubscriptionTier.enterprise:
-        return 'price_enterprise_monthly_2025';
-      case SubscriptionTier.free:
-        return '';
     }
   }
 
@@ -1393,6 +1438,81 @@ class UnifiedPaymentService {
       AppLogger.error('Error getting default payment method: $e');
       return null;
     }
+  }
+
+  /// Get payment methods for the current authenticated user.
+  Future<List<PaymentMethodModel>> getCurrentUserPaymentMethods() async {
+    final customerId = await getOrCreateCustomerId();
+    if (customerId.isEmpty) {
+      return <PaymentMethodModel>[];
+    }
+    return getPaymentMethods(customerId);
+  }
+
+  /// Add a payment method for the current authenticated user via Stripe setup.
+  Future<void> addPaymentMethodForCurrentUser() async {
+    final customerId = await getOrCreateCustomerId();
+    final setupIntentClientSecret = await createSetupIntent(customerId);
+    await setupPaymentSheet(
+      customerId: customerId,
+      setupIntentClientSecret: setupIntentClientSecret,
+    );
+    await safelyPresentPaymentSheet(operationName: 'presentPaymentSheet_setup');
+  }
+
+  /// Persist the current user's default payment method after updating Stripe.
+  Future<void> saveDefaultPaymentMethodForCurrentUser(
+    String paymentMethodId,
+  ) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final customerId = await getOrCreateCustomerId();
+    await setDefaultPaymentMethod(
+      customerId: customerId,
+      paymentMethodId: paymentMethodId,
+    );
+
+    await _firestore.collection('users').doc(userId).set({
+      'defaultPaymentMethodId': paymentMethodId,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  /// Clear the stored default payment method for the current authenticated user.
+  Future<void> clearDefaultPaymentMethodForCurrentUser() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    await _firestore.collection('users').doc(userId).set({
+      'defaultPaymentMethodId': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  /// Get recent payments for the current authenticated user.
+  Future<List<Map<String, dynamic>>> getRecentPaymentsForCurrentUser({
+    int limit = 5,
+  }) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final paymentsSnapshot = await _firestore
+        .collection('payments')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get();
+
+    return paymentsSnapshot.docs
+        .map((doc) => <String, dynamic>{'id': doc.id, ...doc.data()})
+        .toList();
   }
 
   /// Get customer's saved payment methods

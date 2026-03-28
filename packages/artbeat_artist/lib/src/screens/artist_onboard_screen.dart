@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'artist_profile_edit_screen.dart';
-import '../services/artist_profile_service.dart';
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 
 /// Artist onboarding with customized experience for your medium and a seamless gallery setup
 class ArtistOnboardScreen extends StatefulWidget {
@@ -21,6 +21,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
   late PageController _pageController;
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
+  late final SubscriptionService _coreSubscriptionService;
+  late final UserService _userService;
+  late final artist.ArtistProfileService _artistProfileService;
 
   int _currentPage = 0;
   final List<String> _selectedInterests = [];
@@ -55,6 +58,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
   @override
   void initState() {
     super.initState();
+    _coreSubscriptionService = context.read<SubscriptionService>();
+    _userService = context.read<UserService>();
+    _artistProfileService = context.read<artist.ArtistProfileService>();
     _pageController = PageController();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -824,7 +830,8 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                         SubscriptionTier.business,
                       ])
                         _buildSelectablePlanCard(
-                          details: SubscriptionService().getSubscriptionDetails(
+                          details: _coreSubscriptionService
+                              .getSubscriptionDetails(
                             tier,
                           ),
                           tier: tier,
@@ -843,7 +850,7 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...(SubscriptionService().getSubscriptionDetails(
+                  ...(_coreSubscriptionService.getSubscriptionDetails(
                                 _tierForPlanName(_selectedPlanName ?? "") ??
                                     SubscriptionTier.free,
                               )['features']
@@ -1094,16 +1101,13 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
     setState(() => _isProcessingPlan = true);
 
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = _userService.currentUser;
       if (currentUser == null) throw Exception('User not authenticated');
 
-      final artistProfileService = ArtistProfileService();
-      final userService = UserService();
-
-      final user = await userService.getUserById(currentUser.uid);
+      final user = await _userService.getUserById(currentUser.uid);
       if (user == null) throw Exception('User data not found');
 
-      await artistProfileService.createArtistProfile(
+      await _artistProfileService.createArtistProfile(
         userId: currentUser.uid,
         displayName: currentUser.displayName ?? 'Artist',
         username: user.username,
@@ -1114,12 +1118,12 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
         styles: [],
       );
 
-      await userService.updateUserProfileWithMap({
+      await _userService.updateUserProfileWithMap({
         'userType': UserType.artist.name,
       });
 
       if (tier == SubscriptionTier.free) {
-        await SubscriptionService().changeTierWithValidation(
+        await _coreSubscriptionService.changeTierWithValidation(
           tier,
           validateOnly: false,
         );

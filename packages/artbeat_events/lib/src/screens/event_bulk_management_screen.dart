@@ -6,6 +6,7 @@ import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
@@ -20,8 +21,6 @@ class EventBulkManagementScreen extends StatefulWidget {
 }
 
 class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
-  final EventBulkManagementService _bulkService = EventBulkManagementService();
-
   List<ArtbeatEvent> _events = [];
   final Set<String> _selectedEventIds = <String>{};
 
@@ -47,12 +46,14 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     });
 
     try {
-      final events = await _bulkService.getBulkManageableEvents(
-        category: _selectedCategory,
-        status: _selectedStatus,
-        startDate: _startDate,
-        endDate: _endDate,
-      );
+      final events = await context
+          .read<EventBulkManagementService>()
+          .getBulkManageableEvents(
+            category: _selectedCategory,
+            status: _selectedStatus,
+            startDate: _startDate,
+            endDate: _endDate,
+          );
 
       setState(() {
         _events = events;

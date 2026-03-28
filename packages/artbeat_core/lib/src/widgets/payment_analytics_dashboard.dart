@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../services/payment_analytics_service.dart';
 import '../models/payment_models.dart';
 
@@ -23,7 +24,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _analyticsService = PaymentAnalyticsService();
+    _analyticsService = context.read<PaymentAnalyticsService>();
     _loadReports();
   }
 

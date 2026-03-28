@@ -8,6 +8,7 @@ export 'image_moderation_service.dart';
 export 'artwork_analytics_service.dart';
 export 'artwork_discovery_service.dart';
 export 'artwork_pagination_service.dart';
+export 'artwork_local_read_service.dart';
 export 'collection_service.dart';
 export 'artwork_rating_service.dart';
 export 'artwork_comment_service.dart';

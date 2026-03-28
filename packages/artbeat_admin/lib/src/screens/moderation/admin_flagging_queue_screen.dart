@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 import '../../services/flagging_queue_service.dart';
 import '../../widgets/admin_drawer.dart';
 
@@ -13,13 +14,14 @@ class AdminFlaggingQueueScreen extends StatefulWidget {
 }
 
 class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
-  final FlaggingQueueService _queueService = FlaggingQueueService();
+  late FlaggingQueueService _queueService;
   List<FlaggedItem> _flaggedItems = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _queueService = context.read<FlaggingQueueService>();
     _loadQueue();
   }
 

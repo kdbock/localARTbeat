@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
@@ -20,7 +20,6 @@ class DirectCommissionsScreen extends StatefulWidget {
 
 class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     with SingleTickerProviderStateMixin {
-  final DirectCommissionService _commissionService = DirectCommissionService();
   late final TabController _tabController;
   final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
     symbol: '\$',
@@ -50,8 +49,8 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         setState(() => _isLoading = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -61,9 +60,11 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         return;
       }
 
-      _currentUserId = user.uid;
-      final commissions = await _commissionService.getCommissionsByUser(
-        user.uid,
+      _currentUserId = userId;
+      final commissions = await context
+          .read<DirectCommissionService>()
+          .getCommissionsByUser(
+            userId,
       );
 
       setState(() {
@@ -956,7 +957,9 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
 
   Future<void> _acceptCommission(DirectCommissionModel commission) async {
     try {
-      await _commissionService.acceptCommission(commission.id);
+      await context.read<DirectCommissionService>().acceptCommission(
+        commission.id,
+      );
       await _loadCommissions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -981,7 +984,9 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
 
   Future<void> _markCompleted(DirectCommissionModel commission) async {
     try {
-      await _commissionService.completeCommission(commission.id);
+      await context.read<DirectCommissionService>().completeCommission(
+        commission.id,
+      );
       await _loadCommissions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1134,7 +1139,9 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                             deadlineController.text,
                           );
 
-                          await _commissionService.createCommissionRequest(
+                          await context
+                              .read<DirectCommissionService>()
+                              .createCommissionRequest(
                             artistId: selectedArtist.id,
                             artistName: selectedArtist.displayName,
                             type: CommissionType.digital,
@@ -1269,7 +1276,6 @@ class _QuoteProvisionDialog extends StatefulWidget {
 }
 
 class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
-  final DirectCommissionService _commissionService = DirectCommissionService();
   final _formKey = GlobalKey<FormState>();
 
   // Form controllers
@@ -1403,7 +1409,7 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
         );
       }).toList();
 
-      await _commissionService.provideQuote(
+      await context.read<DirectCommissionService>().provideQuote(
         commissionId: widget.commission.id,
         totalPrice: totalPrice,
         depositPercentage: depositPercentage,

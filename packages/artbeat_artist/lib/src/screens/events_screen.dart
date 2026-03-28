@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide EventModel;
+import 'package:provider/provider.dart';
+
 import '../models/event_model_internal.dart';
 import '../services/event_service_adapter.dart';
 
@@ -13,7 +15,6 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  final EventServiceAdapter _eventService = EventServiceAdapter();
   List<EventModel> _events = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -33,7 +34,7 @@ class _EventsScreenState extends State<EventsScreen> {
     });
 
     try {
-      final events = await _eventService.getLocalEvents();
+      final events = await context.read<EventServiceAdapter>().getLocalEvents();
       if (!mounted) return;
 
       setState(() {

@@ -7,24 +7,38 @@ import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         ArtistProfileModel,
+        ChapterModel,
         SubscriptionTier,
         SubscriptionService,
         EnhancedStorageService,
         AppLogger,
         ArtworkContentType;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart'
-    show SocialService, SocialActivityType;
+    show SocialService, SocialActivityType, WalkStatus;
 
 /// Service for managing artwork
 class ArtworkService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final SubscriptionService _subscriptionService = SubscriptionService();
-  final EnhancedStorageService _enhancedStorage = EnhancedStorageService();
+  ArtworkService({
+    FirebaseAuth? auth,
+    FirebaseStorage? storage,
+    FirebaseFirestore? firestore,
+    SubscriptionService? subscriptionService,
+    EnhancedStorageService? enhancedStorage,
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _storage = storage ?? FirebaseStorage.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _subscriptionService = subscriptionService ?? SubscriptionService(),
+       _enhancedStorage = enhancedStorage ?? EnhancedStorageService();
+
+  final FirebaseAuth _auth;
+  final FirebaseStorage _storage;
+  final FirebaseFirestore _firestore;
+  final SubscriptionService _subscriptionService;
+  final EnhancedStorageService _enhancedStorage;
 
   // Collection references
-  final CollectionReference _artworkCollection = FirebaseFirestore.instance
-      .collection('artwork');
+  CollectionReference<Map<String, dynamic>> get _artworkCollection =>
+      _firestore.collection('artwork');
 
   /// Get the current authenticated user's ID
   String? getCurrentUserId() {
@@ -599,6 +613,116 @@ class ArtworkService {
     }
   }
 
+  Future<int> getArtworkCountForCurrentUser() async {
+    final userId = getCurrentUserId();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final snapshot = await _artworkCollection
+        .where('userId', isEqualTo: userId)
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
+
+  Future<Map<String, dynamic>?> getArtworkDocumentData(String artworkId) async {
+    try {
+      final doc = await _artworkCollection.doc(artworkId).get();
+      if (!doc.exists) {
+        return null;
+      }
+      return doc.data();
+    } catch (e) {
+      AppLogger.error('Error loading artwork document data: $e');
+      throw Exception('Failed to load artwork document data: $e');
+    }
+  }
+
+  Future<String> uploadArtworkAsset({
+    required File file,
+    required String folder,
+  }) async {
+    final userId = getCurrentUserId();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final shouldOptimizeImage = folder == 'artwork_images';
+    if (shouldOptimizeImage) {
+      try {
+        final uploadResult = await _enhancedStorage.uploadImageWithOptimization(
+          imageFile: file,
+          category: 'artwork',
+          generateThumbnail: true,
+        );
+        return uploadResult['imageUrl']!;
+      } catch (e) {
+        AppLogger.warning(
+          'Enhanced artwork upload failed, falling back to legacy upload: $e',
+        );
+      }
+    }
+
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
+    final ref = _storage.ref().child('$folder/$userId/$fileName');
+    final snapshot = await ref.putFile(file);
+    return snapshot.ref.getDownloadURL();
+  }
+
+  Future<List<String>> uploadArtworkAssets({
+    required List<File> files,
+    required String folder,
+  }) async {
+    final urls = <String>[];
+    for (final file in files) {
+      urls.add(await uploadArtworkAsset(file: file, folder: folder));
+    }
+    return urls;
+  }
+
+  Future<void> saveArtworkData({
+    String? artworkId,
+    required Map<String, dynamic> artworkData,
+  }) async {
+    try {
+      final payload = Map<String, dynamic>.from(artworkData)
+        ..['updatedAt'] = FieldValue.serverTimestamp();
+
+      if (artworkId != null && artworkId.isNotEmpty) {
+        payload.remove('createdAt');
+        await _artworkCollection.doc(artworkId).update(payload);
+      } else {
+        payload.putIfAbsent('createdAt', () => FieldValue.serverTimestamp());
+        await _artworkCollection.add(payload);
+      }
+    } catch (e) {
+      AppLogger.error('Error saving artwork data: $e');
+      throw Exception('Failed to save artwork data: $e');
+    }
+  }
+
+  Future<void> saveArtworkDraft({
+    String? draftId,
+    required Map<String, dynamic> draftData,
+  }) async {
+    try {
+      final payload = Map<String, dynamic>.from(draftData)
+        ..['updatedAt'] = FieldValue.serverTimestamp();
+
+      final drafts = _firestore.collection('artwork_drafts');
+      if (draftId != null && draftId.isNotEmpty) {
+        await drafts.doc(draftId).set(payload);
+      } else {
+        await drafts.add(payload);
+      }
+    } catch (e) {
+      AppLogger.error('Error saving artwork draft: $e');
+      throw Exception('Failed to save artwork draft: $e');
+    }
+  }
+
   /// Search artwork by query
   Future<List<ArtworkModel>> searchArtwork(String query) async {
     try {
@@ -707,6 +831,98 @@ class ArtworkService {
         return [];
       }
     }
+  }
+
+  Future<Map<String, List<String>>> getPublicArtworkFilterOptions({
+    int limit = 250,
+    String? chapterId,
+  }) async {
+    final artworks = await getAllPublicArtwork(limit: limit, chapterId: chapterId);
+    final locations = <String>{};
+    final mediums = <String>{};
+
+    for (final artwork in artworks) {
+      final location = artwork.location?.trim();
+      final medium = artwork.medium.trim();
+      if (location != null && location.isNotEmpty) {
+        locations.add(location);
+      }
+      if (medium.isNotEmpty) {
+        mediums.add(medium);
+      }
+    }
+
+    final sortedLocations = locations.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final sortedMediums = mediums.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    return <String, List<String>>{
+      'locations': sortedLocations,
+      'mediums': sortedMediums,
+    };
+  }
+
+  Future<List<ArtworkModel>> browsePublicArtwork({
+    String? query,
+    String? location,
+    String? medium,
+    int limit = 150,
+    String? chapterId,
+  }) async {
+    final artworks = await getAllPublicArtwork(limit: limit, chapterId: chapterId);
+    final normalizedQuery = query?.trim().toLowerCase();
+    final normalizedLocation = location?.trim().toLowerCase();
+    final normalizedMedium = medium?.trim().toLowerCase();
+
+    return artworks.where((artwork) {
+      final locationMatches =
+          normalizedLocation == null ||
+          normalizedLocation.isEmpty ||
+          normalizedLocation == 'all' ||
+          (artwork.location?.trim().toLowerCase() == normalizedLocation);
+      if (!locationMatches) {
+        return false;
+      }
+
+      final mediumMatches =
+          normalizedMedium == null ||
+          normalizedMedium.isEmpty ||
+          normalizedMedium == 'all' ||
+          artwork.medium.trim().toLowerCase() == normalizedMedium;
+      if (!mediumMatches) {
+        return false;
+      }
+
+      if (normalizedQuery == null || normalizedQuery.isEmpty) {
+        return true;
+      }
+
+      return artwork.title.toLowerCase().contains(normalizedQuery) ||
+          artwork.description.toLowerCase().contains(normalizedQuery) ||
+          artwork.medium.toLowerCase().contains(normalizedQuery) ||
+          (artwork.location?.toLowerCase().contains(normalizedQuery) ?? false) ||
+          artwork.styles.any(
+            (style) => style.toLowerCase().contains(normalizedQuery),
+          ) ||
+          (artwork.tags?.any((tag) => tag.toLowerCase().contains(normalizedQuery)) ??
+              false);
+    }).toList();
+  }
+
+  Future<List<ArtworkModel>> getCurrentUserArtwork() async {
+    final userId = getCurrentUserId();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+    return getArtworkByUserId(userId);
+  }
+
+  Future<void> updateArtworkMetadata(
+    String artworkId,
+    Map<String, dynamic> updates,
+  ) async {
+    await _artworkCollection.doc(artworkId).update(updates);
   }
 
   /// Get all artwork (no filter on isPublic)
@@ -1191,6 +1407,113 @@ class ArtworkService {
         AppLogger.error('Fallback query also failed: $fallbackError');
         return [];
       }
+    }
+  }
+
+  Future<Map<String, dynamic>> getWrittenContentPurchaseStatus(
+    String artworkId, {
+    List<ChapterModel> chapters = const [],
+  }) async {
+    final userId = getCurrentUserId();
+    if (userId == null) {
+      return {
+        'hasFullBookPurchase': false,
+        'purchasedChapterIds': <String>{},
+      };
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('artwork_sales')
+          .where('buyerId', isEqualTo: userId)
+          .where('artworkId', isEqualTo: artworkId)
+          .get();
+
+      var hasFullBookPurchase = false;
+      final purchasedChapterIds = <String>{};
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final status = data['status']?.toString().toLowerCase();
+        if (status != null && status != 'completed' && status != 'success') {
+          continue;
+        }
+
+        final purchaseType = data['purchaseType']?.toString().toLowerCase();
+        final isFullBook =
+            data['isFullBook'] == true || data['fullBook'] == true;
+        final chapterId = data['chapterId']?.toString();
+        final chapterNumber = data['chapterNumber'] as int?;
+
+        if (purchaseType == 'full_book' || isFullBook) {
+          hasFullBookPurchase = true;
+          continue;
+        }
+
+        if (chapterId != null && chapterId.isNotEmpty) {
+          purchasedChapterIds.add(chapterId);
+          continue;
+        }
+
+        if (chapterNumber != null) {
+          for (final chapter in chapters) {
+            final number = chapter.episodeNumber ?? chapter.chapterNumber;
+            if (number == chapterNumber) {
+              purchasedChapterIds.add(chapter.id);
+              break;
+            }
+          }
+        }
+      }
+
+      return {
+        'hasFullBookPurchase': hasFullBookPurchase,
+        'purchasedChapterIds': purchasedChapterIds,
+      };
+    } catch (e) {
+      AppLogger.error('Error loading written content purchase status: $e');
+      return {
+        'hasFullBookPurchase': false,
+        'purchasedChapterIds': <String>{},
+      };
+    }
+  }
+
+  Future<Map<String, int>> getCurrentUserEngagementUnlockMetrics() async {
+    final userId = getCurrentUserId();
+    if (userId == null) {
+      return {'captures': 0, 'discoveries': 0, 'walksCompleted': 0};
+    }
+
+    try {
+      final results = await Future.wait([
+        _firestore
+            .collection('captures')
+            .where('userId', isEqualTo: userId)
+            .count()
+            .get(),
+        _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('discoveries')
+            .count()
+            .get(),
+        _firestore
+            .collection('artWalkProgress')
+            .where('userId', isEqualTo: userId)
+            .where('status', isEqualTo: WalkStatus.completed.name)
+            .count()
+            .get(),
+      ]);
+
+      return {
+        'captures': results[0].count ?? 0,
+        'discoveries': results[1].count ?? 0,
+        'walksCompleted': results[2].count ?? 0,
+      };
+    } catch (e) {
+      AppLogger.error('Error loading current user engagement metrics: $e');
+      return {'captures': 0, 'discoveries': 0, 'walksCompleted': 0};
     }
   }
 }

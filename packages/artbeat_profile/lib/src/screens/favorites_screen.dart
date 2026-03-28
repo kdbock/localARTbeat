@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/auth_service.dart' as auth;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/shared_widgets.dart'
     show GlassCard, WorldBackground;
+import 'package:provider/provider.dart';
 import 'package:artbeat_profile/widgets/widgets.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -17,8 +17,8 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  final _userService = core.UserService();
-  final _currentUser = FirebaseAuth.instance.currentUser;
+  late auth.AuthService _authService;
+  late core.UserService _userService;
   List<core.FavoriteModel> _favorites = [];
   bool _isLoading = true;
   bool _isCurrentUser = false;
@@ -26,7 +26,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   void initState() {
     super.initState();
-    _isCurrentUser = widget.userId == _currentUser?.uid;
+    _authService = context.read<auth.AuthService>();
+    _userService = context.read<core.UserService>();
+    _isCurrentUser = widget.userId == _authService.currentUser?.uid;
     _loadFavorites();
   }
 
@@ -121,10 +123,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     if (confirm == true) {
       try {
-        await FirebaseFirestore.instance
-            .collection('engagements')
-            .doc(favoriteId)
-            .delete();
+        await _userService.removeLikedContent(favoriteId);
 
         if (mounted) {
           setState(() {

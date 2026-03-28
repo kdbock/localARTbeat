@@ -4,7 +4,10 @@ import '../models/chapter_quest.dart';
 import '../utils/logger.dart';
 
 class ChapterPartnerService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+
+  ChapterPartnerService({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Fetch all active chapter partners
   Future<List<ChapterPartner>> getActiveChapters() async {

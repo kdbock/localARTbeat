@@ -4,8 +4,14 @@ import 'dart:convert';
 
 /// Service for managing artist payouts from the admin dashboard
 class AdminPayoutService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
+  AdminPayoutService({
+    FirebaseFirestore? firestore,
+    UnifiedPaymentService? paymentService,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _paymentService = paymentService ?? UnifiedPaymentService();
+
+  final FirebaseFirestore _firestore;
+  final UnifiedPaymentService _paymentService;
 
   /// Get all pending payout requests
   Stream<List<Map<String, dynamic>>> getPendingPayouts() {

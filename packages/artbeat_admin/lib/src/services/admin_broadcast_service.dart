@@ -11,6 +11,19 @@ class AdminBroadcastService extends ChangeNotifier {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
+  Stream<List<Map<String, dynamic>>> getRecentBroadcasts({int limit = 10}) {
+    return _firestore
+        .collection('broadcasts')
+        .orderBy('timestamp', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => {'id': doc.id, ...doc.data()})
+              .toList(growable: false),
+        );
+  }
+
   Future<void> sendBroadcastMessage(String message) async {
     try {
       final currentUser = _auth.currentUser;

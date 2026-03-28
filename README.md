@@ -671,6 +671,18 @@ Web      E2E       Audit       App Store Metrics
 
 ### **Release Management**
 
+Release workflow uses the canonical runbook in
+[`docs/RELEASE_CHECKLIST.md`](/Volumes/ExternalDrive/DevProjects/artbeat/docs/RELEASE_CHECKLIST.md).
+Before release builds, run:
+
+```bash
+bash tools/architecture/check_release_payment_config.sh
+bash tools/architecture/check_release_monetization_prereqs.sh
+```
+
+`./scripts/build_secure.sh` is the convenience release path and now runs both
+gates before building.
+
 #### **App Store Deployment**
 
 - **iOS App Store**: Automated deployment with Fastlane

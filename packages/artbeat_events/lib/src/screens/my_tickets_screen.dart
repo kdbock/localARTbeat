@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/ticket_purchase.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
@@ -20,8 +21,6 @@ class MyTicketsScreen extends StatefulWidget {
 
 class _MyTicketsScreenState extends State<MyTicketsScreen>
     with TickerProviderStateMixin {
-  final EventService _eventService = EventService();
-
   List<TicketPurchase> _allTickets = [];
   List<TicketPurchase> _filteredTickets = [];
   Map<String, ArtbeatEvent> _eventCache = {};
@@ -65,7 +64,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
         _error = null;
       });
 
-      final tickets = await _eventService.getUserTicketPurchases(widget.userId);
+      final eventService = context.read<EventService>();
+      final tickets = await eventService.getUserTicketPurchases(widget.userId);
 
       // Load event details for each ticket
       final eventIds = tickets.map((t) => t.eventId).toSet();
@@ -73,7 +73,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
 
       for (final eventId in eventIds) {
         try {
-          final event = await _eventService.getEvent(eventId);
+          final event = await eventService.getEvent(eventId);
           if (event != null) {
             events[eventId] = event;
           }
@@ -879,6 +879,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
 
   Future<void> _processRefund(TicketPurchase ticket) async {
     try {
+      final eventService = context.read<EventService>();
       // Attempt to process refund with payment provider
       // NOTE: This assumes TicketPurchase has paymentId and amount fields
       if (ticket.paymentId == null || ticket.amount == null) {
@@ -892,7 +893,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
       );
 
       // Update ticket status in backend
-      await _eventService.refundTicketPurchase(ticket.id, 'mock_refund_id');
+      await eventService.refundTicketPurchase(ticket.id, 'mock_refund_id');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

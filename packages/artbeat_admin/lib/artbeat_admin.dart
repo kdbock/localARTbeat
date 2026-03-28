@@ -6,6 +6,8 @@ export 'src/models/content_model.dart';
 export 'src/models/analytics_model.dart';
 export 'src/models/admin_settings_model.dart';
 export 'src/models/recent_activity_model.dart';
+export 'src/models/admin_permissions.dart'
+    show AdminPermissions, AdminRole, AdminRoleService, AdminUser;
 
 // Export services
 export 'src/services/admin_service.dart';
@@ -20,6 +22,29 @@ export 'src/services/migration_service.dart';
 export 'src/services/consolidated_admin_service.dart';
 export 'src/services/unified_admin_service.dart';
 export 'src/services/audit_trail_service.dart';
+export 'src/services/admin_ad_moderation_service.dart'
+    show AdminAdModerationService;
+export 'src/services/admin_sponsorship_moderation_service.dart'
+    show AdminSponsorshipModerationService;
+export 'src/services/admin_data_rights_service.dart'
+    show AdminDataRightsService;
+export 'src/services/admin_payment_operations_service.dart'
+    show AdminPaymentOperationsService, BulkRefundResult;
+export 'src/services/admin_broadcast_service.dart' show AdminBroadcastService;
+export 'src/services/payment_audit_service.dart' show PaymentAuditService;
+export 'src/services/financial_service.dart' show FinancialService;
+export 'src/services/admin_payout_service.dart' show AdminPayoutService;
+export 'src/services/admin_artwork_service.dart' show AdminArtworkService;
+export 'src/services/admin_capture_moderation_service.dart'
+    show AdminCaptureModerationService;
+export 'src/services/admin_community_moderation_service.dart'
+    show AdminCommunityModerationService;
+export 'src/services/admin_art_walk_moderation_service.dart'
+    show AdminArtWalkModerationService;
+export 'src/services/admin_event_moderation_service.dart'
+    show AdminEventModerationService;
+export 'src/services/flagging_queue_service.dart' show FlaggingQueueService;
+export 'src/services/security_service.dart' show SecurityService;
 
 // Export utilities
 export 'src/utils/image_utils.dart';

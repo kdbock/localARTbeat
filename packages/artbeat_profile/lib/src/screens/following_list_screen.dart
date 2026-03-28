@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide HudTopBar;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_profile/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class FollowingListScreen extends StatefulWidget {
   final String userId;
@@ -17,12 +18,13 @@ class FollowingListScreen extends StatefulWidget {
 enum _FollowingFilter { all, artists, galleries, collectors }
 
 class _FollowingListScreenState extends State<FollowingListScreen> {
-  final UserService _userService = UserService();
-  final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
   List<UserModel> _following = [];
   bool _isLoading = true;
   _FollowingFilter _activeFilter = _FollowingFilter.all;
+
+  UserService get _userService => context.read<UserService>();
+  String? get _currentUserId =>
+      context.read<core_auth.AuthService>().currentUser?.uid;
 
   bool get _isViewingOwnProfile => _currentUserId == widget.userId;
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/auth_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_profile/widgets/widgets.dart';
 
 class FollowersListScreen extends StatefulWidget {
@@ -14,7 +15,8 @@ class FollowersListScreen extends StatefulWidget {
 }
 
 class _FollowersListScreenState extends State<FollowersListScreen> {
-  final UserService _userService = UserService();
+  late AuthService _authService;
+  late UserService _userService;
   List<UserModel> _followers = [];
   bool _isLoading = true;
   bool _isCurrentUser = false;
@@ -22,7 +24,9 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
   @override
   void initState() {
     super.initState();
-    _isCurrentUser = FirebaseAuth.instance.currentUser?.uid == widget.userId;
+    _authService = context.read<AuthService>();
+    _userService = context.read<UserService>();
+    _isCurrentUser = _authService.currentUser?.uid == widget.userId;
     _loadFollowers();
   }
 
@@ -71,7 +75,7 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                         itemBuilder: (context, index) {
                           final user = _followers[index];
                           final isViewer =
-                              user.id == FirebaseAuth.instance.currentUser?.uid;
+                              user.id == _authService.currentUser?.uid;
 
                           return FutureBuilder<bool>(
                             future: _userService.isFollowing(user.id),

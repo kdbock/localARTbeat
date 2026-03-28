@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/artist_onboarding/artist_onboarding_data.dart';
 import '../../routing/app_routes.dart';
+import '../../services/user_service.dart';
 import '../../theme/design_system.dart';
 import '../../viewmodels/artist_onboarding/artist_onboarding_view_model.dart';
 import 'onboarding_widgets.dart';
@@ -44,25 +43,22 @@ class _OnboardingCompletionScreenState
   }
 
   Future<void> _shareProfile() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    final userService = context.read<UserService>();
+    final userId = userService.currentUserId;
+    if (userId == null) return;
 
-    var profileIdentifier = user.uid;
+    var profileIdentifier = userId;
 
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final userData = userDoc.data();
-      final username = (userData?['username'] as String?)?.trim();
+      final userModel = await userService.getCurrentUserModel();
+      final username = userModel?.username.trim();
       if (username != null && username.isNotEmpty) {
         profileIdentifier = _sanitizeProfilePathSegment(username);
       } else {
-        profileIdentifier = _sanitizeProfilePathSegment(user.uid);
+        profileIdentifier = _sanitizeProfilePathSegment(userId);
       }
     } catch (_) {
-      profileIdentifier = _sanitizeProfilePathSegment(user.uid);
+      profileIdentifier = _sanitizeProfilePathSegment(userId);
     }
 
     final profileUrl = 'https://artbeat.com/artist/$profileIdentifier';
@@ -81,7 +77,7 @@ class _OnboardingCompletionScreenState
   }
 
   void _navigateToProfile() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final userId = context.read<UserService>().currentUserId;
     if (userId != null) {
       Navigator.of(context).pushReplacementNamed(
         AppRoutes.artistPublicProfile,

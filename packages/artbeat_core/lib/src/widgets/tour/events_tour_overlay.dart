@@ -2,6 +2,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class EventsTourOverlay extends StatefulWidget {
   final GlobalKey menuKey;
@@ -45,10 +46,12 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
   late List<TourStep> _steps;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late OnboardingService _onboardingService;
 
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
     _steps = [
       // Step 1: Main Menu
       TourStep(
@@ -265,7 +268,7 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
   }
 
   void _finish() async {
-    await OnboardingService().markEventsOnboardingCompleted();
+    await _onboardingService.markEventsOnboardingCompleted();
     widget.onFinish();
   }
 

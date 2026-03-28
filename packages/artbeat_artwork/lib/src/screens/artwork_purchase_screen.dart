@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         AppLogger,
@@ -12,6 +12,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         MainLayout,
         SecureNetworkImage,
         UnifiedPaymentService,
+        UserService,
         WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
@@ -27,10 +28,6 @@ class ArtworkPurchaseScreen extends StatefulWidget {
 }
 
 class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
-  final ArtworkService _artworkService = ArtworkService();
-  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   ArtworkModel? _artwork;
   bool _isLoading = true;
   bool _isProcessing = false;
@@ -55,7 +52,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
 
   Future<void> _loadArtworkData() async {
     try {
-      final artwork = await _artworkService.getArtworkById(widget.artworkId);
+      final artwork = await context.read<ArtworkService>().getArtworkById(
+        widget.artworkId,
+      );
 
       if (mounted) {
         setState(() {
@@ -86,8 +85,8 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
   Future<void> _processPurchase() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final user = _auth.currentUser;
-    if (user == null) {
+    final userId = context.read<UserService>().currentUserId;
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('artwork_purchase_login_required'.tr())),
       );
@@ -95,6 +94,7 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
     }
 
     try {
+      final paymentService = context.read<UnifiedPaymentService>();
       setState(() {
         _isProcessing = true;
       });
@@ -103,7 +103,7 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
           (_artwork!.price ?? 0) * 1.15; // Including 15% platform fee
 
       // 1. Create payment intent
-      final intentData = await _paymentService.createPaymentIntent(
+      final intentData = await paymentService.createPaymentIntent(
         amount: totalAmount,
         currency: 'USD',
         description: 'Purchase of artwork: ${_artwork!.title}',
@@ -119,14 +119,14 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
       }
 
       // 2. Initialize and present payment sheet
-      await _paymentService.initPaymentSheetForPayment(
+      await paymentService.initPaymentSheetForPayment(
         paymentIntentClientSecret: clientSecret,
       );
 
-      await _paymentService.presentPaymentSheet();
+      await paymentService.presentPaymentSheet();
 
       // 3. Complete purchase on backend
-      final result = await _paymentService.processArtworkSalePayment(
+      final result = await paymentService.processArtworkSalePayment(
         artworkId: widget.artworkId,
         artistId: _artwork!.userId,
         amount: totalAmount,

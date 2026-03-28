@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 import 'event_card.dart';
@@ -26,7 +27,6 @@ class CommunityFeedEventsWidget extends StatefulWidget {
 }
 
 class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
-  final EventService _eventService = EventService();
   List<ArtbeatEvent> _events = [];
   bool _isLoading = true;
   String? _error;
@@ -44,7 +44,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
         _error = null;
       });
 
-      final events = await _eventService.getUpcomingPublicEvents(
+      final events = await context.read<EventService>().getUpcomingPublicEvents(
         limit: widget.limit,
       );
 

@@ -1,15 +1,22 @@
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/admin_sponsorship.dart';
 
 class AdminSponsorshipModerationService {
-  AdminSponsorshipModerationService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  AdminSponsorshipModerationService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
   static const String _collection = 'sponsorships';
+
+  String get currentAdminId => _auth.currentUser?.uid ?? 'system';
 
   Future<List<AdminSponsorship>> getAllSponsorships() async {
     try {
@@ -27,7 +34,7 @@ class AdminSponsorshipModerationService {
   Future<void> updateSponsorshipStatus({
     required String sponsorshipId,
     required String status,
-    required String adminId,
+    String? adminId,
     String? moderationNotes,
   }) async {
     try {
@@ -40,12 +47,10 @@ class AdminSponsorshipModerationService {
 
       final paymentFollowUpNotes = switch (status) {
         'approved' || 'active' => null,
-        'needsCreative' =>
-          moderationNotes ??
-              'Creative assets or destination link still need business follow-up.',
-        'rejected' =>
-          moderationNotes ??
-              'Rejected after payment. Review Stripe subscription cancellation or refund handling.',
+        'needsCreative' => moderationNotes ??
+            'Creative assets or destination link still need business follow-up.',
+        'rejected' => moderationNotes ??
+            'Rejected after payment. Review Stripe subscription cancellation or refund handling.',
         _ => moderationNotes,
       };
 
@@ -54,7 +59,7 @@ class AdminSponsorshipModerationService {
         'moderationNotes': moderationNotes,
         'paymentFollowUpStatus': paymentFollowUpStatus,
         'paymentFollowUpNotes': paymentFollowUpNotes,
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
       });
     } catch (e) {

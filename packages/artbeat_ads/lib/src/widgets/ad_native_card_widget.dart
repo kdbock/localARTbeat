@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import 'ad_image_rotator.dart';
@@ -20,7 +21,6 @@ class AdNativeCardWidget extends StatefulWidget {
 }
 
 class _AdNativeCardWidgetState extends State<AdNativeCardWidget> {
-  final LocalAdService _adService = LocalAdService();
   LocalAd? _ad;
   bool _isLoading = true;
   bool _isVisible = true;
@@ -33,7 +33,8 @@ class _AdNativeCardWidgetState extends State<AdNativeCardWidget> {
 
   void _loadAd() async {
     try {
-      final ads = await _adService.getActiveAdsByZone(widget.zone);
+      final adService = context.read<LocalAdService>();
+      final ads = await adService.getActiveAdsByZone(widget.zone);
       if (ads.isNotEmpty && mounted) {
         setState(() {
           _ad = ads.first;

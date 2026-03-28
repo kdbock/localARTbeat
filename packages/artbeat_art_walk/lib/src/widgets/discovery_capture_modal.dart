@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:confetti/confetti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart'
     hide PublicArtModel, SocialActivityType;
@@ -33,8 +33,9 @@ class DiscoveryCaptureModal extends StatefulWidget {
 }
 
 class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
-  final InstantDiscoveryService _discoveryService = InstantDiscoveryService();
-  final SocialService _socialService = SocialService();
+  late final InstantDiscoveryService _discoveryService;
+  late final SocialService _socialService;
+  late final UserService _userService;
   late ConfettiController _confettiController;
   bool _isCapturing = false;
   bool _captured = false;
@@ -48,6 +49,9 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
   @override
   void initState() {
     super.initState();
+    _discoveryService = context.read<InstantDiscoveryService>();
+    _socialService = context.read<SocialService>();
+    _userService = context.read<UserService>();
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
@@ -77,8 +81,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
     }
 
     try {
-      final userService = UserService();
-      final userModel = await userService.getUserById(art.userId);
+      final userModel = await _userService.getUserById(art.userId);
       if (userModel != null) {
         _userCache[art.userId] = userModel;
         if (mounted) {
@@ -125,7 +128,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
 
         _confettiController.play();
 
-        final user = FirebaseAuth.instance.currentUser;
+        final user = _userService.currentUser;
         if (user != null) {
           await _socialService.postActivity(
             userId: user.uid,

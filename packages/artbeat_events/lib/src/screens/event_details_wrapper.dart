@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -21,8 +22,6 @@ class EventDetailsWrapper extends StatefulWidget {
 }
 
 class _EventDetailsWrapperState extends State<EventDetailsWrapper> {
-  final EventService _eventService = EventService();
-
   ArtbeatEvent? _event;
   bool _isLoading = true;
   String? _error;
@@ -35,7 +34,7 @@ class _EventDetailsWrapperState extends State<EventDetailsWrapper> {
 
   Future<void> _loadEvent() async {
     try {
-      final event = await _eventService.getEvent(widget.eventId);
+      final event = await context.read<EventService>().getEvent(widget.eventId);
 
       if (!mounted) return;
 

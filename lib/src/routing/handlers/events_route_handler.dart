@@ -1,45 +1,82 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_events/artbeat_events.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:flutter/material.dart';
 
+import '../route_utils.dart';
+
 class EventsRouteHandler {
-  static Widget handleEventsRoute(String routeName, Object? arguments) {
-    switch (routeName) {
-      case core.AppRoutes.allEvents:
-        return const EventsListScreen();
-      case core.AppRoutes.artistEvents:
-        return const EventsDashboardScreen();
-      case core.AppRoutes.myTickets:
-        // Get current user ID from Firebase Auth
-        final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-        return MyTicketsScreen(userId: userId);
-      case core.AppRoutes.createEvent:
-        return const CreateEventScreen();
-      case core.AppRoutes.myEvents:
-        return const UserEventsDashboardScreen();
+  const EventsRouteHandler({required core_auth.AuthService authService})
+    : _authService = authService;
+
+  final core_auth.AuthService _authService;
+
+  Route<dynamic>? handleRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case core.AppRoutes.events:
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 4,
+          drawer: const events.EventsDrawer(),
+          child: const events.EventsDashboardScreen(),
+        );
+
+      case core.AppRoutes.eventsDiscover:
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 4,
+          drawer: const events.EventsDrawer(),
+          child: const events.EventsListScreen(),
+        );
+
+      case core.AppRoutes.eventsDashboard:
+      case core.AppRoutes.eventsArtistDashboard:
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 4,
+          drawer: const events.EventsDrawer(),
+          child: const events.EventsDashboardScreen(),
+        );
+
+      case core.AppRoutes.eventsCreate:
+        return RouteUtils.createMainLayoutRoute(
+          drawer: const events.EventsDrawer(),
+          child: const events.CreateEventScreen(),
+        );
+
       case core.AppRoutes.eventsSearch:
-        return const EventSearchScreen();
-      case core.AppRoutes.eventsNearby:
-        // Show events filtered by location - coming soon
-        return const EventsListScreen(
-          title: 'Events Near Me',
-          showCreateButton: true,
+        return RouteUtils.createSimpleRoute(
+          child: const events.EventSearchScreen(),
         );
-      case '/events/trending':
-        // Show trending events - coming soon
-        return const EventsListScreen(
-          title: 'Trending Events',
-          showCreateButton: true,
+
+      case core.AppRoutes.myEvents:
+        return RouteUtils.createMainLayoutRoute(
+          drawer: const events.EventsDrawer(),
+          child: const events.UserEventsDashboardScreen(),
         );
-      case '/events/weekend':
-        // Show weekend events - coming soon
-        return const EventsListScreen(
-          title: 'This Weekend\'s Events',
-          showCreateButton: true,
+
+      case core.AppRoutes.myTickets:
+        final currentUserId = _authService.currentUser?.uid ?? '';
+        return RouteUtils.createSimpleRoute(
+          child: events.MyTicketsScreen(userId: currentUserId),
         );
+
+      case core.AppRoutes.eventsDetail:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final eventId = args?['eventId'] as String?;
+        if (eventId != null) {
+          return RouteUtils.createMainLayoutRoute(
+            drawer: const events.EventsDrawer(),
+            child: events.EventDetailsScreen(eventId: eventId),
+          );
+        }
+        return RouteUtils.createNotFoundRoute();
+
+      case core.AppRoutes.eventsCalendar:
+        return RouteUtils.createMainLayoutRoute(
+          drawer: const events.EventsDrawer(),
+          child: const events.CalendarScreen(),
+        );
+
       default:
-        return const Center(child: Text('Coming Soon'));
+        return RouteUtils.createComingSoonRoute('Events');
     }
   }
 }

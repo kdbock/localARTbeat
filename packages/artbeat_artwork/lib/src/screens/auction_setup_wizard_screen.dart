@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core show UserService;
 import 'package:artbeat_core/shared_widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -100,18 +101,8 @@ class _AuctionSetupWizardScreenState extends State<AuctionSetupWizardScreen> {
   Future<void> _saveSettings() async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        _showSnackBar(
-          'You must be logged in to save auction settings',
-          backgroundColor: Colors.red,
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      // Save auction preferences to user document
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      final userService = context.read<core.UserService>();
+      await userService.updateUserProfileWithMap({
         'auctionPreferences': {
           'enableAuctionsByDefault': _enableAuctionsByDefault,
           'defaultStartingPrice': _defaultStartingPrice,
@@ -121,7 +112,7 @@ class _AuctionSetupWizardScreenState extends State<AuctionSetupWizardScreen> {
           'minimumBidIncrement': _minimumBidIncrement,
           'lastUpdated': FieldValue.serverTimestamp(),
         },
-      }, SetOptions(merge: true));
+      });
 
       if (!mounted) return;
       _showSnackBar(

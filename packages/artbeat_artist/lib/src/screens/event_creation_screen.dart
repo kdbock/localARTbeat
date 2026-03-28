@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
 import '../services/event_service_adapter.dart';
 
 /// Screen for creating and editing events (for Pro and Gallery plans)
@@ -17,10 +20,6 @@ class EventCreationScreen extends StatefulWidget {
 }
 
 class _EventCreationScreenState extends State<EventCreationScreen> {
-  final EventServiceAdapter _eventService = EventServiceAdapter();
-  final core.SubscriptionService _subscriptionService =
-      core.SubscriptionService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final ImagePicker _imagePicker = ImagePicker();
 
   final _formKey = GlobalKey<FormState>();
@@ -40,6 +39,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
   File? _imageFile;
   String? _existingImageUrl;
 
+  EventServiceAdapter get _eventService => context.read<EventServiceAdapter>();
+
   @override
   void initState() {
     super.initState();
@@ -57,14 +58,15 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     super.dispose();
   }
 
-  /// Check if user's subscription allows event creation
   Future<void> _checkSubscriptionStatus() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final subscription = await _subscriptionService.getUserSubscription();
+      final subscription = await context
+          .read<core.SubscriptionService>()
+          .getUserSubscription();
       final canCreateEvents =
           subscription != null &&
           (subscription.tier == core.SubscriptionTier.creator ||
@@ -84,7 +86,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
   }
 
-  /// Load existing event data for editing
   Future<void> _loadExistingEvent() async {
     setState(() {
       _isLoading = true;
@@ -92,10 +93,13 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     });
 
     try {
+      final currentUserId = context
+          .read<core_auth.AuthService>()
+          .currentUser
+          ?.uid;
       final eventModel = await _eventService.getEventById(widget.eventId!);
 
-      // Check if user has permission to edit
-      if (eventModel.artistId != _auth.currentUser?.uid) {
+      if (eventModel.artistId != currentUserId) {
         throw Exception('Permission denied');
       }
 
@@ -112,8 +116,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
         _endTime = TimeOfDay.fromDateTime(eventModel.endDate!);
       }
 
-      // ArtbeatEvent doesn't have endDate, we'll use the same date
-      // This is a limitation we need to address in a proper migration
       setState(() {
         _isLoading = false;
       });
@@ -125,7 +127,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
   }
 
-  /// Select event image from gallery
   Future<void> _pickImage() async {
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
@@ -152,12 +153,11 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
   }
 
-  /// Select date from date picker
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime initialDate = isStartDate ? _startDate : _endDate;
-    final DateTime firstDate = isStartDate ? DateTime.now() : _startDate;
+    final initialDate = isStartDate ? _startDate : _endDate;
+    final firstDate = isStartDate ? DateTime.now() : _startDate;
 
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: firstDate,
@@ -168,7 +168,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
-          // If end date is before start date, update it
           if (_endDate.isBefore(_startDate)) {
             _endDate = _startDate;
           }
@@ -179,11 +178,10 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
   }
 
-  /// Select time from time picker
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
-    final TimeOfDay initialTime = isStartTime ? _startTime : _endTime;
+    final initialTime = isStartTime ? _startTime : _endTime;
 
-    final TimeOfDay? picked = await showTimePicker(
+    final picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
     );
@@ -192,7 +190,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
       setState(() {
         if (isStartTime) {
           _startTime = picked;
-          // If same day and end time is before start time, update it
           if (_startDate.year == _endDate.year &&
               _startDate.month == _endDate.month &&
               _startDate.day == _endDate.day &&
@@ -209,24 +206,20 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
   }
 
-  /// Save event changes
   Future<void> _saveEvent() async {
     if (!_formKey.currentState!.validate()) {
-      // Show validation error message
       setState(() {
         _errorMessage = 'Please fill in all required fields correctly.';
       });
       return;
     }
 
-    // Clear any previous error messages
     setState(() {
       _errorMessage = null;
       _isLoading = true;
     });
 
     try {
-      // Convert TimeOfDay to DateTime
       final startDateTime = DateTime(
         _startDate.year,
         _startDate.month,
@@ -247,7 +240,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
         throw Exception('End time cannot be before start time');
       }
 
-      // Update existing event
       if (widget.eventId != null) {
         await _eventService.updateEvent(
           eventId: widget.eventId!,
@@ -260,7 +252,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
           imageFile: _imageFile,
         );
       } else {
-        // Create new event
         await _eventService.createEvent(
           title: _titleController.text,
           description: _descriptionController.text,
@@ -280,7 +271,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
             ),
           ),
         );
-        Navigator.of(context).pop(true); // Return true to trigger refresh
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       setState(() {
@@ -288,7 +279,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
         _isLoading = false;
       });
     } finally {
-      // Ensure loading state is reset even if navigation fails
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -306,7 +296,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
       );
     }
 
-    // Show upgrade prompt if user can't create events
     if (!_canCreateEvents) {
       return Scaffold(
         appBar: AppBar(
@@ -354,7 +343,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     }
 
     return core.MainLayout(
-      currentIndex: 2, // Events tab in bottom navigation
+      currentIndex: 2,
       appBar: core.EnhancedUniversalHeader(
         title: widget.eventId == null ? 'Create Event' : 'Edit Event',
         showBackButton: true,
@@ -388,8 +377,6 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     style: TextStyle(color: Colors.red.shade800),
                   ),
                 ),
-
-              // Event cover image
               InkWell(
                 onTap: _pickImage,
                 child: Container(
@@ -430,10 +417,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                         ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // Event title
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -447,10 +431,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
-              // Event dates
               Row(
                 children: [
                   Expanded(
@@ -524,10 +505,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
-              // Event times
               Row(
                 children: [
                   Expanded(
@@ -597,10 +575,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
-              // Location
               TextFormField(
                 controller: _locationController,
                 decoration: const InputDecoration(
@@ -614,10 +589,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
-              // Description
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -634,10 +606,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
-              // Public/Private toggle
               SwitchListTile(
                 title: Text(tr('artist_event_creation_text_public_event')),
                 subtitle: const Text(
@@ -650,10 +619,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   });
                 },
               ),
-
               const SizedBox(height: 24),
-
-              // Save button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

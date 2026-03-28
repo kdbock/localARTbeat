@@ -8,9 +8,17 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Adapter service to bridge between artbeat_artist EventModel and artbeat_events ArtbeatEvent
 /// This provides backward compatibility while migrating to the unified event system
 class EventServiceAdapter {
-  final EventService _eventService = EventService();
-  final EventAnalyticsService _analyticsService = EventAnalyticsService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  EventServiceAdapter({
+    EventService? eventService,
+    EventAnalyticsService? analyticsService,
+    FirebaseAuth? auth,
+  }) : _eventService = eventService ?? EventService(),
+       _analyticsService = analyticsService ?? EventAnalyticsService(),
+       _auth = auth ?? FirebaseAuth.instance;
+
+  final EventService _eventService;
+  final EventAnalyticsService _analyticsService;
+  final FirebaseAuth _auth;
 
   /// Get currently logged-in user ID
   String? getCurrentUserId() {

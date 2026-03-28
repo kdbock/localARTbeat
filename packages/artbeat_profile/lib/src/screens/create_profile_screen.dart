@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:provider/provider.dart';
 import 'dart:io';
 
 /// Initial profile creation screen for new users who have authenticated
@@ -32,16 +33,13 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   bool _isSaving = false;
   String? _errorMessage;
 
-  final _userService = UserService();
-  User? currentUser;
+  UserService get _userService => context.read<UserService>();
+  core_auth.AuthService get _authService =>
+      context.read<core_auth.AuthService>();
 
   @override
   void initState() {
     super.initState();
-    // In test environment, don't access Firebase directly
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
-      currentUser = FirebaseAuth.instance.currentUser;
-    }
     _prefillUserData();
   }
 
@@ -56,14 +54,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   /// Pre-fill form with any available Firebase Auth data
   void _prefillUserData() {
+    final currentUser = _authService.currentUser;
     if (currentUser != null) {
-      if (currentUser!.displayName != null) {
-        _nameController.text = currentUser!.displayName!;
+      if (currentUser.displayName != null) {
+        _nameController.text = currentUser.displayName!;
       }
 
       // Try to generate a username from email or display name
-      if (currentUser!.email != null) {
-        final emailPrefix = currentUser!.email!.split('@').first;
+      if (currentUser.email != null) {
+        final emailPrefix = currentUser.email!.split('@').first;
         _usernameController.text = emailPrefix.toLowerCase().replaceAll(
           RegExp(r'[^a-z0-9_]'),
           '',
@@ -103,6 +102,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     });
 
     try {
+      final currentUser = _authService.currentUser;
       // Create the user profile
       await _userService.createNewUser(
         uid: widget.userId,

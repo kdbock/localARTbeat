@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 import '../services/audit_trail_service.dart';
 import '../widgets/admin_drawer.dart';
 
@@ -11,7 +12,7 @@ class AdminAuditLogsScreen extends StatefulWidget {
 }
 
 class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
-  final AuditTrailService _auditService = AuditTrailService();
+  late AuditTrailService _auditService;
   String? _selectedCategory;
   final List<String> _categories = [
     'all',
@@ -21,6 +22,12 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
     'system',
     'payment'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _auditService = context.read<AuditTrailService>();
+  }
 
   @override
   Widget build(BuildContext context) {

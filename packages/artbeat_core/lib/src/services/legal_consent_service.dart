@@ -13,6 +13,19 @@ class LegalConsentService {
     : _auth = auth ?? FirebaseAuth.instance,
       _firestore = firestore ?? FirebaseFirestore.instance;
 
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  Future<Map<String, dynamic>> getCurrentUserLegalConsents() async {
+    final userId = currentUserId;
+    if (userId == null) {
+      return <String, dynamic>{};
+    }
+
+    final snapshot = await _firestore.collection('users').doc(userId).get();
+    final data = snapshot.data();
+    return (data?['legalConsents'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+  }
+
   Future<void> recordRegistrationConsent({
     required String userId,
     required String locale,

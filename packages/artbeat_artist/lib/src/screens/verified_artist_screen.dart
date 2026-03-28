@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artist/artbeat_artist.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 
 /// Screen for browsing verified artists
 class VerifiedArtistScreen extends StatefulWidget {
@@ -12,7 +13,7 @@ class VerifiedArtistScreen extends StatefulWidget {
 }
 
 class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
-  final SubscriptionService _subscriptionService = SubscriptionService();
+  late final SubscriptionService _subscriptionService;
 
   bool _isLoading = true;
   List<core.ArtistProfileModel> _artists = [];
@@ -43,6 +44,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<SubscriptionService>();
     _loadVerifiedArtists();
   }
 

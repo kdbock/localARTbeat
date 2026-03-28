@@ -76,10 +76,12 @@ class EnhancedUniversalHeader extends StatefulWidget
 class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
     with SingleTickerProviderStateMixin {
   // Removed legacy search state - using unified search flow now
+  late OnboardingService _onboardingService;
 
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
     // Removed legacy search initialization
   }
 
@@ -470,7 +472,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
               subtitle: 'Show all onboarding tours on next refresh',
               onTap: () async {
                 Navigator.pop(context);
-                await OnboardingService().resetOnboarding();
+                await _onboardingService.resetOnboarding();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

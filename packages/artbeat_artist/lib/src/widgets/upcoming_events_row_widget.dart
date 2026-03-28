@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart' show OptimizedImage;
 import 'package:artbeat_events/artbeat_events.dart';
+import 'package:provider/provider.dart';
 
 /// Widget for displaying upcoming local events in a horizontal scrollable row
 class UpcomingEventsRowWidget extends StatelessWidget {
@@ -44,16 +44,8 @@ class UpcomingEventsRowWidget extends StatelessWidget {
         ),
         SizedBox(
           height: 240,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('events')
-                .where(
-                  'startDate',
-                  isGreaterThanOrEqualTo: Timestamp.fromDate(now),
-                )
-                .where('isPublic', isEqualTo: true)
-                .limit(20) // Reduce payload; local filtering still applies
-                .snapshots(),
+          child: StreamBuilder<List<ArtbeatEvent>>(
+            stream: context.read<EventService>().watchUpcomingEvents(limit: 20),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -63,7 +55,8 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              final allEvents = snapshot.data ?? const <ArtbeatEvent>[];
+              if (allEvents.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
@@ -73,13 +66,11 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                 );
               }
 
-              final events = snapshot.data!.docs
-                  .map((doc) => ArtbeatEvent.fromFirestore(doc))
-                  .where((event) {
-                    // Filter to only show public events with locations containing the zipCode
-                    return event.isPublic && event.location.contains(zipCode);
-                  })
-                  .toList();
+              final events = allEvents.where((event) {
+                return event.isPublic &&
+                    event.startDate.isAfter(now) &&
+                    event.location.contains(zipCode);
+              }).toList();
 
               // Sort locally by date
               events.sort((a, b) => a.startDate.compareTo(b.startDate));

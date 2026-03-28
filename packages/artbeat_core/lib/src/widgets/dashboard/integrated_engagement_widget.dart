@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 class IntegratedEngagementWidget extends StatefulWidget {
   final UserModel user;
@@ -38,8 +39,8 @@ class IntegratedEngagementWidget extends StatefulWidget {
 class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  final LeaderboardService _leaderboardService = LeaderboardService();
-  final DailyChallengeReadService _challengeService = DailyChallengeReadService();
+  late final LeaderboardService _leaderboardService;
+  late final DailyChallengeReadService _challengeService;
   List<LeaderboardEntry> _topUsers = [];
   bool _isLoadingLeaderboard = true;
   DailyChallengeModel? _dailyChallenge;
@@ -49,6 +50,8 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
   @override
   void initState() {
     super.initState();
+    _leaderboardService = context.read<LeaderboardService>();
+    _challengeService = context.read<DailyChallengeReadService>();
     _tabController = TabController(length: 4, vsync: this);
     _loadTopUsers();
     _loadDailyChallenge();

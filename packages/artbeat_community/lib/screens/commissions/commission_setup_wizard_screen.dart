@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/shared_widgets.dart';
 
@@ -110,9 +110,6 @@ class _CommissionSetupWizardScreenState
     ),
   ];
 
-  final DirectCommissionService _commissionService = DirectCommissionService();
-  final core.EnhancedStorageService _storageService =
-      core.EnhancedStorageService();
   final ImagePicker _imagePicker = ImagePicker();
   final PageController _pageController = PageController();
 
@@ -192,8 +189,8 @@ class _CommissionSetupWizardScreenState
   Future<void> _saveSettings() async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<core.UserService>().currentUserId;
+      if (userId == null) {
         _showSnackBar(
           'commission_setup_error_not_authenticated'.tr(),
           backgroundColor: _WizardPalette.accentPink,
@@ -203,7 +200,7 @@ class _CommissionSetupWizardScreenState
       }
 
       final settings = ArtistCommissionSettings(
-        artistId: user.uid,
+        artistId: userId,
         acceptingCommissions: _acceptingCommissions,
         availableTypes: _selectedTypes,
         basePrice: _basePrice,
@@ -217,7 +214,9 @@ class _CommissionSetupWizardScreenState
         lastUpdated: DateTime.now(),
       );
 
-      await _commissionService.updateArtistCommissionSettings(settings);
+      await context
+          .read<DirectCommissionService>()
+          .updateArtistCommissionSettings(settings);
 
       if (!mounted) return;
       _showSnackBar(
@@ -244,6 +243,7 @@ class _CommissionSetupWizardScreenState
 
   Future<void> _addPortfolioImage() async {
     try {
+      final storageService = context.read<core.EnhancedStorageService>();
       final source = await showDialog<ImageSource>(
         context: context,
         builder: (context) => Dialog(
@@ -292,7 +292,7 @@ class _CommissionSetupWizardScreenState
 
       setState(() => _isUploadingImage = true);
 
-      final uploadResult = await _storageService.uploadImageWithOptimization(
+      final uploadResult = await storageService.uploadImageWithOptimization(
         imageFile: File(pickedFile.path),
         category: 'commission_portfolio',
         generateThumbnail: true,

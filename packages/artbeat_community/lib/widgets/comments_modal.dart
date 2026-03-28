@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/post_model.dart';
@@ -64,30 +63,6 @@ class _CommentsModalState extends State<CommentsModal> {
       AppLogger.info(
         '💬 CommentsModal: Successfully loaded ${comments.length} comments',
       );
-
-      // Debug: Show a snackbar with the result
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Debug: Loaded ${comments.length} comments for post ${widget.post.id}',
-            ),
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-
-      // Debug: Log each comment
-      for (int i = 0; i < comments.length; i++) {
-        AppLogger.info(
-          '💬 Comment ${i}: "${comments[i].content}" by ${comments[i].userName}',
-        );
-      }
-
-      // Also log the post ID for debugging
-      AppLogger.info(
-        '💬 CommentsModal: Post ID being queried: "${widget.post.id}"',
-      );
     } catch (e) {
       AppLogger.error('Error loading comments: $e');
       setState(() => _isLoading = false);
@@ -151,7 +126,7 @@ class _CommentsModalState extends State<CommentsModal> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = widget.communityService.currentUser;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return GestureDetector(

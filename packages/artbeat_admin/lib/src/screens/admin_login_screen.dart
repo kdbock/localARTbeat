@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,8 +30,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     });
 
     try {
+      final authService = context.read<core_auth.AuthService>();
       // Attempt to sign in
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await authService.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -47,7 +49,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         Navigator.of(context).pushReplacementNamed('/admin/dashboard');
       } else {
         // Sign out if not an admin
-        await FirebaseAuth.instance.signOut();
+        await authService.signOut();
         if (!mounted) return;
         setState(() {
           _error = 'admin_login_error_access_denied'.tr();

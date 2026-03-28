@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 import '../../services/earnings_service.dart';
 import '../../models/payout_model.dart';
 
@@ -12,8 +13,8 @@ class PayoutAccountsScreen extends StatefulWidget {
 }
 
 class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
-  final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final EarningsService _earningsService;
 
   List<PayoutAccountModel> _accounts = [];
   bool _isLoading = true;
@@ -22,6 +23,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
   @override
   void initState() {
     super.initState();
+    _earningsService = context.read<EarningsService>();
     _loadAccounts();
   }
 
@@ -436,16 +438,22 @@ class _AddAccountDialog extends StatefulWidget {
 }
 
 class _AddAccountDialogState extends State<_AddAccountDialog> {
-  final EarningsService _earningsService = EarningsService();
   final _formKey = GlobalKey<FormState>();
   final _accountHolderNameController = TextEditingController();
   final _accountNumberController = TextEditingController();
   final _routingNumberController = TextEditingController();
   final _bankNameController = TextEditingController();
+  late final EarningsService _earningsService;
 
   String _accountType = 'bank_account';
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _earningsService = context.read<EarningsService>();
+  }
 
   @override
   void dispose() {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/analytics_model.dart';
 import '../models/recent_activity_model.dart';
 import '../models/user_admin_model.dart';
@@ -45,14 +45,13 @@ class _ModernUnifiedAdminDashboardState
   late Animation<double> _fadeAnimation;
 
   // Services
-  final RecentActivityService _activityService = RecentActivityService();
-  final EnhancedAnalyticsService _analyticsService = EnhancedAnalyticsService();
-  final ConsolidatedAdminService _consolidatedService =
-      ConsolidatedAdminService();
-  final AdminService _adminService = AdminService();
-  final ContentReviewService _contentService = ContentReviewService();
-  final UnifiedAdminService _unifiedAdminService = UnifiedAdminService();
-  final FinancialService _financialService = FinancialService();
+  late RecentActivityService _activityService;
+  late EnhancedAnalyticsService _analyticsService;
+  late ConsolidatedAdminService _consolidatedService;
+  late AdminService _adminService;
+  late ContentReviewService _contentService;
+  late UnifiedAdminService _unifiedAdminService;
+  late FinancialService _financialService;
 
   // Data
   AnalyticsModel? _analytics;
@@ -81,6 +80,13 @@ class _ModernUnifiedAdminDashboardState
   @override
   void initState() {
     super.initState();
+    _activityService = context.read<RecentActivityService>();
+    _analyticsService = context.read<EnhancedAnalyticsService>();
+    _consolidatedService = context.read<ConsolidatedAdminService>();
+    _adminService = context.read<AdminService>();
+    _contentService = context.read<ContentReviewService>();
+    _unifiedAdminService = context.read<UnifiedAdminService>();
+    _financialService = context.read<FinancialService>();
     _mainTabController = TabController(length: 4, vsync: this);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -2432,7 +2438,7 @@ class _ModernUnifiedAdminDashboardState
 
       // Trigger rewards if it's a capture
       if (review.contentType == ContentType.captures) {
-        await _triggerCaptureApprovalRewards(review);
+        await _unifiedAdminService.rewardApprovedCapture(review.contentId);
       }
 
       // Refresh the content data
@@ -2459,40 +2465,6 @@ class _ModernUnifiedAdminDashboardState
           ),
         );
       }
-    }
-  }
-
-  /// Trigger rewards when a capture is approved
-  Future<void> _triggerCaptureApprovalRewards(ContentReviewModel review) async {
-    try {
-      // Get the capture document to find the author
-      final captureDoc = await FirebaseFirestore.instance
-          .collection('captures')
-          .doc(review.contentId)
-          .get();
-
-      if (captureDoc.exists) {
-        final captureData = captureDoc.data()!;
-        final authorId = captureData['userId'] as String?;
-
-        if (authorId != null) {
-          // Award XP and update stats for capture approval
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(authorId)
-              .update({
-            'experiencePoints': FieldValue.increment(
-                25), // Additional 25 XP for approval (total 50)
-            'stats.capturesApproved': FieldValue.increment(1),
-          });
-
-          AppLogger.info(
-              '🎉 Awarded capture approval rewards to user: $authorId');
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Failed to trigger capture approval rewards: $e');
-      // Don't throw - approval should still succeed even if rewards fail
     }
   }
 
@@ -3335,25 +3307,12 @@ class _ModernUnifiedAdminDashboardState
     String newStatus,
   ) async {
     try {
-      // Update in Firestore based on content type
-      final collection = _getCollectionForContentType(content.type);
-      final updateData = {
-        'title': newTitle,
-        'description': newDescription,
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      // For artworks, update moderationStatus; for others, update status
-      if (content.type == 'artwork') {
-        updateData['moderationStatus'] = newStatus;
-      } else {
-        updateData['status'] = newStatus;
-      }
-
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc(content.id)
-          .update(updateData);
+      await _unifiedAdminService.updateContentRecord(
+        content: content,
+        newTitle: newTitle,
+        newDescription: newDescription,
+        newStatus: newStatus,
+      );
 
       // Update local data
       final index = _allContent.indexWhere((c) => c.id == content.id);
@@ -3400,12 +3359,7 @@ class _ModernUnifiedAdminDashboardState
 
   Future<void> _deleteContent(ContentModel content) async {
     try {
-      // Delete from Firestore based on content type
-      final collection = _getCollectionForContentType(content.type);
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc(content.id)
-          .delete();
+      await _unifiedAdminService.deleteContentRecord(content);
 
       // Remove from local data
       setState(() {
@@ -3456,21 +3410,6 @@ class _ModernUnifiedAdminDashboardState
         return ContentType.comments;
       default:
         return ContentType.posts; // Default fallback
-    }
-  }
-
-  String _getCollectionForContentType(String type) {
-    switch (type.toLowerCase()) {
-      case 'artwork':
-        return 'artwork';
-      case 'post':
-        return 'posts';
-      case 'event':
-        return 'events';
-      case 'ad':
-        return 'advertisements';
-      default:
-        return 'content';
     }
   }
 

@@ -8,8 +8,14 @@ import '../models/local_ad_status.dart';
 
 /// Service for handling advertisement reporting and moderation
 class AdReportService extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  AdReportService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance;
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
   static const String _reportsCollection = 'ad_reports';
   static const String _adsCollection = 'localAds';

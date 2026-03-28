@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ChallengeService;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide ArtworkModel, GlassInputDecoration, WritingMetadata;
 import 'package:artbeat_core/artbeat_core.dart' show WritingMetadata;
@@ -20,13 +20,6 @@ class ArtworkDetailScreen extends StatefulWidget {
 }
 
 class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
-  final ArtworkService _artworkService = ArtworkService();
-  final ArtistService _artistService = ArtistService();
-  final ArtworkVisibilityService _visibilityService =
-      ArtworkVisibilityService();
-  final AuctionService _auctionService = AuctionService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   bool _isLoading = true;
   ArtworkModel? _artwork;
   ArtistProfileModel? _artist;
@@ -49,12 +42,17 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     });
 
     try {
+      final artworkService = context.read<ArtworkService>();
+      final artistService = context.read<ArtistService>();
+      final visibilityService = context.read<ArtworkVisibilityService>();
+      final auctionService = context.read<AuctionService>();
+      final userService = context.read<UserService>();
       // Get artwork details
-      var artwork = await _artworkService.getArtworkById(widget.artworkId);
+      var artwork = await artworkService.getArtworkById(widget.artworkId);
 
       // Track artwork view for analytics if artwork exists
       if (artwork != null) {
-        _visibilityService.trackArtworkView(
+        visibilityService.trackArtworkView(
           artworkId: widget.artworkId,
           artistId: artwork.userId,
         );
@@ -71,7 +69,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       }
 
       // Get artist profile
-      final artistProfile = await _artistService.getArtistProfileById(
+      final artistProfile = await artistService.getArtistProfileById(
         artwork.artistProfileId,
       );
 
@@ -80,7 +78,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       String? fallbackArtistImageUrl;
       if (artistProfile == null) {
         try {
-          final userService = UserService();
           final userData = await userService.getUserProfile(artwork.userId);
           fallbackArtistName =
               (userData?['fullName'] as String?) ??
@@ -95,10 +92,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       }
 
       // Increment view count
-      await _artworkService.incrementViewCount(widget.artworkId);
+      await artworkService.incrementViewCount(widget.artworkId);
 
       // Refresh artwork to get updated view count
-      final updatedArtwork = await _artworkService.getArtworkById(
+      final updatedArtwork = await artworkService.getArtworkById(
         widget.artworkId,
       );
       if (updatedArtwork != null) {
@@ -109,10 +106,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       double? currentHighestBid;
       List<AuctionBidModel> bidHistory = [];
       if (artwork.auctionEnabled) {
-        currentHighestBid = await _auctionService.getCurrentHighestBid(
+        currentHighestBid = await auctionService.getCurrentHighestBid(
           widget.artworkId,
         );
-        bidHistory = await _auctionService.getBidHistory(widget.artworkId);
+        bidHistory = await auctionService.getBidHistory(widget.artworkId);
       }
 
       if (mounted) {
@@ -332,7 +329,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
 
   Future<void> _trackShare(String platform) async {
     try {
-      final engagementService = ContentEngagementService();
+      final engagementService = context.read<ContentEngagementService>();
+      final challengeService = context.read<ChallengeService>();
       await engagementService.toggleEngagement(
         contentId: _artwork!.id,
         contentType: 'artwork',
@@ -345,7 +343,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
 
       // Track share for challenge progress
       try {
-        final challengeService = ChallengeService();
         await challengeService.recordSocialShare();
       } catch (e) {
         AppLogger.error('Error recording share to challenge: $e');
@@ -747,7 +744,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
 
   Widget _buildAuctionActionButtons(ArtworkModel artwork) {
     final theme = Theme.of(context);
-    final currentUser = _auth.currentUser;
+    final currentUser = context.read<UserService>().currentUser;
     final isAuctionActive =
         artwork.auctionStatus == 'open' &&
         artwork.auctionEnd != null &&
@@ -903,7 +900,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     if (_artwork == null) return;
 
     final currentBid = _currentHighestBid ?? _artwork!.startingPrice ?? 0.0;
-    final minimumBid = _auctionService.getMinimumNextBid(
+    final minimumBid = context.read<AuctionService>().getMinimumNextBid(
       currentBid,
       _artwork!.startingPrice,
     );

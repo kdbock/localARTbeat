@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -385,7 +386,7 @@ class DashboardArtworkSection extends StatelessWidget {
 
   void _handleAppreciate(BuildContext context, ArtworkModel artwork) async {
     try {
-      final engagementService = ContentEngagementService();
+      final engagementService = context.read<ContentEngagementService>();
       await engagementService.toggleEngagement(
         contentId: artwork.id.toString(),
         contentType: 'artwork',
@@ -430,7 +431,7 @@ class DashboardArtworkSection extends StatelessWidget {
       );
 
       // Track the share as an engagement
-      final engagementService = ContentEngagementService();
+      final engagementService = context.read<ContentEngagementService>();
       await engagementService.toggleEngagement(
         contentId: artwork.id.toString(),
         contentType: 'artwork',

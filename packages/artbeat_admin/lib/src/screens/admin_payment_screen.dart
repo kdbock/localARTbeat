@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -16,7 +15,7 @@ import '../models/admin_permissions.dart';
 import '../services/financial_service.dart';
 import '../services/payment_audit_service.dart';
 import '../services/admin_payout_service.dart';
-import '../services/audit_trail_service.dart';
+import '../services/admin_payment_operations_service.dart';
 import '../widgets/admin_header.dart';
 import '../widgets/admin_metrics_card.dart';
 import '../widgets/admin_drawer.dart';
@@ -46,11 +45,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
   late Animation<double> _fadeAnimation;
 
   // Services
-  final FinancialService _financialService = FinancialService();
-  final PaymentAuditService _auditService = PaymentAuditService();
-  final AdminPayoutService _payoutService = AdminPayoutService();
-  final AdminRoleService _roleService = AdminRoleService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late FinancialService _financialService;
+  late PaymentAuditService _auditService;
+  late AdminPayoutService _payoutService;
+  late AdminRoleService _roleService;
+  late AdminPaymentOperationsService _paymentOperationsService;
 
   // Data
   List<TransactionModel> _transactions = [];
@@ -80,6 +79,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
   @override
   void initState() {
     super.initState();
+    _financialService = context.read<FinancialService>();
+    _auditService = context.read<PaymentAuditService>();
+    _payoutService = context.read<AdminPayoutService>();
+    _roleService = context.read<AdminRoleService>();
+    _paymentOperationsService = context.read<AdminPaymentOperationsService>();
     _tabController = TabController(length: 5, vsync: this);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -205,80 +209,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
     if (result == true) {
       try {
-        // Get current admin user
-        final currentUser = FirebaseAuth.instance.currentUser;
-        final adminUserId = currentUser?.uid ?? 'unknown_admin';
-        final adminEmail = currentUser?.email ?? 'unknown';
-
-        // Get payment intent ID from transaction metadata
-        final paymentIntentId =
-            transaction.metadata['paymentIntentId'] as String?;
-
-        if (paymentIntentId != null) {
-          // Process actual Stripe refund using UnifiedPaymentService
-          final unifiedPaymentService = UnifiedPaymentService();
-          await unifiedPaymentService.requestRefund(
-            paymentId: paymentIntentId,
-            amount: transaction.amount,
-            reason: 'Admin processed refund',
-          );
-        } else {
-          // Fallback: Log warning if no payment intent ID
-          AppLogger.warning(
-            'No paymentIntentId found for transaction ${transaction.id}. '
-            'Recording refund in database only.',
-          );
-        }
-
-        // Record refund in database
-        await _firestore.collection('refunds').add({
-          'originalTransactionId': transaction.id,
-          'paymentIntentId': paymentIntentId,
-          'amount': transaction.amount,
-          'currency': transaction.currency,
-          'userId': transaction.userId,
-          'userName': transaction.userName,
-          'reason': 'Admin processed refund',
-          'processedBy': adminUserId,
-          'processedByEmail': adminEmail,
-          'processedAt': FieldValue.serverTimestamp(),
-          'status': 'completed',
-        });
-
-        // Update transaction status
-        await _firestore
-            .collection('payment_history')
-            .doc(transaction.id)
-            .update({
-          'status': 'refunded',
-          'refundedAt': FieldValue.serverTimestamp(),
-          'refundedBy': adminUserId,
-        });
-
-        // Log audit
-        await _auditService.logRefundAction(
-          adminId: adminUserId,
-          adminEmail: adminEmail,
-          transactionId: transaction.id,
-          refundAmount: transaction.amount,
-          reason: 'Admin processed refund',
-          userId: transaction.userId,
-          notes: 'Processed via transaction details',
-        );
-
-        // General Audit Trail
-        await AuditTrailService().logAdminAction(
-          action: 'process_refund',
-          category: 'financial',
-          targetUserId: transaction.userId,
-          description:
-              'Processed refund for transaction ${transaction.id} (\$${transaction.amount})',
-          metadata: {
-            'transaction_id': transaction.id,
-            'amount': transaction.amount,
-            'user_name': transaction.userName,
-          },
-        );
+        await _paymentOperationsService.processRefund(transaction);
 
         _showSuccessSnackBar('Refund processed successfully');
         _loadData(); // Refresh data
@@ -340,70 +271,14 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
     if (result == true) {
       try {
-        final currentAdmin = await _roleService.getCurrentAdmin();
-        if (currentAdmin == null) {
-          _showErrorSnackBar('Admin authentication required');
-          return;
-        }
+        final result =
+            await _paymentOperationsService.processBulkRefunds(
+          selectedTransactions,
+        );
 
-        int successCount = 0;
-        final unifiedPaymentService = UnifiedPaymentService();
-
-        for (final transaction in selectedTransactions) {
-          try {
-            // Get payment intent ID from transaction metadata
-            final paymentIntentId =
-                transaction.metadata['paymentIntentId'] as String?;
-
-            if (paymentIntentId != null) {
-              // Process actual Stripe refund using UnifiedPaymentService
-              await unifiedPaymentService.requestRefund(
-                paymentId: paymentIntentId,
-                amount: transaction.amount,
-                reason: 'Bulk admin refund',
-              );
-            }
-
-            // Record refund in database
-            await _firestore.collection('refunds').add({
-              'originalTransactionId': transaction.id,
-              'amount': transaction.amount,
-              'currency': transaction.currency,
-              'userId': transaction.userId,
-              'userName': transaction.userName,
-              'reason': 'Bulk admin refund',
-              'processedBy': currentAdmin.id,
-              'processedAt': FieldValue.serverTimestamp(),
-              'status': 'completed',
-            });
-
-            // Update transaction status
-            await _firestore
-                .collection('payment_history')
-                .doc(transaction.id)
-                .update({
-              'status': 'refunded',
-              'refundedAt': FieldValue.serverTimestamp(),
-            });
-
-            // Log audit
-            await _auditService.logRefundAction(
-              adminId: currentAdmin.id,
-              adminEmail: currentAdmin.email,
-              transactionId: transaction.id,
-              refundAmount: transaction.amount,
-              reason: 'Bulk admin refund',
-              userId: transaction.userId,
-              notes: 'Part of bulk refund operation',
-            );
-
-            successCount++;
-          } catch (e) {
-            debugPrint('Failed to refund transaction ${transaction.id}: $e');
-          }
-        }
-
-        _showSuccessSnackBar('Successfully processed $successCount refunds');
+        _showSuccessSnackBar(
+          'Successfully processed ${result.successCount} refunds',
+        );
         _clearSelection();
         _loadData(); // Refresh data
       } catch (e) {
@@ -520,40 +395,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
     }
 
     try {
-      final currentAdmin = await _roleService.getCurrentAdmin();
-      if (currentAdmin == null) {
-        _showErrorSnackBar('Admin authentication required');
-        return;
-      }
-
-      final batch = _firestore.batch();
-      final updateData = {
-        'status': newStatus,
-        'updatedAt': FieldValue.serverTimestamp(),
-        'updatedBy': currentAdmin.id,
-      };
-
-      for (final transactionId in _selectedTransactionIds) {
-        final docRef =
-            _firestore.collection('payment_history').doc(transactionId);
-        batch.update(docRef, updateData);
-
-        // Log audit for each update
-        await _auditService.logPaymentAction(
-          adminId: currentAdmin.id,
-          adminEmail: currentAdmin.email,
-          action: 'STATUS_UPDATE',
-          transactionId: transactionId,
-          details: {
-            'newStatus': newStatus,
-            'previousStatus':
-                _transactions.firstWhere((t) => t.id == transactionId).status,
-            'bulkOperation': true,
-          },
-        );
-      }
-
-      await batch.commit();
+      await _paymentOperationsService.bulkUpdateStatuses(
+        transactionIds: _selectedTransactionIds,
+        transactions: _transactions,
+        newStatus: newStatus,
+      );
       _showSuccessSnackBar(
           'Successfully updated ${_selectedTransactionIds.length} transactions');
       _clearSelection();

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' show WalkStatus;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 /// Screen for reading written content (books, stories, etc.)
 class WrittenContentDetailScreen extends StatefulWidget {
@@ -26,13 +24,12 @@ class _WrittenContentDetailScreenState
   static const double _perChapterPrice = 1.0;
   static const double _fullBookPrice = 20.0;
 
-  final ArtworkService _artworkService = ArtworkService();
-  final ChapterService _chapterService = ChapterService();
-  final ArtistService _artistService = ArtistService();
-  final ArtworkVisibilityService _visibilityService =
-      ArtworkVisibilityService();
-  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final ArtworkService _artworkService;
+  late final ChapterService _chapterService;
+  late final ArtistService _artistService;
+  late final ArtworkVisibilityService _visibilityService;
+  late final UnifiedPaymentService _paymentService;
+  late final UserService _userService;
 
   bool _isLoading = true;
   ArtworkModel? _artwork;
@@ -59,6 +56,12 @@ class _WrittenContentDetailScreenState
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
+    _chapterService = context.read<ChapterService>();
+    _artistService = context.read<ArtistService>();
+    _visibilityService = context.read<ArtworkVisibilityService>();
+    _paymentService = context.read<UnifiedPaymentService>();
+    _userService = context.read<UserService>();
     _loadContent();
   }
 
@@ -92,61 +95,26 @@ class _WrittenContentDetailScreenState
   }
 
   Future<void> _loadPurchaseStatus() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
+    if (_userService.currentUserId == null) {
       _hasFullBookPurchase = false;
       _purchasedChapterIds.clear();
       return;
     }
 
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artwork_sales')
-          .where('buyerId', isEqualTo: uid)
-          .where('artworkId', isEqualTo: widget.artworkId)
-          .get();
+      final purchaseStatus = await _artworkService.getWrittenContentPurchaseStatus(
+        widget.artworkId,
+        chapters: _chapters,
+      );
 
-      bool hasFullBookPurchase = false;
-      final purchasedChapterIds = <String>{};
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final status = data['status']?.toString().toLowerCase();
-        if (status != null && status != 'completed' && status != 'success') {
-          continue;
-        }
-
-        final purchaseType = data['purchaseType']?.toString().toLowerCase();
-        final isFullBook =
-            data['isFullBook'] == true || data['fullBook'] == true;
-        final chapterId = data['chapterId']?.toString();
-        final chapterNumber = data['chapterNumber'] as int?;
-
-        if (purchaseType == 'full_book' || isFullBook) {
-          hasFullBookPurchase = true;
-          continue;
-        }
-
-        if (chapterId != null && chapterId.isNotEmpty) {
-          purchasedChapterIds.add(chapterId);
-          continue;
-        }
-
-        if (chapterNumber != null) {
-          for (final chapter in _chapters) {
-            final number = chapter.episodeNumber ?? chapter.chapterNumber;
-            if (number == chapterNumber) {
-              purchasedChapterIds.add(chapter.id);
-              break;
-            }
-          }
-        }
-      }
-
-      _hasFullBookPurchase = hasFullBookPurchase;
+      _hasFullBookPurchase =
+          purchaseStatus['hasFullBookPurchase'] as bool? ?? false;
       _purchasedChapterIds
         ..clear()
-        ..addAll(purchasedChapterIds);
+        ..addAll(
+          (purchaseStatus['purchasedChapterIds'] as Set<String>? ??
+              <String>{}),
+        );
     } catch (e) {
       AppLogger.error('❌ Error loading purchase status: $e');
       _hasFullBookPurchase = false;
@@ -155,8 +123,7 @@ class _WrittenContentDetailScreenState
   }
 
   Future<void> _loadEngagementUnlockStatus() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
+    if (_userService.currentUserId == null) {
       _captureCount = 0;
       _discoveryCount = 0;
       _walksCompleted = 0;
@@ -165,34 +132,11 @@ class _WrittenContentDetailScreenState
     }
 
     try {
-      final firestore = FirebaseFirestore.instance;
-      final captureCountFuture = firestore
-          .collection('captures')
-          .where('userId', isEqualTo: uid)
-          .count()
-          .get();
-      final discoveryCountFuture = firestore
-          .collection('users')
-          .doc(uid)
-          .collection('discoveries')
-          .count()
-          .get();
-      final walksCompletedFuture = firestore
-          .collection('artWalkProgress')
-          .where('userId', isEqualTo: uid)
-          .where('status', isEqualTo: WalkStatus.completed.name)
-          .count()
-          .get();
+      final metrics = await _artworkService.getCurrentUserEngagementUnlockMetrics();
 
-      final results = await Future.wait([
-        captureCountFuture,
-        discoveryCountFuture,
-        walksCompletedFuture,
-      ]);
-
-      final captures = results[0].count ?? 0;
-      final discoveries = results[1].count ?? 0;
-      final walksCompleted = results[2].count ?? 0;
+      final captures = metrics['captures'] ?? 0;
+      final discoveries = metrics['discoveries'] ?? 0;
+      final walksCompleted = metrics['walksCompleted'] ?? 0;
 
       _captureCount = captures;
       _discoveryCount = discoveries;
@@ -237,30 +181,14 @@ class _WrittenContentDetailScreenState
       _artwork = artwork;
 
       // Check ownership and access
-      final currentUser = _auth.currentUser;
+      final currentUserId = _userService.currentUserId;
       _isOwner =
-          currentUser?.uid == artwork.userId ||
-          currentUser?.uid == artwork.artistProfileId;
+          currentUserId == artwork.userId || currentUserId == artwork.artistProfileId;
 
       // Check if user is admin - more robust check
       try {
-        final uid = currentUser?.uid ?? '';
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .get();
-        final userData = userDoc.data();
-
-        // Check multiple possible admin field names and values
-        final userType = userData?['userType']?.toString().toLowerCase() ?? '';
-        final role = userData?['role']?.toString().toLowerCase() ?? '';
-        final isAdmin = userData?['isAdmin'] as bool? ?? false;
-
-        _isAdmin = userType == 'admin' || role == 'admin' || isAdmin;
-        AppLogger.info(
-          '🔑 Admin check for UID $uid: userType=$userType, role=$role, isAdmin=$isAdmin, result=$_isAdmin',
-        );
-        AppLogger.info('📋 Full user data: $userData');
+        _isAdmin = await _userService.isCurrentUserAdmin();
+        AppLogger.info('🔑 Admin check result=$_isAdmin');
       } catch (e) {
         AppLogger.error('❌ Error checking admin status: $e');
         _isAdmin = false;
@@ -275,11 +203,9 @@ class _WrittenContentDetailScreenState
 
         // If artist profile not found, try to get user information as fallback
         if (artistProfile == null) {
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(artwork.artistProfileId)
-              .get();
-          final userData = userDoc.data();
+          final userData = await _userService.getUserProfile(
+            artwork.artistProfileId,
+          );
           _fallbackArtistName =
               (userData?['fullName'] as String?) ??
               (userData?['displayName'] as String?) ??
@@ -297,7 +223,7 @@ class _WrittenContentDetailScreenState
         // getChaptersForArtwork now handles all filtering logic for public/author/moderator
         _chapters = await _chapterService.getChaptersForArtwork(
           widget.artworkId,
-          currentUserId: _auth.currentUser?.uid,
+          currentUserId: currentUserId,
           isModerator: _isAdmin,
         );
         _chapters.sort((a, b) => a.chapterNumber.compareTo(b.chapterNumber));

@@ -5,8 +5,14 @@ import '../utils/artist_logger.dart';
 
 /// Service for artwork management
 class ArtworkService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  ArtworkService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance;
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
   /// Get all artwork by artist profile ID
   Future<List<ArtworkModel>> getArtworkByArtistProfileId(

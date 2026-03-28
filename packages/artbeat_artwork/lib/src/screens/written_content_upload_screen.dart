@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         SubscriptionTier,
@@ -14,6 +14,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         MainLayout,
         AppLogger,
         FirestoreUtils,
+        ArtworkContentType,
+        UserService,
         WritingMetadata;
 import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkService, ChapterService;
@@ -56,12 +58,10 @@ class _WrittenContentUploadScreenState
   late final TextEditingController _publisherController;
   late final TextEditingController _editionController;
 
-  final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-
   // Services
-  final ArtworkService _artworkService = ArtworkService();
-  final ChapterService _chapterService = ChapterService();
+  late final ArtworkService _artworkService;
+  late final ChapterService _chapterService;
+  late final UserService _userService;
 
   File? _coverImageFile;
   bool _isForSale = false;
@@ -143,36 +143,29 @@ class _WrittenContentUploadScreenState
     // Initialize rich text controller
     _richTextController.addListener(_onRichTextChanged);
 
+    _artworkService = context.read<ArtworkService>();
+    _chapterService = context.read<ChapterService>();
+    _userService = context.read<UserService>();
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) return;
 
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _userService.getCurrentUserProfile();
+      final userArtwork = await _artworkService.getCurrentUserArtwork();
       if (!mounted) return;
 
       setState(() {
-        _userType = FirestoreUtils.safeString(userDoc.get('userType'));
+        _userType = FirestoreUtils.safeString(userDoc?['userType']);
         _tierLevel = SubscriptionTier.values.firstWhere(
-          (tier) => tier.name == userDoc.get('subscriptionTier'),
+          (tier) => tier.name == userDoc?['subscriptionTier'],
           orElse: () => SubscriptionTier.free,
         );
+        _artworkCount = userArtwork.length;
       });
-
-      final artworkDocs = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .count()
-          .get();
-
-      if (mounted) {
-        setState(() {
-          _artworkCount = artworkDocs.count ?? 0;
-        });
-      }
     } catch (e) {
       AppLogger.error('Error loading user data: $e');
     }
@@ -599,19 +592,15 @@ class _WrittenContentUploadScreenState
   Future<bool> _checkForDuplicateContent(String contentHash) async {
     try {
       // Check recent uploads for similar content
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) return false;
+      final recentArtworks = await _artworkService.getCurrentUserArtwork();
 
-      final recentArtworks = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .where('contentType', isEqualTo: 'written')
-          .orderBy('createdAt', descending: true)
-          .limit(10)
-          .get();
-
-      for (final doc in recentArtworks.docs) {
-        final existingHash = doc.data()['contentHash'];
+      for (final artwork in recentArtworks.where(
+        (artwork) => artwork.contentType == ArtworkContentType.written,
+      )) {
+        final artworkData = await _artworkService.getArtworkDocumentData(
+          artwork.id,
+        );
+        final existingHash = artworkData?['contentHash'];
         if (existingHash == contentHash) {
           return true;
         }
@@ -730,7 +719,7 @@ class _WrittenContentUploadScreenState
         context: context,
         barrierDismissible: false,
         builder: (context) => UploadLimitUpsellDialog(
-          userId: _auth.currentUser?.uid ?? '',
+          userId: _userService.currentUserId ?? '',
           currentTier: _tierLevel ?? SubscriptionTier.free,
         ),
       );
@@ -741,7 +730,7 @@ class _WrittenContentUploadScreenState
     AppLogger.info('Starting content upload process...');
 
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) throw Exception('Not authenticated');
 
       // Create artwork using ArtworkService
@@ -812,7 +801,7 @@ class _WrittenContentUploadScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      await _firestore.collection('artwork').doc(artworkId).update(updatedData);
+      await _artworkService.updateArtworkMetadata(artworkId, updatedData);
       AppLogger.info('Artwork metadata updated successfully');
 
       // Create chapters
@@ -860,7 +849,7 @@ class _WrittenContentUploadScreenState
             context: context,
             barrierDismissible: false,
             builder: (context) => UploadLimitUpsellDialog(
-              userId: _auth.currentUser?.uid ?? '',
+              userId: _userService.currentUserId ?? '',
               currentTier: _tierLevel ?? SubscriptionTier.free,
             ),
           );

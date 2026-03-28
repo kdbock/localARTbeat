@@ -631,4 +631,55 @@ class EventService {
       rethrow;
     }
   }
+
+  /// Submit an end-user report for an event and queue it for moderation.
+  Future<void> submitEventReport({
+    required String eventId,
+    required String reportedBy,
+    required String reason,
+    String? eventTitle,
+    String? eventCategory,
+  }) async {
+    try {
+      await _firestore.collection('reports').add({
+        'type': 'event',
+        'targetId': eventId,
+        'reportedBy': reportedBy,
+        'reason': reason,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'additionalInfo': {
+          'eventTitle': eventTitle ?? 'Unknown Event',
+          'eventType': eventCategory ?? 'Unknown',
+        },
+      });
+
+      await _firestore.collection('moderationQueue').add({
+        'type': 'event_report',
+        'eventId': eventId,
+        'reportedBy': reportedBy,
+        'reason': reason,
+        'priority': _getPriorityLevel(reason),
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+      });
+
+      _logger.i('Event report submitted for $eventId');
+    } catch (e) {
+      _logger.e('Error submitting event report: $e');
+      rethrow;
+    }
+  }
+
+  String _getPriorityLevel(String reason) {
+    final normalizedReason = reason.toLowerCase();
+    if (normalizedReason.contains('scam') ||
+        normalizedReason.contains('inappropriate')) {
+      return 'high';
+    }
+    if (normalizedReason.contains('misleading')) {
+      return 'medium';
+    }
+    return 'low';
+  }
 }

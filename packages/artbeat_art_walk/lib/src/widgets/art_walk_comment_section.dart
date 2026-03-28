@@ -3,12 +3,13 @@ import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/widgets/comment_tile.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/shared_widgets.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 
 class ArtWalkCommentSection extends StatefulWidget {
   final String artWalkId;
@@ -29,7 +30,8 @@ class ArtWalkCommentSection extends StatefulWidget {
 class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   ArtWalkService? _artWalkService;
   ArtWalkService get artWalkService =>
-      _artWalkService ??= widget.artWalkService ?? ArtWalkService();
+      _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
+  late final core_auth.AuthService _authService;
 
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
@@ -42,6 +44,12 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   double? _selectedRating;
   List<CommentModel> _comments = [];
   bool _hasLoadedComments = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = context.read<core_auth.AuthService>();
+  }
 
   @override
   void didChangeDependencies() {
@@ -91,7 +99,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   Future<void> _submitComment() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _authService.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -234,7 +242,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   }
 
   Future<void> _toggleCommentLike(String commentId) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _authService.currentUser;
     if (user == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -381,7 +389,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
               final comment = _comments[index];
               final replies = comment.replies ?? [];
               final timeAgo = timeago.format(comment.createdAt);
-              final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+              final currentUserId = _authService.currentUser?.uid;
               final isAuthor = comment.userId == currentUserId;
 
               return Column(

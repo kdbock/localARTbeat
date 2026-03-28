@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:geolocator/geolocator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 import 'package:artbeat_core/artbeat_core.dart' hide SocialActivityType;
 import 'package:artbeat_art_walk/src/services/social_service.dart';
@@ -21,13 +21,16 @@ class SocialActivityFeed extends StatefulWidget {
 }
 
 class _SocialActivityFeedState extends State<SocialActivityFeed> {
-  final SocialService _socialService = SocialService();
+  late final SocialService _socialService;
+  late final UserService _userService;
   List<SocialActivity> _activities = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _socialService = context.read<SocialService>();
+    _userService = context.read<UserService>();
     _loadActivities();
   }
 
@@ -64,7 +67,7 @@ class _SocialActivityFeedState extends State<SocialActivityFeed> {
       }
 
       // Fallback to user's own activities
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _userService.currentUser;
       if (user != null) {
         final userActivities = await _socialService.getFriendsActivities(
           friendIds: [user.uid],

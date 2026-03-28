@@ -4,15 +4,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
+
 import '../../models/group_models.dart';
-import '../../services/art_community_service.dart';
+import '../../services/community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
 
@@ -37,7 +37,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     with TickerProviderStateMixin {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
-  final ArtCommunityService _communityService = ArtCommunityService();
+  late CommunityService _communityService;
   final FirebaseStorageService _storageService = FirebaseStorageService();
   final ModerationService _moderationService = ModerationService();
   final ImagePicker _imagePicker = ImagePicker();
@@ -64,6 +64,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -78,7 +79,6 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
   void dispose() {
     _contentController.dispose();
     _tagsController.dispose();
-    _communityService.dispose();
     _videoController?.dispose();
     _audioPlayer?.dispose();
     _animationController.dispose();
@@ -272,8 +272,9 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      if (_communityService.currentUserId == null) {
+        throw Exception('User not authenticated');
+      }
 
       // AI Moderation Check
       final moderationResult = await _moderationService.moderateContent(
@@ -352,40 +353,15 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
           .where((tag) => tag.isNotEmpty)
           .toList();
 
-      // Get user profile information
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final userData = userDoc.data() ?? {};
-      final userName =
-          userData['displayName'] ?? user.displayName ?? 'Anonymous';
-      final userPhotoUrl = userData['profileImageUrl'] ?? user.photoURL ?? '';
-
-      // Create the post data - all group posts have the same structure
-      final postData = {
-        'userId': user.uid,
-        'userName': userName,
-        'userPhotoUrl': userPhotoUrl,
-        'content': _contentController.text.trim(),
-        'imageUrls': imageUrls,
-        'videoUrl': videoUrl,
-        'audioUrl': audioUrl,
-        'tags': tags,
-        'location': '',
-        'createdAt': FieldValue.serverTimestamp(),
-        'applauseCount': 0,
-        'commentCount': 0,
-        'shareCount': 0,
-        'isPublic': true,
-        'isUserVerified': userData['isVerified'] ?? false,
-        'groupType': widget.groupType.value,
-        if (widget.groupId != null) 'groupId': widget.groupId,
-      };
-
-      // Save to Firestore - use 'posts' collection so it appears in unified feed
-      await FirebaseFirestore.instance.collection('posts').add(postData);
+      await _communityService.createEnhancedPostForCurrentUser(
+        content: _contentController.text.trim(),
+        imageUrls: imageUrls,
+        videoUrl: videoUrl,
+        audioUrl: audioUrl,
+        tags: tags,
+        groupType: widget.groupType.value,
+        groupId: widget.groupId,
+      );
 
       if (!mounted) return;
 
@@ -637,7 +613,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
   }
 
   Widget _buildUserCard() {
-    final user = FirebaseAuth.instance.currentUser;
+    final isSignedIn = _communityService.currentUserId != null;
 
     return GlassCard(
       margin: EdgeInsets.zero,
@@ -647,10 +623,11 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
           CircleAvatar(
             radius: 28,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
-            backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
-            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                ? const Icon(Icons.person, color: Colors.white, size: 24)
-                : null,
+            child: Icon(
+              isSignedIn ? Icons.groups_rounded : Icons.person,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -658,7 +635,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.displayName ?? 'create_group_post_anonymous'.tr(),
+                  isSignedIn ? 'ARTbeat' : 'create_group_post_anonymous'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

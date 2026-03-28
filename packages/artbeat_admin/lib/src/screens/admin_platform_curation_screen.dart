@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/admin_service.dart';
 import '../services/admin_broadcast_service.dart';
@@ -22,9 +23,9 @@ class _AdminPlatformCurationScreenState
     extends State<AdminPlatformCurationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final AdminService _adminService = AdminService();
-  final AdminArtworkService _artworkService = AdminArtworkService();
-  final AdminBroadcastService _broadcastService = AdminBroadcastService();
+  late AdminService _adminService;
+  late AdminArtworkService _artworkService;
+  late AdminBroadcastService _broadcastService;
 
   bool _isLoading = false;
   List<core.UserModel> _featuredArtists = [];
@@ -34,6 +35,9 @@ class _AdminPlatformCurationScreenState
   @override
   void initState() {
     super.initState();
+    _adminService = context.read<AdminService>();
+    _artworkService = context.read<AdminArtworkService>();
+    _broadcastService = context.read<AdminBroadcastService>();
     _tabController = TabController(length: 2, vsync: this);
     _loadCurationData();
   }
@@ -239,22 +243,18 @@ class _AdminPlatformCurationScreenState
           _buildSectionHeader('Recent Broadcasts', Icons.history),
           const SizedBox(height: 8),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('broadcasts')
-                  .orderBy('timestamp', descending: true)
-                  .limit(10)
-                  .snapshots(),
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _broadcastService.getRecentBroadcasts(limit: 10),
               builder: (context, snapshot) {
                 if (!snapshot.hasData)
                   return const Center(child: CircularProgressIndicator());
-                final docs = snapshot.data!.docs;
+                final docs = snapshot.data!;
                 if (docs.isEmpty)
                   return const Center(child: Text('No recent broadcasts'));
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
+                    final data = docs[index];
                     return Card(
                       child: ListTile(
                         title: Text(data['message'] as String? ?? ''),

@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config/legal_config.dart';
+import '../services/legal_consent_service.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
 
@@ -12,21 +13,17 @@ class LegalCenterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final legalConsentService = context.read<LegalConsentService>();
+    final uid = legalConsentService.currentUserId;
 
     return Scaffold(
       appBar: AppBar(title: Text('legal_center_title'.tr())),
       body: uid == null
           ? Center(child: Text('legal_center_sign_in_required'.tr()))
-          : FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              future: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uid)
-                  .get(),
+          : FutureBuilder<Map<String, dynamic>>(
+              future: legalConsentService.getCurrentUserLegalConsents(),
               builder: (context, snapshot) {
-                final data = snapshot.data?.data();
-                final legalConsents =
-                    (data?['legalConsents'] as Map<String, dynamic>?) ?? {};
+                final legalConsents = snapshot.data ?? <String, dynamic>{};
                 final tos =
                     (legalConsents['termsOfService']
                         as Map<String, dynamic>?) ??

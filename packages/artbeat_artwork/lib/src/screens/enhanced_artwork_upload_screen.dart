@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         SubscriptionTier,
         SubscriptionService,
         ArtbeatColors,
-        EnhancedStorageService,
         EnhancedUniversalHeader,
         MainLayout,
-        ImageUrlValidator;
+        ImageUrlValidator,
+        UserService;
 
 /// Enhanced artwork upload screen with support for multiple media types
 class EnhancedArtworkUploadScreen extends StatefulWidget {
@@ -61,12 +61,6 @@ class _EnhancedArtworkUploadScreenState
   final _creationProcessController = TextEditingController();
   final _inspirationController = TextEditingController();
   final _techniqueController = TextEditingController();
-
-  // Firebase instances
-  final _storage = FirebaseStorage.instance;
-  final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-  final _subscriptionService = SubscriptionService();
 
   // State variables
   File? _mainImageFile;
@@ -208,19 +202,17 @@ class _EnhancedArtworkUploadScreenState
     });
 
     try {
+      final subscriptionService = context.read<SubscriptionService>();
+      final userService = context.read<UserService>();
+      final artworkService = context.read<ArtworkService>();
       // Get user's current subscription
-      final subscription = await _subscriptionService.getUserSubscription();
+      final subscription = await subscriptionService.getUserSubscription();
       _tierLevel = subscription?.tier ?? SubscriptionTier.starter;
 
       // Get count of user's existing artwork
-      final userId = _auth.currentUser?.uid;
+      final userId = userService.currentUserId;
       if (userId != null) {
-        final snapshot = await _firestore
-            .collection('artwork')
-            .where('userId', isEqualTo: userId)
-            .get();
-
-        _artworkCount = snapshot.docs.length;
+        _artworkCount = await artworkService.getArtworkCountForCurrentUser();
 
         // Check if user can upload more artwork
         if (_tierLevel == SubscriptionTier.starter && _artworkCount >= 5) {
@@ -245,12 +237,11 @@ class _EnhancedArtworkUploadScreenState
     });
 
     try {
-      final doc = await _firestore
-          .collection('artwork')
-          .doc(widget.artworkId)
-          .get();
+      final data = await context.read<ArtworkService>().getArtworkDocumentData(
+        widget.artworkId!,
+      );
 
-      if (!doc.exists) {
+      if (data == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('enhanced_upload_not_found'.tr())),
@@ -259,8 +250,6 @@ class _EnhancedArtworkUploadScreenState
         }
         return;
       }
-
-      final data = doc.data()!;
 
       if (mounted) {
         setState(() {
@@ -429,36 +418,10 @@ class _EnhancedArtworkUploadScreenState
 
   // Upload file to Firebase Storage using EnhancedStorageService for images
   Future<String> _uploadFile(File file, String folder) async {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
-
-    // Use enhanced storage service for image uploads
-    if (folder == 'artwork_images') {
-      try {
-        final enhancedStorage = EnhancedStorageService();
-        final uploadResult = await enhancedStorage.uploadImageWithOptimization(
-          imageFile: file,
-          category: 'artwork',
-          generateThumbnail: true,
-        );
-        return uploadResult['imageUrl']!;
-      } catch (e) {
-        debugPrint(
-          '❌ Enhanced upload failed, falling back to legacy method: $e',
-        );
-      }
-    }
-
-    // Fallback to legacy method for non-images or if enhanced upload fails
-    final fileName =
-        '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
-    // Remove the problematic 'new' subdirectory
-    final ref = _storage.ref().child('$folder/$userId/$fileName');
-
-    final uploadTask = ref.putFile(file);
-    final snapshot = await uploadTask;
-
-    return snapshot.ref.getDownloadURL();
+    return context.read<ArtworkService>().uploadArtworkAsset(
+      file: file,
+      folder: folder,
+    );
   }
 
   // Upload all media files
@@ -510,10 +473,11 @@ class _EnhancedArtworkUploadScreenState
     }
 
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = context.read<UserService>().currentUserId;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
+      final artworkService = context.read<ArtworkService>();
 
       // Upload all media files
       await _uploadAllMedia();
@@ -561,16 +525,10 @@ class _EnhancedArtworkUploadScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      // Save to Firestore
-      if (widget.artworkId != null) {
-        await _firestore.collection('artwork').doc(widget.artworkId).update({
-          ...artworkData,
-          'createdAt':
-              FieldValue.serverTimestamp(), // Keep original creation date
-        });
-      } else {
-        await _firestore.collection('artwork').add(artworkData);
-      }
+      await artworkService.saveArtworkData(
+        artworkId: widget.artworkId,
+        artworkData: artworkData,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(
@@ -868,8 +826,9 @@ class _EnhancedArtworkUploadScreenState
 
   Future<void> _saveDraft() async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = context.read<UserService>().currentUserId;
       if (userId == null) return;
+      final artworkService = context.read<ArtworkService>();
 
       final draftData = {
         'userId': userId,
@@ -899,14 +858,10 @@ class _EnhancedArtworkUploadScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      if (widget.artworkId != null) {
-        await _firestore
-            .collection('artwork_drafts')
-            .doc(widget.artworkId)
-            .set(draftData);
-      } else {
-        await _firestore.collection('artwork_drafts').add(draftData);
-      }
+      await artworkService.saveArtworkDraft(
+        draftId: widget.artworkId,
+        draftData: draftData,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

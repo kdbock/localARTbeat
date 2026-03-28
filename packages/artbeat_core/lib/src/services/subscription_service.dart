@@ -180,7 +180,11 @@ class SubscriptionService extends ChangeNotifier {
         return {
           'name': 'Creator',
           'price': 12.99,
-          'priceId': 'price_creator_monthly_2025',
+          'priceId':
+              UnifiedPaymentService.tryResolveSubscriptionPriceIdForTier(
+                SubscriptionTier.creator,
+              ) ??
+              '',
           'features': [
             'Unlimited artwork listings',
             'Featured in discover section',
@@ -194,7 +198,11 @@ class SubscriptionService extends ChangeNotifier {
         return {
           'name': 'Business',
           'price': 29.99,
-          'priceId': 'price_business_monthly_2025',
+          'priceId':
+              UnifiedPaymentService.tryResolveSubscriptionPriceIdForTier(
+                SubscriptionTier.business,
+              ) ??
+              '',
           'features': [
             'Multiple artist management',
             'Business profile for galleries',
@@ -208,7 +216,11 @@ class SubscriptionService extends ChangeNotifier {
         return {
           'name': 'Starter',
           'price': 4.99,
-          'priceId': 'price_starter_monthly_2025',
+          'priceId':
+              UnifiedPaymentService.tryResolveSubscriptionPriceIdForTier(
+                SubscriptionTier.starter,
+              ) ??
+              '',
           'features': [
             'Artist profile page',
             'Up to 5 artwork listings',
@@ -232,7 +244,11 @@ class SubscriptionService extends ChangeNotifier {
         return {
           'name': 'Enterprise',
           'price': 79.99,
-          'priceId': 'price_enterprise_monthly_2025',
+          'priceId':
+              UnifiedPaymentService.tryResolveSubscriptionPriceIdForTier(
+                SubscriptionTier.enterprise,
+              ) ??
+              '',
           'features': [
             'All Business features',
             'White-label branding',
@@ -524,9 +540,17 @@ class SubscriptionService extends ChangeNotifier {
         if (coupon != null) {
           await couponService.redeemCoupon(coupon.id);
         }
+        AppLogger.warning(
+          'Blocked legacy client-owned paid subscription activation for ${tier.apiName}. Use backend-authoritative subscription purchase flow instead.',
+        );
+        return {
+          'success': false,
+          'message':
+              'Paid subscription activation must use the backend-authoritative checkout flow.',
+        };
       }
 
-      // Update user profile with new subscription tier
+      // Full-discount coupon activation remains a non-payment entitlement path.
       await updateUserSubscriptionTier(tier);
 
       return {
@@ -535,7 +559,7 @@ class SubscriptionService extends ChangeNotifier {
             ? 'Free subscription activated successfully!'
             : 'Subscription created successfully!',
         'subscription': subscriptionResult,
-        'couponApplied': coupon != null,
+        'couponApplied': true,
         'isFree': isFree,
       };
     } catch (e) {
@@ -715,23 +739,11 @@ class SubscriptionService extends ChangeNotifier {
         throw Exception('Can only upgrade to a higher tier');
       }
 
-      // Process payment for the upgrade
-      final paymentService = UnifiedPaymentService();
-
-      // Get or create Stripe customer ID
-      final customerId = await paymentService.getOrCreateCustomerId();
-
-      // Create or update subscription
-      await paymentService.createSubscription(
-        customerId: customerId,
-        tier: tier,
+      AppLogger.warning(
+        'Blocked legacy client-owned subscription upgrade for ${tier.apiName}. Use backend-authoritative subscription purchase flow instead.',
       );
-
-      // Update the user's tier in Firestore
-      await updateUserSubscriptionTier(tier);
-
-      AppLogger.info(
-        'Successfully upgraded subscription to ${tier.displayName}',
+      throw Exception(
+        'Legacy subscription upgrade flow is disabled. Use the backend-authoritative subscription purchase flow.',
       );
     } catch (e) {
       AppLogger.error('Error upgrading subscription: $e');

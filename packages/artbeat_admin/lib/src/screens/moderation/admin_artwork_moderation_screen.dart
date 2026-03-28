@@ -5,6 +5,7 @@ import 'package:artbeat_core/artbeat_core.dart'
     hide GlassInputDecoration;
 import 'package:artbeat_core/artbeat_core.dart'
     show GlassCard, HudTopBar, MainLayout, SecureNetworkImage, WorldBackground;
+import 'package:provider/provider.dart';
 
 import '../../models/admin_artwork_model.dart';
 import '../../services/admin_artwork_service.dart';
@@ -20,7 +21,7 @@ class AdminArtworkModerationScreen extends StatefulWidget {
 
 class _AdminArtworkModerationScreenState
     extends State<AdminArtworkModerationScreen> {
-  final AdminArtworkService _artworkService = AdminArtworkService();
+  late AdminArtworkService _artworkService;
 
   String _selectedFilter = 'pending';
   bool _isLoading = false;
@@ -30,6 +31,7 @@ class _AdminArtworkModerationScreenState
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<AdminArtworkService>();
     _loadArtworks();
   }
 

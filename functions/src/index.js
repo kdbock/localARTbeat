@@ -16,6 +16,7 @@ const {defineSecret} = require("firebase-functions/params");
 const nodemailer = require("nodemailer");
 const https = require("https");
 const crypto = require("crypto");
+const {google} = require("googleapis");
 const cors = require("cors")({origin: true});
 
 // Set global options for all functions
@@ -188,6 +189,111 @@ function getBoostTitleForProduct(productId) {
   if (productId.includes("gift_large")) return "Titan Overdrive";
   if (productId.includes("gift_premium")) return "Mythic Expansion";
   return "Artist Boost";
+}
+
+function getIapSubscriptionConfig(productId) {
+  if (!productId) return null;
+
+  let tier = null;
+  if (productId.includes("starter")) tier = "starter";
+  if (productId.includes("creator")) tier = "creator";
+  if (productId.includes("business")) tier = "business";
+  if (productId.includes("enterprise")) tier = "enterprise";
+
+  if (!tier) return null;
+
+  const isYearly = productId.includes("yearly");
+  const durationDays = isYearly ? 365 : 30;
+
+  return {
+    tier,
+    isYearly,
+    durationDays,
+    cycle: isYearly ? "yearly" : "monthly",
+  };
+}
+
+function isGoogleApiNotFound(error) {
+  const status =
+    Number(error?.code || 0) ||
+    Number(error?.status || 0) ||
+    Number(error?.response?.status || 0);
+  return status === 404;
+}
+
+async function verifyGooglePlayPurchaseWithApi({
+  packageName,
+  productId,
+  purchaseToken,
+}) {
+  const auth = new google.auth.GoogleAuth({
+    scopes: ["https://www.googleapis.com/auth/androidpublisher"],
+  });
+  const authClient = await auth.getClient();
+  const publisher = google.androidpublisher({
+    version: "v3",
+    auth: authClient,
+  });
+
+  try {
+    const subscriptionResponse =
+      await publisher.purchases.subscriptionsv2.get({
+        packageName,
+        token: purchaseToken,
+      });
+    const data = subscriptionResponse.data || {};
+    const lineItems = Array.isArray(data.lineItems) ? data.lineItems : [];
+    const matchesProduct =
+      !productId || lineItems.some((item) => item.productId === productId);
+    const subscriptionState = String(data.subscriptionState || "");
+    const isActive =
+      subscriptionState === "SUBSCRIPTION_STATE_ACTIVE" ||
+      subscriptionState === "SUBSCRIPTION_STATE_IN_GRACE_PERIOD";
+
+    if (matchesProduct && isActive) {
+      return {
+        valid: true,
+        purchaseType: "subscription",
+        subscriptionState,
+        orderId: lineItems[0]?.latestSuccessfulOrderId || null,
+        expiryTime: lineItems[0]?.expiryTime || null,
+        raw: data,
+      };
+    }
+
+    if (matchesProduct) {
+      return {
+        valid: false,
+        purchaseType: "subscription",
+        subscriptionState,
+        raw: data,
+      };
+    }
+  } catch (error) {
+    if (!isGoogleApiNotFound(error)) {
+      throw error;
+    }
+  }
+
+  const productResponse = await publisher.purchases.products.get({
+    packageName,
+    productId,
+    token: purchaseToken,
+  });
+  const data = productResponse.data || {};
+  const purchaseState = Number(data.purchaseState ?? 1);
+  const acknowledged = Number(data.acknowledgementState ?? 0);
+
+  return {
+    valid: purchaseState === 0,
+    purchaseType: "product",
+    purchaseState,
+    acknowledgementState: acknowledged,
+    consumptionState: Number(data.consumptionState ?? 0),
+    orderId: data.orderId || null,
+    purchaseTimeMillis: data.purchaseTimeMillis || null,
+    raw: data,
+  };
 }
 
 function getBoostFeaturesForProduct(productId, amount, momentum) {
@@ -5087,6 +5193,334 @@ exports.validateAppleReceipt = onRequest(
       } catch (error) {
         console.error("Error validating Apple receipt:", error);
         response.status(500).send({error: error.message});
+      }
+    });
+  }
+);
+
+/**
+ * Validate Google Play purchase token for subscriptions and products.
+ */
+exports.verifyGooglePlayPurchase = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  (request, response) => {
+    cors(request, response, async () => {
+      try {
+        const {packageName, productId, purchaseToken} = request.body || {};
+
+        if (!packageName || !productId || !purchaseToken) {
+          return response.status(400).send({
+            error: "Missing required fields: packageName, productId, purchaseToken",
+          });
+        }
+
+        const verification = await verifyGooglePlayPurchaseWithApi({
+          packageName: String(packageName),
+          productId: String(productId),
+          purchaseToken: String(purchaseToken),
+        });
+
+        await admin.firestore().collection("iapValidations").add({
+          userId: null,
+          productId: String(productId),
+          platform: "android",
+          packageName: String(packageName),
+          purchaseTokenHash: crypto
+            .createHash("sha256")
+            .update(String(purchaseToken))
+            .digest("hex"),
+          valid: verification.valid,
+          purchaseType: verification.purchaseType,
+          orderId: verification.orderId || null,
+          purchaseState: verification.purchaseState ?? null,
+          subscriptionState: verification.subscriptionState || null,
+          validatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        if (!verification.valid) {
+          return response.status(400).send({
+            valid: false,
+            error: "Purchase token is not active for the requested product",
+            purchaseType: verification.purchaseType,
+            purchaseState: verification.purchaseState ?? null,
+            subscriptionState: verification.subscriptionState || null,
+          });
+        }
+
+        return response.status(200).send({
+          valid: true,
+          purchaseType: verification.purchaseType,
+          orderId: verification.orderId || null,
+          purchaseState: verification.purchaseState ?? null,
+          subscriptionState: verification.subscriptionState || null,
+          expiryTime: verification.expiryTime || null,
+          purchaseTimeMillis: verification.purchaseTimeMillis || null,
+        });
+      } catch (error) {
+        console.error("Error verifying Google Play purchase:", error);
+        return response.status(500).send({error: error.message});
+      }
+    });
+  }
+);
+
+/**
+ * Activate a verified IAP subscription in backend-owned state.
+ * This should be called only after store receipt verification succeeds.
+ */
+exports.activateIapSubscription = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  (request, response) => {
+    cors(request, response, async () => {
+      try {
+        const authHeader = request.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return response.status(401).send({error: "Unauthorized"});
+        }
+
+        const idToken = authHeader.split("Bearer ")[1];
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userId = decodedToken.uid;
+
+        if (request.method !== "POST") {
+          return response.status(405).send({error: "Method Not Allowed"});
+        }
+
+        const {
+          productId,
+          transactionId,
+          originalTransactionId,
+          purchaseDateMs,
+          amount,
+          currency,
+          platform,
+        } = request.body || {};
+
+        if (!productId || !transactionId || !purchaseDateMs) {
+          return response.status(400).send({
+            error: "Missing required fields: productId, transactionId, purchaseDateMs",
+          });
+        }
+
+        const config = getIapSubscriptionConfig(String(productId));
+        if (!config) {
+          return response.status(400).send({
+            error: `Unsupported IAP subscription product: ${productId}`,
+          });
+        }
+
+        const firestore = admin.firestore();
+        const purchaseDate = new Date(Number(purchaseDateMs));
+        if (Number.isNaN(purchaseDate.getTime())) {
+          return response.status(400).send({error: "Invalid purchaseDateMs"});
+        }
+
+        const endDate = new Date(
+          purchaseDate.getTime() + config.durationDays * 24 * 60 * 60 * 1000
+        );
+        const subscriptionDocId =
+          `iap_${userId}_${String(originalTransactionId || transactionId)}`;
+        const subscriptionRef = firestore
+          .collection("subscriptions")
+          .doc(subscriptionDocId);
+        const userRef = firestore.collection("users").doc(userId);
+        const artistProfileQuery = await firestore
+          .collection("artistProfiles")
+          .where("userId", "==", userId)
+          .limit(1)
+          .get();
+
+        await firestore.runTransaction(async (transaction) => {
+          transaction.set(subscriptionRef, {
+            userId,
+            productId: String(productId),
+            transactionId: String(transactionId),
+            originalTransactionId: originalTransactionId || null,
+            source: "iap",
+            platform: String(platform || ""),
+            tier: config.tier,
+            status: "active",
+            isActive: true,
+            autoRenew: true,
+            autoRenewing: true,
+            billingCycle: config.cycle,
+            startDate: admin.firestore.Timestamp.fromDate(purchaseDate),
+            endDate: admin.firestore.Timestamp.fromDate(endDate),
+            nextBillingDate: admin.firestore.Timestamp.fromDate(endDate),
+            purchaseDate: admin.firestore.Timestamp.fromDate(purchaseDate),
+            price: Number(amount || 0),
+            currency: String(currency || "USD"),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          }, {merge: true});
+
+          transaction.set(userRef, {
+            subscriptionTier: config.tier,
+            subscriptionStatus: "active",
+            subscriptionExpiryDate: admin.firestore.Timestamp.fromDate(endDate),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          }, {merge: true});
+
+          if (!artistProfileQuery.empty) {
+            transaction.set(artistProfileQuery.docs[0].ref, {
+              subscriptionTier: config.tier,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            }, {merge: true});
+          } else {
+            const userDoc = await transaction.get(userRef);
+            const userData = userDoc.exists ? userDoc.data() || {} : {};
+            const displayName = String(
+              userData.displayName || userData.name || "Artist"
+            );
+
+            const artistRef = firestore.collection("artistProfiles").doc();
+            transaction.set(artistRef, {
+              userId,
+              displayName,
+              displayNameLower: displayName.trim().toLowerCase(),
+              bio: "Artist profile created via verified IAP subscription",
+              userType: "artist",
+              location: "",
+              mediums: [],
+              styles: [],
+              socialLinks: {},
+              profileImageUrl: null,
+              coverImageUrl: null,
+              isVerified: false,
+              isFeatured: false,
+              followerCount: 0,
+              subscriptionTier: config.tier,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        });
+
+        return response.status(200).send({
+          success: true,
+          userId,
+          tier: config.tier,
+          subscriptionId: subscriptionDocId,
+        });
+      } catch (error) {
+        console.error("Error activating IAP subscription:", error);
+        return response.status(500).send({error: error.message});
+      }
+    });
+  }
+);
+
+/**
+ * Cancel an IAP subscription in backend-owned state.
+ */
+exports.cancelIapSubscription = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  (request, response) => {
+    cors(request, response, async () => {
+      try {
+        const authHeader = request.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return response.status(401).send({error: "Unauthorized"});
+        }
+
+        const idToken = authHeader.split("Bearer ")[1];
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userId = decodedToken.uid;
+
+        if (request.method !== "POST") {
+          return response.status(405).send({error: "Method Not Allowed"});
+        }
+
+        const {subscriptionId, reason} = request.body || {};
+        if (!subscriptionId) {
+          return response.status(400).send({
+            error: "Missing required field: subscriptionId",
+          });
+        }
+
+        const firestore = admin.firestore();
+        const subscriptionRef = firestore
+          .collection("subscriptions")
+          .doc(String(subscriptionId));
+
+        await firestore.runTransaction(async (transaction) => {
+          const subscriptionDoc = await transaction.get(subscriptionRef);
+          if (!subscriptionDoc.exists) {
+            throw new Error("Subscription not found");
+          }
+
+          const subscriptionData = subscriptionDoc.data() || {};
+          if (subscriptionData.userId !== userId) {
+            throw new Error("Forbidden");
+          }
+
+          if (subscriptionData.source !== "iap") {
+            throw new Error("Subscription is not managed by IAP cancellation");
+          }
+
+          const updates = {
+            status: "cancelled",
+            isActive: false,
+            autoRenew: false,
+            autoRenewing: false,
+            cancellationReason: String(reason || "user_requested"),
+            cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          };
+
+          transaction.set(subscriptionRef, updates, {merge: true});
+
+          const userRef = firestore.collection("users").doc(userId);
+          transaction.set(userRef, {
+            subscriptionStatus: "cancelled",
+            subscriptionTier: "free",
+            subscriptionId: null,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          }, {merge: true});
+
+          const artistProfileQuery = await firestore
+            .collection("artistProfiles")
+            .where("userId", "==", userId)
+            .limit(1)
+            .get();
+          if (!artistProfileQuery.empty) {
+            transaction.set(artistProfileQuery.docs[0].ref, {
+              subscriptionTier: "free",
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            }, {merge: true});
+          }
+        });
+
+        return response.status(200).send({
+          success: true,
+          subscriptionId,
+          status: "cancelled",
+        });
+      } catch (error) {
+        console.error("Error cancelling IAP subscription:", error);
+        const message = String(error.message || "");
+        if (message === "Subscription not found") {
+          return response.status(404).send({error: message});
+        }
+        if (message === "Forbidden") {
+          return response.status(403).send({error: message});
+        }
+        if (message === "Subscription is not managed by IAP cancellation") {
+          return response.status(400).send({error: message});
+        }
+        return response.status(500).send({error: error.message});
       }
     });
   }

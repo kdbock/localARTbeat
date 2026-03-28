@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
@@ -25,7 +26,6 @@ class EventSearchScreen extends StatefulWidget {
 }
 
 class _EventSearchScreenState extends State<EventSearchScreen> {
-  final EventService _eventService = EventService();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -114,10 +114,11 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
     });
 
     try {
+      final eventService = context.read<EventService>();
       await _saveRecentSearch(query);
 
       // Get all search results
-      final results = await _eventService.searchEvents(query);
+      final results = await eventService.searchEvents(query);
 
       // Apply client-side filters
       var filteredResults = results;

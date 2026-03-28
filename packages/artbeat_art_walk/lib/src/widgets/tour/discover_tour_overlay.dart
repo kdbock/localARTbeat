@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 
 class TourStep {
@@ -65,10 +66,12 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
   late List<TourStep> _steps;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late final OnboardingService _onboardingService;
 
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
     _steps = [
       TourStep(
         targetKey: widget.menuKey,
@@ -237,7 +240,7 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
   }
 
   void _finish() async {
-    await OnboardingService().markDiscoverOnboardingCompleted();
+    await _onboardingService.markDiscoverOnboardingCompleted();
     widget.onFinish();
   }
 

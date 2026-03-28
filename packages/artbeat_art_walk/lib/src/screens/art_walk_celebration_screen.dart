@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
 import 'package:lottie/lottie.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
@@ -16,6 +15,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         SocialActivityType,
         WorldBackground;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_art_walk/src/models/models.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
 import 'package:artbeat_art_walk/src/widgets/widgets.dart';
@@ -461,7 +461,7 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
 
   void _shareAchievement() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       if (user == null) throw Exception('User not authenticated');
       final socialService = context.read<SocialService>();
       final distanceMiles = (widget.celebrationData.distanceWalked * 0.621371)

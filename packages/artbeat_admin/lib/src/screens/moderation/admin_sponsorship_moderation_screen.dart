@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/admin_sponsorship.dart';
 import '../../services/admin_sponsorship_moderation_service.dart';
@@ -19,8 +19,7 @@ enum _SponsorshipFilter { all, pending, needsCreative, approved, rejected }
 
 class _AdminSponsorshipModerationScreenState
     extends State<AdminSponsorshipModerationScreen> {
-  final AdminSponsorshipModerationService _service =
-      AdminSponsorshipModerationService();
+  late AdminSponsorshipModerationService _service;
 
   bool _isLoading = true;
   List<AdminSponsorship> _items = [];
@@ -29,6 +28,7 @@ class _AdminSponsorshipModerationScreenState
   @override
   void initState() {
     super.initState();
+    _service = context.read<AdminSponsorshipModerationService>();
     _load();
   }
 
@@ -127,7 +127,8 @@ class _AdminSponsorshipModerationScreenState
         return _items.where((item) => item.status == 'needsCreative').toList();
       case _SponsorshipFilter.approved:
         return _items
-            .where((item) => item.status == 'approved' || item.status == 'active')
+            .where(
+                (item) => item.status == 'approved' || item.status == 'active')
             .toList();
       case _SponsorshipFilter.rejected:
         return _items.where((item) => item.status == 'rejected').toList();
@@ -154,11 +155,9 @@ class _AdminSponsorshipModerationScreenState
     String status,
     String? notes,
   ) async {
-    final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
     await _service.updateSponsorshipStatus(
       sponsorshipId: item.id,
       status: status,
-      adminId: adminId,
       moderationNotes: notes,
     );
     await _load();

@@ -11,13 +11,14 @@ class ChapterLandingScreen extends StatefulWidget {
 }
 
 class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
-  final ChapterPartnerService _chapterService = ChapterPartnerService();
+  late final ChapterPartnerService _chapterService;
   List<ChapterQuest> _quests = [];
   bool _isLoadingQuests = true;
 
   @override
   void initState() {
     super.initState();
+    _chapterService = context.read<ChapterPartnerService>();
     _loadChapterData();
   }
 

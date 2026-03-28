@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../services/leaderboard_service.dart';
 import '../services/user_progression_service.dart';
@@ -19,8 +20,8 @@ class LeaderboardScreen extends StatefulWidget {
 class _LeaderboardScreenState extends State<LeaderboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final LeaderboardService _leaderboardService = LeaderboardService();
-  final UserProgressionService _progressionService = UserProgressionService();
+  late final LeaderboardService _leaderboardService;
+  late final UserProgressionService _progressionService;
 
   Map<LeaderboardCategory, List<LeaderboardEntry>> _leaderboards = {};
   Map<String, dynamic>? _stats;
@@ -39,6 +40,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   @override
   void initState() {
     super.initState();
+    _leaderboardService = context.read<LeaderboardService>();
+    _progressionService = context.read<UserProgressionService>();
     _tabController = TabController(length: _categories.length, vsync: this);
     _loadLeaderboards();
   }

@@ -1,6 +1,26 @@
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:flutter/material.dart';
 
+import '../route_utils.dart';
+
 class GalleryRouteHandler {
-  static Widget handleGalleryRoute(String routeName, Object? arguments) =>
-      const Center(child: Text('Coming Soon - Gallery Feature'));
+  const GalleryRouteHandler();
+
+  Route<dynamic>? handleRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case core.AppRoutes.galleryArtistsManagement:
+        return RouteUtils.createMainNavRoute(
+          child: const artist.GalleryArtistsManagementScreen(),
+        );
+
+      case core.AppRoutes.galleryAnalytics:
+        return RouteUtils.createMainLayoutRoute(
+          child: const artist.GalleryVisibilityHubScreen(),
+        );
+
+      default:
+        return RouteUtils.createNotFoundRoute('Gallery feature');
+    }
+  }
 }

@@ -43,11 +43,12 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
   late EngagementStats _stats;
   final Map<EngagementType, bool> _userEngagements = {};
   bool _isLoading = false;
-  final ArtistBoostService _boostService = ArtistBoostService();
+  late ArtistBoostService _boostService;
 
   @override
   void initState() {
     super.initState();
+    _boostService = context.read<ArtistBoostService>();
     _stats = widget.initialStats;
     _loadUserEngagements();
   }

@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:logger/logger.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/artbeat_event.dart';
@@ -22,9 +23,6 @@ class CreateEventScreen extends StatefulWidget {
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
-  final EventService _eventService = EventService();
-  final EventNotificationService _notificationService =
-      EventNotificationService();
   final Logger _logger = Logger();
   bool _isLoading = false;
 
@@ -114,11 +112,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final eventService = context.read<EventService>();
+      final notificationService = context.read<EventNotificationService>();
       String eventId;
 
       if (widget.editEvent != null) {
         // Update existing event
-        await _eventService.updateEvent(event);
+        await eventService.updateEvent(event);
         eventId = event.id;
 
         if (mounted) {
@@ -131,18 +131,18 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         }
       } else {
         // Create new event
-        eventId = await _eventService.createEvent(event);
+        eventId = await eventService.createEvent(event);
 
         // Schedule event reminders if enabled
         String successMessage = 'events_created_success'.tr();
         if (event.reminderEnabled) {
           try {
             // Initialize notification service first
-            await _notificationService.initialize();
-            await _notificationService.requestPermissions();
+            await notificationService.initialize();
+            await notificationService.requestPermissions();
 
             final updatedEvent = event.copyWith(id: eventId);
-            await _notificationService.scheduleEventReminders(updatedEvent);
+            await notificationService.scheduleEventReminders(updatedEvent);
           } on Exception catch (notificationError) {
             _logger.e('Failed to schedule reminders: $notificationError');
             successMessage =

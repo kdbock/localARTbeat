@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/subscription_service.dart' as artist_subscription;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 /// Widget that displays artist social statistics
 class ArtistSocialStatsWidget extends StatefulWidget {
@@ -20,13 +21,13 @@ class ArtistSocialStatsWidget extends StatefulWidget {
 }
 
 class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
-  final artist_subscription.SubscriptionService _subscriptionService =
-      artist_subscription.SubscriptionService();
+  late final artist_subscription.SubscriptionService _subscriptionService;
   late Future<Map<String, dynamic>> _statsFuture;
 
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<artist_subscription.SubscriptionService>();
     _statsFuture = _subscriptionService.getFollowerStats(
       artistProfileId: widget.artistProfileId,
     );

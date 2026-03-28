@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'achievement_runner.dart';
 import 'achievement_badge.dart';
 
@@ -35,7 +36,7 @@ class UserExperienceCard extends StatefulWidget {
 
 class _UserExperienceCardState extends State<UserExperienceCard>
     with TickerProviderStateMixin {
-  final UserProgressionService _progressionService = UserProgressionService();
+  late UserProgressionService _progressionService;
   late AnimationController _expandController;
   late Animation<double> _expandAnimation;
   bool _isExpanded = false;
@@ -49,6 +50,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
   @override
   void initState() {
     super.initState();
+    _progressionService = context.read<UserProgressionService>();
     _expandController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,

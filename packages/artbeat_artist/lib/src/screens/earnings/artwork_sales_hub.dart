@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 import '../../services/earnings_service.dart';
 import '../../models/earnings_model.dart';
 
@@ -13,9 +14,9 @@ class ArtworkSalesHub extends StatefulWidget {
 
 class _ArtworkSalesHubState extends State<ArtworkSalesHub>
     with SingleTickerProviderStateMixin {
-  final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   late final TabController _tabController;
+  late final EarningsService _earningsService;
 
   EarningsModel? _earnings;
   List<EarningsTransaction> _salesTransactions = [];
@@ -26,6 +27,7 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
   @override
   void initState() {
     super.initState();
+    _earningsService = context.read<EarningsService>();
     _tabController = TabController(length: 2, vsync: this);
     _loadSalesData();
   }

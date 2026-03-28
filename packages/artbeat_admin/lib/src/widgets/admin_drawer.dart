@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/auth_service.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../routes/admin_routes.dart';
 
 /// Admin Package Specific Drawer
@@ -377,7 +378,7 @@ class AdminDrawer extends StatelessWidget {
               Navigator.pop(context);
               try {
                 // Handle logout logic using AuthService from artbeat_core
-                final authService = AuthService();
+                final authService = context.read<core_auth.AuthService>();
                 await authService.signOut();
 
                 // Navigate to login screen

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/usage_tracking_service.dart';
 
 /// Widget to display usage statistics and limits following 2025 industry standards
@@ -20,7 +21,7 @@ class UsageLimitsWidget extends StatefulWidget {
 }
 
 class _UsageLimitsWidgetState extends State<UsageLimitsWidget> {
-  final UsageTrackingService _usageService = UsageTrackingService();
+  late UsageTrackingService _usageService;
   Map<String, dynamic>? _usageStats;
   bool _isLoading = true;
   double _overageCost = 0.0;
@@ -28,6 +29,7 @@ class _UsageLimitsWidgetState extends State<UsageLimitsWidget> {
   @override
   void initState() {
     super.initState();
+    _usageService = context.read<UsageTrackingService>();
     _loadUsageStats();
   }
 

@@ -4,9 +4,12 @@
 export 'achievement_service.dart';
 export 'art_walk_cache_service.dart';
 export 'art_walk_capture_read_service.dart';
+export 'art_walk_distance_unit_service.dart';
 export 'art_walk_navigation_service.dart';
+export 'art_walk_preview_read_service.dart';
 export 'art_walk_security_service.dart';
 export 'art_walk_service.dart';
+export 'art_walk_user_stats_service.dart';
 export 'directions_service.dart';
 export 'secure_directions_service.dart';
 export 'google_maps_service.dart';

@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:artbeat_core/artbeat_core.dart' show AppRoutes;
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppRoutes, UserService;
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
@@ -26,8 +26,6 @@ class CommissionHubScreen extends StatefulWidget {
 }
 
 class _CommissionHubScreenState extends State<CommissionHubScreen> {
-  final DirectCommissionService _commissionService = DirectCommissionService();
-
   final intl.DateFormat _dateFormat = intl.DateFormat('MMM d, yyyy');
   final intl.NumberFormat _compactCurrencyFormatter =
       intl.NumberFormat.compactCurrency(symbol: '\$');
@@ -40,6 +38,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   ArtistCommissionSettings? _artistSettings;
   List<DirectCommissionModel> _recentCommissions = [];
   Map<String, int> _stats = {};
+  String? _currentUserId;
 
   @override
   void initState() {
@@ -51,10 +50,12 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      final commissionService = context.read<DirectCommissionService>();
+      if (userId == null) {
         if (!mounted) return;
         setState(() {
+          _currentUserId = null;
           _isArtist = false;
           _artistSettings = null;
           _recentCommissions = [];
@@ -67,16 +68,14 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       ArtistCommissionSettings? artistSettings;
       var isArtist = false;
       try {
-        artistSettings = await _commissionService.getArtistSettings(user.uid);
+        artistSettings = await commissionService.getArtistSettings(userId);
         isArtist = artistSettings != null;
       } catch (_) {
         isArtist = false;
         artistSettings = null;
       }
 
-      final commissions = await _commissionService.getCommissionsByUser(
-        user.uid,
-      );
+      final commissions = await commissionService.getCommissionsByUser(userId);
       final recentCommissions = commissions.take(5).toList();
 
       final activeCount = commissions
@@ -102,7 +101,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       final totalEarnings = commissions
           .where(
             (c) =>
-                c.artistId == user.uid &&
+                c.artistId == userId &&
                 [
                   CommissionStatus.completed,
                   CommissionStatus.delivered,
@@ -112,6 +111,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
 
       if (!mounted) return;
       setState(() {
+        _currentUserId = userId;
         _isArtist = isArtist;
         _artistSettings = artistSettings;
         _recentCommissions = recentCommissions;
@@ -674,8 +674,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   Widget _buildCommissionTile(DirectCommissionModel commission) {
     final statusColor = _getStatusColor(commission.status);
     final statusLabel = _getStatusLabel(commission.status);
-    final isArtistView =
-        commission.artistId == FirebaseAuth.instance.currentUser?.uid;
+    final isArtistView = commission.artistId == _currentUserId;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -822,7 +821,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
           CommissionStatus.completed,
           CommissionStatus.delivered,
         ].contains(commission.status) &&
-        FirebaseAuth.instance.currentUser != null) {
+        _currentUserId != null) {
       actions.add(
         HudButton.secondary(
           onPressed: () => _rateCommission(commission),
@@ -837,7 +836,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
           CommissionStatus.inProgress,
           CommissionStatus.revision,
         ].contains(commission.status) &&
-        FirebaseAuth.instance.currentUser != null) {
+        _currentUserId != null) {
       actions.add(
         HudButton.secondary(
           onPressed: () => _reportDispute(commission),
@@ -989,8 +988,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   }
 
   void _viewAnalytics() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (_currentUserId == null) return;
     Navigator.pushNamed(context, AppRoutes.adminDashboard);
   }
 
@@ -1004,12 +1002,12 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   }
 
   void _viewGallery() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    final userId = _currentUserId;
+    if (userId == null) return;
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => CommissionGalleryScreen(artistId: user.uid),
+        builder: (context) => CommissionGalleryScreen(artistId: userId),
       ),
     );
   }
@@ -1042,13 +1040,13 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   }
 
   void _reportDispute(DirectCommissionModel commission) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
+    final currentUserId = _currentUserId;
+    if (currentUserId == null) return;
 
-    final otherPartyId = commission.artistId == currentUser.uid
+    final otherPartyId = commission.artistId == currentUserId
         ? commission.clientId
         : commission.artistId;
-    final otherPartyName = commission.artistId == currentUser.uid
+    final otherPartyName = commission.artistId == currentUserId
         ? commission.clientName
         : commission.artistName;
 

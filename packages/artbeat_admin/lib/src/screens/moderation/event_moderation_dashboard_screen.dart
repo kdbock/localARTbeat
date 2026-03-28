@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/admin_event_model.dart';
 import '../../services/admin_event_moderation_service.dart';
@@ -17,8 +18,7 @@ class EventModerationDashboardScreen extends StatefulWidget {
 class _EventModerationDashboardScreenState
     extends State<EventModerationDashboardScreen>
     with SingleTickerProviderStateMixin {
-  final AdminEventModerationService _moderationService =
-      AdminEventModerationService();
+  late AdminEventModerationService _moderationService;
 
   late TabController _tabController;
   List<Map<String, dynamic>> _flaggedEvents = [];
@@ -32,6 +32,7 @@ class _EventModerationDashboardScreenState
   @override
   void initState() {
     super.initState();
+    _moderationService = context.read<AdminEventModerationService>();
     _tabController = TabController(length: 4, vsync: this);
     _loadData();
   }

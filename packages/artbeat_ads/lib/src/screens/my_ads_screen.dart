@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import '../widgets/ad_card.dart';
@@ -16,19 +17,19 @@ class MyAdsScreen extends StatefulWidget {
 
 class _MyAdsScreenState extends State<MyAdsScreen> {
   late final String _userId;
-  final _adService = LocalAdService();
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
+    final userId = context.read<UserService>().currentUserId;
+    if (userId == null) {
       throw Exception('User not authenticated');
     }
-    _userId = user.uid;
+    _userId = userId;
   }
 
   Future<void> _deleteAd(String adId) async {
+    final adService = context.read<LocalAdService>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -52,7 +53,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
 
     if (confirmed == true) {
       try {
-        await _adService.deleteAd(adId);
+        await adService.deleteAd(adId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('ads_my_ads_text_ad_deleted'.tr())),
@@ -89,7 +90,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
         child: const Icon(Icons.add),
       ),
       body: FutureBuilder<List<LocalAd>>(
-        future: _adService.getMyAds(_userId),
+        future: context.read<LocalAdService>().getMyAds(_userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

@@ -16,7 +16,13 @@ class CouponManagementScreen extends StatefulWidget {
 }
 
 class _CouponManagementScreenState extends State<CouponManagementScreen> {
-  final CouponService _couponService = CouponService();
+  late CouponService _couponService;
+
+  @override
+  void initState() {
+    super.initState();
+    _couponService = context.read<CouponService>();
+  }
 
   @override
   Widget build(BuildContext context) {

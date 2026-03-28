@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         GlassCard,
@@ -14,6 +14,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         WorldBackground;
 import 'package:artbeat_ads/artbeat_ads.dart';
 import '../models/artwork_model.dart';
+import '../services/artwork_service.dart';
 
 /// Screen for browsing all artwork, with filtering options
 class ArtworkBrowseScreen extends StatefulWidget {
@@ -27,17 +28,23 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   static const int _artworksPerAd = 6;
   static const int _adCycleLength = _artworksPerAd + 1;
 
+  late final ArtworkService _artworkService;
   final _searchController = TextEditingController();
   String _selectedLocation = 'common_all'.tr();
   String _selectedMedium = 'common_all'.tr();
   List<String> _availableLocations = ['common_all'.tr()];
   List<String> _availableMediums = ['common_all'.tr()];
   bool _isLoadingFilters = true;
+  bool _isLoadingArtworks = true;
+  List<ArtworkModel> _artworks = [];
+  String? _artworkError;
 
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
     _loadFilterOptions();
+    _performSearch();
   }
 
   @override
@@ -52,31 +59,12 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     });
 
     try {
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('artwork')
-          .where('isPublic', isEqualTo: true)
-          .get();
-
-      final Set<String> locations = {'common_all'.tr()};
-      final Set<String> mediums = {'common_all'.tr()};
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final location = (data['location'] as String?)?.trim();
-        final medium = (data['medium'] as String?)?.trim();
-
-        if (location != null && location.isNotEmpty) {
-          locations.add(location);
-        }
-        if (medium != null && medium.isNotEmpty) {
-          mediums.add(medium);
-        }
-      }
+      final options = await _artworkService.getPublicArtworkFilterOptions();
 
       if (!mounted) return;
       setState(() {
-        _availableLocations = _sortFilterOptions(locations);
-        _availableMediums = _sortFilterOptions(mediums);
+        _availableLocations = _sortFilterOptions(options['locations']!.toSet());
+        _availableMediums = _sortFilterOptions(options['mediums']!.toSet());
         _isLoadingFilters = false;
       });
     } catch (_) {
@@ -386,47 +374,41 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   }
 
   Widget _buildArtworkGrid() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _getArtworkStream(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF22D3EE)),
-          );
-        }
+    if (_isLoadingArtworks) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF22D3EE)),
+      );
+    }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'artwork_error_prefix'.tr() + (snapshot.error?.toString() ?? ''),
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          );
-        }
+    if (_artworkError != null) {
+      return Center(
+        child: Text(
+          'artwork_error_prefix'.tr() + _artworkError!,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
 
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
-          return Center(
-            child: Text(
-              'artwork_no_results'.tr(),
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          );
-        }
+    if (_artworks.isEmpty) {
+      return Center(
+        child: Text(
+          'artwork_no_results'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
 
-        final artworks = docs
-            .map((doc) => ArtworkModel.fromFirestore(doc))
-            .toList();
+    final artworks = _artworks;
 
-        return CustomScrollView(
+    return CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(
               child: Padding(
@@ -491,8 +473,6 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         );
-      },
-    );
   }
 
   Widget _buildArtworkCard(ArtworkModel artwork) {
@@ -650,33 +630,31 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     return null;
   }
 
-  Stream<QuerySnapshot> _getArtworkStream() {
-    Query query = FirebaseFirestore.instance.collection('artwork');
+  Future<void> _performSearch() async {
+    setState(() {
+      _isLoadingArtworks = true;
+      _artworkError = null;
+    });
 
-    query = query.where('isPublic', isEqualTo: true);
-
-    if (_selectedLocation != 'common_all'.tr()) {
-      query = query.where('location', isEqualTo: _selectedLocation);
+    try {
+      final results = await _artworkService.browsePublicArtwork(
+        query: _searchController.text,
+        location:
+            _selectedLocation != 'common_all'.tr() ? _selectedLocation : null,
+        medium: _selectedMedium != 'common_all'.tr() ? _selectedMedium : null,
+      );
+      if (!mounted) return;
+      setState(() {
+        _artworks = results;
+        _isLoadingArtworks = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _artworkError = e.toString();
+        _isLoadingArtworks = false;
+      });
     }
-
-    if (_selectedMedium != 'common_all'.tr()) {
-      query = query.where('medium', isEqualTo: _selectedMedium);
-    }
-
-    if (_searchController.text.isNotEmpty) {
-      query = query
-          .where('title', isGreaterThanOrEqualTo: _searchController.text)
-          .where(
-            'title',
-            isLessThanOrEqualTo: '${_searchController.text}\uf8ff',
-          );
-    }
-
-    return query.orderBy('createdAt', descending: true).snapshots();
-  }
-
-  void _performSearch() {
-    setState(() {});
   }
 
   void _navigateToArtworkDetail(String artworkId) {

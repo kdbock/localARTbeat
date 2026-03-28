@@ -1,9 +1,9 @@
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ArtWalkDrawer extends StatefulWidget {
   const ArtWalkDrawer({super.key});
@@ -14,11 +14,12 @@ class ArtWalkDrawer extends StatefulWidget {
 
 class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
   UserModel? _currentUser;
-  final UserService _userService = UserService();
+  late final UserService _userService;
 
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
     _loadCurrentUser();
   }
 
@@ -34,7 +35,7 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
   @override
   Widget build(BuildContext context) {
     final currentRoute = ModalRoute.of(context)?.settings.name;
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final authUser = _userService.currentUser;
     final primaryActionItem = _drawerSections.first.items.first;
 
     return Drawer(
@@ -47,9 +48,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
               _DrawerHeader(
                 displayName:
                     _currentUser?.fullName ??
-                    firebaseUser?.displayName ??
+                    authUser?.displayName ??
                     'art_walk_drawer_art_walker'.tr(),
-                email: firebaseUser?.email,
+                email: authUser?.email,
                 avatarUrl: _currentUser?.profileImageUrl,
                 onCreateArtWalk: () =>
                     _handleNavigation(context, primaryActionItem, currentRoute),
@@ -155,7 +156,7 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
 
     if (shouldSignOut != true) return;
 
-    await FirebaseAuth.instance.signOut();
+    await _userService.signOut();
     if (!mounted) return;
     // ignore: use_build_context_synchronously
     Navigator.of(context, rootNavigator: true).pushReplacementNamed('/login');

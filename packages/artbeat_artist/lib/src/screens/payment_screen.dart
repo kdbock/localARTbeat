@@ -7,8 +7,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         SubscriptionTier,
         EnhancedUniversalHeader,
         MainLayout;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'payment_methods_screen.dart';
 
 /// Screen for handling subscription payments
@@ -22,12 +21,16 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  // Use UnifiedPaymentService instead of legacy PaymentService
-  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final UnifiedPaymentService _paymentService;
 
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _paymentService = context.read<UnifiedPaymentService>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +167,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _handlePayment() async {
-    final user = _auth.currentUser;
+    final user = _paymentService.currentUser;
     if (user == null || user.email == null) {
       setState(() {
         _errorMessage =
@@ -179,18 +182,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     });
 
     try {
-      // Get the stripe customer ID for the current user
-      final customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(user.uid)
-          .get();
+      final defaultPaymentMethodId = await _paymentService
+          .getDefaultPaymentMethodId();
 
-      final String? stripeCustomerId =
-          customerDoc.data()?['stripeCustomerId'] as String?;
-      final String? defaultPaymentMethodId =
-          customerDoc.data()?['defaultPaymentMethodId'] as String?;
-
-      if (stripeCustomerId == null || defaultPaymentMethodId == null) {
+      if (defaultPaymentMethodId == null) {
         // Navigate to payment methods screen to add a payment method
         if (mounted) {
           final result = await Navigator.push<bool>(

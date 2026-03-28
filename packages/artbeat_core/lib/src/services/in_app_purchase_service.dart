@@ -49,10 +49,7 @@ class InAppPurchaseService {
       'artbeat_boost_surge', // Surge Boost
       'artbeat_boost_overdrive', // Overdrive Boost
     ],
-    'ads': [
-      'artbeat_ad_banner_monthly',
-      'artbeat_ad_inline_monthly',
-    ],
+    'ads': ['artbeat_ad_banner_monthly', 'artbeat_ad_inline_monthly'],
   };
 
   // Callbacks for purchase events
@@ -295,19 +292,36 @@ class InAppPurchaseService {
       final pendingMetadata =
           _pendingPurchaseMetadata[purchaseDetails.productID] ?? {};
 
+      final purchaseAmount = _getProductPrice(product);
+      final purchaseCurrency = _getProductCurrency(product);
+      final purchaseDate = DateTime.now();
+      final purchaseId =
+          purchaseDetails.purchaseID ??
+          DateTime.now().millisecondsSinceEpoch.toString();
+
+      if (purchaseCategory == PurchaseCategory.subscription) {
+        await PurchaseVerificationService.activateVerifiedSubscription(
+          productId: purchaseDetails.productID,
+          transactionId: purchaseId,
+          originalTransactionId: purchaseDetails.purchaseID,
+          purchaseDate: purchaseDate,
+          amount: purchaseAmount,
+          currency: purchaseCurrency,
+          platform: Platform.isIOS ? 'ios' : 'android',
+        );
+      }
+
       // Create completed purchase record
       final completedPurchase = CompletedPurchase(
-        purchaseId:
-            purchaseDetails.purchaseID ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        purchaseId: purchaseId,
         productId: purchaseDetails.productID,
         userId: user.uid,
-        purchaseDate: DateTime.now(),
+        purchaseDate: purchaseDate,
         status: 'completed',
         type: purchaseType,
         category: purchaseCategory,
-        amount: _getProductPrice(product),
-        currency: _getProductCurrency(product),
+        amount: purchaseAmount,
+        currency: purchaseCurrency,
         transactionId: purchaseDetails.purchaseID,
         metadata: {
           'platform': Platform.isIOS ? 'ios' : 'android',
@@ -474,51 +488,9 @@ class InAppPurchaseService {
     CompletedPurchase purchase,
     PurchaseDetails details,
   ) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) return;
-
-      // Determine subscription tier from product ID
-      final tier = _getSubscriptionTierFromProductId(purchase.productId);
-      final isYearly = purchase.productId.contains('yearly');
-
-      // Calculate expiry date
-      final expiryDate = DateTime.now().add(
-        isYearly ? const Duration(days: 365) : const Duration(days: 30),
-      );
-
-      // Create subscription details
-      final subscription = SubscriptionDetails(
-        subscriptionId: purchase.purchaseId,
-        productId: purchase.productId,
-        userId: user.uid,
-        startDate: purchase.purchaseDate,
-        endDate: expiryDate,
-        status: 'active',
-        autoRenewing: true,
-        price: purchase.amount,
-        currency: purchase.currency,
-        nextBillingDate: expiryDate,
-      );
-
-      // Save subscription
-      await _firestore
-          .collection('subscriptions')
-          .doc(subscription.subscriptionId)
-          .set(subscription.toFirestore());
-
-      // Update user's subscription tier
-      await _firestore.collection('users').doc(user.uid).update({
-        'subscriptionTier': tier.apiName,
-        'subscriptionStatus': 'active',
-        'subscriptionExpiryDate': Timestamp.fromDate(expiryDate),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      AppLogger.info('✅ Subscription processed: ${tier.displayName}');
-    } catch (e) {
-      AppLogger.error('Error processing subscription purchase: $e');
-    }
+    AppLogger.info(
+      '✅ Verified IAP subscription recorded; backend activation owns entitlement for ${purchase.productId}',
+    );
   }
 
   /// Process boost purchase
@@ -645,7 +617,8 @@ class InAppPurchaseService {
       if (!_isAvailable) {
         AppLogger.error('❌ In-app purchases not available on this device');
         AppLogger.info('Available products: ${_products.length}');
-        _lastPurchaseError = 'In-app purchases are not available on this device.';
+        _lastPurchaseError =
+            'In-app purchases are not available on this device.';
         throw Exception('In-app purchases are not available on this device');
       }
 
@@ -861,14 +834,6 @@ class InAppPurchaseService {
 
   String _getProductCurrency(ProductDetails product) {
     return product.currencyCode;
-  }
-
-  SubscriptionTier _getSubscriptionTierFromProductId(String productId) {
-    if (productId.contains('starter')) return SubscriptionTier.starter;
-    if (productId.contains('creator')) return SubscriptionTier.creator;
-    if (productId.contains('business')) return SubscriptionTier.business;
-    if (productId.contains('enterprise')) return SubscriptionTier.enterprise;
-    return SubscriptionTier.free;
   }
 
   /// Get user's active subscriptions

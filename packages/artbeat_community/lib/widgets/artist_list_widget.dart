@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 // Using ArtistProfileModel from artbeat_core to avoid conflicts
 import '../screens/feed/artist_community_feed_screen.dart';
@@ -18,8 +18,8 @@ class ArtistListWidget extends StatefulWidget {
 class _ArtistListWidgetState extends State<ArtistListWidget>
     with AutomaticKeepAliveClientMixin {
   final List<ArtistProfileModel> _artists = [];
-  final Map<String, int> _followerCounts = {};
-  final UserService _userService = UserService();
+  late UserService _userService;
+  late ArtistService _artistService;
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
@@ -30,6 +30,8 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
+    _artistService = context.read<ArtistService>();
     _loadArtists();
   }
 
@@ -41,41 +43,12 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
       _hasError = false;
       _errorMessage = null;
       _artists.clear();
-      _followerCounts.clear();
     });
 
     try {
       AppLogger.info('Loading artists for community...');
 
-      // Get all artist profiles
-      final artistsSnapshot = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .orderBy('displayName')
-          .limit(50)
-          .get();
-
-      if (!mounted) return;
-
-      AppLogger.info('Found ${artistsSnapshot.docs.length} artist documents');
-
-      final loadedArtists = <ArtistProfileModel>[];
-      for (final doc in artistsSnapshot.docs) {
-        try {
-          AppLogger.info('Processing artist document: ${doc.id}');
-          final artist = ArtistProfileModel.fromFirestore(doc);
-          loadedArtists.add(artist);
-
-          // Get follower count for this artist
-          final followerCount = await _getFollowerCount(doc.id);
-          _followerCounts[doc.id] = followerCount;
-
-          debugPrint(
-            'Successfully loaded artist: ${artist.displayName} with $followerCount followers',
-          );
-        } catch (e) {
-          AppLogger.error('Error parsing artist ${doc.id}: $e');
-        }
-      }
+      final loadedArtists = await _artistService.getAllArtistProfiles(limit: 50);
 
       AppLogger.info('Loaded ${loadedArtists.length} artists');
 
@@ -130,23 +103,6 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
           _isLoading = false;
         });
       }
-    }
-  }
-
-  /// Get the actual follower count for an artist from the artistFollows collection
-  Future<int> _getFollowerCount(String artistProfileId) async {
-    try {
-      final followersSnapshot = await FirebaseFirestore.instance
-          .collection('artistFollows')
-          .where('artistProfileId', isEqualTo: artistProfileId)
-          .get();
-
-      return followersSnapshot.docs.length;
-    } catch (e) {
-      debugPrint(
-        'Error getting follower count for artist $artistProfileId: $e',
-      );
-      return 0;
     }
   }
 
@@ -404,7 +360,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                     ],
 
                     // Follower count
-                    if (_followerCounts[artist.id] != null) ...[
+                    if (artist.followersCount > 0) ...[
                       Row(
                         children: [
                           const Icon(
@@ -418,7 +374,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                               'artist_list_followers_count',
                               args: [
                                 _formatFollowerCount(
-                                  _followerCounts[artist.id]!,
+                                  artist.followersCount,
                                 ),
                               ],
                             ),

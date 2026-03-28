@@ -1,18 +1,18 @@
 import 'dart:developer' as developer;
-import 'dart:math' as math;
 
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../models/activity_model.dart';
 import '../widgets/local_artists_row_widget.dart';
 import '../widgets/local_galleries_widget.dart';
 import '../widgets/upcoming_events_row_widget.dart';
 import '../services/earnings_service.dart';
+import '../services/gallery_hub_read_service.dart';
 import '../services/visibility_service.dart';
 import '../models/earnings_model.dart';
 
@@ -28,10 +28,10 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Services
-  final EarningsService _earningsService = EarningsService();
-  final VisibilityService _analyticsService = VisibilityService();
-  final core.ArtistFeatureService _featureService = core.ArtistFeatureService();
-  static const double _momentumDecayRateWeekly = 0.10;
+  late final EarningsService _earningsService;
+  late final VisibilityService _analyticsService;
+  late final core.ArtistFeatureService _featureService;
+  late final GalleryHubReadService _galleryHubReadService;
   static const int _weeklyMomentumCap = 600;
 
   bool _isLoading = true;
@@ -45,6 +45,10 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   @override
   void initState() {
     super.initState();
+    _earningsService = context.read<EarningsService>();
+    _analyticsService = context.read<VisibilityService>();
+    _featureService = context.read<core.ArtistFeatureService>();
+    _galleryHubReadService = context.read<GalleryHubReadService>();
     _loadArtistData();
   }
 
@@ -70,12 +74,17 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       );
       final analytics = await _safeLoad<Map<String, dynamic>>(
         'GalleryHub.loadArtistData.visibility',
-        _loadVisibilityData,
+        () => _galleryHubReadService.loadVisibilityData(
+          userId: userId ?? '',
+          totalSales: earnings?.totalEarnings ?? 0.0,
+        ),
         <String, dynamic>{},
       );
       final activities = await _safeLoad<List<ActivityModel>>(
         'GalleryHub.loadArtistData.activities',
-        _loadRecentActivities,
+        () => userId == null
+            ? Future<List<ActivityModel>>.value(<ActivityModel>[])
+            : _galleryHubReadService.loadRecentActivities(userId),
         <ActivityModel>[],
       );
 
@@ -139,73 +148,6 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     }
   }
 
-  Future<Map<String, dynamic>> _loadVisibilityData() async {
-    try {
-      final userId = _analyticsService.getCurrentUserId();
-      if (userId == null) return {};
-
-      // Get artwork count and other analytics
-      final artworkCount = await _getArtworkCount(userId);
-      final profileViews = await _getProfileViews(userId);
-
-      // Get Artist XP and follower count from user document and profile
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-      final artistXP = userDoc.exists
-          ? (userDoc.data()?['artistXP'] as int? ?? 0)
-          : 0;
-
-      final profileDoc = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .doc(userId)
-          .get();
-      final followerCount = profileDoc.exists
-          ? (profileDoc.data()?['followerCount'] as int? ?? 0)
-          : 0;
-
-      final momentumDoc = await FirebaseFirestore.instance
-          .collection('artist_momentum')
-          .doc(userId)
-          .get();
-      final momentumData = momentumDoc.data() ?? {};
-      final rawMomentum = (momentumData['momentum'] as num?)?.toDouble() ?? 0.0;
-      final weeklyMomentum =
-          (momentumData['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
-      final momentumLastUpdated =
-          (momentumData['momentumLastUpdated'] as Timestamp?)?.toDate();
-      final weeklyWindowStart =
-          (momentumData['weeklyWindowStart'] as Timestamp?)?.toDate();
-      final decayedMomentum = _calculateDecayedMomentum(
-        rawMomentum,
-        momentumLastUpdated,
-      );
-
-      return {
-        'artworkCount': artworkCount,
-        'profileViews': profileViews,
-        'totalSales': _earnings?.totalEarnings ?? 0.0,
-        'followerCount': followerCount,
-        'artistXP': artistXP,
-        'momentum': decayedMomentum,
-        'weeklyMomentum': weeklyMomentum,
-        'weeklyWindowStart': weeklyWindowStart,
-        'momentumLastUpdated': momentumLastUpdated,
-      };
-    } catch (e) {
-      return {};
-    }
-  }
-
-  double _calculateDecayedMomentum(double momentum, DateTime? lastUpdated) {
-    if (momentum <= 0 || lastUpdated == null) return momentum;
-    final elapsedHours = DateTime.now().difference(lastUpdated).inHours;
-    if (elapsedHours <= 0) return momentum;
-    final weeksElapsed = elapsedHours / (24 * 7);
-    return momentum * math.pow(1 - _momentumDecayRateWeekly, weeksElapsed);
-  }
-
   String _calculatePowerLevel(int xp) {
     if (xp >= 5000) return 'Mythic Legend';
     if (xp >= 2500) return 'Titan';
@@ -213,249 +155,6 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     if (xp >= 500) return 'Pro';
     if (xp >= 100) return 'Rising Star';
     return 'Rookie';
-  }
-
-  Future<int> _getArtworkCount(String userId) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .get();
-      return snapshot.docs.length;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  Future<int> _getProfileViews(String userId) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artistProfileViews')
-          .where('artistId', isEqualTo: userId)
-          .get();
-      return snapshot.docs.length;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  Future<List<ActivityModel>> _loadRecentActivities() async {
-    final activities = <ActivityModel>[];
-
-    try {
-      final userId = _analyticsService.getCurrentUserId();
-      if (userId == null) return activities;
-
-      // Load recent artwork sales
-      final salesActivities = await _loadSalesActivities(userId);
-      activities.addAll(salesActivities);
-
-      // Load recent commission requests
-      final commissionActivities = await _loadCommissionActivities(userId);
-      activities.addAll(commissionActivities);
-
-      // Load recent auction activities
-      final auctionActivities = await _loadAuctionActivities(userId);
-      activities.addAll(auctionActivities);
-
-      // Load recent gift activities
-      final giftActivities = await _loadGiftActivities(userId);
-      activities.addAll(giftActivities);
-
-      // Sort by most recent (descending by timestamp)
-      activities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      return activities.take(5).toList();
-    } catch (e) {
-      return activities;
-    }
-  }
-
-  Future<List<ActivityModel>> _loadSalesActivities(String userId) async {
-    final activities = <ActivityModel>[];
-
-    try {
-      debugPrint('🔍 DEBUG: Loading sales activities for user: $userId');
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artwork_sales')
-          .where('artistID', isEqualTo: userId)
-          .orderBy('soldAt', descending: true)
-          .limit(3)
-          .get();
-      debugPrint(
-        '✅ DEBUG: Sales activities loaded successfully: ${snapshot.docs.length} docs',
-      );
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final artworkTitle = data['artworkTitle'] as String? ?? 'Artwork';
-        final soldAt =
-            (data['soldAt'] as Timestamp?)?.toDate() ?? DateTime.now();
-
-        activities.add(
-          ActivityModel(
-            type: ActivityType.sale,
-            title: 'Artwork Sold',
-            description: '"$artworkTitle" was sold',
-            timeAgo: _formatTimeAgo(soldAt),
-            timestamp: soldAt,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ DEBUG: Error loading sales activities: $e');
-    }
-
-    return activities;
-  }
-
-  Future<List<ActivityModel>> _loadCommissionActivities(String userId) async {
-    final activities = <ActivityModel>[];
-
-    try {
-      debugPrint('🔍 DEBUG: Loading commission activities for user: $userId');
-      final snapshot = await FirebaseFirestore.instance
-          .collection('commission_requests')
-          .where('artistId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .limit(3)
-          .get();
-      debugPrint(
-        '✅ DEBUG: Commission activities loaded successfully: ${snapshot.docs.length} docs',
-      );
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final createdAt =
-            (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
-
-        activities.add(
-          ActivityModel(
-            type: ActivityType.commission,
-            title: 'Commission Request',
-            description: 'New commission inquiry received',
-            timeAgo: _formatTimeAgo(createdAt),
-            timestamp: createdAt,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ DEBUG: Error loading commission activities: $e');
-    }
-
-    return activities;
-  }
-
-  Future<List<ActivityModel>> _loadAuctionActivities(String userId) async {
-    final activities = <ActivityModel>[];
-
-    try {
-      debugPrint('🔍 DEBUG: Loading auction activities for user: $userId');
-      // Get user's artworks that have auctions
-      final artworkSnapshot = await FirebaseFirestore.instance
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .where('auctionEnabled', isEqualTo: true)
-          .orderBy('auctionEnd', descending: true)
-          .limit(10)
-          .get();
-
-      debugPrint(
-        '✅ DEBUG: Found ${artworkSnapshot.docs.length} artworks with auctions',
-      );
-
-      for (final artworkDoc in artworkSnapshot.docs) {
-        final artworkId = artworkDoc.id;
-
-        // Get recent bids for this artwork
-        final bidsSnapshot = await FirebaseFirestore.instance
-            .collection('artwork')
-            .doc(artworkId)
-            .collection('bids')
-            .orderBy('timestamp', descending: true)
-            .limit(3)
-            .get();
-
-        for (final bidDoc in bidsSnapshot.docs) {
-          final bidData = bidDoc.data();
-          final timestamp =
-              (bidData['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-          final bidAmount = bidData['amount'] as num? ?? 0;
-
-          activities.add(
-            ActivityModel(
-              type: ActivityType.auction,
-              title: 'New Bid',
-              description: 'Bid of \$${bidAmount.toStringAsFixed(2)} placed',
-              timeAgo: _formatTimeAgo(timestamp),
-              timestamp: timestamp,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ DEBUG: Error loading auction activities: $e');
-    }
-
-    return activities;
-  }
-
-  Future<List<ActivityModel>> _loadGiftActivities(String userId) async {
-    final activities = <ActivityModel>[];
-
-    try {
-      debugPrint('🔍 DEBUG: Loading boost activities for user: $userId');
-      final snapshot = await FirebaseFirestore.instance
-          .collection('boosts')
-          .where('recipientId', isEqualTo: userId)
-          .orderBy('purchaseDate', descending: true)
-          .limit(3)
-          .get();
-      debugPrint(
-        '✅ DEBUG: Boost activities loaded successfully: ${snapshot.docs.length} docs',
-      );
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final purchaseDate =
-            (data['purchaseDate'] as Timestamp?)?.toDate() ?? DateTime.now();
-        final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
-        final productId = data['productId'] as String? ?? '';
-
-        String boostName = 'Artist Boost';
-        if (productId.contains('spark')) boostName = 'Spark Boost';
-        if (productId.contains('surge')) boostName = 'Surge Boost';
-        if (productId.contains('overdrive')) boostName = 'Overdrive Boost';
-
-        activities.add(
-          ActivityModel(
-            type: ActivityType.gift,
-            title: 'Boost Activated!',
-            description: '$boostName received (\$${amount.toStringAsFixed(2)})',
-            timeAgo: _formatTimeAgo(purchaseDate),
-            timestamp: purchaseDate,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ DEBUG: Error loading boost activities: $e');
-    }
-
-    return activities;
-  }
-
-  String _formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
   }
 
   Widget _buildCompactStatsSection() {

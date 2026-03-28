@@ -104,13 +104,23 @@ echo "  Google Maps Key: ${GOOGLE_MAPS_API_KEY:0:10}...${GOOGLE_MAPS_API_KEY: -4
 echo "  Stripe Key: ${STRIPE_PUBLISHABLE_KEY:0:12}...${STRIPE_PUBLISHABLE_KEY: -4}"
 echo ""
 
+print_info "Running release payment/config gate..."
+bash tools/architecture/check_release_payment_config.sh
+print_success "Release payment/config gate passed"
+
+print_info "Running release monetization prerequisite gate..."
+bash tools/architecture/check_release_monetization_prereqs.sh
+print_success "Release monetization prerequisite gate passed"
+
 # Build Flutter command with dart-defines
 DART_DEFINES=(
     "--dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
     "--dart-define=STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY"
     "--dart-define=ENVIRONMENT=$ENVIRONMENT"
-    "--dart-define=FIREBASE_REGION=${FIREBASE_REGION:-us-central1}"
-    "--dart-define=API_BASE_URL=${API_BASE_URL:-https://api.artbeat.app}"
+    "--dart-define=FIREBASE_REGION=$FIREBASE_REGION"
+    "--dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID"
+    "--dart-define=FIREBASE_FUNCTIONS_BASE_URL=$FIREBASE_FUNCTIONS_BASE_URL"
+    "--dart-define=API_BASE_URL=$API_BASE_URL"
 )
 
 # Execute build command

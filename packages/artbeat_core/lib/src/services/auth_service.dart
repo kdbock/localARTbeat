@@ -22,6 +22,8 @@ class AuthService {
     return _authInstance!;
   }
 
+  FirebaseAuth get auth => _auth;
+
   /// Get current authenticated user
   User? get currentUser => _auth.currentUser;
 

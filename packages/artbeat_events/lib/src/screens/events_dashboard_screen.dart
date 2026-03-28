@@ -14,11 +14,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_ads/artbeat_ads.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/artbeat_event.dart';
+import '../services/event_service.dart';
 import '../widgets/events_drawer.dart';
 import 'events_list_screen.dart';
 import 'my_tickets_screen.dart';
@@ -32,7 +33,9 @@ class EventsDashboardScreen extends StatefulWidget {
 
 class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     with TickerProviderStateMixin {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final EventService _eventService;
+  late final UserService _userService;
+  late final OnboardingService _onboardingService;
 
   bool _isLoading = true;
   List<ArtbeatEvent> _events = [];
@@ -65,6 +68,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   @override
   void initState() {
     super.initState();
+    _eventService = context.read<EventService>();
+    _userService = context.read<UserService>();
+    _onboardingService = context.read<OnboardingService>();
 
     _categories = [
       'events_all_categories'.tr(),
@@ -92,8 +98,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final onboardingService = OnboardingService();
-    final hasCompleted = await onboardingService.isEventsOnboardingCompleted();
+    final hasCompleted = await _onboardingService.isEventsOnboardingCompleted();
     if (!hasCompleted && mounted) {
       // Delay to ensure widgets are built
       await Future.delayed(const Duration(milliseconds: 500));
@@ -109,7 +114,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     setState(() {
       _showOnboarding = false;
     });
-    OnboardingService().markEventsOnboardingCompleted();
+    _onboardingService.markEventsOnboardingCompleted();
   }
 
   @override
@@ -125,16 +130,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         _error = null;
       });
 
-      final now = DateTime.now();
-      final query = await _firestore
-          .collection('events')
-          .where('isPublic', isEqualTo: true)
-          .where('dateTime', isGreaterThan: Timestamp.fromDate(now))
-          .orderBy('dateTime', descending: false)
-          .limit(50)
-          .get();
-
-      final events = query.docs.map(ArtbeatEvent.fromFirestore).toList();
+      final events = await _eventService.getUpcomingPublicEvents(limit: 50);
 
       if (!mounted) return;
       setState(() {
@@ -193,7 +189,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    final currentUser = context.watch<UserService>().currentUser;
 
     final scaffold = Scaffold(
       backgroundColor: const Color(0xFF070A12),
@@ -961,7 +957,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     title: 'events_quick_my_tickets'.tr(),
                     gradient: const [Color(0xFF22D3EE), Color(0xFF34D399)],
                     onTap: () {
-                      final u = FirebaseAuth.instance.currentUser;
+                      final u = _userService.currentUser;
                       if (u != null) {
                         Navigator.of(context).push(
                           MaterialPageRoute(

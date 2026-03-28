@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide
@@ -9,10 +9,13 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         HudButton,
         GradientBadge;
+import 'package:artbeat_core/artbeat_core.dart' as core
+    show UserService, ArtistBoostService;
 import 'package:artbeat_community/artbeat_community.dart'
     show DirectCommissionService, ArtistCommissionSettings;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../models/artwork_model.dart' as artist_artwork;
 import '../services/artwork_service.dart' as artist_artwork_service;
 import '../services/subscription_service.dart' as artist_subscription;
@@ -33,12 +36,12 @@ class ArtistPublicProfileScreen extends StatefulWidget {
 }
 
 class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
-  final artist_subscription.SubscriptionService _subscriptionService =
-      artist_subscription.SubscriptionService();
-  final artist_artwork_service.ArtworkService _artworkService =
-      artist_artwork_service.ArtworkService();
-  final VisibilityService _visibilityService = VisibilityService();
-  final DirectCommissionService _commissionService = DirectCommissionService();
+  late final core.UserService _userService;
+  late final artist_subscription.SubscriptionService _subscriptionService;
+  late final artist_artwork_service.ArtworkService _artworkService;
+  late final VisibilityService _visibilityService;
+  late final DirectCommissionService _commissionService;
+  late final core.ArtistBoostService _artistBoostService;
 
   bool _isLoading = true;
   ArtistProfileModel? _artistProfile;
@@ -56,6 +59,12 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _userService = context.read<core.UserService>();
+    _subscriptionService = context.read<artist_subscription.SubscriptionService>();
+    _artworkService = context.read<artist_artwork_service.ArtworkService>();
+    _visibilityService = context.read<VisibilityService>();
+    _commissionService = context.read<DirectCommissionService>();
+    _artistBoostService = context.read<core.ArtistBoostService>();
     _loadArtistProfile();
   }
 
@@ -64,37 +73,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       _isLoadingBoosters = true;
     });
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artist_boosters')
-          .doc(artistUserId)
-          .collection('boosters')
-          .orderBy('lastBoostAt', descending: true)
-          .limit(8)
-          .get();
-
-      if (snapshot.docs.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _boosters = [];
-            _isLoadingBoosters = false;
-          });
-        }
-        return;
-      }
-
-      final boosterIds = snapshot.docs
-          .map((doc) => doc.id)
-          .where((id) => id.isNotEmpty)
-          .toList();
-
-      final usersSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where(FieldPath.documentId, whereIn: boosterIds)
-          .get();
-
-      final boosters = usersSnapshot.docs
-          .map((doc) => UserModel.fromFirestore(doc))
-          .toList();
+      final boosters = await _artistBoostService.getTopBoosters(artistUserId);
 
       if (mounted) {
         setState(() {
@@ -115,21 +94,19 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   Future<void> _loadBoosterStatus(String artistUserId) async {
     if (_currentUserId == null) return;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('artist_boosters')
-          .doc(artistUserId)
-          .collection('boosters')
-          .doc(_currentUserId)
-          .get();
-
-      final data = doc.data();
-      if (!doc.exists || data == null) return;
+      final data = await _artistBoostService.getBoosterStatus(
+        artistUserId: artistUserId,
+        boosterUserId: _currentUserId!,
+      );
+      if (data == null) return;
 
       if (mounted) {
+        final earlyAccessValue = data['earlyAccessUntil'];
         setState(() {
           _earlyAccessTier = data['earlyAccessTier'] as String?;
-          _earlyAccessUntil = (data['earlyAccessUntil'] as Timestamp?)
-              ?.toDate();
+          _earlyAccessUntil = earlyAccessValue is Timestamp
+              ? earlyAccessValue.toDate()
+              : null;
         });
       }
     } catch (_) {
@@ -145,7 +122,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
     try {
       // Get current user ID
-      _currentUserId = _subscriptionService.getCurrentUserId();
+      _currentUserId = _userService.currentUserId;
 
       // Get artist profile by user ID
       final artistProfile = await _subscriptionService.getArtistProfileByUserId(
