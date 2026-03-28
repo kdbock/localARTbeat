@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -35,6 +36,11 @@ class MockSocialService extends Mock implements SocialService {}
 class MockArtWalkNavigationService extends Mock
     implements ArtWalkNavigationService {}
 
+class MockAuthService extends Mock implements core_auth.AuthService {}
+
+class MockArtWalkUserStatsService extends Mock
+    implements ArtWalkUserStatsService {}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -53,6 +59,8 @@ void main() {
     required AudioNavigationService audioService,
     required SocialService socialService,
     required ArtWalkNavigationService navigationService,
+    required core_auth.AuthService authService,
+    required ArtWalkUserStatsService userStatsService,
     ArtWalkService? providerArtWalkService,
     ArtWalkService? overrideArtWalkService,
   }) {
@@ -63,6 +71,8 @@ void main() {
         Provider<ArtWalkProgressService>.value(value: progressService),
         Provider<AudioNavigationService>.value(value: audioService),
         Provider<SocialService>.value(value: socialService),
+        Provider<core_auth.AuthService>.value(value: authService),
+        Provider<ArtWalkUserStatsService>.value(value: userStatsService),
         Provider<ArtWalkNavigationService>.value(value: navigationService),
       ],
       child: MaterialApp(
@@ -88,6 +98,8 @@ void main() {
       final audioService = AudioNavigationService();
       final socialService = MockSocialService();
       final navigationService = MockArtWalkNavigationService();
+      final authService = MockAuthService();
+      final userStatsService = MockArtWalkUserStatsService();
       final pendingArtPieces = Completer<List<PublicArtModel>>();
       final overrideService = FakeArtWalkService(pendingArtPieces.future);
 
@@ -99,6 +111,8 @@ void main() {
           audioService: audioService,
           socialService: socialService,
           navigationService: navigationService,
+          authService: authService,
+          userStatsService: userStatsService,
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
@@ -118,6 +132,8 @@ void main() {
     final audioService = AudioNavigationService();
     final socialService = MockSocialService();
     final navigationService = MockArtWalkNavigationService();
+    final authService = MockAuthService();
+    final userStatsService = MockArtWalkUserStatsService();
 
     await tester.pumpWidget(
       buildHarness(
@@ -127,6 +143,8 @@ void main() {
         audioService: audioService,
         socialService: socialService,
         navigationService: navigationService,
+        authService: authService,
+        userStatsService: userStatsService,
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
@@ -143,6 +161,8 @@ void main() {
       final audioService = AudioNavigationService();
       final socialService = MockSocialService();
       final navigationService = MockArtWalkNavigationService();
+      final authService = MockAuthService();
+      final userStatsService = MockArtWalkUserStatsService();
 
       await tester.pumpWidget(
         buildHarness(
@@ -151,6 +171,8 @@ void main() {
           audioService: audioService,
           socialService: socialService,
           navigationService: navigationService,
+          authService: authService,
+          userStatsService: userStatsService,
         ),
       );
       final error = tester.takeException();

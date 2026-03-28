@@ -10,7 +10,14 @@ failures=()
 require_pattern() {
   local pattern="$1"
   local label="$2"
-  if ! rg -q "$pattern" "$FUNCTIONS_INDEX"; then
+  if command -v rg >/dev/null 2>&1; then
+    if ! rg -q "$pattern" "$FUNCTIONS_INDEX"; then
+      failures+=("missing backend endpoint: $label")
+    fi
+    return
+  fi
+
+  if ! grep -Eq "$pattern" "$FUNCTIONS_INDEX"; then
     failures+=("missing backend endpoint: $label")
   fi
 }
