@@ -2165,11 +2165,7 @@ class _AvatarCircle extends StatelessWidget {
         backgroundImage: hasValidUrl ? NetworkImage(trimmedUrl) : null,
         child: hasValidUrl
             ? null
-            : Icon(
-                Icons.person,
-                size: 20,
-                color: color.withValues(alpha: 0.5),
-              ),
+            : Icon(Icons.person, size: 20, color: color.withValues(alpha: 0.5)),
       ),
     );
   }

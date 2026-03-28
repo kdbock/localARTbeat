@@ -5,7 +5,7 @@ import '../models/admin_community_moderation_models.dart';
 
 class AdminCommunityModerationService {
   AdminCommunityModerationService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 

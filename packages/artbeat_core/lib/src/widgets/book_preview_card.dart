@@ -39,7 +39,8 @@ class BookPreviewCard extends StatelessWidget {
                         artwork.imageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+                        errorBuilder: (_, __, ___) =>
+                            _buildPlaceholder(context),
                       )
                     : _buildPlaceholder(context),
               ),
@@ -53,11 +54,12 @@ class BookPreviewCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           artwork.title,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            height: 1.2,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                height: 1.2,
+                              ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -66,12 +68,14 @@ class BookPreviewCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           artwork.artistName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                            fontSize: 10,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.8),
+                                fontSize: 10,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

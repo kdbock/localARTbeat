@@ -262,12 +262,10 @@ class DashboardViewModel extends ChangeNotifier {
       _isDisposed ? [] : List.unmodifiable(_artists);
   Set<Marker> get markers => Set.unmodifiable(_markers);
   Position? get currentLocation => _currentLocation;
-  List<AchievementModel> get achievements =>
-      List.unmodifiable(_achievements);
+  List<AchievementModel> get achievements => List.unmodifiable(_achievements);
   List<CaptureModel> get localCaptures => List.unmodifiable(_localCaptures);
   List<CommunityPostModel> get posts => List.unmodifiable(_posts);
-  List<SocialActivityModel> get activities =>
-      List.unmodifiable(_activities);
+  List<SocialActivityModel> get activities => List.unmodifiable(_activities);
   LatLng? get mapLocation => _mapLocation;
   UserModel? get currentUser => _isDisposed ? null : _currentUser;
   DailyChallengeModel? get todaysChallenge => _todaysChallenge;

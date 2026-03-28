@@ -7,11 +7,9 @@ class ProfileChallengeService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  ProfileChallengeService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  ProfileChallengeService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   Future<ProfileChallengeModel?> getTodaysChallenge({String? userId}) async {
     final uid = userId ?? _auth.currentUser?.uid;

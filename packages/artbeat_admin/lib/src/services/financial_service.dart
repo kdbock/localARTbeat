@@ -12,8 +12,7 @@ class FinancialService extends ChangeNotifier {
   FinancialService({
     FirebaseFirestore? firestore,
     FinancialAnalyticsService? analyticsService,
-  })
-      : _firestore = firestore ?? FirebaseFirestore.instance,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _analyticsService = analyticsService ?? FinancialAnalyticsService();
 
   /// Get recent transactions for admin dashboard

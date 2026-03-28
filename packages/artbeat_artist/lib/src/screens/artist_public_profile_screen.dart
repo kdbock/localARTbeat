@@ -9,7 +9,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         HudButton,
         GradientBadge;
-import 'package:artbeat_core/artbeat_core.dart' as core
+import 'package:artbeat_core/artbeat_core.dart'
+    as core
     show UserService, ArtistBoostService;
 import 'package:artbeat_community/artbeat_community.dart'
     show DirectCommissionService, ArtistCommissionSettings;
@@ -60,7 +61,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   void initState() {
     super.initState();
     _userService = context.read<core.UserService>();
-    _subscriptionService = context.read<artist_subscription.SubscriptionService>();
+    _subscriptionService = context
+        .read<artist_subscription.SubscriptionService>();
     _artworkService = context.read<artist_artwork_service.ArtworkService>();
     _visibilityService = context.read<VisibilityService>();
     _commissionService = context.read<DirectCommissionService>();

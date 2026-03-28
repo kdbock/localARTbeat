@@ -3,7 +3,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 class AdminCaptureModerationService {
   AdminCaptureModerationService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 

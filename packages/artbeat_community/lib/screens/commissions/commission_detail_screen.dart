@@ -130,9 +130,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _loadCommissionDetails() async {
     try {
-      final commission = await context.read<DirectCommissionService>().getCommission(
-        widget.commission.id,
-      );
+      final commission = await context
+          .read<DirectCommissionService>()
+          .getCommission(widget.commission.id);
       if (!mounted) return;
       setState(() {
         _commission = commission;

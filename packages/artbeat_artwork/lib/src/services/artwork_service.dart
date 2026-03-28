@@ -837,7 +837,10 @@ class ArtworkService {
     int limit = 250,
     String? chapterId,
   }) async {
-    final artworks = await getAllPublicArtwork(limit: limit, chapterId: chapterId);
+    final artworks = await getAllPublicArtwork(
+      limit: limit,
+      chapterId: chapterId,
+    );
     final locations = <String>{};
     final mediums = <String>{};
 
@@ -870,7 +873,10 @@ class ArtworkService {
     int limit = 150,
     String? chapterId,
   }) async {
-    final artworks = await getAllPublicArtwork(limit: limit, chapterId: chapterId);
+    final artworks = await getAllPublicArtwork(
+      limit: limit,
+      chapterId: chapterId,
+    );
     final normalizedQuery = query?.trim().toLowerCase();
     final normalizedLocation = location?.trim().toLowerCase();
     final normalizedMedium = medium?.trim().toLowerCase();
@@ -901,11 +907,14 @@ class ArtworkService {
       return artwork.title.toLowerCase().contains(normalizedQuery) ||
           artwork.description.toLowerCase().contains(normalizedQuery) ||
           artwork.medium.toLowerCase().contains(normalizedQuery) ||
-          (artwork.location?.toLowerCase().contains(normalizedQuery) ?? false) ||
+          (artwork.location?.toLowerCase().contains(normalizedQuery) ??
+              false) ||
           artwork.styles.any(
             (style) => style.toLowerCase().contains(normalizedQuery),
           ) ||
-          (artwork.tags?.any((tag) => tag.toLowerCase().contains(normalizedQuery)) ??
+          (artwork.tags?.any(
+                (tag) => tag.toLowerCase().contains(normalizedQuery),
+              ) ??
               false);
     }).toList();
   }
@@ -1416,10 +1425,7 @@ class ArtworkService {
   }) async {
     final userId = getCurrentUserId();
     if (userId == null) {
-      return {
-        'hasFullBookPurchase': false,
-        'purchasedChapterIds': <String>{},
-      };
+      return {'hasFullBookPurchase': false, 'purchasedChapterIds': <String>{}};
     }
 
     try {
@@ -1472,10 +1478,7 @@ class ArtworkService {
       };
     } catch (e) {
       AppLogger.error('Error loading written content purchase status: $e');
-      return {
-        'hasFullBookPurchase': false,
-        'purchasedChapterIds': <String>{},
-      };
+      return {'hasFullBookPurchase': false, 'purchasedChapterIds': <String>{}};
     }
   }
 

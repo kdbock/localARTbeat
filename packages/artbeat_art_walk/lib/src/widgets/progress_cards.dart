@@ -317,9 +317,9 @@ class CreatedWalkCard extends StatelessWidget {
                 ),
               ),
               FutureBuilder<double>(
-                future: context.read<ArtWalkPreviewReadService>().getAverageRating(
-                  walk.id,
-                ),
+                future: context
+                    .read<ArtWalkPreviewReadService>()
+                    .getAverageRating(walk.id),
                 builder: (context, snapshot) {
                   final label =
                       snapshot.connectionState == ConnectionState.waiting
@@ -428,9 +428,9 @@ class SavedWalkCard extends StatelessWidget {
                 ),
               ),
               FutureBuilder<double>(
-                future: context.read<ArtWalkPreviewReadService>().getAverageRating(
-                  walk.id,
-                ),
+                future: context
+                    .read<ArtWalkPreviewReadService>()
+                    .getAverageRating(walk.id),
                 builder: (context, snapshot) {
                   final label =
                       snapshot.connectionState == ConnectionState.waiting

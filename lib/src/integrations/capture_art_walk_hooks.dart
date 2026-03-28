@@ -41,17 +41,17 @@ class CaptureArtWalkHooks implements CapturePostCaptureHooks {
     String? userAvatar,
     Position? location,
   }) => _socialService.postActivity(
-      userId: capture.userId,
-      userName: userName,
-      userAvatar: userAvatar,
-      type: art_walk.SocialActivityType.capture,
-      message: 'captured new artwork',
-      location: location,
-      metadata: {
-        'captureId': capture.id,
-        'artTitle': capture.title ?? 'Untitled',
-      },
-    );
+    userId: capture.userId,
+    userName: userName,
+    userAvatar: userAvatar,
+    type: art_walk.SocialActivityType.capture,
+    message: 'captured new artwork',
+    location: location,
+    metadata: {
+      'captureId': capture.id,
+      'artTitle': capture.title ?? 'Untitled',
+    },
+  );
 
   @override
   Future<void> recordCaptureChallengeProgress() async {

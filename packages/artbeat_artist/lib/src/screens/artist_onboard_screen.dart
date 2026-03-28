@@ -831,9 +831,7 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                       ])
                         _buildSelectablePlanCard(
                           details: _coreSubscriptionService
-                              .getSubscriptionDetails(
-                            tier,
-                          ),
+                              .getSubscriptionDetails(tier),
                           tier: tier,
                         ),
                     ],

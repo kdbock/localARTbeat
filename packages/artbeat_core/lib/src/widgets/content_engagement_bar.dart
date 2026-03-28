@@ -118,9 +118,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'content_engagement_error_generic'.tr(
@@ -608,14 +606,10 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'content_engagement_share_error'.tr(
-                namedArgs: {'error': '$e'},
-              ),
+              'content_engagement_share_error'.tr(namedArgs: {'error': '$e'}),
             ),
           ),
         );
@@ -728,7 +722,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'content_engagement_share_facebook_coming_soon'.tr(),
+                            'content_engagement_share_facebook_coming_soon'
+                                .tr(),
                           ),
                         ),
                       );
@@ -739,14 +734,16 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                   ),
                   _buildShareOption(
                     icon: Icons.photo_camera,
-                    label: 'artist_artist_public_profile_tooltip_instagram'.tr(),
+                    label: 'artist_artist_public_profile_tooltip_instagram'
+                        .tr(),
                     color: Colors.pink,
                     onTap: () async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'content_engagement_share_instagram_coming_soon'.tr(),
+                            'content_engagement_share_instagram_coming_soon'
+                                .tr(),
                           ),
                         ),
                       );
@@ -867,14 +864,10 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'content_engagement_error_generic'.tr(
-                namedArgs: {'error': '$e'},
-              ),
+              'content_engagement_error_generic'.tr(namedArgs: {'error': '$e'}),
             ),
           ),
         );
@@ -939,9 +932,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('content_engagement_comment_success'.tr()),
-            ),
+            SnackBar(content: Text('content_engagement_comment_success'.tr())),
           );
         }
       } catch (e) {
@@ -949,9 +940,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'content_engagement_comment_error'.tr(

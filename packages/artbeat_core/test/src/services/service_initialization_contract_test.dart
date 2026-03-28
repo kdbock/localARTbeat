@@ -33,9 +33,12 @@ void main() {
       expect(userService.currentUser, isNull);
     });
 
-    test('SubscriptionService can be constructed without eager Firebase access', () {
-      expect(SubscriptionService.new, returnsNormally);
-    });
+    test(
+      'SubscriptionService can be constructed without eager Firebase access',
+      () {
+        expect(SubscriptionService.new, returnsNormally);
+      },
+    );
 
     test(
       'ContentEngagementService can be constructed without eager Firebase access',
@@ -165,8 +168,11 @@ void main() {
       },
     );
 
-    test('UsageTrackingService can be constructed without eager Firebase access', () {
-      expect(UsageTrackingService.new, returnsNormally);
-    });
+    test(
+      'UsageTrackingService can be constructed without eager Firebase access',
+      () {
+        expect(UsageTrackingService.new, returnsNormally);
+      },
+    );
   });
 }

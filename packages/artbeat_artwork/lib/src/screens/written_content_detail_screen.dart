@@ -102,18 +102,18 @@ class _WrittenContentDetailScreenState
     }
 
     try {
-      final purchaseStatus = await _artworkService.getWrittenContentPurchaseStatus(
-        widget.artworkId,
-        chapters: _chapters,
-      );
+      final purchaseStatus = await _artworkService
+          .getWrittenContentPurchaseStatus(
+            widget.artworkId,
+            chapters: _chapters,
+          );
 
       _hasFullBookPurchase =
           purchaseStatus['hasFullBookPurchase'] as bool? ?? false;
       _purchasedChapterIds
         ..clear()
         ..addAll(
-          (purchaseStatus['purchasedChapterIds'] as Set<String>? ??
-              <String>{}),
+          (purchaseStatus['purchasedChapterIds'] as Set<String>? ?? <String>{}),
         );
     } catch (e) {
       AppLogger.error('❌ Error loading purchase status: $e');
@@ -132,7 +132,8 @@ class _WrittenContentDetailScreenState
     }
 
     try {
-      final metrics = await _artworkService.getCurrentUserEngagementUnlockMetrics();
+      final metrics = await _artworkService
+          .getCurrentUserEngagementUnlockMetrics();
 
       final captures = metrics['captures'] ?? 0;
       final discoveries = metrics['discoveries'] ?? 0;
@@ -183,7 +184,8 @@ class _WrittenContentDetailScreenState
       // Check ownership and access
       final currentUserId = _userService.currentUserId;
       _isOwner =
-          currentUserId == artwork.userId || currentUserId == artwork.artistProfileId;
+          currentUserId == artwork.userId ||
+          currentUserId == artwork.artistProfileId;
 
       // Check if user is admin - more robust check
       try {

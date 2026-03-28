@@ -47,9 +47,7 @@ class AdPurchaseWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'ad_purchase_retired_body'.tr(),
-                    ),
+                    Text('ad_purchase_retired_body'.tr()),
                     if (artworkTitle != null) ...[
                       const SizedBox(height: 16),
                       Text(
@@ -60,9 +58,7 @@ class AdPurchaseWidget extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 20),
-                    Text(
-                      'ad_purchase_manage_prompt'.tr(),
-                    ),
+                    Text('ad_purchase_manage_prompt'.tr()),
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,

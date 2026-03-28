@@ -1,5 +1,6 @@
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_profile/artbeat_profile.dart' as profile
+import 'package:artbeat_profile/artbeat_profile.dart'
+    as profile
     show
         ProfileConnectionService,
         ProfileActivityService,

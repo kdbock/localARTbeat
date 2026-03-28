@@ -55,9 +55,7 @@ class LegalCenterScreen extends StatelessWidget {
                     ),
                     Text(
                       'legal_center_law_enforcement'.tr(
-                        namedArgs: {
-                          'email': LegalConfig.lawEnforcementEmail,
-                        },
+                        namedArgs: {'email': LegalConfig.lawEnforcementEmail},
                       ),
                     ),
                     Text(
@@ -142,8 +140,7 @@ class LegalCenterScreen extends StatelessWidget {
                     Text(
                       'legal_center_fulfillment_sla'.tr(
                         namedArgs: {
-                          'days':
-                              '${LegalConfig.dataRequestFulfillmentDays}',
+                          'days': '${LegalConfig.dataRequestFulfillmentDays}',
                         },
                       ),
                     ),

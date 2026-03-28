@@ -73,9 +73,7 @@ mixin UserModerationMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'user_moderation_error_unblocking'.tr(
-                namedArgs: {'error': '$e'},
-              ),
+              'user_moderation_error_unblocking'.tr(namedArgs: {'error': '$e'}),
             ),
             backgroundColor: Colors.red,
           ),

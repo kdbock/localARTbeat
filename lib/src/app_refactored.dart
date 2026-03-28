@@ -163,9 +163,8 @@ class MyApp extends StatelessWidget {
       lazy: true,
     ),
     Provider<capture.CaptureService>(
-      create: (_) => capture.CaptureService(
-        postCaptureHooks: CaptureArtWalkHooks(),
-      ),
+      create: (_) =>
+          capture.CaptureService(postCaptureHooks: CaptureArtWalkHooks()),
       lazy: true,
     ),
     ProxyProvider<capture.CaptureService, core.CaptureServiceInterface>(

@@ -103,7 +103,9 @@ class OfflineDatabaseService {
 
       final result = await db.insert('offline_queue', {
         ...item.toJson(),
-        'captureData': jsonEncode(_encodeForLocalStorage(item.captureData.toJson())),
+        'captureData': jsonEncode(
+          _encodeForLocalStorage(item.captureData.toJson()),
+        ),
         'metadata': item.metadata != null
             ? jsonEncode(_encodeForLocalStorage(item.metadata!))
             : null,
@@ -127,7 +129,9 @@ class OfflineDatabaseService {
         'offline_queue',
         {
           ...item.toJson(),
-          'captureData': jsonEncode(_encodeForLocalStorage(item.captureData.toJson())),
+          'captureData': jsonEncode(
+            _encodeForLocalStorage(item.captureData.toJson()),
+          ),
           'metadata': item.metadata != null
               ? jsonEncode(_encodeForLocalStorage(item.metadata!))
               : null,
@@ -320,17 +324,20 @@ class OfflineDatabaseService {
   OfflineQueueItem _mapToQueueItem(Map<String, dynamic> map) {
     // Parse the captureData JSON string back to Map
     final captureDataStr = map['captureData'] as String;
-    final captureData = _decodeFromLocalStorage(
-      jsonDecode(captureDataStr) as Map<String, dynamic>,
-    ) as Map<String, dynamic>;
+    final captureData =
+        _decodeFromLocalStorage(
+              jsonDecode(captureDataStr) as Map<String, dynamic>,
+            )
+            as Map<String, dynamic>;
 
     // Parse metadata if present
     Map<String, dynamic>? metadata;
     if (map['metadata'] != null) {
-      metadata = _decodeFromLocalStorage(
-            jsonDecode(map['metadata'] as String) as Map<String, dynamic>,
-          )
-          as Map<String, dynamic>;
+      metadata =
+          _decodeFromLocalStorage(
+                jsonDecode(map['metadata'] as String) as Map<String, dynamic>,
+              )
+              as Map<String, dynamic>;
     }
 
     return OfflineQueueItem(
@@ -360,10 +367,7 @@ class OfflineDatabaseService {
   Object? _encodeForLocalStorage(Object? value) {
     if (value == null) return null;
     if (value is Timestamp) {
-      return {
-        '__type': 'timestamp',
-        'value': value.toDate().toIso8601String(),
-      };
+      return {'__type': 'timestamp', 'value': value.toDate().toIso8601String()};
     }
     if (value is GeoPoint) {
       return {
@@ -373,10 +377,7 @@ class OfflineDatabaseService {
       };
     }
     if (value is DateTime) {
-      return {
-        '__type': 'datetime',
-        'value': value.toIso8601String(),
-      };
+      return {'__type': 'datetime', 'value': value.toIso8601String()};
     }
     if (value is Map<String, dynamic>) {
       return value.map(

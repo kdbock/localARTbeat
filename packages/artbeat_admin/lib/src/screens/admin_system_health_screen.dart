@@ -1031,8 +1031,8 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
           padding: const EdgeInsets.all(16),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'admin_admin_system_monitoring_feedback_search_hint'
-                  .tr(),
+              hintText:
+                  'admin_admin_system_monitoring_feedback_search_hint'.tr(),
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
             ),

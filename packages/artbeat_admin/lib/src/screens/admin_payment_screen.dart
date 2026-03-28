@@ -271,8 +271,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
     if (result == true) {
       try {
-        final result =
-            await _paymentOperationsService.processBulkRefunds(
+        final result = await _paymentOperationsService.processBulkRefunds(
           selectedTransactions,
         );
 
@@ -1142,7 +1141,8 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
               if (transaction.itemTitle != null)
                 _buildDetailRow('Item', transaction.itemTitle!),
               if (transaction.description != null)
-                _buildDetailRow('common_description'.tr(), transaction.description!),
+                _buildDetailRow(
+                    'common_description'.tr(), transaction.description!),
             ],
           ),
         ),

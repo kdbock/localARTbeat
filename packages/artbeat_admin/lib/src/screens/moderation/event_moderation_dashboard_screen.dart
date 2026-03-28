@@ -116,7 +116,8 @@ class _EventModerationDashboardScreenState
           const SizedBox(height: 12),
           Text(_errorMessage ?? 'Error loading events',
               style: const TextStyle(color: Colors.white)),
-          ElevatedButton(onPressed: _loadData, child: Text('common_retry'.tr())),
+          ElevatedButton(
+              onPressed: _loadData, child: Text('common_retry'.tr())),
         ],
       ),
     );
@@ -339,7 +340,8 @@ class _EventModerationDashboardScreenState
               child: Text('common_cancel'.tr())),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('common_delete'.tr(), style: const TextStyle(color: Colors.red))),
+              child: Text('common_delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );

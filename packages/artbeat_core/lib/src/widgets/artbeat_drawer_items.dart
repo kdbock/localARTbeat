@@ -577,7 +577,7 @@ class ArtbeatDrawerItems {
     paymentManagement,
     adminSettings,
     manageAds,
- ];
+  ];
 
   static List<ArtbeatDrawerItem> get moderatorItems => [moderatorDashboard];
 

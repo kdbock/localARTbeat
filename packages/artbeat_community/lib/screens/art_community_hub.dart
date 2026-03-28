@@ -271,9 +271,7 @@ class _CommissionsTabState extends State<CommissionsTab>
 
       final commissions = await context
           .read<DirectCommissionService>()
-          .getCommissionsByUser(
-            userId,
-      );
+          .getCommissionsByUser(userId);
       setState(() {
         _commissions = commissions;
         _isLoading = false;
@@ -2038,7 +2036,10 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
                 const SizedBox(height: 14),
                 HudButton.primary(
                   onPressed: () async {
-                    await Navigator.pushNamed(context, AppRoutes.artistOnboarding);
+                    await Navigator.pushNamed(
+                      context,
+                      AppRoutes.artistOnboarding,
+                    );
                     if (mounted) _loadArtists();
                   },
                   text: 'community_hub_artists_empty_cta'.tr(),
@@ -2134,14 +2135,14 @@ class _GroupsTabState extends State<GroupsTab> {
   Future<void> _loadGroups() async {
     setState(() => _isLoading = true);
     try {
-      final groups = await context
-          .read<CommunityService>()
-          .getTopGroups(limit: 20);
+      final groups = await context.read<CommunityService>().getTopGroups(
+        limit: 20,
+      );
 
       if (mounted) {
-        final loadedGroups = groups.map(GroupModel.fromMap).toList(
-          growable: false,
-        );
+        final loadedGroups = groups
+            .map(GroupModel.fromMap)
+            .toList(growable: false);
         setState(() {
           _groups = loadedGroups;
           _filteredGroups = loadedGroups;

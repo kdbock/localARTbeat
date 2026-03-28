@@ -2,11 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ArtWalkUserStatsService {
-  ArtWalkUserStatsService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  ArtWalkUserStatsService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -24,7 +22,8 @@ class ArtWalkUserStatsService {
 
     final userDoc = await _firestore.collection('users').doc(userId).get();
     final data = userDoc.data() ?? <String, dynamic>{};
-    final stats = data['artWalkStats'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final stats =
+        data['artWalkStats'] as Map<String, dynamic>? ?? <String, dynamic>{};
 
     final bests = <String, dynamic>{};
 
@@ -63,7 +62,8 @@ class ArtWalkUserStatsService {
 
     final userDoc = await _firestore.collection('users').doc(userId).get();
     final data = userDoc.data() ?? <String, dynamic>{};
-    final stats = data['artWalkStats'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final stats =
+        data['artWalkStats'] as Map<String, dynamic>? ?? <String, dynamic>{};
     return (stats['totalDistance'] as num?)?.toDouble() ?? 0.0;
   }
 }

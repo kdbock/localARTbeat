@@ -150,7 +150,6 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
           ),
         );
       }
-
     } catch (e) {
       // If there's an error checking artist status, default to simple create post
       Navigator.push(
@@ -205,10 +204,9 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
   void _handleUserTap(String userId) async {
     try {
       if (!mounted) return;
-      Navigator.of(context).pushNamed(
-        AppRoutes.messagingUser,
-        arguments: {'userId': userId},
-      );
+      Navigator.of(
+        context,
+      ).pushNamed(AppRoutes.messagingUser, arguments: {'userId': userId});
     } catch (e) {
       AppLogger.error('Error navigating to user profile: $e');
       if (!mounted) return;
@@ -937,10 +935,7 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
   Map<String, dynamic> _formatArtistFollowerCounts(
     Map<String, dynamic> artist,
   ) {
-    return {
-      ...artist,
-      'followers': _formatFollowerCount(artist['followers']),
-    };
+    return {...artist, 'followers': _formatFollowerCount(artist['followers'])};
   }
 
   @override

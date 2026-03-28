@@ -179,13 +179,13 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
         );
         await _loadArtistPosts();
       case PostAppreciationResult.alreadyAppreciated:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('already_appreciated'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('already_appreciated'.tr())));
       case PostAppreciationResult.unauthenticated:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('sign_in_to_appreciate'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('sign_in_to_appreciate'.tr())));
       case PostAppreciationResult.postNotFound:
       case PostAppreciationResult.error:
         ScaffoldMessenger.of(context).showSnackBar(

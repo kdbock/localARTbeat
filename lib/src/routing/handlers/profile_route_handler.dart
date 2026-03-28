@@ -323,7 +323,8 @@ class _ProfileActivityWrapper extends StatefulWidget {
   const _ProfileActivityWrapper();
 
   @override
-  State<_ProfileActivityWrapper> createState() => _ProfileActivityWrapperState();
+  State<_ProfileActivityWrapper> createState() =>
+      _ProfileActivityWrapperState();
 }
 
 class _ProfileActivityWrapperState extends State<_ProfileActivityWrapper>
@@ -355,7 +356,10 @@ class _ProfileActivityWrapperState extends State<_ProfileActivityWrapper>
         ],
       ),
       actions: [
-        IconButton(icon: const Icon(Icons.refresh), onPressed: () => setState(() {})),
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () => setState(() {}),
+        ),
       ],
     ),
     child: _ProfileActivityContent(tabController: _tabController),
@@ -368,7 +372,8 @@ class _ProfileActivityContent extends StatefulWidget {
   final TabController tabController;
 
   @override
-  State<_ProfileActivityContent> createState() => _ProfileActivityContentState();
+  State<_ProfileActivityContent> createState() =>
+      _ProfileActivityContentState();
 }
 
 class _ProfileActivityContentState extends State<_ProfileActivityContent> {
@@ -429,7 +434,8 @@ class _ProfileActivityContentState extends State<_ProfileActivityContent> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: activities.length,
-            itemBuilder: (context, index) => _buildActivityCard(activities[index]),
+            itemBuilder: (context, index) =>
+                _buildActivityCard(activities[index]),
           );
         },
       );
@@ -462,9 +468,8 @@ class _ProfileActivityContentState extends State<_ProfileActivityContent> {
       return ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: unreadActivities.length,
-        itemBuilder:
-            (context, index) =>
-                _buildActivityCard(unreadActivities[index], isUnread: true),
+        itemBuilder: (context, index) =>
+            _buildActivityCard(unreadActivities[index], isUnread: true),
       );
     },
   );

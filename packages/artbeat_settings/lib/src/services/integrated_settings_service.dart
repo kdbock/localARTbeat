@@ -381,7 +381,10 @@ class IntegratedSettingsService extends ChangeNotifier {
         await _firestore
             .collection('users')
             .doc(userId)
-            .set(_buildAccountSettingsPayload(settings), SetOptions(merge: true));
+            .set(
+              _buildAccountSettingsPayload(settings),
+              SetOptions(merge: true),
+            );
       } else {
         settings = AccountSettingsModel.fromUserDocument(
           doc.data()!,

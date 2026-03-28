@@ -43,7 +43,9 @@ class FeaturedContentRowWidget extends StatelessWidget {
         SizedBox(
           height: 260,
           child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: context.read<StorePreviewReadService>().watchFeaturedContent(),
+            stream: context
+                .read<StorePreviewReadService>()
+                .watchFeaturedContent(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(

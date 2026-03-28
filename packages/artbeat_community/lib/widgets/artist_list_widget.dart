@@ -48,7 +48,9 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
     try {
       AppLogger.info('Loading artists for community...');
 
-      final loadedArtists = await _artistService.getAllArtistProfiles(limit: 50);
+      final loadedArtists = await _artistService.getAllArtistProfiles(
+        limit: 50,
+      );
 
       AppLogger.info('Loaded ${loadedArtists.length} artists');
 
@@ -373,9 +375,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                             tr(
                               'artist_list_followers_count',
                               args: [
-                                _formatFollowerCount(
-                                  artist.followersCount,
-                                ),
+                                _formatFollowerCount(artist.followersCount),
                               ],
                             ),
                             style: GoogleFonts.spaceGrotesk(

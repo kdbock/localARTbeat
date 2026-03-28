@@ -106,7 +106,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await _onboardingService.isDiscoverOnboardingCompleted();
+    final isCompleted = await _onboardingService
+        .isDiscoverOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure data is loaded and layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1500));

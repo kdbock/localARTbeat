@@ -20,11 +20,10 @@ import 'package:provider/single_child_widget.dart';
 
 List<SingleChildWidget> createArtistMonetizationProviders() => [
   Provider<artist.SubscriptionService>(
-    create:
-        (context) => artist.SubscriptionService(
-          auth: context.read<core_auth.AuthService>().auth,
-          userService: context.read<core.UserService>(),
-        ),
+    create: (context) => artist.SubscriptionService(
+      auth: context.read<core_auth.AuthService>().auth,
+      userService: context.read<core.UserService>(),
+    ),
     lazy: true,
   ),
   Provider<artist.VisibilityService>(
@@ -32,10 +31,8 @@ List<SingleChildWidget> createArtistMonetizationProviders() => [
     lazy: true,
   ),
   Provider<artist.ArtworkService>(
-    create:
-        (context) => artist.ArtworkService(
-          auth: context.read<core_auth.AuthService>().auth,
-        ),
+    create: (context) =>
+        artist.ArtworkService(auth: context.read<core_auth.AuthService>().auth),
     lazy: true,
   ),
   Provider<artist.ArtistProfileService>(
@@ -59,11 +56,10 @@ List<SingleChildWidget> createArtistMonetizationProviders() => [
     lazy: true,
   ),
   Provider<artist.EventServiceAdapter>(
-    create:
-        (context) => artist.EventServiceAdapter(
-          auth: context.read<core_auth.AuthService>().auth,
-          eventService: context.read<events.EventService>(),
-        ),
+    create: (context) => artist.EventServiceAdapter(
+      auth: context.read<core_auth.AuthService>().auth,
+      eventService: context.read<events.EventService>(),
+    ),
     lazy: true,
   ),
   Provider<LocalAdService>(create: (_) => LocalAdService(), lazy: true),

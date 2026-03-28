@@ -29,18 +29,15 @@ class PublicArtReadService {
           .limit(limit)
           .get();
 
-      return snapshot.docs
-          .map(PublicArtModel.fromFirestore)
-          .where((art) {
-            final distance = Geolocator.distanceBetween(
-              latitude,
-              longitude,
-              art.location.latitude,
-              art.location.longitude,
-            );
-            return distance <= radiusKm * 1000;
-          })
-          .toList();
+      return snapshot.docs.map(PublicArtModel.fromFirestore).where((art) {
+        final distance = Geolocator.distanceBetween(
+          latitude,
+          longitude,
+          art.location.latitude,
+          art.location.longitude,
+        );
+        return distance <= radiusKm * 1000;
+      }).toList();
     } catch (e) {
       AppLogger.error('Error loading nearby public art: $e');
       return [];

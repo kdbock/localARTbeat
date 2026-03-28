@@ -331,11 +331,10 @@ class _ModernUnifiedAdminDashboardState
             fontSize: 14,
           ),
           tabs: [
-            _buildModernTab(
-                'admin_modern_dashboard_tab_dashboard'.tr(),
+            _buildModernTab('admin_modern_dashboard_tab_dashboard'.tr(),
                 Icons.dashboard_rounded),
-            _buildModernTab('admin_modern_dashboard_tab_users'.tr(),
-                Icons.people_rounded),
+            _buildModernTab(
+                'admin_modern_dashboard_tab_users'.tr(), Icons.people_rounded),
             _buildModernTab('admin_modern_dashboard_tab_content'.tr(),
                 Icons.content_copy_rounded),
             _buildModernTab('admin_modern_dashboard_tab_financial'.tr(),
@@ -1179,8 +1178,7 @@ class _ModernUnifiedAdminDashboardState
                     controller: _userSearchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText:
-                          'admin_modern_dashboard_search_users_hint'.tr(),
+                      hintText: 'admin_modern_dashboard_search_users_hint'.tr(),
                       hintStyle:
                           TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                       prefixIcon: Icon(Icons.search_rounded,
@@ -1213,13 +1211,16 @@ class _ModernUnifiedAdminDashboardState
                             'admin_modern_dashboard_filter_all'.tr(),
                             _getFilteredUsers().length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('admin_modern_dashboard_filter_verified'.tr(),
+                        _buildFilterChip(
+                            'admin_modern_dashboard_filter_verified'.tr(),
                             _users.where((u) => u.isVerified).length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('admin_modern_dashboard_filter_featured'.tr(),
+                        _buildFilterChip(
+                            'admin_modern_dashboard_filter_featured'.tr(),
                             _users.where((u) => u.isFeatured).length),
                         const SizedBox(width: 8),
-                        _buildFilterChip('admin_modern_dashboard_filter_suspended'.tr(),
+                        _buildFilterChip(
+                            'admin_modern_dashboard_filter_suspended'.tr(),
                             _users.where((u) => u.isSuspended).length),
                       ],
                     ),
@@ -1561,12 +1562,12 @@ class _ModernUnifiedAdminDashboardState
                         ),
                       ),
                       const SizedBox(width: 12),
-                  Text(
-                    'admin_modern_dashboard_content_moderation'.tr(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      Text(
+                        'admin_modern_dashboard_content_moderation'.tr(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -1687,7 +1688,8 @@ class _ModernUnifiedAdminDashboardState
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
                           'admin_modern_dashboard_suite_art_walks'.tr(),
-                          'admin_modern_dashboard_suite_art_walks_subtitle'.tr(),
+                          'admin_modern_dashboard_suite_art_walks_subtitle'
+                              .tr(),
                           Icons.route_rounded,
                           Colors.tealAccent,
                           () => Navigator.pushNamed(
@@ -1727,7 +1729,8 @@ class _ModernUnifiedAdminDashboardState
                         width: (MediaQuery.of(context).size.width - 64) / 3,
                         child: _buildModerationSuiteTile(
                           'admin_modern_dashboard_suite_community'.tr(),
-                          'admin_modern_dashboard_suite_community_subtitle'.tr(),
+                          'admin_modern_dashboard_suite_community_subtitle'
+                              .tr(),
                           Icons.forum_rounded,
                           Colors.blueAccent,
                           () => Navigator.pushNamed(
@@ -1769,7 +1772,8 @@ class _ModernUnifiedAdminDashboardState
                     controller: _contentSearchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'admin_modern_dashboard_search_content_hint'.tr(),
+                      hintText:
+                          'admin_modern_dashboard_search_content_hint'.tr(),
                       hintStyle:
                           TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                       prefixIcon: Icon(Icons.search_rounded,
@@ -2383,15 +2387,13 @@ class _ModernUnifiedAdminDashboardState
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'view',
-                child:
-                    Text('admin_modern_dashboard_view_details'.tr(),
-                        style: const TextStyle(color: Colors.white)),
+                child: Text('admin_modern_dashboard_view_details'.tr(),
+                    style: const TextStyle(color: Colors.white)),
               ),
               PopupMenuItem(
                 value: 'edit',
-                child:
-                    Text('admin_modern_dashboard_edit_content'.tr(),
-                        style: const TextStyle(color: Colors.white)),
+                child: Text('admin_modern_dashboard_edit_content'.tr(),
+                    style: const TextStyle(color: Colors.white)),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
@@ -2737,15 +2739,12 @@ class _ModernUnifiedAdminDashboardState
                       ],
 
                       // Author info
-                      _buildDetailRow(
-                          'admin_modern_dashboard_author'.tr(),
+                      _buildDetailRow('admin_modern_dashboard_author'.tr(),
                           content.authorName),
-                      _buildDetailRow(
-                          'admin_modern_dashboard_created'.tr(),
+                      _buildDetailRow('admin_modern_dashboard_created'.tr(),
                           _formatDate(content.createdAt)),
                       if (content.updatedAt != null)
-                        _buildDetailRow(
-                            'admin_modern_dashboard_updated'.tr(),
+                        _buildDetailRow('admin_modern_dashboard_updated'.tr(),
                             _formatDate(content.updatedAt!)),
 
                       // Stats
@@ -2758,8 +2757,7 @@ class _ModernUnifiedAdminDashboardState
                           _buildStatChip('admin_modern_dashboard_likes'.tr(),
                               content.likeCount.toString()),
                           const SizedBox(width: 12),
-                          _buildStatChip(
-                              'admin_modern_dashboard_reports'.tr(),
+                          _buildStatChip('admin_modern_dashboard_reports'.tr(),
                               content.reportCount.toString()),
                         ],
                       ),

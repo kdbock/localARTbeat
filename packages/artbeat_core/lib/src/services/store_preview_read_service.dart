@@ -39,12 +39,12 @@ class StorePreviewReadService {
         .where('isForSale', isEqualTo: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(ArtworkModel.fromFirestore).toList());
+        .map(
+          (snapshot) => snapshot.docs.map(ArtworkModel.fromFirestore).toList(),
+        );
   }
 
-  Stream<List<ArtworkModel>> watchMarketArtworks({
-    required bool isAuction,
-  }) {
+  Stream<List<ArtworkModel>> watchMarketArtworks({required bool isAuction}) {
     if (isAuction) {
       return _firestore
           .collection('artwork')
@@ -74,7 +74,9 @@ class StorePreviewReadService {
         .where('isForSale', isEqualTo: true)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(ArtworkModel.fromFirestore).toList());
+        .map(
+          (snapshot) => snapshot.docs.map(ArtworkModel.fromFirestore).toList(),
+        );
   }
 
   Stream<List<ArtistProfileModel>> watchKioskLaneArtists({int limit = 10}) {

@@ -100,7 +100,9 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
 
   Widget _buildMapCard() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: context.read<ArtWalkPreviewReadService>().watchPublicPreviewWalks(),
+      stream: context
+          .read<ArtWalkPreviewReadService>()
+          .watchPublicPreviewWalks(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _wrapMapSurface(_buildLoadingState());

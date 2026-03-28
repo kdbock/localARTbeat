@@ -32,7 +32,8 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
   @override
   void initState() {
     super.initState();
-    _subscriptionService = context.read<artist_subscription.SubscriptionService>();
+    _subscriptionService = context
+        .read<artist_subscription.SubscriptionService>();
     _topFollowersFuture = _subscriptionService.getTopFollowers(
       artistProfileId: widget.artistProfileId,
       limit: widget.limit,

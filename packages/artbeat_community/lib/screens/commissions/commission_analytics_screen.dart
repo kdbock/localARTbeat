@@ -49,9 +49,7 @@ class _CommissionAnalyticsScreenState extends State<CommissionAnalyticsScreen> {
 
       final analytics = await context
           .read<DirectCommissionService>()
-          .getCommissionAnalytics(
-            userId,
-      );
+          .getCommissionAnalytics(userId);
       if (!mounted) return;
       setState(() {
         _analytics = analytics;

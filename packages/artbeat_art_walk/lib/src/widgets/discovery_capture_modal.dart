@@ -174,7 +174,9 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
       widget.distance,
     );
     final isClose = widget.distance < 50;
-    final artImageUrl = ImageUrlValidator.normalizeImageUrl(widget.art.imageUrl);
+    final artImageUrl = ImageUrlValidator.normalizeImageUrl(
+      widget.art.imageUrl,
+    );
     final hasValidArtImage = ImageUrlValidator.isValidImageUrl(artImageUrl);
     final profileImageProvider = ImageUrlValidator.safeNetworkImage(
       _enrichedArt?.userProfileUrl ?? widget.art.userProfileUrl,

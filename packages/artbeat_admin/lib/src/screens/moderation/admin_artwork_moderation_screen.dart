@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_core/artbeat_core.dart'
-    hide GlassInputDecoration;
+import 'package:artbeat_core/artbeat_core.dart' hide GlassInputDecoration;
 import 'package:artbeat_core/artbeat_core.dart'
     show GlassCard, HudTopBar, MainLayout, SecureNetworkImage, WorldBackground;
 import 'package:provider/provider.dart';

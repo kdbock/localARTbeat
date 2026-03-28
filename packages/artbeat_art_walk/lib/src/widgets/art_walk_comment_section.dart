@@ -29,8 +29,8 @@ class ArtWalkCommentSection extends StatefulWidget {
 
 class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   ArtWalkService? _artWalkService;
-  ArtWalkService get artWalkService =>
-      _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
+  ArtWalkService get artWalkService => _artWalkService ??=
+      widget.artWalkService ?? context.read<ArtWalkService>();
   late final core_auth.AuthService _authService;
 
   final TextEditingController _commentController = TextEditingController();

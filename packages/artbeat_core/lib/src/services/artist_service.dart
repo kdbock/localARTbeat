@@ -10,7 +10,8 @@ import '../utils/logger.dart';
 /// This service consolidates functionality from both artbeat_core and artbeat_artist
 /// to provide a single point of truth for artist-related operations.
 class ArtistService {
-  ArtistService({FirebaseFirestore? firestore}) : _firestoreInstance = firestore;
+  ArtistService({FirebaseFirestore? firestore})
+    : _firestoreInstance = firestore;
 
   FirebaseFirestore? _firestoreInstance;
 
@@ -70,7 +71,9 @@ class ArtistService {
   }
 
   /// Get public artist profiles for dashboard/discovery surfaces.
-  Future<List<ArtistProfileModel>> getAllArtistProfiles({int limit = 20}) async {
+  Future<List<ArtistProfileModel>> getAllArtistProfiles({
+    int limit = 20,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection('artistProfiles')

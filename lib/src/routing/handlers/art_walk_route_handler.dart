@@ -101,9 +101,9 @@ class ArtWalkRouteHandler {
                 );
               }
               return FutureBuilder<List<capture.CaptureModel>>(
-                future: context.read<capture.CaptureService>().getCapturesForUser(
-                  userId,
-                ),
+                future: context
+                    .read<capture.CaptureService>()
+                    .getCapturesForUser(userId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -291,8 +291,8 @@ class _LocationCapturesView extends StatelessWidget {
               mainAxisSpacing: 8,
             ),
             itemCount: captures.length,
-            itemBuilder:
-                (context, index) => _buildCaptureCard(context, captures[index]),
+            itemBuilder: (context, index) =>
+                _buildCaptureCard(context, captures[index]),
           ),
   );
 
@@ -316,11 +316,10 @@ class _LocationCapturesView extends StatelessWidget {
             Image.network(
               captureModel.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder:
-                  (context, error, stackTrace) => Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
-                  ),
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey[300],
+                child: const Icon(Icons.image_not_supported),
+              ),
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) {
                   return child;

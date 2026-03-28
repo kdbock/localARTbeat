@@ -13,9 +13,9 @@ class UnifiedAdminService {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     AdminArtworkService? artworkService,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _artworkService = artworkService ?? AdminArtworkService();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _artworkService = artworkService ?? AdminArtworkService();
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -535,7 +535,8 @@ class UnifiedAdminService {
 
   Future<void> rewardApprovedCapture(String captureId) async {
     try {
-      final captureDoc = await _firestore.collection('captures').doc(captureId).get();
+      final captureDoc =
+          await _firestore.collection('captures').doc(captureId).get();
       if (!captureDoc.exists) return;
 
       final captureData = captureDoc.data()!;
@@ -571,7 +572,10 @@ class UnifiedAdminService {
         updateData['status'] = newStatus;
       }
 
-      await _firestore.collection(collection).doc(content.id).update(updateData);
+      await _firestore
+          .collection(collection)
+          .doc(content.id)
+          .update(updateData);
     } catch (e) {
       throw Exception('Failed to update content: $e');
     }

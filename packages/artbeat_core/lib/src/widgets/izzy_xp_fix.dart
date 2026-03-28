@@ -31,11 +31,12 @@ class _IzzyXPFixState extends State<IzzyXPFix> {
 
     try {
       const izzyId = 'EdH8MvWk4Ja6eoSZM59QtOaxEK43';
-      setState(() => _status = 'Repairing Izzy\'s XP from approved captures...');
-
-      final result = await _userMaintenanceService.repairUserXpFromApprovedCaptures(
-        izzyId,
+      setState(
+        () => _status = 'Repairing Izzy\'s XP from approved captures...',
       );
+
+      final result = await _userMaintenanceService
+          .repairUserXpFromApprovedCaptures(izzyId);
 
       if (result == null) {
         setState(() {
@@ -50,16 +51,16 @@ class _IzzyXPFixState extends State<IzzyXPFix> {
       setState(() {
         _status = result.wasUpdated
             ? '✅ Izzy XP Fix Complete!\n'
-                'Approved captures: ${result.actualApprovedCaptures}\n'
-                'Stored count: ${result.storedCapturesCount}\n'
-                'XP: ${result.previousXp} → ${result.updatedXp}\n'
-                'Level: ${result.previousLevel} → ${result.updatedLevel}\n'
-                'XP gained: ${result.updatedXp - result.previousXp}'
+                  'Approved captures: ${result.actualApprovedCaptures}\n'
+                  'Stored count: ${result.storedCapturesCount}\n'
+                  'XP: ${result.previousXp} → ${result.updatedXp}\n'
+                  'Level: ${result.previousLevel} → ${result.updatedLevel}\n'
+                  'XP gained: ${result.updatedXp - result.previousXp}'
             : '✅ Izzy\'s XP is already correct!\n'
-                'Approved captures: ${result.actualApprovedCaptures}\n'
-                'Stored count: ${result.storedCapturesCount}\n'
-                'Current XP: ${result.previousXp}\n'
-                'Expected XP: ${result.updatedXp}';
+                  'Approved captures: ${result.actualApprovedCaptures}\n'
+                  'Stored count: ${result.storedCapturesCount}\n'
+                  'Current XP: ${result.previousXp}\n'
+                  'Expected XP: ${result.updatedXp}';
         _isFixing = false;
       });
     } catch (e) {

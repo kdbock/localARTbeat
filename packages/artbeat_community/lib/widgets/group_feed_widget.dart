@@ -174,7 +174,9 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
       case PostAppreciationResult.postNotFound:
       case PostAppreciationResult.error:
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('error_appreciating_post'.tr(args: [post.id]))),
+          SnackBar(
+            content: Text('error_appreciating_post'.tr(args: [post.id])),
+          ),
         );
     }
   }

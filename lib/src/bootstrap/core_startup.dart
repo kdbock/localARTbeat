@@ -11,7 +11,9 @@ import '../managers/app_lifecycle_manager.dart';
 
 Future<void> initializeCoreStartup() async {
   try {
-    await EasyLocalization.ensureInitialized().timeout(const Duration(seconds: 5));
+    await EasyLocalization.ensureInitialized().timeout(
+      const Duration(seconds: 5),
+    );
   } on TimeoutException {
     AppLogger.warning('⚠️ Localization init timed out');
   } on Exception catch (e) {

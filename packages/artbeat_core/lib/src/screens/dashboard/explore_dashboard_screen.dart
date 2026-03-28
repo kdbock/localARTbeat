@@ -865,8 +865,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await _onboardingService
-        .isExploreOnboardingCompleted();
+    final isCompleted = await _onboardingService.isExploreOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1000));

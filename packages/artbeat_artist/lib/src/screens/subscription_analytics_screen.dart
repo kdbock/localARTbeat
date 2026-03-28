@@ -161,8 +161,8 @@ class _SubscriptionAnalyticsScreenState
       );
 
       // Get artwork count
-      analytics['artworkCount'] =
-          await _artworkService.getArtworkCountForCurrentUser();
+      analytics['artworkCount'] = await _artworkService
+          .getArtworkCountForCurrentUser();
     } catch (e) {
       _logger.e('Error calculating analytics: $e');
     }

@@ -63,9 +63,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
       _currentUserId = userId;
       final commissions = await context
           .read<DirectCommissionService>()
-          .getCommissionsByUser(
-            userId,
-      );
+          .getCommissionsByUser(userId);
 
       setState(() {
         _allCommissions = commissions;
@@ -1142,30 +1140,30 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                           await context
                               .read<DirectCommissionService>()
                               .createCommissionRequest(
-                            artistId: selectedArtist.id,
-                            artistName: selectedArtist.displayName,
-                            type: CommissionType.digital,
-                            title: titleController.text,
-                            description: descriptionController.text,
-                            specs: CommissionSpecs(
-                              size: 'Custom',
-                              medium: 'Digital',
-                              style: 'Custom',
-                              colorScheme: 'Full Color',
-                              revisions: 2,
-                              commercialUse: false,
-                              deliveryFormat: 'Digital File',
-                              customRequirements: {
-                                'budget': budget,
-                                'notes': descriptionController.text,
-                              },
-                            ),
-                            deadline: deadline,
-                            metadata: {
-                              'requestedVia': 'direct_request',
-                              'budget': budget,
-                            },
-                          );
+                                artistId: selectedArtist.id,
+                                artistName: selectedArtist.displayName,
+                                type: CommissionType.digital,
+                                title: titleController.text,
+                                description: descriptionController.text,
+                                specs: CommissionSpecs(
+                                  size: 'Custom',
+                                  medium: 'Digital',
+                                  style: 'Custom',
+                                  colorScheme: 'Full Color',
+                                  revisions: 2,
+                                  commercialUse: false,
+                                  deliveryFormat: 'Digital File',
+                                  customRequirements: {
+                                    'budget': budget,
+                                    'notes': descriptionController.text,
+                                  },
+                                ),
+                                deadline: deadline,
+                                metadata: {
+                                  'requestedVia': 'direct_request',
+                                  'budget': budget,
+                                },
+                              );
 
                           if (!mounted || !context.mounted) return;
 

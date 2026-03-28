@@ -44,8 +44,8 @@ class AuditLog {
 /// Tracks all admin actions, user activities, and system events
 class AuditTrailService extends ChangeNotifier {
   AuditTrailService({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;

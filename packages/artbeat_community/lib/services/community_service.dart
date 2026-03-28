@@ -22,10 +22,7 @@ enum PostAppreciationResult {
 }
 
 class PaginatedPostsResult<T> {
-  const PaginatedPostsResult({
-    required this.posts,
-    required this.lastDocument,
-  });
+  const PaginatedPostsResult({required this.posts, required this.lastDocument});
 
   final List<T> posts;
   final DocumentSnapshot? lastDocument;
@@ -287,7 +284,8 @@ class CommunityService extends ChangeNotifier {
         .map(
           (snapshot) => snapshot.docs
               .map(
-                (doc) => community_artwork.ArtworkModel.fromFirestore(doc, null),
+                (doc) =>
+                    community_artwork.ArtworkModel.fromFirestore(doc, null),
               )
               .toList(growable: false),
         );
@@ -474,22 +472,24 @@ class CommunityService extends ChangeNotifier {
   List<CommunitySocialActivity> _filterNonFeedActivities(
     List<CommunitySocialActivity> activities,
   ) {
-    return activities.where((activity) {
-      final activityType = activity.type.toString().toLowerCase();
-      final isRssFeed =
-          activityType.contains('rss') ||
-          activityType.contains('feed') ||
-          activityType.contains('news');
+    return activities
+        .where((activity) {
+          final activityType = activity.type.toString().toLowerCase();
+          final isRssFeed =
+              activityType.contains('rss') ||
+              activityType.contains('feed') ||
+              activityType.contains('news');
 
-      final message = activity.message.toLowerCase();
-      final hasRssIndicators =
-          message.contains('rss') ||
-          message.contains('news feed') ||
-          message.contains('political news') ||
-          message.contains('news sports');
+          final message = activity.message.toLowerCase();
+          final hasRssIndicators =
+              message.contains('rss') ||
+              message.contains('news feed') ||
+              message.contains('political news') ||
+              message.contains('news sports');
 
-      return !isRssFeed && !hasRssIndicators;
-    }).toList(growable: false);
+          return !isRssFeed && !hasRssIndicators;
+        })
+        .toList(growable: false);
   }
 
   // Get posts by user ID
@@ -1039,7 +1039,8 @@ class CommunityService extends ChangeNotifier {
           return PostAppreciationResult.alreadyAppreciated;
         }
 
-        final currentCount = (postSnapshot.data()?['applauseCount'] as int?) ?? 0;
+        final currentCount =
+            (postSnapshot.data()?['applauseCount'] as int?) ?? 0;
         transaction.update(postRef, {
           'applauseCount': currentCount + 1,
           'engagementStats.likeCount': FieldValue.increment(1),
@@ -1130,7 +1131,9 @@ class CommunityService extends ChangeNotifier {
           .update({'isReported': true});
       return true;
     } catch (e) {
-      AppLogger.error('Error reporting comment $commentId for post $postId: $e');
+      AppLogger.error(
+        'Error reporting comment $commentId for post $postId: $e',
+      );
       return false;
     }
   }

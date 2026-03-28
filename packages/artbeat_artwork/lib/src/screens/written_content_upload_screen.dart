@@ -230,7 +230,7 @@ class _WrittenContentUploadScreenState
     if (_contentFile == null) return;
 
     if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('written_content_upload_processing_file'.tr()),
           duration: const Duration(seconds: 1),
@@ -341,9 +341,7 @@ class _WrittenContentUploadScreenState
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'written_content_upload_pdf_no_text_warning'.tr(),
-              ),
+              content: Text('written_content_upload_pdf_no_text_warning'.tr()),
               backgroundColor: Colors.red,
             ),
           );
@@ -371,9 +369,7 @@ class _WrittenContentUploadScreenState
             _contentFile!.path.toLowerCase().endsWith('.pdf')) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'written_content_upload_pdf_low_text_warning'.tr(),
-              ),
+              content: Text('written_content_upload_pdf_low_text_warning'.tr()),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 5),
             ),
@@ -386,9 +382,7 @@ class _WrittenContentUploadScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'written_content_upload_process_error'.tr(
-                args: [e.toString()],
-              ),
+              'written_content_upload_process_error'.tr(args: [e.toString()]),
             ),
             backgroundColor: Colors.red,
           ),
@@ -447,9 +441,7 @@ class _WrittenContentUploadScreenState
         // Warning for likely image-only PDFs
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'written_content_upload_image_scan_warning'.tr(),
-            ),
+            content: Text('written_content_upload_image_scan_warning'.tr()),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -965,9 +957,7 @@ class _WrittenContentUploadScreenState
                       state: _getStepState(0),
                     ),
                     Step(
-                      title: Text(
-                        'written_content_upload_step_chapters'.tr(),
-                      ),
+                      title: Text('written_content_upload_step_chapters'.tr()),
                       subtitle: Text(
                         'written_content_upload_step_chapters_desc'.tr(),
                       ),
@@ -1225,9 +1215,8 @@ class _WrittenContentUploadScreenState
                   setState(() {
                     _chapters.add({
                       'number': 1,
-                      'title': 'written_content_upload_default_chapter_title'.tr(
-                        namedArgs: {'number': '1'},
-                      ),
+                      'title': 'written_content_upload_default_chapter_title'
+                          .tr(namedArgs: {'number': '1'}),
                       'content': _contentText,
                       'wordCount': _wordCount,
                       'readingTime': _estimatedReadingTime,
@@ -1550,15 +1539,15 @@ class _WrittenContentUploadScreenState
                             icon: const Icon(Icons.format_italic),
                             onPressed: () =>
                                 _insertMarkdownFormatting('*', '*'),
-                            tooltip:
-                                'written_content_upload_toolbar_italic'.tr(),
+                            tooltip: 'written_content_upload_toolbar_italic'
+                                .tr(),
                           ),
                           IconButton(
                             icon: const Icon(Icons.title),
                             onPressed: () =>
                                 _insertMarkdownFormatting('# ', ''),
-                            tooltip:
-                                'written_content_upload_toolbar_header'.tr(),
+                            tooltip: 'written_content_upload_toolbar_header'
+                                .tr(),
                           ),
                           IconButton(
                             icon: const Icon(Icons.link),
@@ -2000,9 +1989,7 @@ class _WrittenContentUploadScreenState
                 if (_useFileUpload && _contentFile != null) ...[
                   Text(
                     'written_content_upload_review_file'.tr(
-                      namedArgs: {
-                        'file': _contentFile!.path.split('/').last,
-                      },
+                      namedArgs: {'file': _contentFile!.path.split('/').last},
                     ),
                   ),
                 ] else if (_useRichText &&

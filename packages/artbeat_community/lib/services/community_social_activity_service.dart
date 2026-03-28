@@ -100,9 +100,9 @@ class CommunitySocialActivityService {
       final lat = userPosition.latitude;
       final latDelta = radiusKm / 111.0;
 
-      final query = _activities.orderBy('timestamp', descending: true).limit(
-        limit * 10,
-      );
+      final query = _activities
+          .orderBy('timestamp', descending: true)
+          .limit(limit * 10);
 
       final snapshot = await query.get();
       final activities = snapshot.docs
@@ -124,7 +124,9 @@ class CommunitySocialActivityService {
           })
           .toList();
 
-      AppLogger.debug('Loaded ${activities.length} nearby community activities');
+      AppLogger.debug(
+        'Loaded ${activities.length} nearby community activities',
+      );
       return activities;
     } catch (e) {
       AppLogger.error('Error loading nearby community activities: $e');

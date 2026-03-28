@@ -1022,13 +1022,15 @@ class VisibilityService {
         artworkViewsSnapshot.docs,
         'viewedAt',
       ).entries) {
-        visitorsByDay[entry.key] = (visitorsByDay[entry.key] ?? 0) + entry.value;
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
       }
       for (final entry in _countByDay(
         profileViewsSnapshot.docs,
         'viewedAt',
       ).entries) {
-        visitorsByDay[entry.key] = (visitorsByDay[entry.key] ?? 0) + entry.value;
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
       }
 
       final topArtworkIds = artworkViewsByArtwork.entries.toList()
@@ -1180,13 +1182,15 @@ class VisibilityService {
         artworkViewsSnapshot.docs,
         'viewedAt',
       ).entries) {
-        visitorsByDay[entry.key] = (visitorsByDay[entry.key] ?? 0) + entry.value;
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
       }
       for (final entry in _countByDay(
         profileViewsSnapshot.docs,
         'viewedAt',
       ).entries) {
-        visitorsByDay[entry.key] = (visitorsByDay[entry.key] ?? 0) + entry.value;
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
       }
 
       return {

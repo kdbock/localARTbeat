@@ -27,7 +27,8 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
   @override
   void initState() {
     super.initState();
-    _subscriptionService = context.read<artist_subscription.SubscriptionService>();
+    _subscriptionService = context
+        .read<artist_subscription.SubscriptionService>();
     _statsFuture = _subscriptionService.getFollowerStats(
       artistProfileId: widget.artistProfileId,
     );

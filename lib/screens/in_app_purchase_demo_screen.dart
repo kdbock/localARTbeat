@@ -205,5 +205,4 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
       ),
     );
   }
-
 }

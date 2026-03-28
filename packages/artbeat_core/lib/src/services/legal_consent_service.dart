@@ -23,7 +23,8 @@ class LegalConsentService {
 
     final snapshot = await _firestore.collection('users').doc(userId).get();
     final data = snapshot.data();
-    return (data?['legalConsents'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+    return (data?['legalConsents'] as Map<String, dynamic>?) ??
+        <String, dynamic>{};
   }
 
   Future<void> recordRegistrationConsent({

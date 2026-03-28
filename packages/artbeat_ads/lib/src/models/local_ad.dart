@@ -187,7 +187,8 @@ class LocalAd {
       reviewedAt: reviewedAt ?? this.reviewedAt,
       reviewedBy: reviewedBy ?? this.reviewedBy,
       rejectionReason: rejectionReason ?? this.rejectionReason,
-      subscriptionProductId: subscriptionProductId ?? this.subscriptionProductId,
+      subscriptionProductId:
+          subscriptionProductId ?? this.subscriptionProductId,
       purchaseId: purchaseId ?? this.purchaseId,
       transactionId: transactionId ?? this.transactionId,
       monthlyPrice: monthlyPrice ?? this.monthlyPrice,
@@ -195,7 +196,8 @@ class LocalAd {
       autoRenewing: autoRenewing ?? this.autoRenewing,
       purchaseFollowUpStatus:
           purchaseFollowUpStatus ?? this.purchaseFollowUpStatus,
-      purchaseFollowUpNotes: purchaseFollowUpNotes ?? this.purchaseFollowUpNotes,
+      purchaseFollowUpNotes:
+          purchaseFollowUpNotes ?? this.purchaseFollowUpNotes,
     );
   }
 

@@ -23,11 +23,11 @@ class AdminPaymentOperationsService {
     PaymentAuditService? paymentAuditService,
     AuditTrailService? auditTrailService,
     AdminRoleService? roleService,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _paymentService = paymentService ?? UnifiedPaymentService(),
-       _paymentAuditService = paymentAuditService ?? PaymentAuditService(),
-       _auditTrailService = auditTrailService ?? AuditTrailService(),
-       _roleService = roleService ?? AdminRoleService();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _paymentService = paymentService ?? UnifiedPaymentService(),
+        _paymentAuditService = paymentAuditService ?? PaymentAuditService(),
+        _auditTrailService = auditTrailService ?? AuditTrailService(),
+        _roleService = roleService ?? AdminRoleService();
 
   final FirebaseFirestore _firestore;
   final UnifiedPaymentService _paymentService;
@@ -136,7 +136,10 @@ class AdminPaymentOperationsService {
           'status': 'completed',
         });
 
-        await _firestore.collection('payment_history').doc(transaction.id).update({
+        await _firestore
+            .collection('payment_history')
+            .doc(transaction.id)
+            .update({
           'status': 'refunded',
           'refundedAt': FieldValue.serverTimestamp(),
           'refundedBy': admin.id,
@@ -179,7 +182,8 @@ class AdminPaymentOperationsService {
     };
 
     for (final transactionId in transactionIds) {
-      final docRef = _firestore.collection('payment_history').doc(transactionId);
+      final docRef =
+          _firestore.collection('payment_history').doc(transactionId);
       batch.update(docRef, updateData);
 
       await _paymentAuditService.logPaymentAction(

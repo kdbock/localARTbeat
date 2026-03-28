@@ -5,8 +5,8 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 class AdminBroadcastService extends ChangeNotifier {
   AdminBroadcastService({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;

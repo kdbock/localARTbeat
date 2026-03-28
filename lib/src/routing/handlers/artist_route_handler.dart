@@ -189,9 +189,8 @@ class _ArtistFeedLoaderState extends State<_ArtistFeedLoader> {
     try {
       setState(() => _isLoading = true);
 
-      final artistProfile = await _artistProfileService.getArtistProfileByUserId(
-        widget.artistUserId,
-      );
+      final artistProfile = await _artistProfileService
+          .getArtistProfileByUserId(widget.artistUserId);
 
       if (artistProfile != null) {
         _artistProfile = artistProfile;

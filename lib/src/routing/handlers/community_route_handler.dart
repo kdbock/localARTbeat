@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../route_utils.dart';
 
-typedef AdminRouteHandlerDelegate = Route<dynamic>? Function(
-  RouteSettings settings,
-);
+typedef AdminRouteHandlerDelegate =
+    Route<dynamic>? Function(RouteSettings settings);
 
 class CommunityRouteHandler {
   const CommunityRouteHandler();

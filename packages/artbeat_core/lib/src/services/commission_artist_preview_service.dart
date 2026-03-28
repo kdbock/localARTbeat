@@ -43,7 +43,9 @@ class CommissionArtistPreviewService {
           results[id] = profile.displayName;
         }
       } catch (error) {
-        AppLogger.error('Failed to load commission artist name for $id: $error');
+        AppLogger.error(
+          'Failed to load commission artist name for $id: $error',
+        );
       }
     }
 

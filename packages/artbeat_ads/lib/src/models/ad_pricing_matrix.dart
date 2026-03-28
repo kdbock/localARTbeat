@@ -50,7 +50,8 @@ class AdPricingMatrix {
         // Keep older code paths working while the merchant flow is monthly-only.
         return allConfigs.firstWhere(
           (config) =>
-              config.size == size && config.duration == LocalAdDuration.oneMonth,
+              config.size == size &&
+              config.duration == LocalAdDuration.oneMonth,
         );
       } catch (_) {
         return null;

@@ -17,7 +17,9 @@ class MessagingProvider extends ChangeNotifier {
   String? _currentUserId;
 
   MessagingProvider(this._messagingStatusService) {
-    AppLogger.info('MessagingProvider: Initializing with MessagingStatusService');
+    AppLogger.info(
+      'MessagingProvider: Initializing with MessagingStatusService',
+    );
     // Initialize current user ID to prevent unnecessary reset on first auth state change
     _currentUserId = FirebaseAuth.instance.currentUser?.uid;
     _setupAuthListener();
@@ -68,24 +70,28 @@ class MessagingProvider extends ChangeNotifier {
   void _initializeUnreadCount() {
     AppLogger.info('MessagingProvider: Setting up unread count stream');
     try {
-      _unreadCountSubscription = _messagingStatusService.getTotalUnreadCount().listen(
-        (count) {
-          AppLogger.info('MessagingProvider: Unread count updated to $count');
-          _unreadCount = count;
-          _hasUnreadMessages = count > 0;
-          _isInitialized = true;
-          _hasError = false;
-          notifyListeners();
-        },
-        onError: (Object error) {
-          AppLogger.error(
-            'MessagingProvider: Error in unread count stream: $error',
+      _unreadCountSubscription = _messagingStatusService
+          .getTotalUnreadCount()
+          .listen(
+            (count) {
+              AppLogger.info(
+                'MessagingProvider: Unread count updated to $count',
+              );
+              _unreadCount = count;
+              _hasUnreadMessages = count > 0;
+              _isInitialized = true;
+              _hasError = false;
+              notifyListeners();
+            },
+            onError: (Object error) {
+              AppLogger.error(
+                'MessagingProvider: Error in unread count stream: $error',
+              );
+              _hasError = true;
+              _isInitialized = true;
+              notifyListeners();
+            },
           );
-          _hasError = true;
-          _isInitialized = true;
-          notifyListeners();
-        },
-      );
     } catch (e) {
       AppLogger.error(
         'MessagingProvider: Error setting up unread count stream: $e',

@@ -469,7 +469,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 CircleAvatar(
                   radius: 22,
                   backgroundImage:
-                      profileImageUrl != null && profileImageUrl.trim().isNotEmpty
+                      profileImageUrl != null &&
+                          profileImageUrl.trim().isNotEmpty
                       ? CachedNetworkImageProvider(profileImageUrl)
                       : null,
                   backgroundColor: Colors.white.withValues(alpha: 0.1),

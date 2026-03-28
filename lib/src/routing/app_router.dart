@@ -52,7 +52,9 @@ class AppRouter {
     authService: _authService,
     buildOnboardingScreen: _buildOnboardingScreen,
   );
-  late final _eventsRouteHandler = EventsRouteHandler(authService: _authService);
+  late final _eventsRouteHandler = EventsRouteHandler(
+    authService: _authService,
+  );
   late final _settingsRouteHandler = SettingsRouteHandler(
     authService: _authService,
   );

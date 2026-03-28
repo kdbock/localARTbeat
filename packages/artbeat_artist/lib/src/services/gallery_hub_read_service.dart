@@ -6,11 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/activity_model.dart';
 
 class GalleryHubReadService {
-  GalleryHubReadService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  GalleryHubReadService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;

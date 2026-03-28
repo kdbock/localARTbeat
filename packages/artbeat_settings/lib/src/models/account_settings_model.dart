@@ -71,11 +71,15 @@ class AccountSettingsModel {
           authUser?.photoURL ??
           '',
       bio: map['bio'] as String? ?? '',
-      emailVerified: authUser?.emailVerified ?? map['emailVerified'] as bool? ?? false,
+      emailVerified:
+          authUser?.emailVerified ?? map['emailVerified'] as bool? ?? false,
       phoneVerified:
           (authUser?.phoneNumber?.isNotEmpty ?? false) ||
           (map['phoneVerified'] as bool? ?? false),
-      createdAt: _parseDateTime(map['createdAt'], fallback: authUser?.metadata.creationTime),
+      createdAt: _parseDateTime(
+        map['createdAt'],
+        fallback: authUser?.metadata.creationTime,
+      ),
       updatedAt: _parseDateTime(map['updatedAt']),
     );
   }

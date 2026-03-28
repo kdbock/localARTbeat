@@ -6,11 +6,12 @@ import '../models/admin_artwork_model.dart';
 
 class AdminArtworkService {
   AdminArtworkService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
-  CollectionReference get _artworkCollection => _firestore.collection('artwork');
+  CollectionReference get _artworkCollection =>
+      _firestore.collection('artwork');
 
   Future<List<AdminArtworkModel>> getArtworksForModeration({
     required String filter,
@@ -35,10 +36,8 @@ class AdminArtworkService {
         break;
     }
 
-    final snapshot = await query
-        .orderBy('createdAt', descending: true)
-        .limit(limit)
-        .get();
+    final snapshot =
+        await query.orderBy('createdAt', descending: true).limit(limit).get();
     return snapshot.docs.map(AdminArtworkModel.fromFirestore).toList();
   }
 
@@ -78,10 +77,8 @@ class AdminArtworkService {
       query = query.where('chapterId', isNull: true);
     }
 
-    final snapshot = await query
-        .orderBy('createdAt', descending: true)
-        .limit(limit)
-        .get();
+    final snapshot =
+        await query.orderBy('createdAt', descending: true).limit(limit).get();
 
     return snapshot.docs.map(AdminArtworkModel.fromFirestore).toList();
   }
@@ -95,14 +92,11 @@ class AdminArtworkService {
 
   Future<void> updateArtworkCountsForAdmin(String artworkId) async {
     try {
-      final snapshot = await _artworkCollection
-          .doc(artworkId)
-          .collection('chapters')
-          .get();
+      final snapshot =
+          await _artworkCollection.doc(artworkId).collection('chapters').get();
 
-      final chapters = snapshot.docs
-          .map((doc) => ChapterModel.fromFirestore(doc))
-          .toList();
+      final chapters =
+          snapshot.docs.map((doc) => ChapterModel.fromFirestore(doc)).toList();
 
       final totalChapters = chapters.length;
       final releasedApprovedChapters = chapters

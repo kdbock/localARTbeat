@@ -94,7 +94,8 @@ class DiscoveryProgressReadService {
       final discoveryDates = <String, bool>{};
       for (final doc in snapshot.docs) {
         final discoveredAtTimestamp = doc.data()['discoveredAt'] as Timestamp?;
-        final discoveredAt = (discoveredAtTimestamp ?? Timestamp.now()).toDate();
+        final discoveredAt = (discoveredAtTimestamp ?? Timestamp.now())
+            .toDate();
         final dateKey =
             '${discoveredAt.year}-${discoveredAt.month.toString().padLeft(2, '0')}-${discoveredAt.day.toString().padLeft(2, '0')}';
         discoveryDates[dateKey] = true;

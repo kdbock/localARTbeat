@@ -4,11 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/logger.dart';
 
 class MessagingStatusService {
-  MessagingStatusService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  MessagingStatusService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -53,7 +51,8 @@ class MessagingStatusService {
               }
 
               final data = doc.data();
-              final unreadCounts = data['unreadCounts'] as Map<dynamic, dynamic>?;
+              final unreadCounts =
+                  data['unreadCounts'] as Map<dynamic, dynamic>?;
 
               if (unreadCounts != null) {
                 totalUnread += unreadCounts[userId] as int? ?? 0;

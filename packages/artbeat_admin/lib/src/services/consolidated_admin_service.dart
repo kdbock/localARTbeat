@@ -755,9 +755,7 @@ class ConsolidatedAdminService {
       final now = DateTime.now();
       final oneHourAgo = now.subtract(const Duration(hours: 1));
 
-      final activeUsers = await _firestore
-          .collection('users')
-          .get();
+      final activeUsers = await _firestore.collection('users').get();
 
       return activeUsers.docs.where((doc) {
         final lastActive = getEffectiveLastActive(doc.data());

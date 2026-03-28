@@ -89,20 +89,21 @@ class ArtworkModel {
       artistProfileId: (map['artistProfileId'] ?? '').toString(),
       userId: (map['userId'] ?? '').toString(),
       contentType: _contentTypeFromRaw(map['contentType']),
-      writingMetadata:
-          map['writingMetadata'] is Map<String, dynamic>
-              ? WritingMetadata.fromMap(map['writingMetadata'] as Map<String, dynamic>)
-              : null,
+      writingMetadata: map['writingMetadata'] is Map<String, dynamic>
+          ? WritingMetadata.fromMap(
+              map['writingMetadata'] as Map<String, dynamic>,
+            )
+          : null,
       auctionEnabled: map['auctionEnabled'] is bool
           ? map['auctionEnabled'] as bool
           : false,
       auctionEnd: map['auctionEnd'] is DateTime
           ? map['auctionEnd'] as DateTime
           : map['auctionEnd'] is String
-              ? DateTime.tryParse(map['auctionEnd'] as String)
-              : map['auctionEnd'] != null
-                  ? (map['auctionEnd'] as dynamic).toDate() as DateTime?
-                  : null,
+          ? DateTime.tryParse(map['auctionEnd'] as String)
+          : map['auctionEnd'] != null
+          ? (map['auctionEnd'] as dynamic).toDate() as DateTime?
+          : null,
       startingPrice: map['startingPrice'] is num
           ? (map['startingPrice'] as num).toDouble()
           : null,

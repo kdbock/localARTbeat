@@ -21,8 +21,7 @@ class AdminModeratedPost {
     return AdminModeratedPost(
       id: doc.id,
       content: FirestoreUtils.safeStringDefault(data['content']),
-      authorName:
-          FirestoreUtils.safeString(data['authorName']) ??
+      authorName: FirestoreUtils.safeString(data['authorName']) ??
           FirestoreUtils.safeString(data['userName']) ??
           'Unknown user',
       createdAt: FirestoreUtils.safeDateTime(data['createdAt']),

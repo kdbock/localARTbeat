@@ -131,9 +131,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
     );
   }
 
-  List<ArtworkModel> _filterByArtistQuery(
-    List<ArtworkModel> artworks,
-  ) {
+  List<ArtworkModel> _filterByArtistQuery(List<ArtworkModel> artworks) {
     final query = _artistQuery.trim().toLowerCase();
     if (query.isEmpty) return artworks;
 

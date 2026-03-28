@@ -231,7 +231,8 @@ const Map<String, Map<String, dynamic>> profileBadgeCatalog = {
   },
   'combo_master': {
     'name': 'Combo Master',
-    'description': 'Complete a daily challenge and weekly goal on the same day 10 times',
+    'description':
+        'Complete a daily challenge and weekly goal on the same day 10 times',
     'icon': '⚡',
   },
 };

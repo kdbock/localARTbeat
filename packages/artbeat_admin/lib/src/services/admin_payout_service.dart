@@ -7,8 +7,8 @@ class AdminPayoutService {
   AdminPayoutService({
     FirebaseFirestore? firestore,
     UnifiedPaymentService? paymentService,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _paymentService = paymentService ?? UnifiedPaymentService();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _paymentService = paymentService ?? UnifiedPaymentService();
 
   final FirebaseFirestore _firestore;
   final UnifiedPaymentService _paymentService;

@@ -7,9 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Art walk service initialization contracts', () {
-    test('ChallengeService can be constructed without eager Firebase access', () {
-      expect(ChallengeService.new, returnsNormally);
-    });
+    test(
+      'ChallengeService can be constructed without eager Firebase access',
+      () {
+        expect(ChallengeService.new, returnsNormally);
+      },
+    );
 
     test(
       'WeeklyGoalsService can be constructed without eager Firebase access',

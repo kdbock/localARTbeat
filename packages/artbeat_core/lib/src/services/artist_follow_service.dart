@@ -4,11 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/logger.dart';
 
 class ArtistFollowService {
-  ArtistFollowService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  ArtistFollowService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -18,12 +16,15 @@ class ArtistFollowService {
     if (currentUser == null || artistId.isEmpty) return false;
 
     try {
-      await _firestore.collection('follows').doc('${currentUser.uid}_$artistId').set({
-        'followerId': currentUser.uid,
-        'followedId': artistId,
-        'createdAt': FieldValue.serverTimestamp(),
-        'type': 'artist',
-      });
+      await _firestore
+          .collection('follows')
+          .doc('${currentUser.uid}_$artistId')
+          .set({
+            'followerId': currentUser.uid,
+            'followedId': artistId,
+            'createdAt': FieldValue.serverTimestamp(),
+            'type': 'artist',
+          });
 
       await _updateArtistFollowerCounts(artistId, delta: 1);
       return true;

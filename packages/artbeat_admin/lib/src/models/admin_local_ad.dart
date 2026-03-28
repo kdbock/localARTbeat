@@ -175,8 +175,7 @@ class AdminLocalAd {
       title: (map['title'] ?? '') as String,
       description: (map['description'] ?? '') as String,
       imageUrl: map['imageUrl'] as String?,
-      imageUrls:
-          (map['imageUrls'] as List?)?.whereType<String>().toList() ??
+      imageUrls: (map['imageUrls'] as List?)?.whereType<String>().toList() ??
           (map['artworkUrls'] as List?)?.whereType<String>().toList(),
       contactInfo: map['contactInfo'] as String?,
       websiteUrl: map['websiteUrl'] as String?,
@@ -184,7 +183,8 @@ class AdminLocalAd {
       size: AdminLocalAdSizeExtension.fromIndex((map['size'] ?? 0) as int),
       createdAt: ((map['createdAt']) as Timestamp?)?.toDate() ?? DateTime.now(),
       expiresAt: ((map['expiresAt']) as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: AdminLocalAdStatusExtension.fromIndex((map['status'] ?? 3) as int),
+      status:
+          AdminLocalAdStatusExtension.fromIndex((map['status'] ?? 3) as int),
       reportCount: (map['reportCount'] ?? 0) as int,
       reviewedAt: (map['reviewedAt'] as Timestamp?)?.toDate(),
       reviewedBy: map['reviewedBy'] as String?,

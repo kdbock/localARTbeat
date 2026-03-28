@@ -409,70 +409,60 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     final artworks = _artworks;
 
     return CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: AdSmallBannerWidget(
-                  zone: LocalAdZone.artists,
-                  height: 80,
-                ),
-              ),
+      slivers: [
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: AdSmallBannerWidget(zone: LocalAdZone.artists, height: 80),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.78,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.78,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if ((index + 1) % _adCycleLength == 0) {
-                      return const AdGridCardWidget(
-                        zone: LocalAdZone.artists,
-                        size: 150,
-                      );
-                    }
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if ((index + 1) % _adCycleLength == 0) {
+                  return const AdGridCardWidget(
+                    zone: LocalAdZone.artists,
+                    size: 150,
+                  );
+                }
 
-                    final adsBefore = (index + 1) ~/ _adCycleLength;
-                    final artworkIndex = index - adsBefore;
+                final adsBefore = (index + 1) ~/ _adCycleLength;
+                final artworkIndex = index - adsBefore;
 
-                    if (artworkIndex >= artworks.length) {
-                      return const SizedBox.shrink();
-                    }
+                if (artworkIndex >= artworks.length) {
+                  return const SizedBox.shrink();
+                }
 
-                    final artwork = artworks[artworkIndex];
-                    return _buildArtworkCard(artwork);
-                  },
-                  childCount:
-                      artworks.length + (artworks.length ~/ _artworksPerAd),
-                ),
-              ),
+                final artwork = artworks[artworkIndex];
+                return _buildArtworkCard(artwork);
+              },
+              childCount: artworks.length + (artworks.length ~/ _artworksPerAd),
             ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: AdSmallBannerWidget(
-                  zone: LocalAdZone.artists,
-                  height: 120,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: AdSmallBannerWidget(
-                  zone: LocalAdZone.artists,
-                  height: 100,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
-          ],
-        );
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: AdSmallBannerWidget(zone: LocalAdZone.artists, height: 120),
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: AdSmallBannerWidget(zone: LocalAdZone.artists, height: 100),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
+      ],
+    );
   }
 
   Widget _buildArtworkCard(ArtworkModel artwork) {
@@ -639,8 +629,9 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     try {
       final results = await _artworkService.browsePublicArtwork(
         query: _searchController.text,
-        location:
-            _selectedLocation != 'common_all'.tr() ? _selectedLocation : null,
+        location: _selectedLocation != 'common_all'.tr()
+            ? _selectedLocation
+            : null,
         medium: _selectedMedium != 'common_all'.tr() ? _selectedMedium : null,
       );
       if (!mounted) return;

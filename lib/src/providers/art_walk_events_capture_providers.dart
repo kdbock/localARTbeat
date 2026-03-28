@@ -1,7 +1,8 @@
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_events/artbeat_events.dart' as events
+import 'package:artbeat_events/artbeat_events.dart'
+    as events
     show
         EventService,
         EventNotificationService,

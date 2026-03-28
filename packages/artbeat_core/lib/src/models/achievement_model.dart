@@ -39,7 +39,10 @@ class AchievementModel {
 
   factory AchievementModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-    final typeName = FirestoreUtils.safeStringDefault(data['type'], 'firstWalk');
+    final typeName = FirestoreUtils.safeStringDefault(
+      data['type'],
+      'firstWalk',
+    );
     final type = AchievementType.values.firstWhere(
       (value) => value.name == typeName,
       orElse: () => AchievementType.firstWalk,

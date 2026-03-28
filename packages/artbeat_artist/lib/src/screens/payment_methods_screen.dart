@@ -36,7 +36,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     });
 
     try {
-      _defaultPaymentMethodId = await _paymentService.getDefaultPaymentMethodId();
+      _defaultPaymentMethodId = await _paymentService
+          .getDefaultPaymentMethodId();
       final methods = await _paymentService.getCurrentUserPaymentMethods();
 
       setState(() {

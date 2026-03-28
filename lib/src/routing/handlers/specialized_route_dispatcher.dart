@@ -26,10 +26,12 @@ class SpecializedRouteDispatcher {
          _RouteMatcher.single('/gallery', handleGalleryRoute),
          _RouteMatcher.single('/commission', handleCommissionRoute),
          _RouteMatcher.single('/community', handleCommunityRoute),
-         _RouteMatcher.multi(
-           const ['/art-walk', '/enhanced', '/artwalk', '/instant'],
-           handleArtWalkRoute,
-         ),
+         _RouteMatcher.multi(const [
+           '/art-walk',
+           '/enhanced',
+           '/artwalk',
+           '/instant',
+         ], handleArtWalkRoute),
          _RouteMatcher.single('/messaging', handleMessagingRoute),
          _RouteMatcher.single('/events', handleEventsRoute),
          _RouteMatcher.single('/ads', handleAdsRoute),

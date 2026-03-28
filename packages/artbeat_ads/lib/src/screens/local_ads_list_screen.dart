@@ -153,9 +153,7 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
 
   Widget _buildSearchResults() {
     return FutureBuilder<List<LocalAd>>(
-      future: context.read<LocalAdService>().searchAds(
-        _searchController.text,
-      ),
+      future: context.read<LocalAdService>().searchAds(_searchController.text),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -182,5 +180,4 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
       },
     );
   }
-
 }
