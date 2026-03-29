@@ -2,7 +2,7 @@ name: artbeat
 description: "Local ARTbeat - A modular Flutter application for artists, galleries, and art lovers."
 publish_to: "none"
 
-version: 2.6.11+111
+version: 2.6.12+112
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
@@ -59,17 +59,17 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   flutter_dotenv: ^6.0.0
   flutter_image_compress: ^2.3.0
-  flutter_local_notifications: ^20.1.0
+  flutter_local_notifications: ^21.0.0
   flutter_markdown_plus: ^1.0.5
   flutter_sound: ^9.2.13
   flutter_svg: ^2.1.0
   geocoding: ^4.0.0
   geolocator: ^14.0.1
-  google_fonts: ^7.1.0
+  google_fonts: ^8.0.2
   google_maps_flutter: ^2.5.3
   google_sign_in: ^7.2.0
   http: ^1.4.0
-  image_cropper: ^11.0.0
+  image_cropper: ^12.1.1
   image_editor_plus: ^1.0.4
   image_picker: ^1.0.0
   in_app_purchase: ^3.2.3

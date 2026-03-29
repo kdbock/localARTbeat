@@ -26,7 +26,7 @@ dependencies:
   timeago: ^3.6.0
   intl: ^0.20.2
   provider: ^6.1.1
-  share_plus: ^11.0.0
+  share_plus: ^12.0.1
   google_maps_flutter: ^2.5.3
   flutter_svg: ^2.0.10+1
   profanity_filter: ^2.0.0
@@ -40,7 +40,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   video_player: ^2.8.2
   audioplayers: ^6.0.0
-  google_fonts: ^7.1.0
+  google_fonts: ^8.0.2
   image_editor_plus: ^1.0.4
   file_picker: ^10.3.10
   easy_localization: ^3.0.7

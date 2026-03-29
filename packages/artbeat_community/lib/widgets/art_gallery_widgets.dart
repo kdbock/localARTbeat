@@ -503,6 +503,8 @@ class _ArtistCardState extends State<ArtistCard> {
   late bool _isFollowing;
   late int _followersCount;
   bool _isLoading = false;
+  final DefensibilityTelemetryService _telemetry =
+      DefensibilityTelemetryService();
 
   @override
   void initState() {
@@ -544,6 +546,16 @@ class _ArtistCardState extends State<ArtistCard> {
       if (widget.onFollow != null) {
         widget.onFollow!(_isFollowing);
       }
+
+      _telemetry.trackEvent(
+        DefensibilityEvent.recommendationSaveOrFollow,
+        surface: 'artist_gallery',
+        creatorId: widget.artist.userId,
+        extra: {
+          'action': _isFollowing ? 'follow' : 'unfollow',
+          'artist_name': widget.artist.displayName,
+        },
+      );
     } catch (e) {
       // If parent callback fails, revert optimistic update
       setState(() {

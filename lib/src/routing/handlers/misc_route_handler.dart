@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../screens/notifications_screen.dart';
 import '../../guards/auth_guard.dart';
 import '../../screens/about_screen.dart';
+import '../../screens/defensibility_events_dashboard.dart';
 import '../../screens/privacy_policy_screen.dart';
 import '../../screens/rewards_screen.dart';
 import '../../screens/terms_of_service_screen.dart';
@@ -126,6 +127,11 @@ class MiscRouteHandler {
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('common_terms_of_service'.tr()),
           child: const TermsOfServiceScreen(),
+        );
+
+      case '/analytics/defensibility':
+        return RouteUtils.createMainLayoutRoute(
+          child: const DefensibilityEventsDashboard(),
         );
 
       default:

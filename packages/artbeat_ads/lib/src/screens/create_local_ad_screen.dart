@@ -41,6 +41,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   late LocalAdService _adService;
   late LocalAdIapService _adIapService;
   final MonetizationFunnelService _funnelService = MonetizationFunnelService();
+  final DefensibilityTelemetryService _telemetry =
+      DefensibilityTelemetryService();
 
   @override
   void initState() {
@@ -142,6 +144,19 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         },
       );
 
+      _telemetry.trackEvent(
+        DefensibilityEvent.subscriptionStartOrRenewal,
+        surface: _selectedPlacement.name,
+        creatorId: userId,
+        extra: {
+          'product_id': purchase.productId,
+          'purchase_id': purchase.purchaseId,
+          'amount': purchase.price,
+          'currency_code': purchase.currencyCode,
+          'source': 'local_ad_checkout',
+        },
+      );
+
       final now = DateTime.now();
       final expiresAt = now.add(Duration(days: _selectedDuration.days));
 
@@ -200,6 +215,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
       if (mounted) {
         if (creationOutcome.adId != null) {
+          _telemetry.trackEvent(
+            DefensibilityEvent.sponsorCampaignConversion,
+            surface: _selectedPlacement.name,
+            creatorId: userId,
+            campaignId: creationOutcome.adId,
+            extra: {
+              'status': 'pending_review',
+              'source': 'local_ad_submission',
+            },
+          );
           await _showSubmissionSuccessDialog();
         } else {
           await _showPurchaseRecoveryDialog(creationOutcome.recoveryId);

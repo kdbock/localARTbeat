@@ -116,6 +116,8 @@ export 'src/services/ai_service.dart' show AIService;
 export 'src/services/ai_features_service.dart'
     show AIFeaturesService, AIResult, AIFeatureAccess;
 export 'src/services/usage_tracking_service.dart' show UsageTrackingService;
+export 'src/services/defensibility_telemetry_service.dart'
+    show DefensibilityEvent, DefensibilityTelemetryService;
 export 'src/services/store_preview_read_service.dart'
     show StorePreviewReadService;
 export 'src/services/user_maintenance_service.dart'

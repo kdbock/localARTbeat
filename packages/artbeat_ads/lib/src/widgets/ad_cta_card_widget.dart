@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -25,6 +26,9 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
   LocalAd? _ad;
   bool _isLoading = true;
   bool _isVisible = true;
+  bool _hasTrackedImpression = false;
+  final DefensibilityTelemetryService _telemetry =
+      DefensibilityTelemetryService();
 
   @override
   void initState() {
@@ -37,10 +41,12 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
       final adService = context.read<LocalAdService>();
       final ads = await adService.getActiveAdsByZone(widget.zone);
       if (ads.isNotEmpty && mounted) {
+        final loadedAd = ads.first;
         setState(() {
-          _ad = ads.first;
+          _ad = loadedAd;
           _isLoading = false;
         });
+        _trackImpression(loadedAd);
       } else if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -52,9 +58,31 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
   }
 
   void _launchUrl(String url) async {
+    final ad = _ad;
+    if (ad != null) {
+      _telemetry.trackEvent(
+        DefensibilityEvent.sponsorCampaignClick,
+        surface: widget.zone.name,
+        campaignId: ad.id,
+        creatorId: ad.userId,
+        extra: {'website_url': url},
+      );
+    }
+
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     }
+  }
+
+  void _trackImpression(LocalAd ad) {
+    if (_hasTrackedImpression) return;
+    _hasTrackedImpression = true;
+    _telemetry.trackEvent(
+      DefensibilityEvent.sponsorCampaignView,
+      surface: widget.zone.name,
+      campaignId: ad.id,
+      creatorId: ad.userId,
+    );
   }
 
   @override

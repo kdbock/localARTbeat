@@ -9,6 +9,8 @@ class NavigationService {
   static final NavigationService _instance = NavigationService._internal();
 
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  final DefensibilityTelemetryService _defensibilityTelemetry =
+      DefensibilityTelemetryService();
 
   /// Safe navigation with error handling and analytics
   Future<bool> navigateTo(
@@ -54,6 +56,8 @@ class NavigationService {
         parameters: {'route_name': routeName},
       );
 
+      await _trackDefensibilityRouteSignals(routeName);
+
       return true;
     } on Exception catch (error, stackTrace) {
       // Log navigation error
@@ -71,6 +75,42 @@ class NavigationService {
       AppLogger.info('Stack trace: $stackTrace');
 
       return false;
+    }
+  }
+
+  Future<void> _trackDefensibilityRouteSignals(String routeName) async {
+    final surface = _surfaceForRoute(routeName);
+    if (surface == null) return;
+
+    await _defensibilityTelemetry.trackEvent(
+      DefensibilityEvent.feedItemOpen,
+      surface: surface,
+      extra: {'route_name': routeName},
+    );
+
+    if (routeName == '/dashboard' || routeName == '/artist/dashboard') {
+      await _defensibilityTelemetry.trackEvent(
+        DefensibilityEvent.activationMilestoneReached,
+        surface: surface,
+        extra: {'milestone': 'dashboard_reached'},
+      );
+    }
+  }
+
+  String? _surfaceForRoute(String routeName) {
+    switch (routeName) {
+      case '/dashboard':
+        return 'dashboard';
+      case '/community/dashboard':
+        return 'community_feed';
+      case '/artist/dashboard':
+        return 'artist_dashboard';
+      case '/artwork/featured':
+        return 'artwork_featured';
+      case '/events':
+        return 'events';
+      default:
+        return null;
     }
   }
 

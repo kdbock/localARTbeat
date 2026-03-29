@@ -9,6 +9,8 @@ class EnhancedArtworkCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showEngagement;
   final bool isCompact;
+  static final DefensibilityTelemetryService _telemetry =
+      DefensibilityTelemetryService();
 
   const EnhancedArtworkCard({
     super.key,
@@ -26,7 +28,15 @@ class EnhancedArtworkCard extends StatelessWidget {
         vertical: isCompact ? 4 : 8,
       ),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          _telemetry.trackEvent(
+            DefensibilityEvent.recommendationClick,
+            surface: 'community_feed',
+            contentId: artwork.id,
+            extra: {'artist_name': artwork.artistName},
+          );
+          onTap?.call();
+        },
         child: GlassCard(
           padding: EdgeInsets.zero,
           child: Column(
@@ -308,6 +318,12 @@ class EnhancedArtworkCard extends StatelessWidget {
                 icon: Icons.bookmark_border,
                 title: 'save_to_collection'.tr(),
                 onTap: () {
+                  _telemetry.trackEvent(
+                    DefensibilityEvent.recommendationSaveOrFollow,
+                    surface: 'community_feed',
+                    contentId: artwork.id,
+                    extra: {'action': 'save_to_collection'},
+                  );
                   Navigator.pop(context);
                   // Handle save
                 },
