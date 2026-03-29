@@ -54,6 +54,18 @@ flutter test test/localization_key_parity_test.dart
 
 When packages are touched, also run targeted package tests.
 
+## Integration Test Policy (CI)
+
+- preferred state: maintain real integration tests in `integration_test/`
+  (or `test/integration/`) and run them on CI
+- current CI behavior in `.github/workflows/tests.yml` is intentional:
+  - if integration tests exist in either path, CI boots the Android emulator
+    and executes them
+  - if no integration test files are present, CI skips emulator startup and
+    logs an explicit skip message instead of failing
+- when adding integration tests, keep them under one of those two paths so CI
+  auto-detects them without workflow edits
+
 ## Manual QA
 
 Always validate the changed user flows, not just compile success.
