@@ -176,8 +176,9 @@ void main() {
         await FirebaseTestSetup.initializeFirebaseForTesting();
 
         await tester.pumpWidget(
-          const TestAuthScreenWrapper(
-            child: CreateProfileScreen(userId: 'test-user-id'),
+          AuthTestHelpers.createTestProfileCreateScreen(
+            mockAuth: FirebaseTestSetup.mockAuth,
+            mockFirestore: FirebaseTestSetup.fakeFirestore,
           ),
         );
 

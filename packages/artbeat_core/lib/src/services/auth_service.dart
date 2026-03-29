@@ -6,8 +6,11 @@ class AuthService {
   static AuthService? _instance;
   FirebaseAuth? _authInstance;
 
-  factory AuthService() {
+  factory AuthService({FirebaseAuth? auth}) {
     _instance ??= AuthService._internal();
+    if (auth != null) {
+      _instance!._authInstance = auth;
+    }
     return _instance!;
   }
 
