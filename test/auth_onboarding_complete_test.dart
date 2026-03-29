@@ -133,7 +133,9 @@ void main() {
       });
 
       testWidgets('Profile creation screen displays correctly', (tester) async {
-        await tester.pumpWidget(AuthTestHelpers.createTestProfileCreateScreen());
+        await tester.pumpWidget(
+          AuthTestHelpers.createTestProfileCreateScreen(),
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
