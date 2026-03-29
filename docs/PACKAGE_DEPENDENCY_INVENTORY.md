@@ -37,6 +37,7 @@ Depends on:
 Depends on:
 
 - `artbeat_core`
+- `artbeat_artwork`
 - `artbeat_events`
 - `artbeat_community`
 
