@@ -106,13 +106,32 @@ jobs:
       - name: Check formatting
         run: dart format --set-exit-if-changed .
 
+      - name: Detect integration tests
+        id: detect_integration_tests
+        run: |
+          if [ -d "integration_test" ] && [ -n "$(find integration_test -name '*_test.dart' -type f)" ]; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+            echo "test_path=integration_test" >> "$GITHUB_OUTPUT"
+          elif [ -d "test/integration" ] && [ -n "$(find test/integration -name '*_test.dart' -type f)" ]; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+            echo "test_path=test/integration" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: No integration tests found
+        if: steps.detect_integration_tests.outputs.has_tests != 'true'
+        run: echo "No integration tests found in integration_test/ or test/integration/. Skipping."
+
       - name: Enable KVM
+        if: steps.detect_integration_tests.outputs.has_tests == 'true'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
       - name: Start Emulator and Run Integration Tests
+        if: steps.detect_integration_tests.outputs.has_tests == 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -120,4 +139,4 @@ jobs:
           target: google_apis
           emulator-options: -no-snapshot -no-window -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: flutter test integration_test -d emulator-5554
+          script: flutter test ${{ steps.detect_integration_tests.outputs.test_path }} -d emulator-5554
