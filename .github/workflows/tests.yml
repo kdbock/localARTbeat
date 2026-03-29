@@ -117,7 +117,7 @@ jobs:
         with:
           api-level: 29
           arch: x86_64
-          profile: Nexus6
+          target: google_apis
           emulator-options: -no-snapshot -no-window -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: flutter test integration_test -d emulator-5554
