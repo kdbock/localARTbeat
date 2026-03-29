@@ -93,11 +93,11 @@ jobs:
       - name: Verify Dart SDK version
         run: dart --version
 
-      - name: Check formatting
-        run: dart format --set-exit-if-changed .
-
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
 
       - name: Start Emulator and Run Integration Tests
         uses: reactivecircus/android-emulator-runner@v2
