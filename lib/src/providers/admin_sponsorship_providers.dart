@@ -38,7 +38,10 @@ List<SingleChildWidget> createAdminSponsorshipProviders() => [
     create: (_) => UnifiedAdminService(),
     lazy: true,
   ),
-  Provider<FinancialService>(create: (_) => FinancialService(), lazy: true),
+  ChangeNotifierProvider<FinancialService>(
+    create: (_) => FinancialService(),
+    lazy: true,
+  ),
   Provider<PaymentAuditService>(
     create: (_) => PaymentAuditService(),
     lazy: true,

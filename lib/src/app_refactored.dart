@@ -100,9 +100,8 @@ class MyApp extends StatelessWidget {
   /// Creates all providers for the app
   List<SingleChildWidget> _createProviders() => [
     // Core providers
-    ChangeNotifierProvider<core.UserService>(
-      create: (_) => core.UserService(),
-      lazy: true,
+    ChangeNotifierProvider<core.UserService>.value(
+      value: core.UserService()..initialize(),
     ),
     Provider<AuthService>(create: (_) => AuthService(), lazy: true),
     ChangeNotifierProvider<core.ConnectivityService>(

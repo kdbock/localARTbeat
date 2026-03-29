@@ -108,6 +108,16 @@ class EnvLoader {
         _envVars['APPLE_TEAM_ID'] = appleTeamIdDefine;
       }
 
+      const firebaseAppCheckWebRecaptchaSiteKeyDefine = String.fromEnvironment(
+        'FIREBASE_APP_CHECK_WEB_RECAPTCHA_SITE_KEY',
+      );
+      if (firebaseAppCheckWebRecaptchaSiteKeyDefine.isNotEmpty) {
+        _envVars['FIREBASE_APP_CHECK_WEB_RECAPTCHA_SITE_KEY'] =
+            firebaseAppCheckWebRecaptchaSiteKeyDefine;
+      }
+
+      _deriveCloudFunctionsBaseUrlIfMissing();
+
       AppLogger.info(
         '✅ Environment variables loaded successfully (${_envVars.length} variables)',
       );
@@ -146,6 +156,20 @@ class EnvLoader {
   String get cloudFunctionsBaseUrl {
     final configuredBaseUrl = getRequired('FIREBASE_FUNCTIONS_BASE_URL').trim();
     return configuredBaseUrl.replaceFirst(RegExp(r'/+$'), '');
+  }
+
+  void _deriveCloudFunctionsBaseUrlIfMissing() {
+    if (has('FIREBASE_FUNCTIONS_BASE_URL')) return;
+
+    final region = get('FIREBASE_REGION').trim();
+    final projectId = get('FIREBASE_PROJECT_ID').trim();
+    if (region.isEmpty || projectId.isEmpty) return;
+
+    _envVars['FIREBASE_FUNCTIONS_BASE_URL'] =
+        'https://$region-$projectId.cloudfunctions.net';
+    AppLogger.info(
+      '📝 Derived FIREBASE_FUNCTIONS_BASE_URL from region/project configuration',
+    );
   }
 
   /// Get all environment variables

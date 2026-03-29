@@ -371,9 +371,11 @@ artbeat/
 ### **Prerequisites**
 
 ```bash
-# Flutter SDK
-flutter --version
-# Flutter 3.38.7+ required
+# FVM-managed Flutter SDK
+dart pub global activate fvm
+fvm install
+fvm flutter --version
+# Flutter 3.38.7 pinned in .fvmrc
 
 # Development tools
 git --version
@@ -391,15 +393,18 @@ git --version
 git clone [repository-url]
 cd artbeat
 
+# Install pinned Flutter SDK
+fvm install
+
 # Install dependencies
-flutter pub get
+fvm flutter pub get
 
 # Setup environment
 cp .env.example .env
 # Configure Firebase and API keys
 
 # Run on device/simulator
-flutter run
+fvm flutter run
 ```
 
 ### **Environment Configuration**

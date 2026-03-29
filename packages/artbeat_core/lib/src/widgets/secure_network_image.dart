@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/auth_service.dart' as core_auth;
+import '../firebase/secure_firebase_config.dart';
 import '../utils/logger.dart';
 import '../utils/image_url_validator.dart';
 import '../services/image_management_service.dart';
@@ -116,15 +117,21 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
       }
 
       // Refresh App Check token
-      try {
-        await FirebaseAppCheck.instance.getToken(true); // Force refresh
-        if (kDebugMode) {
-          AppLogger.info('🔄 Refreshed App Check token for image retry');
+      if (!SecureFirebaseConfig.shouldBypassAppCheckTokenRefresh) {
+        try {
+          await FirebaseAppCheck.instance.getToken(true); // Force refresh
+          if (kDebugMode) {
+            AppLogger.info('🔄 Refreshed App Check token for image retry');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            AppLogger.warning('⚠️ Could not refresh App Check token: $e');
+          }
         }
-      } catch (e) {
-        if (kDebugMode) {
-          AppLogger.warning('⚠️ Could not refresh App Check token: $e');
-        }
+      } else if (kDebugMode) {
+        AppLogger.info(
+          '🛡️ Skipping App Check token refresh during image retry on web debug',
+        );
       }
 
       // Add a small delay to allow tokens to propagate

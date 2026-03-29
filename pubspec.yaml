@@ -2,7 +2,7 @@ name: artbeat
 description: "Local ARTbeat - A modular Flutter application for artists, galleries, and art lovers."
 publish_to: "none"
 
-version: 2.6.12+112
+version: 2.6.12+113
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
@@ -135,4 +135,30 @@ dev_dependencies:
 
 dependency_overrides:
   archive: ^4.0.0
+  audioplayers_android:
+    path: third_party/pub_overrides/audioplayers_android
+  camera_android_camerax:
+    path: third_party/pub_overrides/camera_android_camerax
+  device_info_plus:
+    path: third_party/pub_overrides/device_info_plus
+  file_picker:
+    path: third_party/pub_overrides/file_picker
+  flutter_image_compress_common:
+    path: third_party/pub_overrides/flutter_image_compress_common
+  google_sign_in_android:
+    path: third_party/pub_overrides/google_sign_in_android
+  package_info_plus:
+    path: third_party/pub_overrides/package_info_plus
+  pedometer:
+    path: third_party/pub_overrides/pedometer
   screenshot: ^3.0.0
+  share_plus:
+    path: third_party/pub_overrides/share_plus
+  shared_preferences_android:
+    path: third_party/pub_overrides/shared_preferences_android
+  sign_in_with_apple:
+    path: third_party/pub_overrides/sign_in_with_apple
+  stripe_android:
+    path: third_party/pub_overrides/stripe_android
+  video_player_android:
+    path: third_party/pub_overrides/video_player_android

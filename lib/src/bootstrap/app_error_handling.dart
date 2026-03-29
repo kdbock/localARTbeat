@@ -3,18 +3,31 @@ import 'package:flutter/foundation.dart';
 
 bool isExpectedMissingImageError(Object error) {
   final errorString = error.toString();
-  return errorString.contains('statusCode: 404') &&
-      (errorString.contains('firebasestorage.googleapis.com') ||
-          errorString.contains('firebase') ||
-          errorString.contains('artwork') ||
-          errorString.contains('HttpException'));
+  final isImageUrlError =
+      errorString.contains('firebasestorage.googleapis.com') ||
+      errorString.contains('firebase') ||
+      errorString.contains('artwork') ||
+      errorString.contains('NetworkImage') ||
+      errorString.contains('ImageCodecException');
+
+  if (!isImageUrlError) {
+    return false;
+  }
+
+  return errorString.contains('statusCode: 404') ||
+      errorString.contains('statusCode: 0') ||
+      errorString.contains('statusCode: 403') ||
+      errorString.contains('HttpException') ||
+      errorString.contains('SocketException') ||
+      errorString.contains('HandshakeException') ||
+      errorString.contains('Connection closed before full header was received');
 }
 
 void logExpectedMissingImageError(Object error) {
   if (!kDebugMode) {
     return;
   }
-  debugPrint('🖼️ Missing image (404): ${error.toString().split(',').first}');
+  debugPrint('🖼️ Expected image load failure: ${error.toString().split(',').first}');
 }
 
 void installGlobalErrorHandlers() {

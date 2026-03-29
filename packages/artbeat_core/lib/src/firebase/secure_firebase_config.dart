@@ -20,6 +20,7 @@ class SecureFirebaseConfig {
     required String teamId,
     bool forceDebug = false,
     String? debugToken, // optional: set a stable debug token if you want
+    String? webRecaptchaSiteKey,
   }) async {
     _teamId = teamId;
 
@@ -30,6 +31,19 @@ class SecureFirebaseConfig {
     }
 
     final bool useDebugProvider = kDebugMode || forceDebug;
+    final normalizedWebRecaptchaSiteKey = webRecaptchaSiteKey?.trim();
+
+    if (kIsWeb &&
+        useDebugProvider &&
+        (normalizedWebRecaptchaSiteKey == null ||
+            normalizedWebRecaptchaSiteKey.isEmpty)) {
+      _lastProviderMode = 'web-debug-skipped';
+      debugPrint(
+        '🛡️ Skipping App Check on web debug build: no FIREBASE_APP_CHECK_WEB_RECAPTCHA_SITE_KEY configured.',
+      );
+      _appCheckInitialized = true;
+      return;
+    }
 
     try {
       debugPrint('🛡️ ============================================');
@@ -57,9 +71,9 @@ class SecureFirebaseConfig {
         providerAndroid: useDebugProvider
             ? AndroidDebugProvider(debugToken: debugToken)
             : const AndroidPlayIntegrityProvider(),
-        providerWeb: ReCaptchaV3Provider(
-          '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', // Test key
-        ),
+        providerWeb: kIsWeb
+            ? ReCaptchaV3Provider(normalizedWebRecaptchaSiteKey!)
+            : null,
       );
 
       await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
@@ -150,6 +164,9 @@ class SecureFirebaseConfig {
     'teamId': _teamId,
     'providerMode': _lastProviderMode,
   };
+
+  static bool get shouldBypassAppCheckTokenRefresh =>
+      kIsWeb && _lastProviderMode == 'web-debug-skipped';
 
   static Future<bool> testStorageAccess() async {
     try {

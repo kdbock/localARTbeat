@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
+import '../firebase/secure_firebase_config.dart';
 import '../utils/logger.dart';
 
 /// Service to handle Firebase Storage authentication and token refresh
@@ -37,16 +38,22 @@ class FirebaseStorageAuthService {
       }
 
       // Refresh App Check token
-      try {
-        await FirebaseAppCheck.instance.getToken(true); // Force refresh
-        appCheckRefreshed = true;
-        if (kDebugMode) {
-          AppLogger.info('✅ App Check token refreshed successfully');
+      if (!SecureFirebaseConfig.shouldBypassAppCheckTokenRefresh) {
+        try {
+          await FirebaseAppCheck.instance.getToken(true); // Force refresh
+          appCheckRefreshed = true;
+          if (kDebugMode) {
+            AppLogger.info('✅ App Check token refreshed successfully');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            AppLogger.error('❌ Failed to refresh App Check token: $e');
+          }
         }
-      } catch (e) {
-        if (kDebugMode) {
-          AppLogger.error('❌ Failed to refresh App Check token: $e');
-        }
+      } else if (kDebugMode) {
+        AppLogger.info(
+          '🛡️ Skipping App Check token refresh for web debug session',
+        );
       }
 
       return authRefreshed || appCheckRefreshed;

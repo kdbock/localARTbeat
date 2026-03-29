@@ -113,9 +113,12 @@ Future<void> initializeAppCheck() async {
   debugPrint('🛡️ About to call configureAppCheck...');
   try {
     final debugToken = ConfigService.instance.firebaseAppCheckDebugToken;
+    final webRecaptchaSiteKey =
+        ConfigService.instance.firebaseAppCheckWebRecaptchaSiteKey;
     await SecureFirebaseConfig.configureAppCheck(
       teamId: 'H49R32NPY6',
       debugToken: debugToken,
+      webRecaptchaSiteKey: webRecaptchaSiteKey,
     ).timeout(const Duration(seconds: 8));
     debugPrint('🛡️ ✅ configureAppCheck completed successfully');
   } on Exception catch (e) {

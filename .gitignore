@@ -176,3 +176,6 @@ packages/*/.git/
 /flutter_output.log
 /pglite-debug.log
 /test_results.log
+
+# FVM Version Cache
+.fvm/

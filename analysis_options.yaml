@@ -11,6 +11,7 @@ analyzer:
   exclude:
     - "local_packages/**"
     - "build/**"
+    - "third_party/pub_overrides/**"
     - "node_modules/**"
     - ".venv*/**"
     - "**/node_modules/**"

@@ -184,16 +184,15 @@ class DashboardViewModel extends ChangeNotifier {
   /// Safely notify listeners, catching disposal errors
   void _safeNotifyListeners() {
     if (_isDisposed) {
-      debugPrint('⚠️ Attempted to notify listeners on disposed ViewModel');
       return;
     }
     try {
       notifyListeners();
     } catch (e) {
-      // Ignore errors if widget is disposed
-      AppLogger.warning(
-        '⚠️ Attempted to notify listeners on disposed ViewModel',
-      );
+      if (_isDisposed) {
+        return;
+      }
+      AppLogger.warning('Error notifying dashboard listeners: $e');
     }
   }
 

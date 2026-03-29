@@ -83,4 +83,8 @@ class ConfigService {
   /// Get Firebase App Check debug token securely
   String? get firebaseAppCheckDebugToken =>
       get('FIREBASE_APP_CHECK_DEBUG_TOKEN');
+
+  /// Get Firebase App Check web reCAPTCHA site key securely
+  String? get firebaseAppCheckWebRecaptchaSiteKey =>
+      get('FIREBASE_APP_CHECK_WEB_RECAPTCHA_SITE_KEY');
 }

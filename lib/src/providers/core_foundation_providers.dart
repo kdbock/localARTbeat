@@ -5,9 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 List<SingleChildWidget> createCoreFoundationProviders() => [
-  ChangeNotifierProvider<core.UserService>(
-    create: (_) => core.UserService()..initialize(),
-    lazy: false,
+  ChangeNotifierProvider<core.UserService>.value(
+    value: core.UserService()..initialize(),
   ),
   ChangeNotifierProvider<core.ChapterPartnerProvider>(
     create: (_) => core.ChapterPartnerProvider()..initialize(),
@@ -86,9 +85,8 @@ List<SingleChildWidget> createCoreFoundationProviders() => [
     create: (_) => core.PublicArtReadService()..initialize(),
     lazy: true,
   ),
-  ChangeNotifierProvider<core.SubscriptionService>(
-    create: (_) => core.SubscriptionService()..initialize(),
-    lazy: false,
+  ChangeNotifierProvider<core.SubscriptionService>.value(
+    value: core.SubscriptionService()..initialize(),
   ),
   Provider<core.InAppSubscriptionService>(
     create: (_) => core.InAppSubscriptionService()..initialize(),
