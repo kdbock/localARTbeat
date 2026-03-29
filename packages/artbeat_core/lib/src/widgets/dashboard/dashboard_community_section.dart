@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -17,8 +18,7 @@ class DashboardCommunitySection extends StatefulWidget {
 }
 
 class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
-  final CommunityPostReadService _communityPostReadService =
-      CommunityPostReadService();
+  late final CommunityPostReadService _communityPostReadService;
   List<CommunityPostModel> _posts = [];
   bool _isLoading = true;
   String? _error;
@@ -26,6 +26,7 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
   @override
   void initState() {
     super.initState();
+    _communityPostReadService = context.read<CommunityPostReadService>();
     _loadPosts();
   }
 

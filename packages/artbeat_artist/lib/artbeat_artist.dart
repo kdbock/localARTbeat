@@ -41,7 +41,10 @@ export 'src/screens/earnings/payout_accounts_screen.dart';
 export 'src/services/visibility_service.dart';
 export 'src/services/artist_profile_service.dart';
 export 'src/services/subscription_service.dart';
+export 'src/services/artist_auction_read_service.dart';
 export 'src/services/gallery_invitation_service.dart';
+export 'src/services/gallery_hub_read_service.dart';
+export 'src/services/artist_gallery_discovery_read_service.dart';
 export 'src/services/event_service_adapter.dart';
 export 'src/services/earnings_service.dart';
 export 'src/services/integration_service.dart'; // NEW: Cross-package integration

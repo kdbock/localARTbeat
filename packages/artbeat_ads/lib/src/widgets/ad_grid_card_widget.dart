@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import '../services/ad_report_service.dart';
@@ -19,8 +20,6 @@ class AdGridCardWidget extends StatefulWidget {
 }
 
 class _AdGridCardWidgetState extends State<AdGridCardWidget> {
-  final LocalAdService _adService = LocalAdService();
-  final AdReportService _reportService = AdReportService();
   LocalAd? _ad;
   bool _isLoading = true;
 
@@ -32,7 +31,8 @@ class _AdGridCardWidgetState extends State<AdGridCardWidget> {
 
   void _loadAd() async {
     try {
-      final ads = await _adService.getActiveAdsByZone(widget.zone);
+      final adService = context.read<LocalAdService>();
+      final ads = await adService.getActiveAdsByZone(widget.zone);
       // Filter to only show ads that should be visible to users
       final visibleAds = ads.where((ad) => ad.isVisibleToUsers).toList();
 
@@ -58,7 +58,7 @@ class _AdGridCardWidgetState extends State<AdGridCardWidget> {
     String? details,
   ) async {
     try {
-      await _reportService.reportAd(
+      await context.read<AdReportService>().reportAd(
         adId: adId,
         reason: reason,
         additionalDetails: details,

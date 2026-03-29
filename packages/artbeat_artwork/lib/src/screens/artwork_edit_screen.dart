@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 
@@ -19,7 +20,7 @@ class ArtworkEditScreen extends StatefulWidget {
 
 class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _artworkService = ArtworkService();
+  late final ArtworkService _artworkService;
 
   // Controllers
   final _titleController = TextEditingController();
@@ -80,6 +81,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
     _loadArtworkData();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 import '../widgets/event_card.dart';
@@ -33,7 +34,6 @@ class EventsListScreen extends StatefulWidget {
 }
 
 class _EventsListScreenState extends State<EventsListScreen> {
-  final EventService _eventService = EventService();
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'All';
   List<ArtbeatEvent> _allEvents = [];
@@ -68,7 +68,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
         _error = null;
       });
 
-      final events = await _eventService.getEvents(
+      final events = await context.read<EventService>().getEvents(
         artistId: widget.artistId,
         tags: widget.tags,
         onlyMine: widget.mode == EventListMode.myEvents,

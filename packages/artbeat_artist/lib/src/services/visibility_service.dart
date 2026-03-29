@@ -21,6 +21,43 @@ class VisibilityService {
     return _auth.currentUser?.uid;
   }
 
+  Map<String, int> _countByDay(
+    Iterable<QueryDocumentSnapshot> docs,
+    String timestampField,
+  ) {
+    final values = <String, int>{};
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final timestamp = data[timestampField];
+      if (timestamp is! Timestamp) {
+        continue;
+      }
+
+      final value = timestamp.toDate();
+      final key =
+          '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
+      values[key] = (values[key] ?? 0) + 1;
+    }
+    return values;
+  }
+
+  List<Map<String, dynamic>> _toTimeline(Map<String, int> counts) {
+    final sortedKeys = counts.keys.toList()..sort();
+    return sortedKeys
+        .map((key) => <String, dynamic>{'label': key, 'value': counts[key]!})
+        .toList();
+  }
+
+  String? _firstString(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return null;
+  }
+
   /// Track an artwork view
   Future<void> trackArtworkView({
     required String artworkId,
@@ -935,13 +972,85 @@ class VisibilityService {
           .where('userId', isEqualTo: userId)
           .get();
 
+      final artworkViewsByArtwork = <String, int>{};
+      final locationBreakdown = <String, int>{};
+      final referralSources = <String, int>{};
+
+      for (final doc in artworkViewsSnapshot.docs) {
+        final data = doc.data();
+        final artworkId = data['artworkId'] as String?;
+        if (artworkId != null && artworkId.isNotEmpty) {
+          artworkViewsByArtwork[artworkId] =
+              (artworkViewsByArtwork[artworkId] ?? 0) + 1;
+        }
+
+        final location = _firstString(data, <String>[
+          'viewerLocation',
+          'location',
+          'city',
+          'country',
+        ]);
+        if (location != null) {
+          locationBreakdown[location] = (locationBreakdown[location] ?? 0) + 1;
+        }
+
+        final referral = _firstString(data, <String>[
+          'referralSource',
+          'referrer',
+          'source',
+        ]);
+        if (referral != null) {
+          referralSources[referral] = (referralSources[referral] ?? 0) + 1;
+        }
+      }
+
+      for (final doc in profileViewsSnapshot.docs) {
+        final data = doc.data();
+        final location = _firstString(data, <String>[
+          'viewerLocation',
+          'location',
+          'city',
+          'country',
+        ]);
+        if (location != null) {
+          locationBreakdown[location] = (locationBreakdown[location] ?? 0) + 1;
+        }
+      }
+
+      final visitorsByDay = <String, int>{};
+      for (final entry in _countByDay(
+        artworkViewsSnapshot.docs,
+        'viewedAt',
+      ).entries) {
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
+      }
+      for (final entry in _countByDay(
+        profileViewsSnapshot.docs,
+        'viewedAt',
+      ).entries) {
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
+      }
+
+      final topArtworkIds = artworkViewsByArtwork.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
       return {
         'totalArtworkViews': artworkViewsSnapshot.docs.length,
         'totalProfileViews': profileViewsSnapshot.docs.length,
         'totalArtwork': artworkSnapshot.docs.length,
+        'artworkViewsCount': artworkViewsSnapshot.docs.length,
+        'profileViewsCount': profileViewsSnapshot.docs.length,
+        'favorites': 0,
+        'leadClicks': 0,
         'averageViewsPerArtwork': artworkSnapshot.docs.isEmpty
             ? 0.0
             : artworkViewsSnapshot.docs.length / artworkSnapshot.docs.length,
+        'visitorsOverTime': _toTimeline(visitorsByDay),
+        'locationBreakdown': locationBreakdown,
+        'referralSources': referralSources,
+        'topArtworks': topArtworkIds.take(5).map((entry) => entry.key).toList(),
         'artworkViews': artworkViewsSnapshot.docs
             .map((doc) => doc.data())
             .toList(),
@@ -1068,10 +1177,31 @@ class VisibilityService {
           .where('userId', isEqualTo: userId)
           .get();
 
+      final visitorsByDay = <String, int>{};
+      for (final entry in _countByDay(
+        artworkViewsSnapshot.docs,
+        'viewedAt',
+      ).entries) {
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
+      }
+      for (final entry in _countByDay(
+        profileViewsSnapshot.docs,
+        'viewedAt',
+      ).entries) {
+        visitorsByDay[entry.key] =
+            (visitorsByDay[entry.key] ?? 0) + entry.value;
+      }
+
       return {
         'totalArtworkViews': artworkViewsSnapshot.docs.length,
         'totalProfileViews': profileViewsSnapshot.docs.length,
         'totalArtwork': artworkSnapshot.docs.length,
+        'artworkViewsCount': artworkViewsSnapshot.docs.length,
+        'profileViewsCount': profileViewsSnapshot.docs.length,
+        'favorites': 0,
+        'leadClicks': 0,
+        'visitorsOverTime': _toTimeline(visitorsByDay),
       };
     } catch (e) {
       logger.e('Error getting basic artist analytics data: $e');

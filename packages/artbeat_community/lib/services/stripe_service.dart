@@ -53,9 +53,6 @@ class StripeService {
         throw Exception(result.error ?? 'Failed to process deposit payment');
       }
 
-      // Update commission status locally
-      await _updateCommissionStatus(commissionId, 'in_progress');
-
       return {'success': true, 'paymentIntentId': result.paymentIntentId};
     } catch (e) {
       AppLogger.error('Error processing commission deposit: $e');
@@ -142,9 +139,6 @@ class StripeService {
         throw Exception(result.error ?? 'Failed to process final payment');
       }
 
-      // Update commission status locally
-      await _updateCommissionStatus(commissionId, 'completed');
-
       return {'success': true, 'paymentIntentId': result.paymentIntentId};
     } catch (e) {
       AppLogger.error('Error processing commission final payment: $e');
@@ -199,24 +193,6 @@ class StripeService {
     } catch (e) {
       AppLogger.error('Error confirming commission payment: $e');
       rethrow;
-    }
-  }
-
-  /// Helper method to update commission status
-  Future<void> _updateCommissionStatus(
-    String commissionId,
-    String status,
-  ) async {
-    try {
-      await _firestore
-          .collection('direct_commissions')
-          .doc(commissionId)
-          .update({
-            'status': status,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-    } catch (e) {
-      AppLogger.error('Error updating commission status: $e');
     }
   }
 

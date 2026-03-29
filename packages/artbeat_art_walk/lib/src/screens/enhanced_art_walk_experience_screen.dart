@@ -5,10 +5,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' show sin, cos, sqrt, atan2, pi;
 
 /// Enhanced art walk experience screen with turn-by-turn navigation
@@ -47,6 +46,8 @@ class _EnhancedArtWalkExperienceScreenState
   late final ArtWalkProgressService _progressService;
   late final AudioNavigationService _audioService;
   late final SocialService _socialService;
+  late final core_auth.AuthService _authService;
+  late final ArtWalkUserStatsService _userStatsService;
 
   // New services for enhanced UX
   SmartOnboardingService? _onboardingService;
@@ -70,6 +71,8 @@ class _EnhancedArtWalkExperienceScreenState
     _progressService = context.read<ArtWalkProgressService>();
     _audioService = context.read<AudioNavigationService>();
     _socialService = context.read<SocialService>();
+    _authService = context.read<core_auth.AuthService>();
+    _userStatsService = context.read<ArtWalkUserStatsService>();
     _navigationService = context.read<ArtWalkNavigationService>();
     // Ensure default art walk service is picked up when widget override is absent
     _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
@@ -881,7 +884,7 @@ class _EnhancedArtWalkExperienceScreenState
       }
 
       // Get new achievements
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final userId = _authService.currentUser?.uid;
       List<AchievementModel> newAchievements = [];
       if (userId != null) {
         newAchievements = await achievementService.checkForNewAchievements(
@@ -956,7 +959,7 @@ class _EnhancedArtWalkExperienceScreenState
 
       // Post walk completed activity to social feed
       try {
-        final user = FirebaseAuth.instance.currentUser;
+        final user = _authService.currentUser;
         if (user != null) {
           await _socialService.postActivity(
             userId: user.uid,
@@ -1035,41 +1038,12 @@ class _EnhancedArtWalkExperienceScreenState
     required Duration duration,
     required int artPieces,
   }) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return {};
-
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      final data = userDoc.data() ?? {};
-      final stats = data['artWalkStats'] as Map<String, dynamic>? ?? {};
-
-      final bests = <String, dynamic>{};
-
-      // Check for personal bests
-      if (distance > ((stats['longestWalk'] as num?) ?? 0)) {
-        bests['longestWalk'] = distance;
-      }
-      if (artPieces > ((stats['mostArtInOneWalk'] as num?) ?? 0)) {
-        bests['mostArtInOneWalk'] = artPieces;
-      }
-      if (duration.inMinutes < ((stats['fastestWalk'] as num?) ?? 999999)) {
-        bests['fastestWalk'] = duration.inMinutes;
-      }
-
-      // Update Firestore if any bests
-      if (bests.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('users').doc(userId).update(
-          {
-            'artWalkStats': {...stats, ...bests},
-          },
-        );
-      }
-
-      return bests;
+      return await _userStatsService.updateCurrentUserPersonalBests(
+        distance: distance,
+        duration: duration,
+        artPieces: artPieces,
+      );
     } catch (e) {
       debugPrint('Error calculating personal bests: $e');
       return {};
@@ -1111,18 +1085,8 @@ class _EnhancedArtWalkExperienceScreenState
 
   /// Get total walks completed by user
   Future<int> _getTotalWalksCompleted() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return 0;
-
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      final data = userDoc.data() ?? {};
-      final stats = data['stats'] as Map<String, dynamic>? ?? {};
-      return stats['walksCompleted'] as int? ?? 0;
+      return await _userStatsService.getCurrentUserTotalWalksCompleted();
     } catch (e) {
       debugPrint('Error getting total walks completed: $e');
       return 0;
@@ -1131,18 +1095,8 @@ class _EnhancedArtWalkExperienceScreenState
 
   /// Get total distance walked by user
   Future<double> _getTotalDistance() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return 0.0;
-
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      final data = userDoc.data() ?? {};
-      final stats = data['artWalkStats'] as Map<String, dynamic>? ?? {};
-      return (stats['totalDistance'] as num?)?.toDouble() ?? 0.0;
+      return await _userStatsService.getCurrentUserTotalDistance();
     } catch (e) {
       debugPrint('Error getting total distance: $e');
       return 0.0;

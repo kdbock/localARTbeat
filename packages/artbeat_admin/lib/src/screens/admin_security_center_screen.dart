@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:provider/provider.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/audit_trail_service.dart';
 import '../services/security_service.dart';
@@ -17,8 +18,8 @@ class AdminSecurityCenterScreen extends StatefulWidget {
 }
 
 class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
-  final SecurityService _securityService = SecurityService();
-  final AuditTrailService _auditService = AuditTrailService();
+  late SecurityService _securityService;
+  late AuditTrailService _auditService;
   final TextEditingController _logSearchController = TextEditingController();
 
   final List<String> _tabs = [
@@ -30,6 +31,13 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
 
   String _selectedLogFilter = 'All';
   String _logSearchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _securityService = context.read<SecurityService>();
+    _auditService = context.read<AuditTrailService>();
+  }
 
   @override
   void dispose() {

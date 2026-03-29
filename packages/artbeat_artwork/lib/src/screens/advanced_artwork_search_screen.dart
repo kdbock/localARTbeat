@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show EnhancedUniversalHeader, MainLayout, AppLogger;
 import '../models/artwork_model.dart';
@@ -18,7 +19,7 @@ class AdvancedArtworkSearchScreen extends StatefulWidget {
 
 class _AdvancedArtworkSearchScreenState
     extends State<AdvancedArtworkSearchScreen> {
-  final ArtworkService _artworkService = ArtworkService();
+  late final ArtworkService _artworkService;
   final TextEditingController _searchController = TextEditingController();
 
   // Filter values
@@ -60,6 +61,7 @@ class _AdvancedArtworkSearchScreenState
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
     // Set initial query if provided
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _searchController.text = widget.initialQuery!;

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/shared_widgets.dart';
 
@@ -43,9 +43,6 @@ class ArtistCommissionSettingsScreen extends StatefulWidget {
 
 class _ArtistCommissionSettingsScreenState
     extends State<ArtistCommissionSettingsScreen> {
-  final DirectCommissionService _commissionService = DirectCommissionService();
-  final core.EnhancedStorageService _storageService =
-      core.EnhancedStorageService();
   final ImagePicker _imagePicker = ImagePicker();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _basePriceController = TextEditingController();
@@ -117,14 +114,16 @@ class _ArtistCommissionSettingsScreenState
   Future<void> _loadSettings() async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<core.UserService>().currentUserId;
+      if (userId == null) {
         _initializeDefaults();
         setState(() => _isLoading = false);
         return;
       }
 
-      final settings = await _commissionService.getArtistSettings(user.uid);
+      final settings = await context
+          .read<DirectCommissionService>()
+          .getArtistSettings(userId);
 
       setState(() {
         if (settings != null) {
@@ -187,13 +186,13 @@ class _ArtistCommissionSettingsScreenState
 
     setState(() => _isSaving = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<core.UserService>().currentUserId;
+      if (userId == null) {
         throw Exception('commission_settings_not_authenticated'.tr());
       }
 
       final settings = ArtistCommissionSettings(
-        artistId: user.uid,
+        artistId: userId,
         acceptingCommissions: _acceptingCommissions,
         availableTypes: _availableTypes,
         basePrice: double.tryParse(_basePriceController.text.trim()) ?? 0,
@@ -207,7 +206,9 @@ class _ArtistCommissionSettingsScreenState
         lastUpdated: DateTime.now(),
       );
 
-      await _commissionService.updateArtistCommissionSettings(settings);
+      await context
+          .read<DirectCommissionService>()
+          .updateArtistCommissionSettings(settings);
 
       _showSnackBar(
         'commission_settings_save_success'.tr(),
@@ -1051,6 +1052,7 @@ class _ArtistCommissionSettingsScreenState
 
   Future<void> _addPortfolioImage() async {
     try {
+      final storageService = context.read<core.EnhancedStorageService>();
       final ImageSource? source = await showDialog<ImageSource>(
         context: context,
         builder: (context) => AlertDialog(
@@ -1099,7 +1101,7 @@ class _ArtistCommissionSettingsScreenState
 
       setState(() => _isUploadingImage = true);
 
-      final uploadResult = await _storageService.uploadImageWithOptimization(
+      final uploadResult = await storageService.uploadImageWithOptimization(
         imageFile: File(pickedFile.path),
         category: 'commission_portfolio',
         generateThumbnail: true,

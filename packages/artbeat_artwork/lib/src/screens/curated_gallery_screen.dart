@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         GlassCard,
@@ -20,8 +21,6 @@ class CuratedGalleryScreen extends StatefulWidget {
 }
 
 class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
-  final CollectionService _collectionService = CollectionService();
-
   List<CollectionModel> _featuredCollections = [];
   List<CollectionModel> _publicCollections = [];
   bool _isLoading = false;
@@ -43,9 +42,10 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
     });
 
     try {
+      final collectionService = context.read<CollectionService>();
       final futures = [
-        _collectionService.getFeaturedCollections(),
-        _collectionService.getPublicCollections(
+        collectionService.getFeaturedCollections(),
+        collectionService.getPublicCollections(
           filterByType: _filterType,
           limit: 50,
         ),
@@ -646,7 +646,7 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
 
   void _navigateToCollectionDetail(CollectionModel collection) {
     // Increment view count
-    _collectionService.incrementViewCount(collection.id);
+    context.read<CollectionService>().incrementViewCount(collection.id);
 
     // Navigate to collection detail
     Navigator.pushNamed(

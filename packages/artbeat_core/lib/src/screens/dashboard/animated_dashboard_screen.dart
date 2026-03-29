@@ -41,8 +41,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
   late final AnimationController _loop; // world animation
   late final AnimationController _intro; // entrance
-  final UserProgressionService _progressionService = UserProgressionService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final UserProgressionService _progressionService;
+  late final OnboardingService _onboardingService;
 
   // Tour GlobalKeys
   final GlobalKey _menuKey = GlobalKey();
@@ -67,6 +68,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   @override
   void initState() {
     super.initState();
+    _progressionService = context.read<UserProgressionService>();
+    _onboardingService = context.read<OnboardingService>();
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
@@ -93,14 +96,14 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   Future<void> _checkOnboarding() async {
     if (_disableDashboardTourOverlay) {
       // Persist completion so the overlay stays off across launches.
-      await OnboardingService().markOnboardingCompleted();
+      await _onboardingService.markOnboardingCompleted();
       if (mounted && _isTourActive) {
         setState(() => _isTourActive = false);
       }
       return;
     }
 
-    final isCompleted = await OnboardingService().isOnboardingCompleted();
+    final isCompleted = await _onboardingService.isOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure intro animation finishes and layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -493,7 +496,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
             eventsNavKey: widget.bottomNavItemKeys?[4] ?? _eventsNavKey,
             onFinish: () {
               setState(() => _isTourActive = false);
-              OnboardingService().markOnboardingCompleted();
+              _onboardingService.markOnboardingCompleted();
             },
           ),
       ],
@@ -1821,7 +1824,7 @@ class _LeaderboardSection extends StatefulWidget {
 }
 
 class _LeaderboardSectionState extends State<_LeaderboardSection> {
-  final LeaderboardService _leaderboardService = LeaderboardService();
+  late final LeaderboardService _leaderboardService;
   List<LeaderboardEntry> _topUsers = [];
   bool _isLoading = true;
   String? _error;
@@ -1829,6 +1832,7 @@ class _LeaderboardSectionState extends State<_LeaderboardSection> {
   @override
   void initState() {
     super.initState();
+    _leaderboardService = context.read<LeaderboardService>();
     _loadData();
   }
 
@@ -2161,11 +2165,7 @@ class _AvatarCircle extends StatelessWidget {
         backgroundImage: hasValidUrl ? NetworkImage(trimmedUrl) : null,
         child: hasValidUrl
             ? null
-            : Icon(
-                Icons.person,
-                size: 20,
-                color: color.withValues(alpha: 0.5),
-              ),
+            : Icon(Icons.person, size: 20, color: color.withValues(alpha: 0.5)),
       ),
     );
   }

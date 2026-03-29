@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/shared_widgets.dart';
+import 'package:provider/provider.dart';
 
 import '../services/art_community_service.dart';
 import '../services/firebase_storage_service.dart';
@@ -40,7 +40,7 @@ class CreateArtPostScreen extends StatefulWidget {
 class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
-  final ArtCommunityService _communityService = ArtCommunityService();
+  late ArtCommunityService _communityService;
   final FirebaseStorageService _storageService = FirebaseStorageService();
 
   final List<File> _selectedImages = [];
@@ -92,6 +92,7 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<ArtCommunityService>();
     _checkIfUserIsArtist();
   }
 
@@ -99,14 +100,13 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
   void dispose() {
     _contentController.dispose();
     _tagsController.dispose();
-    _communityService.dispose();
     super.dispose();
   }
 
   Future<void> _checkIfUserIsArtist() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final profile = await _communityService.getArtistProfile(user.uid);
+    final userId = _communityService.currentUserId;
+    if (userId != null) {
+      final profile = await _communityService.getArtistProfile(userId);
       if (mounted && profile != null) {
         setState(() => _isArtistPost = true);
       }

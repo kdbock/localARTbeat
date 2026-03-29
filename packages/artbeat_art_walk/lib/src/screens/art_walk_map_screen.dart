@@ -5,8 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -40,8 +38,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   LatLng? _currentMapCenter; // Track current map center for filtering
   String _currentZipCode = '';
   bool _hasMovedToUserLocation = false;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
-  _notificationSubscription;
+  StreamSubscription<int>? _notificationSubscription;
   int _unreadNotificationCount = 0;
 
   // Map data
@@ -59,7 +56,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   @override
   void initState() {
     super.initState();
-    _captureService = ArtWalkCaptureReadService();
+    _captureService = context.read<ArtWalkCaptureReadService>();
     _userService = context.read<UserService>();
     _initializeMapsAndLocation();
     _listenToNotificationBadge();
@@ -79,20 +76,17 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
 
     try {
       // Get user's saved ZIP code from profile
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userProfile = await _userService.getUserProfile(user.uid);
-        if (userProfile != null &&
-            userProfile['zipCode'] != null &&
-            userProfile['zipCode'].toString().isNotEmpty) {
-          final profileZipCode = userProfile['zipCode'].toString();
-          if (mounted) {
-            setState(() {
-              _currentZipCode = profileZipCode;
-            });
-          }
-          AppLogger.info('Loaded ZIP code from profile: $profileZipCode');
+      final userProfile = await _userService.getCurrentUserProfile();
+      if (userProfile != null &&
+          userProfile['zipCode'] != null &&
+          userProfile['zipCode'].toString().isNotEmpty) {
+        final profileZipCode = userProfile['zipCode'].toString();
+        if (mounted) {
+          setState(() {
+            _currentZipCode = profileZipCode;
+          });
         }
+        AppLogger.info('Loaded ZIP code from profile: $profileZipCode');
       }
 
       // If no saved ZIP code, default to Kinston, NC
@@ -180,27 +174,20 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   }
 
   void _listenToNotificationBadge() {
-    final user = FirebaseAuth.instance.currentUser;
     _notificationSubscription?.cancel();
 
-    if (user == null) {
+    if (_userService.currentUserId == null) {
       if (mounted && _unreadNotificationCount != 0) {
         setState(() => _unreadNotificationCount = 0);
       }
       return;
     }
 
-    _notificationSubscription = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('notifications')
-        .where('read', isEqualTo: false)
-        .limit(50)
-        .snapshots()
+    _notificationSubscription = _userService
+        .watchUnreadNotificationCount(limit: 50)
         .listen(
-          (snapshot) {
+          (unreadCount) {
             if (!mounted) return;
-            final unreadCount = snapshot.size;
             if (unreadCount == _unreadNotificationCount) return;
             setState(() => _unreadNotificationCount = unreadCount);
           },
@@ -395,8 +382,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
       // Filter captures that have location data and are within 100 miles (160.934 km)
       const double maxDistanceKm = 160.934; // 100 miles in kilometers
       final nearbyCaptures = allCaptures
-          .where((capture) => capture.location != null)
-          .where((capture) {
+          .where((CaptureModel capture) => capture.location != null)
+          .where((CaptureModel capture) {
             final distance =
                 Geolocator.distanceBetween(
                   latitude,
@@ -587,10 +574,10 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     if (!mounted || _currentMapCenter == null) return;
     try {
       List<CaptureModel> nearbyCaptures = [];
-      final user = FirebaseAuth.instance.currentUser;
+      final userId = _userService.currentUserId;
 
       AppLogger.info(
-        '🔄 Updating captures for filter: $_artFilter, user: ${user?.uid}',
+        '🔄 Updating captures for filter: $_artFilter, user: $userId',
       );
       AppLogger.info(
         '🗺️ Using map center: ${_currentMapCenter!.latitude}, ${_currentMapCenter!.longitude}',
@@ -604,7 +591,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
           );
           AppLogger.info('📍 Found ${publicCaptures.length} public captures');
           nearbyCaptures = publicCaptures
-              .where((c) => c.location != null)
+              .where((CaptureModel c) => c.location != null)
               .toList();
           AppLogger.info(
             '📍 Filtered to ${nearbyCaptures.length} public captures with locations',
@@ -612,15 +599,15 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
           break;
         case 'my_captures':
           // Get only current user's captures
-          if (user != null) {
+          if (userId != null) {
             final userCaptures = await _captureService.getCapturesForUser(
-              user.uid,
+              userId,
             );
             AppLogger.info(
-              '👤 Found ${userCaptures.length} user captures for ${user.uid}',
+              '👤 Found ${userCaptures.length} user captures for $userId',
             );
             nearbyCaptures = userCaptures
-                .where((c) => c.location != null)
+                .where((CaptureModel c) => c.location != null)
                 .toList();
             AppLogger.info(
               '👤 Filtered to ${nearbyCaptures.length} user captures with locations',
@@ -1023,6 +1010,7 @@ class CaptureDetailBottomSheet extends StatefulWidget {
 class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
   int _currentIndex = 0;
   late final PageController _pageController;
+  late final UserService _userService;
   final Map<int, CaptureModel> _enrichedCaptures = {};
 
   // Simple static cache for user info to avoid redundant fetches
@@ -1047,6 +1035,7 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _userService = context.read<UserService>();
     _enrichCurrentCapture();
   }
 
@@ -1074,8 +1063,7 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     }
 
     try {
-      final userService = UserService();
-      final userModel = await userService.getUserById(capture.userId);
+      final userModel = await _userService.getUserById(capture.userId);
       if (userModel != null) {
         _userCache[capture.userId] = userModel;
         if (mounted) {

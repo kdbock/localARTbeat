@@ -6,7 +6,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,6 +16,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         PublicArtModel,
         WorldBackground;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
@@ -99,12 +99,9 @@ class _EnhancedArtWalkCreateScreenState
 
   // Services
   late final ArtWalkService _artWalkService;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  final ArtWalkDistanceUnitService _distanceUnitService =
-      ArtWalkDistanceUnitService();
-  final ArtWalkCaptureReadService _captureReadService =
-      ArtWalkCaptureReadService();
+  late final core_auth.AuthService _authService;
+  late final ArtWalkDistanceUnitService _distanceUnitService;
+  late final ArtWalkCaptureReadService _captureReadService;
 
   String _distanceUnit = 'miles';
 
@@ -113,6 +110,9 @@ class _EnhancedArtWalkCreateScreenState
     super.initState();
 
     _artWalkService = context.read<ArtWalkService>();
+    _authService = context.read<core_auth.AuthService>();
+    _distanceUnitService = context.read<ArtWalkDistanceUnitService>();
+    _captureReadService = context.read<ArtWalkCaptureReadService>();
 
     // Initialize animation controller
     _introAnimationController = AnimationController(
@@ -160,7 +160,7 @@ class _EnhancedArtWalkCreateScreenState
 
   Future<void> _loadUserSettings() async {
     try {
-      final user = _auth.currentUser;
+      final user = _authService.currentUser;
       if (user != null) {
         final distanceUnit = await _distanceUnitService.getDistanceUnit();
         setState(() {
@@ -499,7 +499,7 @@ class _EnhancedArtWalkCreateScreenState
         }
       } else {
         // Create new art walk using the service method
-        final userId = _auth.currentUser?.uid;
+        final userId = _authService.currentUser?.uid;
         if (userId == null) {
           throw Exception('User not authenticated');
         }

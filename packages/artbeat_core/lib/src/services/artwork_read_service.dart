@@ -119,7 +119,9 @@ class ArtworkReadService {
       try {
         final allArtwork = await getAllPublicArtwork(limit: limit * 2);
         return allArtwork
-            .where((artwork) => artwork.contentType == ArtworkContentType.written)
+            .where(
+              (artwork) => artwork.contentType == ArtworkContentType.written,
+            )
             .where((artwork) {
               if (!includeSerialized && !includeCompleted) return false;
               if (!includeSerialized) return !artwork.isSerializing;

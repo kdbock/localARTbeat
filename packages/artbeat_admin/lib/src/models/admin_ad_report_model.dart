@@ -34,7 +34,8 @@ class AdminAdReportModel {
       reason: (data['reason'] ?? '') as String,
       additionalDetails: data['additionalDetails'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: AdminAdReportStatus.fromString((data['status'] ?? 'pending') as String),
+      status: AdminAdReportStatus.fromString(
+          (data['status'] ?? 'pending') as String),
       reviewedBy: data['reviewedBy'] as String?,
       reviewedAt: (data['reviewedAt'] as Timestamp?)?.toDate(),
       adminNotes: data['adminNotes'] as String?,

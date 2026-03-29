@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import '../models/group_models.dart';
 import '../models/post_model.dart';
 import '../screens/feed/comments_screen.dart';
+import '../services/community_service.dart';
 import 'group_post_card.dart';
 
 /// Widget that displays the feed for a specific group type
@@ -25,6 +26,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
   final List<BaseGroupPost> _posts = [];
+  late CommunityService _communityService;
 
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -40,6 +42,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _scrollController.addListener(_onScroll);
     _loadPosts();
   }
@@ -70,36 +73,23 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
 
     try {
       AppLogger.info('Loading ${widget.groupType.value} group posts...');
-
-      // Query posts for this specific group type
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('groupType', isEqualTo: widget.groupType.value)
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .get();
+      final result = await _communityService.getGroupTypePosts(
+        widget.groupType,
+        limit: 50,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
+      _lastDocument = result.lastDocument;
 
-        final loadedPosts = <BaseGroupPost>[];
-        for (final doc in postsSnapshot.docs) {
-          final post = _createPostFromDocument(doc);
-          if (post != null) {
-            loadedPosts.add(post);
-          }
-        }
-
+      if (result.posts.isNotEmpty) {
         debugPrint(
-          'Loaded ${loadedPosts.length} ${widget.groupType.value} posts',
+          'Loaded ${result.posts.length} ${widget.groupType.value} posts',
         );
 
         if (mounted) {
           setState(() {
-            _posts.addAll(loadedPosts);
+            _posts.addAll(result.posts);
             _isLoading = false;
           });
         }
@@ -129,31 +119,20 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     setState(() => _isLoadingMore = true);
 
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('groupType', isEqualTo: widget.groupType.value)
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(_postsPerPage)
-          .get();
+      final result = await _communityService.getGroupTypePosts(
+        widget.groupType,
+        limit: _postsPerPage,
+        lastDocument: _lastDocument,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
+      _lastDocument = result.lastDocument;
 
-        final morePosts = <BaseGroupPost>[];
-        for (final doc in postsSnapshot.docs) {
-          final post = _createPostFromDocument(doc);
-          if (post != null) {
-            morePosts.add(post);
-          }
-        }
-
+      if (result.posts.isNotEmpty) {
         if (mounted) {
           setState(() {
-            _posts.addAll(morePosts);
+            _posts.addAll(result.posts);
           });
         }
       }
@@ -173,89 +152,32 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     }
   }
 
-  BaseGroupPost? _createPostFromDocument(DocumentSnapshot doc) {
-    try {
-      switch (widget.groupType) {
-        case GroupType.artist:
-          return ArtistGroupPost.fromFirestore(doc);
-        case GroupType.event:
-          return EventGroupPost.fromFirestore(doc);
-        case GroupType.artWalk:
-          return ArtWalkAdventurePost.fromFirestore(doc);
-        case GroupType.artistWanted:
-          return ArtistWantedPost.fromFirestore(doc);
-      }
-    } catch (e) {
-      AppLogger.error('Error creating post from document ${doc.id}: $e');
-      return null;
-    }
-  }
-
   Future<void> _handleAppreciate(BaseGroupPost post) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      if (mounted) {
+    final result = await _communityService.appreciatePost(post.id);
+    if (!mounted) return;
+
+    switch (result) {
+      case PostAppreciationResult.added:
+        await _loadPosts();
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('appreciated'.tr())));
+      case PostAppreciationResult.alreadyAppreciated:
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('already_appreciated'.tr())));
+      case PostAppreciationResult.unauthenticated:
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('sign_in_to_appreciate'.tr())));
-      }
-      return;
-    }
-
-    try {
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(post.id);
-
-      final appreciateRef = postRef.collection('appreciations').doc(user.uid);
-      final appreciateDoc = await appreciateRef.get();
-
-      if (!appreciateDoc.exists) {
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          final postSnapshot = await transaction.get(postRef);
-          final currentAppreciateCount =
-              (postSnapshot.data()?['applauseCount'] as int?) ?? 0;
-
-          transaction.update(postRef, {
-            'applauseCount': currentAppreciateCount + 1,
-          });
-
-          transaction.set(appreciateRef, {
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-        });
-
-        // Update local state
-        setState(() {
-          final index = _posts.indexWhere((p) => p.id == post.id);
-          if (index != -1) {
-            // Create a new post with updated appreciate count
-            // This is a simplified approach - in a real app you'd want proper copyWith methods
-            _loadPosts(); // Reload to get updated counts
-          }
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('appreciated'.tr())));
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('already_appreciated'.tr())));
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Error appreciating post: $e');
-      if (mounted) {
+      case PostAppreciationResult.postNotFound:
+      case PostAppreciationResult.error:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('error_appreciating_post'.tr(args: [e.toString()])),
+            content: Text('error_appreciating_post'.tr(args: [post.id])),
           ),
         );
-      }
     }
   }
 
@@ -270,40 +192,17 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
   }
 
   void _handleFeature(BaseGroupPost post) async {
-    try {
-      // Mark post as featured in Firestore
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(post.id);
+    final didFeature = await _communityService.featurePost(post.id);
+    if (!mounted) return;
 
-      // First check if the document exists
-      final postDoc = await postRef.get();
-      if (!postDoc.exists) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('post_not_found'.tr())));
-        }
-        return;
-      }
-
-      // Update the post to mark it as featured
-      await postRef.update({'isFeatured': true});
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_featured'.tr())));
-      }
-    } catch (e) {
-      AppLogger.error('Error featuring post: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('failed_to_feature_post'.tr(args: [e.toString()])),
-          ),
-        );
-      }
+    if (didFeature) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('post_featured'.tr())));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('failed_to_feature_post'.tr(args: [post.id]))),
+      );
     }
   }
 
@@ -339,21 +238,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
 
   /// Update share count in Firestore
   Future<void> _updateShareCount(String postId) async {
-    try {
-      final postRef = FirebaseFirestore.instance
-          .collection('posts')
-          .doc(postId);
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final postDoc = await transaction.get(postRef);
-        if (!postDoc.exists) return;
-
-        final currentCount = postDoc.data()?['shareCount'] ?? 0;
-        transaction.update(postRef, {'shareCount': currentCount + 1});
-      });
-    } catch (e) {
-      AppLogger.info('Failed to update share count: $e');
-    }
+    await _communityService.incrementPostShareCount(postId);
   }
 
   Widget _buildLoadingState() {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 /// Widget for displaying local artwork in a horizontal scrollable row
 class LocalArtworkRowWidget extends StatelessWidget {
@@ -38,13 +38,10 @@ class LocalArtworkRowWidget extends StatelessWidget {
         ),
         SizedBox(
           height: 250, // Increased height for price and badge
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('artwork')
-                .where('location', isEqualTo: zipCode)
-                .orderBy('createdAt', descending: true)
-                .limit(10)
-                .snapshots(),
+          child: StreamBuilder<List<ArtworkModel>>(
+            stream: context.read<ArtworkLocalReadService>().watchLocalArtwork(
+              zipCode,
+            ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -74,7 +71,8 @@ class LocalArtworkRowWidget extends StatelessWidget {
                 );
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              final artworks = snapshot.data ?? const <ArtworkModel>[];
+              if (artworks.isEmpty) {
                 return Center(
                   child: Container(
                     width: double.infinity,
@@ -103,10 +101,6 @@ class LocalArtworkRowWidget extends StatelessWidget {
                 );
               }
 
-              final artworks = snapshot.data!.docs
-                  .map((doc) => ArtworkModel.fromFirestore(doc))
-                  .toList();
-
               final artistIds = artworks
                   .map((artwork) => artwork.artistProfileId)
                   .where((id) => id.isNotEmpty)
@@ -114,7 +108,9 @@ class LocalArtworkRowWidget extends StatelessWidget {
                   .toList();
 
               return FutureBuilder<Map<String, String>>(
-                future: _fetchArtistNames(artistIds),
+                future: context
+                    .read<ArtworkLocalReadService>()
+                    .fetchArtistNames(artistIds),
                 builder: (context, artistSnapshot) {
                   final artistNames = artistSnapshot.data ?? const {};
 
@@ -248,19 +244,5 @@ class LocalArtworkRowWidget extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Future<Map<String, String>> _fetchArtistNames(List<String> artistIds) async {
-    if (artistIds.isEmpty) return {};
-
-    final snapshot = await FirebaseFirestore.instance
-        .collection('artistProfiles')
-        .where(FieldPath.documentId, whereIn: artistIds)
-        .get();
-
-    return {
-      for (final doc in snapshot.docs)
-        doc.id: (doc.data()['displayName'] as String?) ?? 'Unknown Artist',
-    };
   }
 }

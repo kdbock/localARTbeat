@@ -41,9 +41,9 @@ class SponsorshipCard extends StatelessWidget {
                   sponsorship.businessAddress ??
                       sponsorship.relatedEntityName ??
                       sponsorship.tier.name.toUpperCase(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white70),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

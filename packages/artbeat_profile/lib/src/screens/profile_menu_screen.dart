@@ -1,7 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/auth_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
 
@@ -13,12 +14,13 @@ class ProfileMenuScreen extends StatefulWidget {
 }
 
 class _ProfileMenuScreenState extends State<ProfileMenuScreen> {
-  final UserService _userService = UserService();
+  late UserService _userService;
   UserModel? _currentUser;
 
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
     _loadCurrentUser();
   }
 
@@ -178,7 +180,7 @@ class _ProfileMenuContent extends StatelessWidget {
             label: 'Sign Out',
             destructive: true,
             onTap: () async {
-              await FirebaseAuth.instance.signOut();
+              await context.read<AuthService>().signOut();
               if (context.mounted) {
                 Navigator.of(
                   context,

@@ -1,23 +1,9 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/in_app_purchase_models.dart';
+import '../models/user_model.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
-import 'artist_feature_service.dart';
-
-class _MomentumUpdate {
-  final double newMomentum;
-  final double newWeeklyMomentum;
-  final double effectiveAdd;
-
-  const _MomentumUpdate({
-    required this.newMomentum,
-    required this.newWeeklyMomentum,
-    required this.effectiveAdd,
-  });
-}
 
 /// Service for handling artist boost-specific in-app purchases
 class ArtistBoostService {
@@ -68,14 +54,6 @@ class ArtistBoostService {
       'powerLevel': 'Overdrive',
     },
   };
-
-  static const double _momentumDecayRateWeekly = 0.10;
-  static const int _weeklyMomentumThreshold = 300;
-  static const int _weeklyMomentumCap = 600;
-  static const double _diminishingMultiplier = 0.5;
-
-  static const String _effectsAppliedField = 'effectsApplied';
-  static const String _effectsApplyingField = 'effectsApplying';
 
   /// Purchase a boost for another user
   Future<bool> purchaseBoost({
@@ -202,11 +180,9 @@ class ArtistBoostService {
     required String transactionId,
     required String message,
   }) async {
-    final boostRef = _firestore.collection('boosts').doc(transactionId);
     try {
       final boostData = _boostProducts[productId]!;
 
-      // Create completed boost record
       final boost = ArtistBoostPurchase(
         id: transactionId,
         senderId: senderId,
@@ -221,240 +197,24 @@ class ArtistBoostService {
         momentum: boostData['momentum'] as int,
       );
 
-      bool shouldApplyEffects = false;
-
-      // Save boost to Firestore and guard against double-apply.
-      await _firestore.runTransaction((transaction) async {
-        final existing = await transaction.get(boostRef);
-        if (existing.exists) {
-          final data = existing.data() ?? {};
-          final alreadyApplied = data[_effectsAppliedField] == true;
-          final inProgress = data[_effectsApplyingField] == true;
-          if (alreadyApplied || inProgress) {
-            shouldApplyEffects = false;
-            return;
-          }
-        }
-        transaction.set(boostRef, {
-          ...boost.toFirestore(),
-          _effectsApplyingField: true,
-          _effectsAppliedField: false,
-        }, SetOptions(merge: true));
-        shouldApplyEffects = true;
-      });
-
-      if (!shouldApplyEffects) {
-        AppLogger.warning(
-          '⚠️ Boost effects already applied or in progress: $transactionId',
+      final boostRef = _firestore.collection('boosts').doc(transactionId);
+      final existingBoost = await boostRef.get();
+      if (existingBoost.exists) {
+        AppLogger.info(
+          '✅ Completed boost event already recorded: $transactionId',
         );
         return;
       }
 
-      // Update pending boost to completed
+      // Backend triggers own momentum, feature, and notification side effects.
+      // The client only records the completed, verified boost event.
+      await boostRef.set(boost.toFirestore());
       await _updatePendingBoosts(senderId, recipientId, productId, 'completed');
-
-      // Apply boost effects (momentum, features, notifications).
-      final momentumUpdate = await _applyMomentumToRecipient(
-        recipientId,
-        boostData['momentum'] as int,
+      AppLogger.info(
+        '✅ Verified boost event recorded for backend processing: $productId',
       );
-      if (momentumUpdate != null) {
-        await _updateArtistProfileBoostFields(recipientId, momentumUpdate);
-      }
-
-      await _createArtistFeatures(senderId, recipientId, productId);
-      await _sendBoostNotification(senderId, recipientId, boostData, message);
-
-      await boostRef.update({
-        _effectsAppliedField: true,
-        _effectsApplyingField: false,
-        'effectsAppliedAt': FieldValue.serverTimestamp(),
-      });
-
-      AppLogger.info('✅ Boost purchase completed: $productId');
     } catch (e) {
       AppLogger.error('Error completing boost purchase: $e');
-      try {
-        await boostRef.update({
-          _effectsApplyingField: false,
-          _effectsAppliedField: false,
-        });
-      } catch (_) {
-        // Swallow secondary failures to avoid masking the original error.
-      }
-    }
-  }
-
-  /// Apply momentum to recipient with decay, caps, and diminishing returns
-  Future<_MomentumUpdate?> _applyMomentumToRecipient(
-    String recipientId,
-    int momentumAmount,
-  ) async {
-    final now = DateTime.now();
-    final momentumRef = _firestore
-        .collection('artist_momentum')
-        .doc(recipientId);
-    final userRef = _firestore.collection('users').doc(recipientId);
-
-    try {
-      double newMomentum = 0;
-      double newWeeklyMomentum = 0;
-      double effectiveAdd = 0;
-
-      await _firestore.runTransaction((transaction) async {
-        final snapshot = await transaction.get(momentumRef);
-        double currentMomentum = 0;
-        double weeklyMomentum = 0;
-        DateTime lastUpdated = now;
-        DateTime weekStart = now;
-
-        if (snapshot.exists) {
-          final data = snapshot.data() as Map<String, dynamic>;
-          currentMomentum = (data['momentum'] as num?)?.toDouble() ?? 0;
-          weeklyMomentum = (data['weeklyMomentum'] as num?)?.toDouble() ?? 0;
-          lastUpdated =
-              (data['momentumLastUpdated'] as Timestamp?)?.toDate() ?? now;
-          weekStart =
-              (data['weeklyWindowStart'] as Timestamp?)?.toDate() ?? now;
-        }
-
-        // Apply decay based on elapsed weeks
-        final elapsedHours = now.difference(lastUpdated).inHours;
-        final weeksElapsed = elapsedHours / (24 * 7);
-        if (weeksElapsed > 0) {
-          currentMomentum =
-              currentMomentum * pow(1 - _momentumDecayRateWeekly, weeksElapsed);
-        }
-
-        // Reset weekly window if needed
-        if (now.difference(weekStart).inDays >= 7) {
-          weeklyMomentum = 0;
-          weekStart = now;
-        }
-
-        effectiveAdd = _calculateEffectiveMomentum(
-          momentumAmount.toDouble(),
-          weeklyMomentum,
-        );
-
-        final remainingCap = _weeklyMomentumCap - weeklyMomentum;
-        if (remainingCap <= 0) {
-          effectiveAdd = 0;
-        } else if (effectiveAdd > remainingCap) {
-          effectiveAdd = remainingCap.toDouble();
-        }
-
-        newWeeklyMomentum = weeklyMomentum + effectiveAdd;
-        newMomentum = currentMomentum + effectiveAdd;
-
-        transaction.set(momentumRef, {
-          'momentum': newMomentum,
-          'weeklyMomentum': newWeeklyMomentum,
-          'weeklyWindowStart': Timestamp.fromDate(weekStart),
-          'momentumLastUpdated': Timestamp.fromDate(now),
-          'lastBoostAt': Timestamp.fromDate(now),
-          'lifetimeMomentum': FieldValue.increment(effectiveAdd),
-        }, SetOptions(merge: true));
-
-        transaction.set(userRef, {
-          'artistMomentum': newMomentum,
-          'artistMomentumUpdatedAt': Timestamp.fromDate(now),
-          'artistMomentumWeekly': newWeeklyMomentum,
-          'artistMomentumWeekStart': Timestamp.fromDate(weekStart),
-          'artistXP': FieldValue.increment(momentumAmount),
-          'totalXPReceived': FieldValue.increment(momentumAmount),
-        }, SetOptions(merge: true));
-      });
-
-      AppLogger.info(
-        '✅ Applied $momentumAmount momentum to artist: $recipientId',
-      );
-      return _MomentumUpdate(
-        newMomentum: newMomentum,
-        newWeeklyMomentum: newWeeklyMomentum,
-        effectiveAdd: effectiveAdd,
-      );
-    } catch (e) {
-      AppLogger.error('Error applying momentum to recipient: $e');
-      return null;
-    }
-  }
-
-  Future<void> _updateArtistProfileBoostFields(
-    String recipientId,
-    _MomentumUpdate update,
-  ) async {
-    try {
-      final snapshot = await _firestore
-          .collection('artistProfiles')
-          .where('userId', isEqualTo: recipientId)
-          .limit(1)
-          .get();
-
-      if (snapshot.docs.isEmpty) return;
-
-      await snapshot.docs.first.reference.set({
-        'boostScore': update.newMomentum,
-        'lastBoostAt': FieldValue.serverTimestamp(),
-        'weeklyBoostMomentum': update.newWeeklyMomentum,
-        'boostMomentumUpdatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    } catch (e) {
-      AppLogger.error('Error updating artist profile boost fields: $e');
-    }
-  }
-
-  double _calculateEffectiveMomentum(double amount, double weeklyMomentum) {
-    if (amount <= 0) return 0;
-    if (weeklyMomentum >= _weeklyMomentumThreshold) {
-      return amount * _diminishingMultiplier;
-    }
-    if (weeklyMomentum + amount <= _weeklyMomentumThreshold) {
-      return amount;
-    }
-    final fullRateAmount = _weeklyMomentumThreshold - weeklyMomentum;
-    final diminishedAmount = amount - fullRateAmount;
-    return fullRateAmount + (diminishedAmount * _diminishingMultiplier);
-  }
-
-  /// Send boost notification to recipient
-  Future<void> _sendBoostNotification(
-    String senderId,
-    String recipientId,
-    Map<String, dynamic> boostData,
-    String message,
-  ) async {
-    try {
-      // Get sender information
-      final senderDoc = await _firestore
-          .collection('users')
-          .doc(senderId)
-          .get();
-      final senderName = senderDoc.exists
-          ? (senderDoc.data()!['displayName'] as String? ?? 'A Supporter')
-          : 'A Supporter';
-
-      // Create notification
-      await _firestore.collection('notifications').add({
-        'userId': recipientId,
-        'type': 'boost_received',
-        'title': 'Momentum Boost Activated',
-        'body': '$senderName fueled ${boostData['title']} for you!',
-        'data': {
-          'senderId': senderId,
-          'senderName': senderName,
-          'boostType': boostData['title'],
-          'amount': boostData['amount'],
-          'momentum': boostData['momentum'],
-          'message': message,
-        },
-        'read': false,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      AppLogger.info('✅ Boost notification sent to: $recipientId');
-    } catch (e) {
-      AppLogger.error('Error sending boost notification: $e');
     }
   }
 
@@ -536,6 +296,70 @@ class ArtistBoostService {
     } catch (e) {
       AppLogger.error('Error getting received boosts: $e');
       return [];
+    }
+  }
+
+  /// Get recent boosters for an artist.
+  Future<List<UserModel>> getTopBoosters(
+    String artistUserId, {
+    int limit = 8,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('artist_boosters')
+          .doc(artistUserId)
+          .collection('boosters')
+          .orderBy('lastBoostAt', descending: true)
+          .limit(limit)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return <UserModel>[];
+      }
+
+      final boosterIds = snapshot.docs
+          .map((doc) => doc.id)
+          .where((id) => id.isNotEmpty)
+          .toList();
+      if (boosterIds.isEmpty) {
+        return <UserModel>[];
+      }
+
+      final usersSnapshot = await _firestore
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: boosterIds)
+          .get();
+
+      return usersSnapshot.docs
+          .map((doc) => UserModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      AppLogger.error('Error getting top boosters: $e');
+      return <UserModel>[];
+    }
+  }
+
+  /// Get a booster relationship/status document for an artist.
+  Future<Map<String, dynamic>?> getBoosterStatus({
+    required String artistUserId,
+    required String boosterUserId,
+  }) async {
+    try {
+      final doc = await _firestore
+          .collection('artist_boosters')
+          .doc(artistUserId)
+          .collection('boosters')
+          .doc(boosterUserId)
+          .get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return doc.data();
+    } catch (e) {
+      AppLogger.error('Error getting booster status: $e');
+      return null;
     }
   }
 
@@ -708,28 +532,6 @@ class ArtistBoostService {
     } catch (e) {
       AppLogger.error('Error purchasing quick boost: $e');
       return false;
-    }
-  }
-
-  /// Create artist features for a completed boost purchase
-  Future<void> _createArtistFeatures(
-    String senderId,
-    String recipientId,
-    String productId,
-  ) async {
-    try {
-      final featureService = ArtistFeatureService();
-      await featureService.createFeaturesForBoost(
-        boostId: productId,
-        artistId: recipientId,
-        purchaserId: senderId,
-      );
-
-      AppLogger.info('✅ Artist features created for boost: $productId');
-    } catch (e) {
-      AppLogger.error('❌ Error creating artist features: $e');
-      // Don't fail the boost purchase if feature creation fails
-      // Features can be created manually later if needed
     }
   }
 }

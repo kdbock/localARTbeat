@@ -43,12 +43,12 @@ class AuditLog {
 /// Comprehensive audit trail service for compliance and logging
 /// Tracks all admin actions, user activities, and system events
 class AuditTrailService extends ChangeNotifier {
-  static final AuditTrailService _instance = AuditTrailService._internal();
-  factory AuditTrailService() => _instance;
-  AuditTrailService._internal();
+  AuditTrailService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
   // ==========================================
   // AUDIT LOGGING METHODS

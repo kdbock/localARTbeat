@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 import '../../services/earnings_service.dart';
 import '../../models/payout_model.dart';
 
@@ -19,10 +20,10 @@ class PayoutRequestScreen extends StatefulWidget {
 }
 
 class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
-  final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  late final EarningsService _earningsService;
 
   List<PayoutAccountModel> _payoutAccounts = [];
   PayoutAccountModel? _selectedAccount;
@@ -33,6 +34,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
   @override
   void initState() {
     super.initState();
+    _earningsService = context.read<EarningsService>();
     _loadPayoutAccounts();
   }
 

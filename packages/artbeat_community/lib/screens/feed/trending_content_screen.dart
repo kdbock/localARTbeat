@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../../models/post_model.dart';
 import '../../widgets/post_card.dart';
 import '../../widgets/community_drawer.dart';
 import 'comments_screen.dart';
+import '../../services/community_service.dart';
 
 class TrendingContentScreen extends StatefulWidget {
   const TrendingContentScreen({super.key});
@@ -19,6 +20,7 @@ class TrendingContentScreen extends StatefulWidget {
 class _TrendingContentScreenState extends State<TrendingContentScreen> {
   final ScrollController _scrollController = ScrollController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late CommunityService _communityService;
   List<PostModel> _trendingPosts = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -48,6 +50,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _loadTrendingContent();
     _scrollController.addListener(_onScroll);
   }
@@ -76,58 +79,18 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     });
 
     try {
-      // Get cutoff date based on selected time frame
-      DateTime cutoffDate;
-      final now = DateTime.now();
+      final result = await _communityService.getTrendingPosts(
+        timeFrame: _selectedTimeFrame,
+        category: _selectedCategory,
+        limit: _postsPerPage,
+      );
 
-      switch (_selectedTimeFrame) {
-        case 'Day':
-          cutoffDate = now.subtract(const Duration(days: 1));
-          break;
-        case 'Week':
-          cutoffDate = now.subtract(const Duration(days: 7));
-          break;
-        case 'Month':
-          cutoffDate = DateTime(now.year, now.month - 1, now.day);
-          break;
-        case 'All Time':
-        default:
-          cutoffDate = DateTime(2000); // Far in the past
-          break;
-      }
-
-      Query query = FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPublic', isEqualTo: true)
-          .where(
-            'createdAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
-          )
-          .orderBy('createdAt', descending: true);
-
-      // Apply category filter if not 'All'
-      if (_selectedCategory != 'All') {
-        query = query.where(
-          'tags',
-          arrayContains: _selectedCategory.toLowerCase(),
-        );
-      }
-
-      // Order by applause count for trending
-      query = query
-          .orderBy('applauseCount', descending: true)
-          .limit(_postsPerPage);
-
-      final snapshot = await query.get();
-
-      if (snapshot.docs.isNotEmpty) {
-        _lastDocument = snapshot.docs.last;
+      if (result.posts.isNotEmpty) {
+        _lastDocument = result.lastDocument;
 
         if (!mounted) return;
         setState(() {
-          _trendingPosts = snapshot.docs
-              .map((doc) => PostModel.fromFirestore(doc))
-              .toList();
+          _trendingPosts = result.posts;
           _isLoading = false;
         });
       } else {
@@ -153,61 +116,19 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     });
 
     try {
-      // Get cutoff date based on selected time frame
-      DateTime cutoffDate;
-      final now = DateTime.now();
+      final result = await _communityService.getTrendingPosts(
+        timeFrame: _selectedTimeFrame,
+        category: _selectedCategory,
+        limit: _postsPerPage,
+        lastDocument: _lastDocument,
+      );
 
-      switch (_selectedTimeFrame) {
-        case 'Day':
-          cutoffDate = now.subtract(const Duration(days: 1));
-          break;
-        case 'Week':
-          cutoffDate = now.subtract(const Duration(days: 7));
-          break;
-        case 'Month':
-          cutoffDate = DateTime(now.year, now.month - 1, now.day);
-          break;
-        case 'All Time':
-        default:
-          cutoffDate = DateTime(2000); // Far in the past
-          break;
-      }
-
-      Query query = FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPublic', isEqualTo: true)
-          .where(
-            'createdAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
-          )
-          .orderBy('createdAt', descending: true);
-
-      // Apply category filter if not 'All'
-      if (_selectedCategory != 'All') {
-        query = query.where(
-          'tags',
-          arrayContains: _selectedCategory.toLowerCase(),
-        );
-      }
-
-      // Order by applause count for trending
-      query = query
-          .orderBy('applauseCount', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(_postsPerPage);
-
-      final snapshot = await query.get();
-
-      if (snapshot.docs.isNotEmpty) {
-        _lastDocument = snapshot.docs.last;
-
-        final morePosts = snapshot.docs
-            .map((doc) => PostModel.fromFirestore(doc))
-            .toList();
+      if (result.posts.isNotEmpty) {
+        _lastDocument = result.lastDocument;
 
         if (!mounted) return;
         setState(() {
-          _trendingPosts.addAll(morePosts);
+          _trendingPosts.addAll(result.posts);
           _isLoadingMore = false;
         });
       } else {
@@ -350,7 +271,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: PostCard(
                 post: post,
-                currentUserId: FirebaseAuth.instance.currentUser?.uid ?? '',
+                currentUserId: _communityService.currentUserId ?? '',
                 comments:
                     const [], // Empty list since we don't load comments here
                 onUserTap: (userId) {

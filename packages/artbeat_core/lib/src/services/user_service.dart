@@ -14,6 +14,20 @@ import '../services/firebase_storage_upload_service.dart';
 import '../storage/enhanced_storage_service.dart';
 import '../utils/logger.dart';
 
+class UserStreakSummary {
+  const UserStreakSummary({
+    this.loginStreak = 0,
+    this.challengeStreak = 0,
+    this.categoryStreak = 0,
+    this.categoryName,
+  });
+
+  final int loginStreak;
+  final int challengeStreak;
+  final int categoryStreak;
+  final String? categoryName;
+}
+
 class UserService extends ChangeNotifier {
   static final UserService _instance = UserService._internal();
 
@@ -154,6 +168,11 @@ class UserService extends ChangeNotifier {
     return _auth?.authStateChanges() ?? Stream.value(null);
   }
 
+  Future<void> signOut() async {
+    initialize();
+    await _auth?.signOut();
+  }
+
   // User operations
   Future<UserModel?> getCurrentUserModel() async {
     initialize();
@@ -224,6 +243,44 @@ class UserService extends ChangeNotifier {
       _logError('Error getting user profile', e, s);
       return null;
     }
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    final userId = currentUserId;
+    if (userId == null) return null;
+    return getUserProfile(userId);
+  }
+
+  Future<bool> isCurrentUserAdmin() async {
+    final profile = await getCurrentUserProfile();
+    if (profile == null) return false;
+
+    final userType = profile['userType']?.toString().toLowerCase() ?? '';
+    final role = profile['role']?.toString().toLowerCase() ?? '';
+    final isAdmin = profile['isAdmin'] as bool? ?? false;
+    return userType == 'admin' || role == 'admin' || isAdmin;
+  }
+
+  Stream<int> watchUnreadNotificationCount({int limit = 50}) {
+    final userId = currentUserId;
+    if (userId == null) {
+      return Stream<int>.value(0);
+    }
+
+    return _usersCollection
+        .doc(userId)
+        .collection('notifications')
+        .where('read', isEqualTo: false)
+        .limit(limit)
+        .snapshots()
+        .map((snapshot) => snapshot.size)
+        .handleError((Object error, StackTrace stackTrace) {
+          _logError(
+            'Error watching unread notification count',
+            error,
+            stackTrace,
+          );
+        });
   }
 
   // Profile updates
@@ -779,6 +836,30 @@ class UserService extends ChangeNotifier {
     }
   }
 
+  Future<void> removeLikedContent(String engagementId) async {
+    final userId = currentUserId;
+    if (userId == null || engagementId.isEmpty) return;
+
+    try {
+      final engagementRef = firestore
+          .collection('engagements')
+          .doc(engagementId);
+      final engagementDoc = await engagementRef.get();
+      if (!engagementDoc.exists) return;
+
+      final data = engagementDoc.data();
+      if (data?['userId'] != userId) {
+        throw StateError('Cannot remove liked content for another user');
+      }
+
+      await engagementRef.delete();
+      notifyListeners();
+    } catch (e, s) {
+      _logError('Error removing liked content', e, s);
+      rethrow;
+    }
+  }
+
   // Helper method to get content title based on type
   String _getContentTitle(
     Map<String, dynamic> contentData,
@@ -912,6 +993,77 @@ class UserService extends ChangeNotifier {
     } catch (e, s) {
       _logError('Error removing from favorites', e, s);
     }
+  }
+
+  Future<void> unfollowArtistProfile(String artistProfileId) async {
+    final userId = currentUserId;
+    if (userId == null || artistProfileId.isEmpty) return;
+
+    try {
+      await firestore
+          .collection('artistFollows')
+          .doc('${userId}_$artistProfileId')
+          .delete();
+
+      await firestore.collection('artistProfiles').doc(artistProfileId).update({
+        'followersCount': FieldValue.increment(-1),
+      });
+
+      notifyListeners();
+    } catch (e, s) {
+      _logError('Error unfollowing artist profile', e, s);
+      rethrow;
+    }
+  }
+
+  Future<UserStreakSummary> getUserStreakSummary(String userId) async {
+    try {
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        return const UserStreakSummary();
+      }
+
+      final userData = userDoc.data();
+      final stats = userData?['stats'] as Map<String, dynamic>?;
+      final categoryStreaks =
+          userData?['categoryStreaks'] as Map<String, dynamic>?;
+
+      var categoryStreak = 0;
+      String? categoryName;
+
+      if (categoryStreaks != null && categoryStreaks.isNotEmpty) {
+        categoryStreaks.forEach((category, data) {
+          if (data is Map) {
+            final currentStreak = data['currentStreak'] as int? ?? 0;
+            if (currentStreak > categoryStreak) {
+              categoryStreak = currentStreak;
+              categoryName = category;
+            }
+          }
+        });
+      }
+
+      return UserStreakSummary(
+        loginStreak: stats?['loginStreak'] as int? ?? 0,
+        challengeStreak: stats?['challengeStreak'] as int? ?? 0,
+        categoryStreak: categoryStreak,
+        categoryName: categoryName,
+      );
+    } catch (e, s) {
+      _logError('Error getting user streak summary', e, s);
+      return const UserStreakSummary();
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> watchUserBoostBadges(String userId) {
+    return firestore
+        .collection('users')
+        .doc(userId)
+        .collection('boost_badges')
+        .orderBy('awardedAt', descending: true)
+        .limit(12)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
 
   // Get favorite by ID

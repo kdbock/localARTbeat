@@ -15,7 +15,9 @@ class EnvValidator {
   final List<String> _requiredVars = [
     'API_BASE_URL',
     'STRIPE_PUBLISHABLE_KEY',
+    'FIREBASE_FUNCTIONS_BASE_URL',
     'FIREBASE_REGION',
+    'FIREBASE_PROJECT_ID',
   ];
 
   /// Validate that all required environment variables are set
@@ -47,11 +49,27 @@ class EnvValidator {
     }
   }
 
+  /// Validate Cloud Functions base URL format
+  bool validateFunctionsUrl() {
+    try {
+      final functionsUrl = _envLoader.get('FIREBASE_FUNCTIONS_BASE_URL');
+      final uri = Uri.parse(functionsUrl);
+      if (!uri.hasScheme || uri.host.isEmpty) {
+        throw const FormatException('Functions URL must be absolute');
+      }
+      return true;
+    } catch (e) {
+      AppLogger.error('❌ Invalid Cloud Functions URL format: ${e.toString()}');
+      return false;
+    }
+  }
+
   /// Validate all environment variables
   bool validateAll() {
     final List<bool> validations = [
       validateRequiredVars(),
       validateApiUrl(),
+      validateFunctionsUrl(),
       validateStripeEnvironment(),
     ];
 
@@ -93,7 +111,13 @@ class EnvValidator {
   void printDiagnostics() {
     AppLogger.debug('🔍 Environment Diagnostics:');
     AppLogger.info('API URL: ${_envLoader.get('API_BASE_URL')}');
+    AppLogger.info(
+      'Functions URL: ${_envLoader.get('FIREBASE_FUNCTIONS_BASE_URL')}',
+    );
     AppLogger.firebase('Firebase Region: ${_envLoader.get('FIREBASE_REGION')}');
+    AppLogger.firebase(
+      'Firebase Project: ${_envLoader.get('FIREBASE_PROJECT_ID')}',
+    );
     debugPrint(
       'Has Google Maps API Key: ${_envLoader.has('GOOGLE_MAPS_API_KEY')}',
     );

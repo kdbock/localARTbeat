@@ -1,17 +1,83 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Directory, File, Platform;
 
-import 'package:artbeat_core/artbeat_core.dart' show PurchaseVerificationService;
+import 'package:artbeat_core/artbeat_core.dart'
+    show FirebaseStorageUploadService, PurchaseVerificationService;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/index.dart';
 
 class LocalAdService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  LocalAdService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    FirebaseStorage? storage,
+    FirebaseStorageUploadService? storageUploadService,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _storage = storage ?? FirebaseStorage.instance,
+       _storageUploadService =
+           storageUploadService ?? FirebaseStorageUploadService();
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final FirebaseStorage _storage;
+  final FirebaseStorageUploadService _storageUploadService;
 
   static const String _collection = 'localAds';
   static const String _recoveriesCollection = 'localAdPurchaseRecoveries';
+
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  String requireCurrentUserId() {
+    final userId = currentUserId;
+    if (userId == null || userId.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+    return userId;
+  }
+
+  Future<List<String>> uploadImagesForCurrentUser(List<File> images) async {
+    if (images.isEmpty) return const <String>[];
+
+    final userId = requireCurrentUserId();
+    final urls = <String>[];
+
+    for (var index = 0; index < images.length; index++) {
+      final uploadFile = images[index];
+      final fileName =
+          'ads/$userId/${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
+      final reference = _storage.ref().child(fileName);
+
+      try {
+        await _storageUploadService.uploadFileWithRetry(
+          ref: reference,
+          file: uploadFile,
+          operationLabel: 'local ad image upload',
+        );
+      } catch (e) {
+        if (e.toString().contains('NSURLFileProtectionComplete') ||
+            e.toString().contains('file protection')) {
+          final tempDir = Directory.systemTemp;
+          final tempFile = File('${tempDir.path}/temp_ad_image.jpg');
+          await uploadFile.copy(tempFile.path);
+          await _storageUploadService.uploadFileWithRetry(
+            ref: reference,
+            file: tempFile,
+            operationLabel: 'local ad image upload',
+          );
+          await tempFile.delete();
+        } else {
+          rethrow;
+        }
+      }
+
+      urls.add(await reference.getDownloadURL());
+    }
+
+    return urls;
+  }
 
   Future<String> createAd(LocalAd ad) async {
     try {

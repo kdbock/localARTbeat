@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:artbeat_artist/artbeat_artist.dart';
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 
 /// Visibility Hub for galleries to track performance and discovery
 class GalleryVisibilityHubScreen extends StatefulWidget {
@@ -16,9 +16,9 @@ class GalleryVisibilityHubScreen extends StatefulWidget {
 
 class _GalleryVisibilityHubScreenState
     extends State<GalleryVisibilityHubScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final SubscriptionService _subscriptionService = SubscriptionService();
-  final VisibilityService _visibilityService = VisibilityService();
+  late final core.UserService _userService;
+  late final artist.SubscriptionService _subscriptionService;
+  late final artist.VisibilityService _visibilityService;
 
   bool _isLoading = true;
   bool _isPremiumGallery = false;
@@ -34,6 +34,9 @@ class _GalleryVisibilityHubScreenState
   @override
   void initState() {
     super.initState();
+    _userService = context.read<core.UserService>();
+    _subscriptionService = context.read<artist.SubscriptionService>();
+    _visibilityService = context.read<artist.VisibilityService>();
     _checkSubscriptionAndLoadData();
   }
 
@@ -65,7 +68,7 @@ class _GalleryVisibilityHubScreenState
       }
 
       // Get gallery profile
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
@@ -483,7 +486,7 @@ class _GalleryVisibilityHubScreenState
                 _isLoading = true;
               });
               // Reload data with new time range
-              final userId = _auth.currentUser?.uid;
+              final userId = _userService.currentUserId;
               if (userId != null) {
                 _subscriptionService.getArtistProfileByUserId(userId).then((
                   profile,

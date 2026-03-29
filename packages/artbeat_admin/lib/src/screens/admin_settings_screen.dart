@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/admin_settings_model.dart';
 import '../services/admin_settings_service.dart';
 import '../widgets/admin_drawer.dart';
@@ -17,7 +18,7 @@ class AdminSettingsScreen extends StatefulWidget {
 }
 
 class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
-  final AdminSettingsService _settingsService = AdminSettingsService();
+  late AdminSettingsService _settingsService;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
 
@@ -29,6 +30,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _settingsService = context.read<AdminSettingsService>();
     _loadSettings();
   }
 

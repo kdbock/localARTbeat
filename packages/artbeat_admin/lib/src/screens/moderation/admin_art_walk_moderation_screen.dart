@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/admin_art_walk_model.dart';
 import '../../services/admin_art_walk_moderation_service.dart';
@@ -16,8 +17,7 @@ class AdminArtWalkModerationScreen extends StatefulWidget {
 
 class _AdminArtWalkModerationScreenState
     extends State<AdminArtWalkModerationScreen> {
-  final AdminArtWalkModerationService _artWalkService =
-      AdminArtWalkModerationService();
+  late AdminArtWalkModerationService _artWalkService;
   List<AdminArtWalkModel> _artWalks = [];
   bool _loading = true;
   String _selectedTab = 'all';
@@ -25,6 +25,7 @@ class _AdminArtWalkModerationScreenState
   @override
   void initState() {
     super.initState();
+    _artWalkService = context.read<AdminArtWalkModerationService>();
     _loadArtWalks();
   }
 

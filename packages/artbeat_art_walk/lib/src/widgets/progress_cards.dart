@@ -1,10 +1,11 @@
 import 'package:intl/intl.dart' as intl;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/models.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_preview_read_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class InProgressWalkCard extends StatelessWidget {
   final ArtWalkProgress progress;
@@ -316,7 +317,9 @@ class CreatedWalkCard extends StatelessWidget {
                 ),
               ),
               FutureBuilder<double>(
-                future: getAverageRating(walk.id),
+                future: context
+                    .read<ArtWalkPreviewReadService>()
+                    .getAverageRating(walk.id),
                 builder: (context, snapshot) {
                   final label =
                       snapshot.connectionState == ConnectionState.waiting
@@ -425,7 +428,9 @@ class SavedWalkCard extends StatelessWidget {
                 ),
               ),
               FutureBuilder<double>(
-                future: getAverageRating(walk.id),
+                future: context
+                    .read<ArtWalkPreviewReadService>()
+                    .getAverageRating(walk.id),
                 builder: (context, snapshot) {
                   final label =
                       snapshot.connectionState == ConnectionState.waiting
@@ -779,33 +784,4 @@ String _formatDuration(Duration duration) {
   return 'art_walk_progress_cards_text_duration_minutes'.tr(
     namedArgs: {'minutes': duration.inMinutes.toString()},
   );
-}
-
-Future<double> getAverageRating(String walkId) async {
-  try {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('walk_reviews')
-        .where('walkId', isEqualTo: walkId)
-        .get();
-
-    if (snapshot.docs.isEmpty) {
-      return 0.0;
-    }
-
-    double totalRating = 0.0;
-    int count = 0;
-
-    for (var doc in snapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      if (data.containsKey('rating') && data['rating'] is num) {
-        totalRating += (data['rating'] as num).toDouble();
-        count++;
-      }
-    }
-
-    return count > 0 ? totalRating / count : 0.0;
-  } catch (e) {
-    AppLogger.error('Error getting average rating: $e');
-    return 0.0;
-  }
 }

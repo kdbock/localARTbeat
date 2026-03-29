@@ -8,8 +8,8 @@ class AdminEventModerationService {
   AdminEventModerationService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -34,7 +34,8 @@ class AdminEventModerationService {
           continue;
         }
 
-        final eventDoc = await _firestore.collection('events').doc(eventId).get();
+        final eventDoc =
+            await _firestore.collection('events').doc(eventId).get();
         if (!eventDoc.exists) {
           continue;
         }
@@ -103,7 +104,8 @@ class AdminEventModerationService {
     await _ensureModerator(user.uid);
 
     try {
-      final totalFlags = await _firestore.collection('event_flags').count().get();
+      final totalFlags =
+          await _firestore.collection('event_flags').count().get();
       final pendingFlags = await _firestore
           .collection('event_flags')
           .where('status', isEqualTo: 'pending')
@@ -193,7 +195,8 @@ class AdminEventModerationService {
     await _ensureModerator(user.uid);
 
     final eventDoc = await _firestore.collection('events').doc(eventId).get();
-    final event = eventDoc.exists ? AdminEventModel.fromFirestore(eventDoc) : null;
+    final event =
+        eventDoc.exists ? AdminEventModel.fromFirestore(eventDoc) : null;
 
     await _firestore.collection('events').doc(eventId).delete();
 

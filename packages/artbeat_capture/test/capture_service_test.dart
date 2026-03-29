@@ -11,7 +11,8 @@ class StubUserService extends Fake implements UserService {
   bool incrementResult = true;
 
   @override
-  Future<bool> incrementUserCaptureCount(String userId) async => incrementResult;
+  Future<bool> incrementUserCaptureCount(String userId) async =>
+      incrementResult;
 }
 
 class StubConnectivity extends Fake implements Connectivity {
@@ -154,7 +155,9 @@ void main() {
     );
     firestore = StubFirebaseFirestore({
       'captures': capturesCollection,
-      'publicArt': StubCollectionReference<Map<String, dynamic>>(docs: const []),
+      'publicArt': StubCollectionReference<Map<String, dynamic>>(
+        docs: const [],
+      ),
     });
     connectivity = StubConnectivity(const <ConnectivityResult>[]);
     userService = StubUserService();
@@ -186,7 +189,9 @@ void main() {
       );
       firestore = StubFirebaseFirestore({
         'captures': capturesCollection,
-        'publicArt': StubCollectionReference<Map<String, dynamic>>(docs: const []),
+        'publicArt': StubCollectionReference<Map<String, dynamic>>(
+          docs: const [],
+        ),
       });
       captureService = CaptureService.withDependencies(
         firestore: firestore,

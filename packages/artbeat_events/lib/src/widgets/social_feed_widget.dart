@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide DateFormat, NumberFormat;
+import 'package:provider/provider.dart';
 
 import '../services/social_integration_service.dart';
 
@@ -27,7 +28,6 @@ class SocialFeedWidget extends StatefulWidget {
 }
 
 class _SocialFeedWidgetState extends State<SocialFeedWidget> {
-  final SocialIntegrationService _socialService = SocialIntegrationService();
   final ScrollController _scrollController = ScrollController();
 
   List<Map<String, dynamic>> _feedItems = [];
@@ -65,7 +65,9 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
     });
 
     try {
-      final items = await _socialService.getSocialFeed();
+      final items = await context
+          .read<SocialIntegrationService>()
+          .getSocialFeed();
       setState(() {
         _feedItems = items;
         _isLoading = false;
@@ -86,8 +88,9 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
     });
 
     try {
+      final socialService = context.read<SocialIntegrationService>();
       // Load more items with pagination
-      final moreItems = await _socialService.getSocialFeed(
+      final moreItems = await socialService.getSocialFeed(
         limit: 10,
         // In real implementation, pass lastDoc for pagination
       );
@@ -536,7 +539,9 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
     if (artistId == null) return;
 
     try {
-      await _socialService.toggleFollowArtist(artistId);
+      await context.read<SocialIntegrationService>().toggleFollowArtist(
+        artistId,
+      );
       await _loadFeedItems();
     } on Exception catch (e) {
       if (mounted) {
@@ -553,7 +558,7 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
 
   Future<void> _toggleLike(String eventId) async {
     try {
-      await _socialService.toggleEventLike(eventId);
+      await context.read<SocialIntegrationService>().toggleEventLike(eventId);
       // You could optimistically update local state here
     } on Exception catch (e) {
       if (mounted) {
@@ -570,7 +575,7 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
 
   Future<void> _toggleSave(String eventId) async {
     try {
-      await _socialService.toggleEventSave(eventId);
+      await context.read<SocialIntegrationService>().toggleEventSave(eventId);
     } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -585,7 +590,10 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
   }
 
   void _shareEvent(String eventId) {
-    _socialService.shareEvent(eventId, shareMethod: 'app');
+    context.read<SocialIntegrationService>().shareEvent(
+      eventId,
+      shareMethod: 'app',
+    );
 
     if (mounted) {
       ScaffoldMessenger.of(
@@ -615,7 +623,6 @@ class _CommentsBottomSheet extends StatefulWidget {
 }
 
 class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
-  final SocialIntegrationService _socialService = SocialIntegrationService();
   final TextEditingController _commentController = TextEditingController();
 
   List<Map<String, dynamic>> _comments = [];
@@ -639,7 +646,9 @@ class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
     });
 
     try {
-      final comments = await _socialService.getEventComments(widget.eventId);
+      final comments = await context
+          .read<SocialIntegrationService>()
+          .getEventComments(widget.eventId);
       setState(() {
         _comments = comments;
         _isLoading = false;
@@ -656,7 +665,10 @@ class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
     if (comment.isEmpty) return;
 
     try {
-      await _socialService.addEventComment(widget.eventId, comment);
+      await context.read<SocialIntegrationService>().addEventComment(
+        widget.eventId,
+        comment,
+      );
       _commentController.clear();
       await _loadComments();
     } on Exception catch (e) {

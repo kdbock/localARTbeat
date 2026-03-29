@@ -10,6 +10,7 @@ export 'src/screens/sponsorships/sponsorship_detail_screen.dart';
 export 'src/screens/sponsorships/sponsorship_review_screen.dart';
 export 'src/services/sponsor_service.dart';
 export 'src/services/sponsorship_checkout_service.dart';
+export 'src/services/sponsorship_submission_service.dart';
 export 'src/utils/sponsorship_placements.dart';
 export 'src/widgets/sponsor_banner.dart';
 export 'src/widgets/sponsorship_card.dart';

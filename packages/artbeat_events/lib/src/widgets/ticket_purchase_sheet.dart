@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
@@ -31,9 +32,10 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
   final _emailController = TextEditingController();
   final _nameController = TextEditingController();
 
-  final EventService _eventService = EventService();
-  final EventNotificationService _notificationService =
-      EventNotificationService();
+  late final EventService _eventService;
+  late final EventNotificationService _notificationService;
+  late final UserService _userService;
+  late final UnifiedPaymentService _unifiedPaymentService;
 
   int _quantity = 1;
   bool _isProcessing = false;
@@ -42,11 +44,15 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
   @override
   void initState() {
     super.initState();
+    _eventService = context.read<EventService>();
+    _notificationService = context.read<EventNotificationService>();
+    _userService = context.read<UserService>();
+    _unifiedPaymentService = context.read<UnifiedPaymentService>();
     _prefillUserInfo();
   }
 
   Future<void> _prefillUserInfo() async {
-    final user = await UserService().getCurrentUserModel();
+    final user = await _userService.getCurrentUserModel();
     if (user != null && mounted) {
       setState(() {
         _emailController.text = user.email;
@@ -545,10 +551,8 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
         final tax = subtotal * 0.08;
         final total = subtotal + tax;
 
-        final unifiedPaymentService = UnifiedPaymentService();
-
         // 1. Create Payment Intent
-        final intentData = await unifiedPaymentService.createPaymentIntent(
+        final intentData = await _unifiedPaymentService.createPaymentIntent(
           amount: total,
           description: 'Tickets for ${widget.event.title} x$_quantity',
           metadata: {
@@ -563,15 +567,15 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
         final paymentIntentId = intentData['paymentIntentId'] as String;
 
         // 2. Initialize Payment Sheet
-        await unifiedPaymentService.initPaymentSheetForPayment(
+        await _unifiedPaymentService.initPaymentSheetForPayment(
           paymentIntentClientSecret: clientSecret,
         );
 
         // 3. Present Payment Sheet
-        await unifiedPaymentService.presentPaymentSheet();
+        await _unifiedPaymentService.presentPaymentSheet();
 
         // 4. Process Payment on Backend (Verification and record creation)
-        final result = await unifiedPaymentService.processEventTicketPayment(
+        final result = await _unifiedPaymentService.processEventTicketPayment(
           eventId: widget.event.id,
           ticketTypeId: widget.ticketType.id,
           quantity: _quantity,

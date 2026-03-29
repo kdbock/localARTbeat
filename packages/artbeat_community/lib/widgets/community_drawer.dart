@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
 import '../screens/feed/trending_content_screen.dart';
@@ -29,36 +28,27 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
   UserModel? _currentUser;
   bool _isLoading = true;
   late final Future<PackageInfo> _packageInfoFuture;
+  late UserService _userService;
 
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
     _packageInfoFuture = PackageInfo.fromPlatform();
     _loadCurrentUser();
   }
 
   Future<void> _loadCurrentUser() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-
-        if (userDoc.exists) {
-          setState(() {
-            _currentUser = UserModel.fromFirestore(userDoc);
-            _isLoading = false;
-          });
-        } else {
-          setState(() => _isLoading = false);
-        }
-      } else {
-        setState(() => _isLoading = false);
-      }
+      final currentUser = await _userService.getCurrentUserModel();
+      if (!mounted) return;
+      setState(() {
+        _currentUser = currentUser;
+        _isLoading = false;
+      });
     } catch (e) {
       AppLogger.error('Error loading current user: $e');
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }

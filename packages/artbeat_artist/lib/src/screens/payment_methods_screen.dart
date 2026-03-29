@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 
 /// Screen for managing payment methods
 class PaymentMethodsScreen extends StatefulWidget {
@@ -13,10 +12,7 @@ class PaymentMethodsScreen extends StatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
-  final core.UnifiedPaymentService _paymentService =
-      core.UnifiedPaymentService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final core.UnifiedPaymentService _paymentService;
 
   bool _isLoading = true;
   String? _errorMessage;
@@ -26,6 +22,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   @override
   void initState() {
     super.initState();
+    _paymentService = context.read<core.UnifiedPaymentService>();
     core.AppLogger.info('🔷 PaymentMethodsScreen: initState called');
     _loadPaymentMethods();
   }
@@ -39,29 +36,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     });
 
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get customer ID (using the more robust UnifiedPaymentService helper)
-      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
-
-      // Get default payment method from Firestore
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      _defaultPaymentMethodId =
-          userDoc.data()?['defaultPaymentMethodId'] as String?;
-
-      if (stripeCustomerId.isEmpty) {
-        setState(() {
-          _isLoading = false;
-          _paymentMethods = [];
-        });
-        return;
-      }
-
-      // Load payment methods
-      final methods = await _paymentService.getPaymentMethods(stripeCustomerId);
+      _defaultPaymentMethodId = await _paymentService
+          .getDefaultPaymentMethodId();
+      final methods = await _paymentService.getCurrentUserPaymentMethods();
 
       setState(() {
         _isLoading = false;
@@ -83,26 +60,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   /// Add a new payment method
   Future<void> _addPaymentMethod() async {
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get or create a customer using the robust helper
-      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
-
-      // Setup payment sheet
-      await _paymentService.setupPaymentSheet(
-        customerId: stripeCustomerId,
-        setupIntentClientSecret: await _paymentService.createSetupIntent(
-          stripeCustomerId,
-        ),
-      );
-
-      // Present payment sheet with crash prevention
-      await _paymentService.safelyPresentPaymentSheet(
-        operationName: 'presentPaymentSheet_setup',
-      );
+      await _paymentService.addPaymentMethodForCurrentUser();
 
       // Reload payment methods and return success
       await _loadPaymentMethods();
@@ -128,23 +86,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     });
 
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
-
-      // Set default payment method in Stripe
-      await _paymentService.setDefaultPaymentMethod(
-        customerId: stripeCustomerId,
-        paymentMethodId: paymentMethodId,
+      await _paymentService.saveDefaultPaymentMethodForCurrentUser(
+        paymentMethodId,
       );
-
-      // Update user document
-      await _firestore.collection('users').doc(userId).update({
-        'defaultPaymentMethodId': paymentMethodId,
-      });
 
       setState(() {
         _defaultPaymentMethodId = paymentMethodId;
@@ -177,13 +121,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
       // If it was the default payment method, clear the default
       if (_defaultPaymentMethodId == paymentMethodId) {
-        final userId = _auth.currentUser?.uid;
-        if (userId != null) {
-          await _firestore.collection('users').doc(userId).update({
-            'defaultPaymentMethodId': FieldValue.delete(),
-          });
-          _defaultPaymentMethodId = null;
-        }
+        await _paymentService.clearDefaultPaymentMethodForCurrentUser();
+        _defaultPaymentMethodId = null;
       }
 
       // Reload payment methods

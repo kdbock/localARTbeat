@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../models/feedback_model.dart';
 import '../services/feedback_service.dart';
 import '../theme/artbeat_colors.dart';
@@ -18,8 +19,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _feedbackService = FeedbackService();
   final _imagePicker = ImagePicker();
+  late final FeedbackService _feedbackService;
 
   FeedbackType _selectedType = FeedbackType.bug;
   FeedbackPriority _selectedPriority = FeedbackPriority.medium;
@@ -28,6 +29,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
   ]; // Changed to support multiple packages
   final List<File> _selectedImages = [];
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _feedbackService = context.read<FeedbackService>();
+  }
 
   @override
   void dispose() {
@@ -429,7 +436,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
               )
             : Text(
                 'feedback_form_title'.tr(),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
       ),
     );

@@ -1,10 +1,11 @@
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/shared_widgets.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_preview_read_service.dart';
 
 class LocalArtWalkPreviewWidget extends StatefulWidget {
   final String zipCode;
@@ -98,8 +99,10 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
   }
 
   Widget _buildMapCard() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _getArtWalksStream(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: context
+          .read<ArtWalkPreviewReadService>()
+          .watchPublicPreviewWalks(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _wrapMapSurface(_buildLoadingState());
@@ -109,12 +112,12 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
           return _wrapMapSurface(_buildDefaultMapView());
         }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        final walks = snapshot.data ?? <Map<String, dynamic>>[];
+        if (walks.isEmpty) {
           return _wrapMapSurface(_buildDefaultMapView());
         }
 
-        final artWalk = snapshot.data!.docs.first;
-        final artWalkData = artWalk.data() as Map<String, dynamic>;
+        final artWalkData = walks.first;
         final List<dynamic> artPoints =
             (artWalkData['artPoints'] as List<dynamic>?) ?? [];
 
@@ -305,23 +308,6 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
         ),
       ),
     );
-  }
-
-  Stream<QuerySnapshot> _getArtWalksStream() {
-    try {
-      return FirebaseFirestore.instance
-          .collection('artWalks')
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(3)
-          .snapshots();
-    } catch (_) {
-      return FirebaseFirestore.instance
-          .collection('artWalks')
-          .where('isPublic', isEqualTo: true)
-          .limit(3)
-          .snapshots();
-    }
   }
 
   void _setupMarkers(List<dynamic> artPoints) {

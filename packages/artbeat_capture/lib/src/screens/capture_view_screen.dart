@@ -93,7 +93,9 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         final message = outcome.queuedOffline
             ? 'Capture saved to the offline queue. It will upload automatically when connection improves.'
             : 'capture_upload_success'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
@@ -102,9 +104,9 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         final message = kDebugMode
             ? 'Failed to submit capture: $e'
             : 'capture_upload_error_generic'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) {

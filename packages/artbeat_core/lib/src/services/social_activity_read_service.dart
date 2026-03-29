@@ -28,9 +28,9 @@ class SocialActivityReadService {
       final lat = userPosition.latitude;
       final latDelta = radiusKm / 111.0;
 
-      final query = _activities.orderBy('timestamp', descending: true).limit(
-        limit * 10,
-      );
+      final query = _activities
+          .orderBy('timestamp', descending: true)
+          .limit(limit * 10);
 
       final snapshot = await query.get();
       final activities = snapshot.docs
@@ -60,7 +60,9 @@ class SocialActivityReadService {
     }
   }
 
-  Future<List<SocialActivityModel>> getRecentActivities({int limit = 20}) async {
+  Future<List<SocialActivityModel>> getRecentActivities({
+    int limit = 20,
+  }) async {
     try {
       final snapshot = await _activities
           .orderBy('timestamp', descending: true)

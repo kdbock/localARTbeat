@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -131,16 +131,8 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
   }
 
   Widget _buildKioskLaneSection(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .where(
-            'kioskLaneUntil',
-            isGreaterThan: Timestamp.fromDate(DateTime.now()),
-          )
-          .orderBy('kioskLaneUntil', descending: true)
-          .limit(8)
-          .snapshots(),
+    return StreamBuilder<List<ArtistProfileModel>>(
+      stream: context.read<ArtistService>().watchKioskLaneArtists(limit: 8),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildKioskLanePlaceholder(
@@ -148,7 +140,9 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        final artists = snapshot.data ?? const <ArtistProfileModel>[];
+
+        if (artists.isEmpty) {
           return _buildKioskLanePlaceholder(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -166,10 +160,6 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
             ),
           );
         }
-
-        final artists = snapshot.data!.docs
-            .map((doc) => ArtistProfileModel.fromFirestore(doc))
-            .toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,7 +584,7 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
 
     try {
       // Toggle follow status using the content engagement service
-      final engagementService = ContentEngagementService();
+      final engagementService = context.read<ContentEngagementService>();
       final newFollowState = await engagementService.toggleEngagement(
         contentId: artist.userId,
         contentType: 'profile',

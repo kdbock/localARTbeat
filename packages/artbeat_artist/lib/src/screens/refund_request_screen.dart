@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show UnifiedPaymentService, EnhancedUniversalHeader, MainLayout;
+import 'package:provider/provider.dart';
 
 /// Screen for handling subscription refunds
 class RefundRequestScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class RefundRequestScreen extends StatefulWidget {
 }
 
 class _RefundRequestScreenState extends State<RefundRequestScreen> {
-  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
+  late final UnifiedPaymentService _paymentService;
   final _formKey = GlobalKey<FormState>();
   final _reasonController = TextEditingController();
   bool _isProcessing = false;
@@ -37,6 +38,12 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
   ];
 
   String _selectedReason = 'Not satisfied with service';
+
+  @override
+  void initState() {
+    super.initState();
+    _paymentService = context.read<UnifiedPaymentService>();
+  }
 
   @override
   void dispose() {

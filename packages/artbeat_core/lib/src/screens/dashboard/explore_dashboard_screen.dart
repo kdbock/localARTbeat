@@ -53,6 +53,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 
   // Onboarding state
   bool _isTourActive = false;
+  late final OnboardingService _onboardingService;
 
   // UI state
   int _scrollDepth = 0;
@@ -139,6 +140,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
 
     _tabController = TabController(length: 3, vsync: this);
 
@@ -303,7 +305,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     browseSectionKey: _browseKey,
                     onFinish: () {
                       setState(() => _isTourActive = false);
-                      OnboardingService().markExploreOnboardingCompleted();
+                      _onboardingService.markExploreOnboardingCompleted();
                     },
                   ),
               ],
@@ -863,8 +865,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await OnboardingService()
-        .isExploreOnboardingCompleted();
+    final isCompleted = await _onboardingService.isExploreOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1000));

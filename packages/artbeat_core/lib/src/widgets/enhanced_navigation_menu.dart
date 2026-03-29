@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../theme/artbeat_colors.dart';
 import '../services/user_service.dart';
 import '../models/user_model.dart';
@@ -42,7 +42,7 @@ class _EnhancedNavigationMenuState extends State<EnhancedNavigationMenu>
   Future<void> _loadUserModel() async {
     try {
       final userService = Provider.of<UserService>(context, listen: false);
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       if (user != null) {
         final userModel = await userService.getUserById(user.uid);
         if (mounted) {

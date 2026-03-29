@@ -2,16 +2,17 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:provider/provider.dart';
 
 import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
 import 'events_list_screen.dart';
+import '../services/event_service.dart';
 
 // Shared widgets (local to events package)
 import '../widgets/glass_bottom_sheet.dart';
@@ -26,8 +27,6 @@ class UserEventsDashboardScreen extends StatefulWidget {
 }
 
 class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   bool _isLoading = true;
   String? _error;
 
@@ -53,15 +52,9 @@ class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
       final today = DateTime(now.year, now.month, now.day);
       final endOfWeek = today.add(const Duration(days: 7));
 
-      final query = await _firestore
-          .collection('events')
-          .where('isPublic', isEqualTo: true)
-          .where('dateTime', isGreaterThan: Timestamp.fromDate(now))
-          .orderBy('dateTime')
-          .limit(50)
-          .get();
-
-      final allEvents = query.docs.map(ArtbeatEvent.fromFirestore).toList();
+      final allEvents = await context
+          .read<EventService>()
+          .getUpcomingPublicEvents(limit: 50);
 
       final featured = <ArtbeatEvent>[];
       final upcoming = <ArtbeatEvent>[];
@@ -256,7 +249,7 @@ class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
   }
 
   Widget _buildWelcomeHeader() {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = context.read<core_auth.AuthService>().currentUser;
 
     return GlassCard(
       padding: const EdgeInsets.all(20),

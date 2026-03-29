@@ -18,19 +18,43 @@ class ConfigService {
 
     try {
       await _envLoader.init();
+      _enforceCriticalConfigContract();
       _isInitialized = true;
       if (kDebugMode) {
         AppLogger.info('✅ ConfigService initialized successfully');
       }
     } catch (e) {
-      // Log the error but don't fail the app initialization
+      if (kReleaseMode) {
+        AppLogger.error('❌ Release-critical config initialization failed: $e');
+        rethrow;
+      }
+
       if (kDebugMode) {
         AppLogger.warning('⚠️ Failed to initialize ConfigService: $e');
-        AppLogger.info('💡 App will continue with default configuration');
+        AppLogger.info(
+          '💡 Continuing in non-release mode with incomplete configuration.',
+        );
       }
-      // Mark as initialized even if loading failed to prevent retries
+
       _isInitialized = true;
     }
+  }
+
+  void _enforceCriticalConfigContract() {
+    final missingKeys = _envLoader.missingCriticalKeys();
+    if (missingKeys.isEmpty) return;
+
+    final message =
+        'Missing critical environment configuration: ${missingKeys.join(', ')}';
+    AppLogger.error('❌ $message');
+
+    if (kReleaseMode) {
+      throw StateError(message);
+    }
+
+    AppLogger.warning(
+      '⚠️ Non-release build continuing with incomplete critical config.',
+    );
   }
 
   /// Get a configuration value securely

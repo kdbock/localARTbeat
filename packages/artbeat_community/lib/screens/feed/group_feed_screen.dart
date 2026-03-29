@@ -1,13 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/group_models.dart';
 import '../../models/post_model.dart';
-import '../../services/art_community_service.dart';
+import '../../services/community_service.dart';
 import '../../widgets/enhanced_post_card.dart';
 import 'create_group_post_screen.dart';
 
@@ -35,7 +34,7 @@ class GroupFeedScreen extends StatefulWidget {
 }
 
 class _GroupFeedScreenState extends State<GroupFeedScreen> {
-  final ArtCommunityService _communityService = ArtCommunityService();
+  late CommunityService _communityService;
   List<PostModel> _posts = [];
   bool _isLoading = true;
   bool _isMember = false;
@@ -47,6 +46,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _checkMembership();
     _loadGroupType();
     _loadGroupPosts();
@@ -54,13 +54,11 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
 
   @override
   void dispose() {
-    _communityService.dispose();
     super.dispose();
   }
 
   Future<void> _checkMembership() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
+    if (_communityService.currentUserId == null) {
       if (!mounted) return;
       setState(() {
         _isMember = false;
@@ -70,16 +68,16 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
     }
 
     try {
-      final membershipDoc = await FirebaseFirestore.instance
-          .collection('groupMembers')
-          .where('groupId', isEqualTo: widget.groupId)
-          .where('userId', isEqualTo: user.uid)
-          .limit(1)
-          .get();
-
       if (!mounted) return;
       setState(() {
-        _isMember = membershipDoc.docs.isNotEmpty;
+        _isMember = false;
+        _checkingMembership = true;
+      });
+
+      final isMember = await _communityService.isGroupMember(widget.groupId);
+      if (!mounted) return;
+      setState(() {
+        _isMember = isMember;
         _checkingMembership = false;
       });
     } catch (e) {
@@ -91,20 +89,8 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
 
   Future<void> _loadGroupType() async {
     try {
-      final groupDoc = await FirebaseFirestore.instance
-          .collection('groups')
-          .doc(widget.groupId)
-          .get();
-
-      if (!groupDoc.exists) return;
-      final data = groupDoc.data();
-      final groupTypeString = data?['groupType'] as String?;
-      if (groupTypeString == null) return;
-
-      final type = GroupType.values.firstWhere(
-        (value) => value.value == groupTypeString,
-        orElse: () => GroupType.artist,
-      );
+      final type = await _communityService.getGroupType(widget.groupId);
+      if (type == null) return;
 
       if (!mounted) return;
       setState(() => _groupType = type);
@@ -117,16 +103,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('groupId', isEqualTo: widget.groupId)
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .get();
-
-      final posts = postsSnapshot.docs
-          .map(PostModel.fromDocument)
-          .toList(growable: false);
+      final posts = await _communityService.getGroupPosts(widget.groupId);
 
       if (!mounted) return;
       setState(() {
@@ -141,8 +118,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
   }
 
   Future<void> _joinGroup() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
+    if (_communityService.currentUserId == null) {
       _showSnackBar('community_group_feed.join_sign_in_required'.tr());
       return;
     }
@@ -150,17 +126,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
     setState(() => _isJoining = true);
 
     try {
-      await FirebaseFirestore.instance.collection('groupMembers').add({
-        'groupId': widget.groupId,
-        'userId': user.uid,
-        'role': 'member',
-        'joinedAt': FieldValue.serverTimestamp(),
-      });
-
-      final groupRef = FirebaseFirestore.instance
-          .collection('groups')
-          .doc(widget.groupId);
-      await groupRef.update({'memberCount': FieldValue.increment(1)});
+      await _communityService.joinGroup(widget.groupId);
 
       if (!mounted) return;
       setState(() {
@@ -184,26 +150,12 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
   }
 
   Future<void> _leaveGroup() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (_communityService.currentUserId == null) return;
 
     setState(() => _isLeaving = true);
 
     try {
-      final membershipDocs = await FirebaseFirestore.instance
-          .collection('groupMembers')
-          .where('groupId', isEqualTo: widget.groupId)
-          .where('userId', isEqualTo: user.uid)
-          .get();
-
-      for (final doc in membershipDocs.docs) {
-        await doc.reference.delete();
-      }
-
-      final groupRef = FirebaseFirestore.instance
-          .collection('groups')
-          .doc(widget.groupId);
-      await groupRef.update({'memberCount': FieldValue.increment(-1)});
+      await _communityService.leaveGroup(widget.groupId);
 
       if (!mounted) return;
       setState(() {
@@ -287,7 +239,6 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
-              communityService: _communityService,
               onLike: () => _handleLike(post),
               onShare: () => _handleShare(post),
             ),

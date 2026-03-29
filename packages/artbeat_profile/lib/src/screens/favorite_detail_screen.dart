@@ -1,8 +1,9 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 class FavoriteDetailScreen extends StatefulWidget {
   final String favoriteId;
@@ -19,16 +20,17 @@ class FavoriteDetailScreen extends StatefulWidget {
 }
 
 class _FavoriteDetailScreenState extends State<FavoriteDetailScreen> {
-  final UserService _userService = UserService();
-  final User? currentUser = FirebaseAuth.instance.currentUser;
   bool _isLoading = true;
   bool _isCurrentUser = false;
   Map<String, dynamic>? _favoriteData;
 
+  UserService get _userService => context.read<UserService>();
+
   @override
   void initState() {
     super.initState();
-    _isCurrentUser = currentUser != null && currentUser!.uid == widget.userId;
+    final currentUser = context.read<core_auth.AuthService>().currentUser;
+    _isCurrentUser = currentUser != null && currentUser.uid == widget.userId;
     _loadFavoriteDetails();
   }
 

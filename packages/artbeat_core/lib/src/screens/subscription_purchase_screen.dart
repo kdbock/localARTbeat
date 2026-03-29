@@ -1,9 +1,10 @@
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 
 import '../config/legal_config.dart';
 import '../models/subscription_tier.dart';
@@ -26,13 +27,17 @@ class SubscriptionPurchaseScreen extends StatefulWidget {
 
 class _SubscriptionPurchaseScreenState
     extends State<SubscriptionPurchaseScreen> {
-  final InAppSubscriptionService _subscriptionService =
-      InAppSubscriptionService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late InAppSubscriptionService _subscriptionService;
 
   bool _isLoading = false;
   bool _isYearlyPlan = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscriptionService = context.read<InAppSubscriptionService>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +655,7 @@ class _SubscriptionPurchaseScreenState
   }
 
   Future<void> _handleSubscription() async {
-    final user = _auth.currentUser;
+    final user = context.read<core_auth.AuthService>().currentUser;
     if (user == null) {
       setState(() {
         _errorMessage = 'User not authenticated. Please log in.';

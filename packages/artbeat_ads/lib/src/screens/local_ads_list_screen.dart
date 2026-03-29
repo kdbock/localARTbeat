@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import '../widgets/ad_card.dart';
@@ -17,7 +18,6 @@ class LocalAdsListScreen extends StatefulWidget {
 
 class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
   late LocalAdZone _selectedPlacement;
-  final _adService = LocalAdService();
   final _searchController = TextEditingController();
   bool _isSearching = false;
 
@@ -103,7 +103,9 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
 
   Widget _buildPlacementAds() {
     return FutureBuilder<List<LocalAd>>(
-      future: _adService.getActiveAdsByZone(_selectedPlacement),
+      future: context.read<LocalAdService>().getActiveAdsByZone(
+        _selectedPlacement,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -151,7 +153,7 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
 
   Widget _buildSearchResults() {
     return FutureBuilder<List<LocalAd>>(
-      future: _adService.searchAds(_searchController.text),
+      future: context.read<LocalAdService>().searchAds(_searchController.text),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -178,5 +180,4 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
       },
     );
   }
-
 }

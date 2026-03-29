@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         GlassCard,
@@ -9,6 +9,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         MainLayout,
         SecureNetworkImage,
+        UserService,
         WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_discovery_service.dart';
@@ -23,8 +24,8 @@ class ArtworkDiscoveryScreen extends StatefulWidget {
 
 class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
     with SingleTickerProviderStateMixin {
-  final ArtworkDiscoveryService _discoveryService = ArtworkDiscoveryService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final ArtworkDiscoveryService _discoveryService;
+  late final UserService _userService;
 
   late TabController _tabController;
   List<ArtworkModel> _trendingArtworks = [];
@@ -36,6 +37,8 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
   @override
   void initState() {
     super.initState();
+    _discoveryService = context.read<ArtworkDiscoveryService>();
+    _userService = context.read<UserService>();
     _tabController = TabController(length: 3, vsync: this);
     _loadDiscoveryContent();
   }
@@ -50,7 +53,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
     try {
       setState(() => _isLoading = true);
 
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
 
       // Load different types of recommendations in parallel
       final results = await Future.wait([
@@ -249,7 +252,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
   }
 
   Widget _buildPersonalizedTab() {
-    final userId = _auth.currentUser?.uid;
+    final userId = _userService.currentUserId;
 
     if (userId == null) {
       return _buildSignInPrompt();

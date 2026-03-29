@@ -4,6 +4,7 @@ import '../models/top_follower_model.dart';
 import '../services/subscription_service.dart' as artist_subscription;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 /// Widget that displays top engaged followers (MySpace-style top 8)
 class TopFollowersWidget extends StatefulWidget {
@@ -25,13 +26,14 @@ class TopFollowersWidget extends StatefulWidget {
 }
 
 class _TopFollowersWidgetState extends State<TopFollowersWidget> {
-  final artist_subscription.SubscriptionService _subscriptionService =
-      artist_subscription.SubscriptionService();
+  late final artist_subscription.SubscriptionService _subscriptionService;
   late Future<List<TopFollowerModel>> _topFollowersFuture;
 
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context
+        .read<artist_subscription.SubscriptionService>();
     _topFollowersFuture = _subscriptionService.getTopFollowers(
       artistProfileId: widget.artistProfileId,
       limit: widget.limit,

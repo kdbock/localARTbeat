@@ -9,9 +9,11 @@ class FinancialService extends ChangeNotifier {
   final FirebaseFirestore _firestore;
   final FinancialAnalyticsService _analyticsService;
 
-  FinancialService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
-        _analyticsService = FinancialAnalyticsService();
+  FinancialService({
+    FirebaseFirestore? firestore,
+    FinancialAnalyticsService? analyticsService,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _analyticsService = analyticsService ?? FinancialAnalyticsService();
 
   /// Get recent transactions for admin dashboard
   Future<List<TransactionModel>> getRecentTransactions({int limit = 10}) async {

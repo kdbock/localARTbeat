@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/image_management_service.dart';
 import '../theme/artbeat_colors.dart';
 
@@ -35,12 +36,13 @@ class OptimizedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ImageManagementService().logDecodeDimensions(
+    final imageManagementService = context.read<ImageManagementService>();
+    imageManagementService.logDecodeDimensions(
       label: 'OptimizedImage',
       width: width,
       height: height,
     );
-    Widget imageWidget = ImageManagementService().getOptimizedImage(
+    Widget imageWidget = imageManagementService.getOptimizedImage(
       imageUrl: imageUrl,
       width: width,
       height: height,
@@ -125,6 +127,7 @@ class OptimizedGridImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayUrl = thumbnailUrl ?? imageUrl;
+    final imageManagementService = context.read<ImageManagementService>();
 
     return GestureDetector(
       onTap: onTap,
@@ -133,7 +136,7 @@ class OptimizedGridImage extends StatelessWidget {
         children: [
           Hero(
             tag: heroTag ?? 'image_$displayUrl',
-            child: ImageManagementService().getOptimizedImage(
+            child: imageManagementService.getOptimizedImage(
               imageUrl: displayUrl,
               fit: BoxFit.cover,
               isThumbnail: true,
@@ -203,6 +206,7 @@ class OptimizedAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageManagementService = context.read<ImageManagementService>();
     return GestureDetector(
       onTap: onTap,
       child: Stack(
@@ -216,7 +220,7 @@ class OptimizedAvatar extends StatelessWidget {
             ),
             child: ClipOval(
               child: imageUrl != null && imageUrl!.isNotEmpty
-                  ? ImageManagementService().getOptimizedImage(
+                  ? imageManagementService.getOptimizedImage(
                       imageUrl: imageUrl!,
                       width: radius * 2,
                       height: radius * 2,

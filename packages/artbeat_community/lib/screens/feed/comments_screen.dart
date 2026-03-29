@@ -1,7 +1,5 @@
 import 'package:artbeat_core/artbeat_core.dart' hide DateFormat, NumberFormat;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
@@ -9,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/comment_model.dart';
 import '../../models/post_model.dart';
+import '../../services/community_service.dart';
 import '../../widgets/widgets.dart';
 
 class CommentsScreen extends StatefulWidget {
@@ -31,6 +30,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   bool _isSendingComment = false;
   String _commentType = _commentCategories.first.value;
   CommentModel? _replyingTo;
+  late CommunityService _communityService;
 
   static const List<_CommentCategory> _commentCategories = [
     _CommentCategory(
@@ -63,6 +63,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _loadComments();
   }
 
@@ -78,21 +79,14 @@ class _CommentsScreenState extends State<CommentsScreen> {
     AppLogger.debug('Loading comments for ${widget.post.id}');
     setState(() => _isLoading = true);
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .collection('comments')
-          .orderBy('createdAt', descending: false)
-          .get();
-
       if (!mounted) {
         return;
       }
 
+      final comments = await _communityService.getPostComments(widget.post.id);
+
       setState(() {
-        _comments = snapshot.docs
-            .map((doc) => CommentModel.fromFirestore(doc))
-            .toList();
+        _comments = comments;
         _isLoading = false;
       });
     } catch (e) {
@@ -114,56 +108,22 @@ class _CommentsScreenState extends State<CommentsScreen> {
     setState(() => _isSendingComment = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      if (_communityService.currentUserId == null) {
         _showError('comments_sign_in_required'.tr());
         return;
       }
 
-      final userService = Provider.of<UserService>(context, listen: false);
-      final userModel = await userService.getUserById(user.uid);
-
-      if (userModel == null) {
-        _showError('comments_user_profile_error'.tr());
-        return;
-      }
-
-      final avatarUrl = userModel.profileImageUrl;
       final parentId = _replyingTo?.id ?? '';
-
-      final commentDoc = {
-        'postId': widget.post.id,
-        'userId': user.uid,
-        'userName': userModel.fullName,
-        'userAvatarUrl': avatarUrl,
-        'content': content,
-        'type': _commentType,
-        'parentCommentId': parentId,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-
-      final commentRef = await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .collection('comments')
-          .add(commentDoc);
-
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .update({'commentCount': FieldValue.increment(1)});
-
-      final newComment = CommentModel(
-        id: commentRef.id,
+      final newComment = await _communityService.addCommentForCurrentUser(
         postId: widget.post.id,
-        userId: user.uid,
-        userName: userModel.fullName,
-        userAvatarUrl: avatarUrl,
         content: content,
         type: _commentType,
         parentCommentId: parentId,
-        createdAt: Timestamp.now(),
       );
+      if (newComment == null) {
+        _showError('comments_user_profile_error'.tr());
+        return;
+      }
 
       if (!mounted) {
         return;

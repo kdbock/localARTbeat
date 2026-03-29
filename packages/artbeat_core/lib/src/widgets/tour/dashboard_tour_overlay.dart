@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../theme/artbeat_colors.dart';
 import '../../theme/glass_card.dart';
 import '../../services/onboarding_service.dart';
@@ -49,10 +50,12 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
   late List<TourStep> _steps;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late OnboardingService _onboardingService;
 
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
     _steps = [
       // 1-4 Top navigation
       TourStep(
@@ -253,7 +256,7 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
   }
 
   void _finish() async {
-    await OnboardingService().markOnboardingCompleted();
+    await _onboardingService.markOnboardingCompleted();
     widget.onFinish();
   }
 
@@ -682,10 +685,12 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay>
   late List<TourStep> _steps;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late OnboardingService _onboardingService;
 
   @override
   void initState() {
     super.initState();
+    _onboardingService = context.read<OnboardingService>();
     _steps = [
       // Step 1: Main Menu
       TourStep(
@@ -877,7 +882,7 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay>
   }
 
   void _finish() async {
-    await OnboardingService().markExploreOnboardingCompleted();
+    await _onboardingService.markExploreOnboardingCompleted();
     widget.onFinish();
   }
 

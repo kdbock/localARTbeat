@@ -1,13 +1,12 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart';
-import 'dart:io';
+import 'package:provider/provider.dart';
+import 'dart:io' show File;
 import '../models/index.dart';
 import '../services/index.dart';
 import 'my_ads_screen.dart';
@@ -49,8 +48,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     _selectedSize = widget.initialSize ?? LocalAdSize.small;
     _selectedDuration = LocalAdDuration.oneMonth;
     _selectedPlacement = _availablePlacementsForSelectedType.first;
-    _adService = LocalAdService();
-    _adIapService = LocalAdIapService();
+    _adService = context.read<LocalAdService>();
+    _adIapService = context.read<LocalAdIapService>();
     _trackFunnelStage(stage: 'form_viewed');
   }
 
@@ -88,45 +87,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     if (_selectedImages.isEmpty) return [];
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('User not authenticated');
-      }
-
-      final urls = <String>[];
-      for (var index = 0; index < _selectedImages.length; index++) {
-        final uploadFile = _selectedImages[index];
-        final fileName =
-            'ads/${user.uid}/${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
-        final reference = FirebaseStorage.instance.ref().child(fileName);
-
-        try {
-          await FirebaseStorageUploadService().uploadFileWithRetry(
-            ref: reference,
-            file: uploadFile,
-            operationLabel: 'local ad image upload',
-          );
-        } catch (e) {
-          if (e.toString().contains('NSURLFileProtectionComplete') ||
-              e.toString().contains('file protection')) {
-            final tempDir = Directory.systemTemp;
-            final tempFile = File('${tempDir.path}/temp_ad_image.jpg');
-            await uploadFile.copy(tempFile.path);
-            await FirebaseStorageUploadService().uploadFileWithRetry(
-              ref: reference,
-              file: tempFile,
-              operationLabel: 'local ad image upload',
-            );
-            await tempFile.delete();
-          } else {
-            rethrow;
-          }
-        }
-
-        urls.add(await reference.getDownloadURL());
-      }
-
-      return urls;
+      return _adService.uploadImagesForCurrentUser(_selectedImages);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -145,12 +106,11 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      final userId = _adService.requireCurrentUserId();
 
       await _trackFunnelStage(
         stage: 'checkout_started',
-        userId: user.uid,
+        userId: userId,
         metadata: <String, Object?>{
           'size': _selectedSize.name,
           'duration_days': _selectedDuration.days,
@@ -171,7 +131,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
       await _trackFunnelStage(
         stage: 'checkout_completed',
-        userId: user.uid,
+        userId: userId,
         status: 'purchase_succeeded',
         amount: purchase.price,
         currencyCode: purchase.currencyCode,
@@ -187,7 +147,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
       final ad = LocalAd(
         id: '', // Will be set by service
-        userId: user.uid,
+        userId: userId,
         title: _showTitle ? _titleController.text.trim() : '',
         description: _showDescription ? _descriptionController.text.trim() : '',
         imageUrl: _uploadedImageUrls.isNotEmpty
@@ -222,9 +182,13 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       );
 
       await _trackFunnelStage(
-        stage: creationOutcome.adId != null ? 'review_queued' : 'recovery_required',
-        userId: user.uid,
-        status: creationOutcome.adId != null ? 'pending_review' : 'verification_pending',
+        stage: creationOutcome.adId != null
+            ? 'review_queued'
+            : 'recovery_required',
+        userId: userId,
+        status: creationOutcome.adId != null
+            ? 'pending_review'
+            : 'verification_pending',
         amount: purchase.price,
         currencyCode: purchase.currencyCode,
         metadata: <String, Object?>{
@@ -244,7 +208,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     } catch (e) {
       await _trackFunnelStage(
         stage: 'checkout_failed',
-        userId: FirebaseAuth.instance.currentUser?.uid,
+        userId: _adService.currentUserId,
         status: 'submit_failed',
         metadata: <String, Object?>{
           'error': e.toString(),
@@ -630,8 +594,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             child: _buildGlassField(
               controller: _descriptionController,
               hint: 'ads_create_local_ad_description_hint'.tr(),
-              validatorMessage:
-                  'ads_create_local_ad_description_required'.tr(),
+              validatorMessage: 'ads_create_local_ad_description_required'.tr(),
               maxLines: 5,
             ),
           ),
@@ -1161,9 +1124,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               ),
               const SizedBox(width: 14),
               Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
                       _selectedSize.displayName,
                       style: GoogleFonts.spaceGrotesk(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'feedback_form.dart';
 import '../services/onboarding_service.dart';
 import '../routing/app_routes.dart';
@@ -78,7 +79,7 @@ class DeveloperMenu extends StatelessWidget {
               title: const Text('Reset Onboarding'),
               subtitle: const Text('Show dashboard tour on next refresh'),
               onTap: () async {
-                await OnboardingService().resetOnboarding();
+                await context.read<OnboardingService>().resetOnboarding();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

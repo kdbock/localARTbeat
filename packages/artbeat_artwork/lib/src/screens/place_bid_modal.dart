@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:provider/provider.dart';
 
 /// Modal bottom sheet for placing bids on auction artworks
 class PlaceBidModal extends StatefulWidget {
@@ -24,7 +25,6 @@ class PlaceBidModal extends StatefulWidget {
 class _PlaceBidModalState extends State<PlaceBidModal> {
   final _formKey = GlobalKey<FormState>();
   final _bidController = TextEditingController();
-  final AuctionService _auctionService = AuctionService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -54,7 +54,7 @@ class _PlaceBidModalState extends State<PlaceBidModal> {
     });
 
     try {
-      final result = await _auctionService.placeBid(
+      final result = await context.read<AuctionService>().placeBid(
         widget.artworkId,
         bidAmount,
       );

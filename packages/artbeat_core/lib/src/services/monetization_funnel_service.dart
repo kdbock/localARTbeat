@@ -18,8 +18,10 @@ class MonetizationFunnelService {
   FirebaseAnalytics? _analyticsInstance;
   FirebaseFirestore? _firestoreInstance;
 
-  FirebaseAnalytics get _analytics => _analyticsInstance ??= FirebaseAnalytics.instance;
-  FirebaseFirestore get _firestore => _firestoreInstance ??= FirebaseFirestore.instance;
+  FirebaseAnalytics get _analytics =>
+      _analyticsInstance ??= FirebaseAnalytics.instance;
+  FirebaseFirestore get _firestore =>
+      _firestoreInstance ??= FirebaseFirestore.instance;
 
   Future<void> trackStage({
     required String flow,
@@ -41,7 +43,8 @@ class MonetizationFunnelService {
         parameters: <String, Object>{
           'flow': normalizedFlow,
           'stage': normalizedStage,
-          if (productFamily != null) 'product_family': _normalize(productFamily),
+          if (productFamily != null)
+            'product_family': _normalize(productFamily),
           if (placement != null) 'placement': _normalize(placement),
           if (status != null) 'status': _normalize(status),
           if (currencyCode != null) 'currency': _normalize(currencyCode),
@@ -55,18 +58,20 @@ class MonetizationFunnelService {
     }
 
     try {
-      await _firestore.collection('monetization_funnel_events').add(<String, Object?>{
-        'flow': normalizedFlow,
-        'stage': normalizedStage,
-        'productFamily': productFamily,
-        'placement': placement,
-        'status': status,
-        'userId': userId,
-        'currencyCode': currencyCode,
-        'amount': amount,
-        'metadata': metadata,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+      await _firestore
+          .collection('monetization_funnel_events')
+          .add(<String, Object?>{
+            'flow': normalizedFlow,
+            'stage': normalizedStage,
+            'productFamily': productFamily,
+            'placement': placement,
+            'status': status,
+            'userId': userId,
+            'currencyCode': currencyCode,
+            'amount': amount,
+            'metadata': metadata,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
     } catch (error) {
       AppLogger.warning(
         'Failed to persist monetization funnel event for $normalizedFlow/$normalizedStage: $error',

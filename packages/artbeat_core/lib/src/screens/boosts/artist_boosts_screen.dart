@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ArtistBoostsScreen extends StatefulWidget {
   final bool showAppBar;
@@ -17,7 +18,8 @@ class ArtistBoostsScreen extends StatefulWidget {
 }
 
 class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
-  final UserService _userService = UserService();
+  late final UserService _userService;
+  late final ArtistBoostService _boostService;
 
   List<UserModel> _artists = [];
   UserModel? _selectedArtist;
@@ -28,6 +30,8 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
+    _boostService = context.read<ArtistBoostService>();
     _initializePurchases();
     _loadArtists();
   }
@@ -157,9 +161,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
     }
 
     try {
-      final boostService = ArtistBoostService();
-
-      final success = await boostService.purchaseBoost(
+      final success = await _boostService.purchaseBoost(
         boostProductId: productId,
         recipientId: _selectedArtist!.id,
         message: '',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 /// Enhanced Profile Menu - Comprehensive dropdown for user profile actions
 ///
@@ -23,11 +23,12 @@ class EnhancedProfileMenu extends StatefulWidget {
 class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
   UserModel? _currentUser;
   bool _isLoading = true;
-  final UserService _userService = UserService();
+  late final UserService _userService;
 
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
     _loadUserData();
   }
 
@@ -306,7 +307,7 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
       );
     }
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _userService.currentUser;
     final isAuthenticated = user != null;
 
     if (!isAuthenticated) {
@@ -557,7 +558,7 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
             onPressed: () async {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close profile menu
-              await FirebaseAuth.instance.signOut();
+              await _userService.signOut();
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                   context,

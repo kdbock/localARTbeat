@@ -4,6 +4,7 @@ import '../models/in_app_purchase_models.dart';
 import '../models/subscription_tier.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
+import 'purchase_verification_service.dart';
 
 /// Service for handling subscription-specific in-app purchases
 class InAppSubscriptionService {
@@ -143,29 +144,9 @@ class InAppSubscriptionService {
   /// Internal method to cancel subscription
   Future<bool> _cancelSubscription(String subscriptionId) async {
     try {
-      // Update subscription status in Firestore
-      await _firestore.collection('subscriptions').doc(subscriptionId).update({
-        'status': 'cancelled',
-        'cancellationReason': 'user_requested',
-        'autoRenewing': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Update user's subscription status
-      final subscription = await _firestore
-          .collection('subscriptions')
-          .doc(subscriptionId)
-          .get();
-
-      if (subscription.exists) {
-        final data = subscription.data()!;
-        final userId = data['userId'] as String;
-
-        await _firestore.collection('users').doc(userId).update({
-          'subscriptionStatus': 'cancelled',
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
+      await PurchaseVerificationService.cancelIapSubscription(
+        subscriptionId: subscriptionId,
+      );
 
       AppLogger.info('✅ Subscription cancelled: $subscriptionId');
       return true;

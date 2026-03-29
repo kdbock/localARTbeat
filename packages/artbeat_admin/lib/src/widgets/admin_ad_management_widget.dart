@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import '../models/admin_ad_report_model.dart';
 import '../models/admin_local_ad_purchase_recovery.dart';
@@ -20,7 +20,7 @@ class AdminAdManagementWidget extends StatefulWidget {
 enum _AdminAdFilter { all, needsReview, paymentIssues, flagged, reports }
 
 class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
-  final AdminAdModerationService _moderationService = AdminAdModerationService();
+  late AdminAdModerationService _moderationService;
 
   List<AdminLocalAd> _adsForReview = [];
   List<AdminLocalAd> _adsNeedingPaymentFollowUp = [];
@@ -33,6 +33,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   @override
   void initState() {
     super.initState();
+    _moderationService = context.read<AdminAdModerationService>();
     _loadData();
   }
 
@@ -51,8 +52,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         _adsForReview = adsForReview as List<AdminLocalAd>;
         _adStats = adStats as Map<String, int>;
         _adsNeedingPaymentFollowUp = paymentFollowUpAds as List<AdminLocalAd>;
-        _purchaseRecoveries =
-            recoveries as List<AdminLocalAdPurchaseRecovery>;
+        _purchaseRecoveries = recoveries as List<AdminLocalAdPurchaseRecovery>;
         _isLoading = false;
       });
 
@@ -237,7 +237,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     final filters = <(_AdminAdFilter, String)>[
       (_AdminAdFilter.all, 'admin_ad_filter_all'.tr()),
       (_AdminAdFilter.needsReview, 'admin_ad_filter_pending_review'.tr()),
-      (_AdminAdFilter.paymentIssues, 'admin_ad_management_filter_payment_issues'.tr()),
+      (
+        _AdminAdFilter.paymentIssues,
+        'admin_ad_management_filter_payment_issues'.tr()
+      ),
       (_AdminAdFilter.flagged, 'admin_ad_filter_flagged'.tr()),
       (_AdminAdFilter.reports, 'admin_ad_filter_reports'.tr()),
     ];
@@ -634,16 +637,13 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
           const SizedBox(height: 12),
           _buildMiniMeta('admin_ad_management_meta_user'.tr(), recovery.userId),
           if (recovery.subscriptionProductId != null)
-            _buildMiniMeta(
-                'admin_ad_management_meta_subscription'.tr(),
+            _buildMiniMeta('admin_ad_management_meta_subscription'.tr(),
                 recovery.subscriptionProductId!),
           if (recovery.purchaseId != null)
-            _buildMiniMeta(
-                'admin_ad_management_meta_purchase_id'.tr(),
+            _buildMiniMeta('admin_ad_management_meta_purchase_id'.tr(),
                 recovery.purchaseId!),
           if (recovery.transactionId != null)
-            _buildMiniMeta(
-                'admin_ad_management_meta_transaction_id'.tr(),
+            _buildMiniMeta('admin_ad_management_meta_transaction_id'.tr(),
                 recovery.transactionId!),
           const SizedBox(height: 12),
           Align(
@@ -702,17 +702,14 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
           _buildMiniMeta('admin_ad_management_meta_placement'.tr(),
               ad.zone.placementDisplayName),
           if (ad.subscriptionProductId != null)
-            _buildMiniMeta(
-                'admin_ad_management_meta_subscription'.tr(),
+            _buildMiniMeta('admin_ad_management_meta_subscription'.tr(),
                 ad.subscriptionProductId!),
           if (ad.transactionId != null)
-            _buildMiniMeta(
-                'admin_ad_management_meta_transaction_id'.tr(),
+            _buildMiniMeta('admin_ad_management_meta_transaction_id'.tr(),
                 ad.transactionId!),
           if (ad.purchaseId != null)
             _buildMiniMeta(
-                'admin_ad_management_meta_purchase_id'.tr(),
-                ad.purchaseId!),
+                'admin_ad_management_meta_purchase_id'.tr(), ad.purchaseId!),
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
@@ -749,8 +746,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
                     autoRenewing: false,
                   ),
                   icon: const Icon(Icons.cancel, size: 16),
-                  label:
-                      Text('admin_ad_management_subscription_canceled'.tr()),
+                  label: Text('admin_ad_management_subscription_canceled'.tr()),
                 ),
                 TextButton.icon(
                   onPressed: () => _viewAdDetails(ad),
@@ -834,10 +830,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Future<void> _approveAd(AdminLocalAd ad) async {
     try {
-      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _moderationService.approveAd(
         adId: ad.id,
-        adminId: adminId,
         adminNotes: 'Approved via admin dashboard',
       );
 
@@ -871,10 +865,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
     if (result != null && result.isNotEmpty) {
       try {
-        final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
         await _moderationService.rejectAd(
           adId: ad.id,
-          adminId: adminId,
           reason: result,
         );
 
@@ -904,11 +896,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   Future<void> _reviewReport(
       AdminAdReportModel report, AdminAdReportStatus status) async {
     try {
-      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _moderationService.reviewReport(
         reportId: report.id,
         newStatus: status,
-        adminId: adminId,
         adminNotes: status == AdminAdReportStatus.actionTaken
             ? 'admin_ad_report_action_taken'.tr()
             : 'admin_ad_report_dismissed'.tr(),
@@ -921,10 +911,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         SnackBar(
           content: Text('admin_ad_report_reviewed'
               .tr(namedArgs: {'status': status.displayName.toLowerCase()})),
-          backgroundColor:
-              status == AdminAdReportStatus.actionTaken
-                  ? Colors.red
-                  : Colors.green,
+          backgroundColor: status == AdminAdReportStatus.actionTaken
+              ? Colors.red
+              : Colors.green,
         ),
       );
     } catch (e) {
@@ -943,10 +932,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     AdminLocalAdPurchaseRecovery recovery,
   ) async {
     try {
-      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _moderationService.markPurchaseRecoveryReviewed(
         recoveryId: recovery.id,
-        adminId: adminId,
         resolutionNotes: 'Manual follow-up completed in admin dashboard.',
       );
       await _loadData();
@@ -976,11 +963,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     bool? autoRenewing,
   }) async {
     try {
-      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _moderationService.updateAdPurchaseFollowUp(
         adId: ad.id,
         status: status,
-        adminId: adminId,
         notes: notes,
         autoRenewing: autoRenewing,
       );
@@ -1166,19 +1151,15 @@ class _AdDetailsDialog extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Details grid
-                    _buildDetailRow(
-                        'admin_ad_management_meta_placement'.tr(),
+                    _buildDetailRow('admin_ad_management_meta_placement'.tr(),
                         ad.zone.placementDisplayName),
                     _buildDetailRow('admin_ad_management_meta_size'.tr(),
                         ad.size.displayName),
-                    _buildDetailRow(
-                        'admin_ad_management_meta_status'.tr(),
+                    _buildDetailRow('admin_ad_management_meta_status'.tr(),
                         ad.status.displayName),
-                    _buildDetailRow(
-                        'admin_ad_management_meta_created'.tr(),
+                    _buildDetailRow('admin_ad_management_meta_created'.tr(),
                         ad.createdAt.toString().substring(0, 16)),
-                    _buildDetailRow(
-                        'admin_ad_management_meta_expires'.tr(),
+                    _buildDetailRow('admin_ad_management_meta_expires'.tr(),
                         ad.expiresAt.toString().substring(0, 16)),
                     _buildDetailRow(
                         'admin_ad_management_meta_report_count'.tr(),
@@ -1189,8 +1170,7 @@ class _AdDetailsDialog extends StatelessWidget {
                         ad.subscriptionProductId!,
                       ),
                     if (ad.hasPaidSubscription)
-                      _buildDetailRow(
-                          'admin_ad_management_meta_billing'.tr(),
+                      _buildDetailRow('admin_ad_management_meta_billing'.tr(),
                           ad.paymentSummaryLabel),
                     if (ad.purchaseId != null)
                       _buildDetailRow(
@@ -1223,12 +1203,10 @@ class _AdDetailsDialog extends StatelessWidget {
                         ad.purchaseFollowUpNotes!,
                       ),
                     if (ad.contactInfo != null)
-                      _buildDetailRow(
-                          'admin_ad_management_meta_contact'.tr(),
+                      _buildDetailRow('admin_ad_management_meta_contact'.tr(),
                           ad.contactInfo!),
                     if (ad.websiteUrl != null)
-                      _buildDetailRow(
-                          'admin_ad_management_meta_website'.tr(),
+                      _buildDetailRow('admin_ad_management_meta_website'.tr(),
                           ad.websiteUrl!),
                     if (ad.reviewedBy != null)
                       _buildDetailRow(

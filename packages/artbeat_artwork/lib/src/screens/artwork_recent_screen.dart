@@ -10,6 +10,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         MainLayout,
         WorldBackground;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
 import '../models/artwork_model.dart';
 import '../services/artwork_pagination_service.dart';
 import '../widgets/artwork_grid_widget.dart';
@@ -23,8 +25,6 @@ class ArtworkRecentScreen extends StatefulWidget {
 }
 
 class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
-  final ArtworkPaginationService _paginationService =
-      ArtworkPaginationService();
   final ScrollController _scrollController = ScrollController();
 
   List<ArtworkModel> _recentArtworks = [];
@@ -54,7 +54,9 @@ class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
         _error = null;
       });
 
-      final state = await _paginationService.loadRecentArtworks();
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadRecentArtworks();
 
       if (mounted) {
         setState(() {
@@ -85,9 +87,9 @@ class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
         _isLoadingMore = true;
       });
 
-      final state = await _paginationService.loadRecentArtworks(
-        lastDocument: _lastDocument,
-      );
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadRecentArtworks(lastDocument: _lastDocument);
 
       if (mounted) {
         setState(() {

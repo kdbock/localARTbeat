@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 
 /// Widget that displays a horizontal list of local artists
 class LocalArtistsRowWidget extends StatefulWidget {
@@ -38,55 +40,18 @@ class _LocalArtistsRowWidgetState extends State<LocalArtistsRowWidget> {
   }
 
   Future<List<ArtistProfileModel>> _fetchAndSortArtists() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('artistProfiles')
-        .where('isPortfolioPublic', isEqualTo: true)
-        .limit(LocalArtistsRowWidget._maxArtists)
-        .get();
-
-    final artists = snapshot.docs
-        .map((doc) => ArtistProfileModel.fromFirestore(doc))
-        .toList();
-
-    final viewerLocation = await _resolveViewerLocation();
-
-    return GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
-      items: artists,
-      idOf: (artist) => artist.userId,
-      locationOf: (artist) => artist.location,
-      coordsOf: (artist) {
-        final lat = artist.locationLat;
-        final lng = artist.locationLng;
-        if (lat == null || lng == null) return null;
-        return SimpleLatLng(lat, lng);
-      },
-      viewerLocation: viewerLocation,
-      tieBreaker: (a, b) {
-        final scoreCompare = b.boostScore.compareTo(a.boostScore);
-        if (scoreCompare != 0) return scoreCompare;
-        final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final boostTimeCompare = bBoost.compareTo(aBoost);
-        if (boostTimeCompare != 0) return boostTimeCompare;
-        return a.displayName.compareTo(b.displayName);
-      },
-    );
+    return context
+        .read<artist.ArtistGalleryDiscoveryReadService>()
+        .getNearbyPublicArtists(
+          zipCode: widget.zipCode,
+          limit: LocalArtistsRowWidget._maxArtists,
+        );
   }
 
   void _refreshArtists() {
     setState(() {
       _artistsFuture = _fetchAndSortArtists();
     });
-  }
-
-  Future<SimpleLatLng?> _resolveViewerLocation() async {
-    final zipCoords = await LocationUtils.getCoordinatesFromZipCode(
-      widget.zipCode,
-    );
-    if (zipCoords != null) {
-      return zipCoords;
-    }
-    return GeoWeightingUtils.resolveViewerLocation(null);
   }
 
   @override

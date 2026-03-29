@@ -15,13 +15,13 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../models/art_models.dart';
+import '../models/artwork_model.dart' as community_artwork;
 import '../models/post_model.dart';
 import '../services/art_community_service.dart';
+import '../services/community_service.dart';
 import '../services/community_social_activity_service.dart';
 import '../src/services/moderation_service.dart';
 import '../widgets/enhanced_post_card.dart';
@@ -164,6 +164,7 @@ mixin PostLoadingMixin<T extends StatefulWidget> on State<T> {
     setState(() => isLoading = true);
 
     try {
+      final currentUser = context.read<UserService>().currentUser;
       AppLogger.info('📱 Loading posts from community service...');
 
       final loadedPosts = await communityService.getFeed(limit: limit);
@@ -172,7 +173,6 @@ mixin PostLoadingMixin<T extends StatefulWidget> on State<T> {
 
       // Filter out posts from blocked users
       List<PostModel> filtered = loadedPosts;
-      final currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser != null) {
         try {
@@ -243,7 +243,6 @@ class CommissionsTab extends StatefulWidget {
 
 class _CommissionsTabState extends State<CommissionsTab>
     with SingleTickerProviderStateMixin {
-  final DirectCommissionService _commissionService = DirectCommissionService();
   late final TabController _tabController;
   List<DirectCommissionModel> _commissions = [];
   bool _isLoading = true;
@@ -264,15 +263,15 @@ class _CommissionsTabState extends State<CommissionsTab>
   Future<void> _loadCommissions() async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         setState(() => _isLoading = false);
         return;
       }
 
-      final commissions = await _commissionService.getCommissionsByUser(
-        user.uid,
-      );
+      final commissions = await context
+          .read<DirectCommissionService>()
+          .getCommissionsByUser(userId);
       setState(() {
         _commissions = commissions;
         _isLoading = false;
@@ -569,7 +568,6 @@ class DiscoveryTab extends StatefulWidget {
 class _DiscoveryTabState extends State<DiscoveryTab>
     with SingleTickerProviderStateMixin {
   late TabController _subTabController;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -636,23 +634,10 @@ class _DiscoveryTabState extends State<DiscoveryTab>
   }
 
   Widget _buildArtworkGrid(String type) {
-    Query query = _firestore
-        .collection('artwork')
-        .where('isPublic', isEqualTo: true);
-
-    if (type == 'sale') {
-      query = query.where('isForSale', isEqualTo: true);
-    } else if (type == 'auction') {
-      query = query.where('auctionEnabled', isEqualTo: true);
-    } else if (type == 'featured') {
-      query = query.where('isFeatured', isEqualTo: true);
-    }
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: query
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .snapshots(),
+    return StreamBuilder<List<community_artwork.ArtworkModel>>(
+      stream: context.read<CommunityService>().watchMarketplaceArtworks(
+        type: type,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -671,8 +656,9 @@ class _DiscoveryTabState extends State<DiscoveryTab>
           );
         }
 
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
+        final artworks =
+            snapshot.data ?? const <community_artwork.ArtworkModel>[];
+        if (artworks.isEmpty) {
           return const Center(
             child: Text(
               'No artwork found',
@@ -682,16 +668,15 @@ class _DiscoveryTabState extends State<DiscoveryTab>
         }
 
         // Apply search filter if any
-        final filteredDocs = docs.where((doc) {
+        final filteredArtworks = artworks.where((artwork) {
           if (widget.searchQuery.isEmpty) return true;
-          final data = doc.data() as Map<String, dynamic>;
-          final title = (data['title'] as String? ?? '').toLowerCase();
-          final artist = (data['artistName'] as String? ?? '').toLowerCase();
+          final title = artwork.title.toLowerCase();
+          final artist = (artwork.artist?.displayName ?? '').toLowerCase();
           final q = widget.searchQuery.toLowerCase();
           return title.contains(q) || artist.contains(q);
         }).toList();
 
-        if (filteredDocs.isEmpty) {
+        if (filteredArtworks.isEmpty) {
           return Center(
             child: Text(
               'No results for "${widget.searchQuery}"',
@@ -708,33 +693,24 @@ class _DiscoveryTabState extends State<DiscoveryTab>
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
-          itemCount: filteredDocs.length,
+          itemCount: filteredArtworks.length,
           itemBuilder: (context, index) {
-            final data = filteredDocs[index].data() as Map<String, dynamic>;
-            return _buildArtworkCard(filteredDocs[index].id, data);
+            return _buildArtworkCard(filteredArtworks[index]);
           },
         );
       },
     );
   }
 
-  Widget _buildArtworkCard(String id, Map<String, dynamic> data) {
-    final title = (data['title'] as String?) ?? 'Untitled';
-    final artistName = (data['artistName'] as String?) ?? 'Unknown Artist';
-    final imageUrl = (data['imageUrl'] as String?) ?? '';
-    final price = (data['price'] as num?)?.toDouble() ?? 0.0;
-    final isAuction =
-        data['auctionEnabled'] == true || data['isAuction'] == true;
-    final currentBid =
-        (data['currentHighestBid'] as num?)?.toDouble() ??
-        (data['startingPrice'] as num?)?.toDouble() ??
-        0.0;
-
+  Widget _buildArtworkCard(community_artwork.ArtworkModel artwork) {
+    final title = artwork.title.isNotEmpty ? artwork.title : 'Untitled';
+    final artistName = artwork.artist?.displayName ?? 'Unknown Artist';
+    final imageUrl = artwork.imageUrl;
     return GestureDetector(
       onTap: () => Navigator.pushNamed(
         context,
         '/artwork/detail',
-        arguments: {'artworkId': id},
+        arguments: {'artworkId': artwork.id},
       ),
       child: _Glass(
         padding: EdgeInsets.zero,
@@ -778,49 +754,6 @@ class _DiscoveryTabState extends State<DiscoveryTab>
                       fontWeight: FontWeight.w600,
                       color: _LAB.textSecondary,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (isAuction) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'AUCTION',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.orange,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '\$${currentBid.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            color: _LAB.teal,
-                          ),
-                        ),
-                      ] else ...[
-                        Text(
-                          '\$${price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            color: _LAB.teal,
-                          ),
-                        ),
-                      ],
-                    ],
                   ),
                 ],
               ),
@@ -870,7 +803,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _communityService = ArtCommunityService();
+    _communityService = context.read<ArtCommunityService>();
     _checkAuthStatus();
     _checkOnboarding();
   }
@@ -878,12 +811,11 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   @override
   void dispose() {
     _tabController.dispose();
-    _communityService.dispose();
     super.dispose();
   }
 
   void _checkAuthStatus() {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = context.read<UserService>().currentUser;
     if (user != null) {
       AppLogger.info('🔐 User is authenticated: ${user.uid} (${user.email})');
     } else {
@@ -1347,55 +1279,24 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
   Future<void> _loadActivities() async {
     try {
-      final socialService = CommunitySocialActivityService();
-      final user = FirebaseAuth.instance.currentUser;
-
-      List<CommunitySocialActivity> activities = [];
-      if (user != null) {
-        final userActivities = await socialService.getUserActivities(
-          userId: user.uid,
-          limit: 10,
-        );
-        activities = userActivities;
-
-        if (activities.length < 5) {
-          try {
-            final userPosition = await Geolocator.getCurrentPosition(
-              locationSettings: const LocationSettings(
-                accuracy: LocationAccuracy.medium,
-              ),
-            );
-            final nearbyActivities = await socialService.getNearbyActivities(
-              userPosition: userPosition,
-              radiusKm: 80.0,
-              limit: 10,
-            );
-
-            final ids = activities.map((a) => a.id).toSet();
-            for (final a in nearbyActivities) {
-              if (!ids.contains(a.id)) activities.add(a);
-            }
-          } catch (_) {}
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
+        if (mounted) {
+          setState(() {
+            _activities = [];
+            _combineFeedItems();
+          });
         }
+        return;
       }
 
-      // Filter out RSS-like items (your existing logic)
-      final filteredActivities = activities.where((activity) {
-        final activityType = activity.type.toString().toLowerCase();
-        final isRssFeed =
-            activityType.contains('rss') ||
-            activityType.contains('feed') ||
-            activityType.contains('news');
-
-        final message = activity.message.toLowerCase();
-        final hasRssIndicators =
-            message.contains('rss') ||
-            message.contains('news feed') ||
-            message.contains('political news') ||
-            message.contains('news sports');
-
-        return !isRssFeed && !hasRssIndicators;
-      }).toList();
+      final filteredActivities = await context
+          .read<CommunityService>()
+          .getPersonalizedActivities(
+            userId: userId,
+            socialActivityService: context
+                .read<CommunitySocialActivityService>(),
+          );
 
       if (mounted) {
         setState(() => _activities = filteredActivities);
@@ -1645,8 +1546,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
   void _handleLike(PostModel post) async {
     // keep your existing implementation
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('community_hub_sign_in_like'.tr())),
         );
@@ -1714,8 +1615,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
   void _handleShare(PostModel post) async {
     // keep your existing implementation
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('community_hub_sign_in_share'.tr())),
         );
@@ -2135,7 +2036,10 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
                 const SizedBox(height: 14),
                 HudButton.primary(
                   onPressed: () async {
-                    await Navigator.pushNamed(context, AppRoutes.artistOnboarding);
+                    await Navigator.pushNamed(
+                      context,
+                      AppRoutes.artistOnboarding,
+                    );
                     if (mounted) _loadArtists();
                   },
                   text: 'community_hub_artists_empty_cta'.tr(),
@@ -2231,30 +2135,17 @@ class _GroupsTabState extends State<GroupsTab> {
   Future<void> _loadGroups() async {
     setState(() => _isLoading = true);
     try {
-      final groupsSnapshot = await FirebaseFirestore.instance
-          .collection('groups')
-          .orderBy('memberCount', descending: true)
-          .limit(20)
-          .get();
-
-      final groups = groupsSnapshot.docs.map((DocumentSnapshot doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return GroupModel(
-          id: doc.id,
-          name: data['name'] as String? ?? 'Unknown',
-          description: data['description'] as String? ?? '',
-          iconUrl: data['iconUrl'] as String? ?? '',
-          memberCount: data['memberCount'] as int? ?? 0,
-          postCount: data['postCount'] as int? ?? 0,
-          createdBy: data['createdBy'] as String? ?? '',
-          color: data['color'] as String? ?? '#8B5CF6',
-        );
-      }).toList();
+      final groups = await context.read<CommunityService>().getTopGroups(
+        limit: 20,
+      );
 
       if (mounted) {
+        final loadedGroups = groups
+            .map(GroupModel.fromMap)
+            .toList(growable: false);
         setState(() {
-          _groups = groups;
-          _filteredGroups = groups;
+          _groups = loadedGroups;
+          _filteredGroups = loadedGroups;
           _isLoading = false;
         });
       }
@@ -2683,32 +2574,10 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please sign in to create a group')),
-        );
-        return;
-      }
-
-      final groupRef = await FirebaseFirestore.instance
-          .collection('groups')
-          .add({
-            'name': _nameController.text.trim(),
-            'description': _descriptionController.text.trim(),
-            'createdBy': user.uid,
-            'memberCount': 1,
-            'postCount': 0,
-            'color': '#8B5CF6',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-
-      await FirebaseFirestore.instance.collection('groupMembers').add({
-        'groupId': groupRef.id,
-        'userId': user.uid,
-        'role': 'admin',
-        'joinedAt': FieldValue.serverTimestamp(),
-      });
+      await context.read<CommunityService>().createGroupForCurrentUser(
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+      );
 
       if (mounted) {
         Navigator.of(context).pop();

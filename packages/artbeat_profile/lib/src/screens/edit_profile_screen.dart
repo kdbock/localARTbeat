@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/avatar_picker.dart';
 import '../widgets/custom_text_field.dart';
@@ -19,8 +20,6 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final UserService _userService = UserService();
-
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -30,6 +29,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _avatarUrl;
 
   File? _newAvatarFile;
+
+  UserService get _userService => context.read<UserService>();
 
   @override
   void initState() {

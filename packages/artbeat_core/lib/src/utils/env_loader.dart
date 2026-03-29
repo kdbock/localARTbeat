@@ -9,6 +9,14 @@ class EnvLoader {
 
   EnvLoader._internal();
 
+  static const List<String> criticalEnvironmentKeys = [
+    'STRIPE_PUBLISHABLE_KEY',
+    'FIREBASE_FUNCTIONS_BASE_URL',
+    'FIREBASE_REGION',
+    'FIREBASE_PROJECT_ID',
+    'API_BASE_URL',
+  ];
+
   /// Map of environment variables
   final Map<String, String> _envVars = {};
 
@@ -100,11 +108,6 @@ class EnvLoader {
         _envVars['APPLE_TEAM_ID'] = appleTeamIdDefine;
       }
 
-      // Set defaults for critical values if still empty
-      _envVars.putIfAbsent('API_BASE_URL', () => 'https://api.artbeat.app');
-      _envVars.putIfAbsent('FIREBASE_REGION', () => 'us-central1');
-      _envVars.putIfAbsent('FIREBASE_PROJECT_ID', () => 'wordnerd-artbeat');
-
       AppLogger.info(
         '✅ Environment variables loaded successfully (${_envVars.length} variables)',
       );
@@ -118,30 +121,35 @@ class EnvLoader {
     return _envVars[key] ?? defaultValue;
   }
 
+  /// Get an environment variable value or throw when it is missing/empty.
+  String getRequired(String key) {
+    final value = get(key).trim();
+    if (value.isEmpty) {
+      throw StateError('Missing required environment variable: $key');
+    }
+    return value;
+  }
+
   /// Check if an environment variable exists
   bool has(String key) {
-    return _envVars.containsKey(key);
+    final value = _envVars[key];
+    return value != null && value.trim().isNotEmpty;
+  }
+
+  /// Return the subset of critical environment keys that are currently missing.
+  List<String> missingCriticalKeys([Iterable<String>? keys]) {
+    final requiredKeys = keys ?? criticalEnvironmentKeys;
+    return requiredKeys.where((key) => !has(key)).toList(growable: false);
   }
 
   /// Resolve the Firebase Cloud Functions base URL for the active environment.
   String get cloudFunctionsBaseUrl {
-    final configuredBaseUrl = get('FIREBASE_FUNCTIONS_BASE_URL').trim();
-    if (configuredBaseUrl.isNotEmpty) {
-      return configuredBaseUrl;
-    }
-
-    final region = get('FIREBASE_REGION', defaultValue: 'us-central1').trim();
-    final projectId = get(
-      'FIREBASE_PROJECT_ID',
-      defaultValue: 'wordnerd-artbeat',
-    ).trim();
-
-    return 'https://$region-$projectId.cloudfunctions.net';
+    final configuredBaseUrl = getRequired('FIREBASE_FUNCTIONS_BASE_URL').trim();
+    return configuredBaseUrl.replaceFirst(RegExp(r'/+$'), '');
   }
 
   /// Get all environment variables
   Map<String, String> getAll() {
     return Map.unmodifiable(_envVars);
   }
-
 }

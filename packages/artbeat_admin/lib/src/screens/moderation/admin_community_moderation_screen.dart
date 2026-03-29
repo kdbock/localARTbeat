@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/admin_community_moderation_models.dart';
 import '../../services/admin_community_moderation_service.dart';
@@ -18,8 +19,7 @@ class _AdminCommunityModerationScreenState
     extends State<AdminCommunityModerationScreen>
     with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final AdminCommunityModerationService _moderationService =
-      AdminCommunityModerationService();
+  late AdminCommunityModerationService _moderationService;
   late final TabController _tabController;
 
   List<AdminModeratedPost> _flaggedPosts = [];
@@ -29,6 +29,7 @@ class _AdminCommunityModerationScreenState
   @override
   void initState() {
     super.initState();
+    _moderationService = context.read<AdminCommunityModerationService>();
     _tabController = TabController(length: 2, vsync: this);
     _loadModerationQueue();
   }

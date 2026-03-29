@@ -718,10 +718,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                                 user.metadata.creationTime ?? DateTime.now(),
                             updatedAt: DateTime.now(),
                           ))
-                      .copyWith(
-                        phoneNumber: phoneNumber,
-                        phoneVerified: true,
-                      ),
+                      .copyWith(phoneNumber: phoneNumber, phoneVerified: true),
                 );
 
                 if (mounted && _accountSettings != null) {

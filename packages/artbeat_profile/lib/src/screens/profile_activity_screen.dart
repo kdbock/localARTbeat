@@ -14,7 +14,6 @@ class ProfileActivityScreen extends StatefulWidget {
 
 class _ProfileActivityScreenState extends State<ProfileActivityScreen>
     with SingleTickerProviderStateMixin {
-  final ProfileActivityService _activityService = ProfileActivityService();
   late TabController _tabController;
 
   String? _currentUserId;
@@ -55,7 +54,9 @@ class _ProfileActivityScreenState extends State<ProfileActivityScreen>
 
   Widget _buildRecentActivityTab() {
     return StreamBuilder<List<ProfileActivityModel>>(
-      stream: _activityService.streamProfileActivities(_currentUserId!),
+      stream: context.read<ProfileActivityService>().streamProfileActivities(
+        _currentUserId!,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -92,7 +93,7 @@ class _ProfileActivityScreenState extends State<ProfileActivityScreen>
 
   Widget _buildUnreadTab() {
     return StreamBuilder<List<ProfileActivityModel>>(
-      stream: _activityService.streamProfileActivities(
+      stream: context.read<ProfileActivityService>().streamProfileActivities(
         _currentUserId!,
         unreadOnly: true,
       ),
@@ -343,7 +344,9 @@ class _ProfileActivityScreenState extends State<ProfileActivityScreen>
 
   void _markAsRead(List<String> activityIds) async {
     try {
-      await _activityService.markActivitiesAsRead(activityIds);
+      await context.read<ProfileActivityService>().markActivitiesAsRead(
+        activityIds,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

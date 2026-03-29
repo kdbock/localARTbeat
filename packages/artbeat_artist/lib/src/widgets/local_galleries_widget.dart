@@ -1,7 +1,9 @@
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 
 /// Widget for displaying local galleries and museums in a grid layout
 class LocalGalleriesWidget extends StatelessWidget {
@@ -45,13 +47,10 @@ class LocalGalleriesWidget extends StatelessWidget {
             ],
           ),
         ),
-        StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('artistProfiles')
-              .where('userType', isEqualTo: 'business') // Filter for galleries
-              .where('location', isEqualTo: zipCode)
-              .limit(6)
-              .snapshots(),
+        StreamBuilder<List<ArtistProfileModel>>(
+          stream: context
+              .read<artist.ArtistGalleryDiscoveryReadService>()
+              .watchLocalGalleries(zipCode: zipCode),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -85,7 +84,8 @@ class LocalGalleriesWidget extends StatelessWidget {
               );
             }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            final galleries = snapshot.data ?? const <ArtistProfileModel>[];
+            if (galleries.isEmpty) {
               return Container(
                 padding: const EdgeInsets.all(24.0),
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -122,20 +122,6 @@ class LocalGalleriesWidget extends StatelessWidget {
               );
             }
 
-            final galleries = snapshot.data!.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              return {
-                'id': doc.id,
-                'name': data['displayName'] ?? 'Unknown Gallery',
-                'description': data['bio'] ?? 'No description available',
-                'imageUrl': data['profileImageUrl'] ?? '',
-                'address': data['location'] ?? 'Address unavailable',
-                'websiteUrl': data['websiteUrl'] ?? '',
-                'isFeatured': data['isFeatured'] ?? false,
-                'isVerified': data['isVerified'] ?? false,
-              };
-            }).toList();
-
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: GridView.builder(
@@ -154,7 +140,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                     onTap: () => Navigator.pushNamed(
                       context,
                       '/artist/public-profile',
-                      arguments: {'artistId': gallery['id']},
+                      arguments: {'artistId': gallery.id},
                     ),
                     child: Card(
                       clipBehavior: Clip.antiAlias,
@@ -175,7 +161,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                     image: DecorationImage(
                                       image:
                                           ImageUrlValidator.safeNetworkImage(
-                                            gallery['imageUrl']?.toString(),
+                                            gallery.profileImageUrl,
                                           ) ??
                                           const AssetImage(
                                                 'assets/event_placeholder.png',
@@ -187,7 +173,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 ),
                               ),
                               // Featured badge
-                              if (gallery['isFeatured'] == true)
+                              if (gallery.isFeatured)
                                 Positioned(
                                   top: 8,
                                   left: 8,
@@ -233,7 +219,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        gallery['name'] as String? ?? 'Gallery',
+                                        gallery.displayName,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -242,7 +228,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    if (gallery['isVerified'] == true)
+                                    if (gallery.isVerified)
                                       const Icon(
                                         Icons.verified,
                                         color: Colors.blue,
@@ -261,8 +247,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                     const SizedBox(width: 2),
                                     Expanded(
                                       child: Text(
-                                        gallery['address'] as String? ??
-                                            'Address',
+                                        gallery.location ?? 'Address',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: _grey700,
@@ -275,8 +260,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  gallery['description'] as String? ??
-                                      'Gallery description',
+                                  gallery.bio ?? 'Gallery description',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: _grey800,

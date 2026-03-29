@@ -133,10 +133,11 @@ void main() {
       });
 
       testWidgets('Profile creation screen displays correctly', (tester) async {
-        await pumpLocalized(
-          tester,
-          const CreateProfileScreen(userId: 'test-user-id'),
+        await tester.pumpWidget(
+          AuthTestHelpers.createTestProfileCreateScreen(),
         );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Verify profile creation screen loads
         expect(find.byType(CreateProfileScreen), findsOneWidget);

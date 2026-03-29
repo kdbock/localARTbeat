@@ -32,7 +32,10 @@ class SectionHeader extends StatelessWidget {
           if (trailing != null)
             trailing!
           else if (onViewAll != null)
-            TextButton(onPressed: onViewAll, child: Text('common_view_all'.tr())),
+            TextButton(
+              onPressed: onViewAll,
+              child: Text('common_view_all'.tr()),
+            ),
         ],
       ),
     );

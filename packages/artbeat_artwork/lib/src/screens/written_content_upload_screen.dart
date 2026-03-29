@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         SubscriptionTier,
@@ -14,6 +14,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         MainLayout,
         AppLogger,
         FirestoreUtils,
+        ArtworkContentType,
+        UserService,
         WritingMetadata;
 import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkService, ChapterService;
@@ -56,12 +58,10 @@ class _WrittenContentUploadScreenState
   late final TextEditingController _publisherController;
   late final TextEditingController _editionController;
 
-  final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-
   // Services
-  final ArtworkService _artworkService = ArtworkService();
-  final ChapterService _chapterService = ChapterService();
+  late final ArtworkService _artworkService;
+  late final ChapterService _chapterService;
+  late final UserService _userService;
 
   File? _coverImageFile;
   bool _isForSale = false;
@@ -143,36 +143,29 @@ class _WrittenContentUploadScreenState
     // Initialize rich text controller
     _richTextController.addListener(_onRichTextChanged);
 
+    _artworkService = context.read<ArtworkService>();
+    _chapterService = context.read<ChapterService>();
+    _userService = context.read<UserService>();
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) return;
 
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _userService.getCurrentUserProfile();
+      final userArtwork = await _artworkService.getCurrentUserArtwork();
       if (!mounted) return;
 
       setState(() {
-        _userType = FirestoreUtils.safeString(userDoc.get('userType'));
+        _userType = FirestoreUtils.safeString(userDoc?['userType']);
         _tierLevel = SubscriptionTier.values.firstWhere(
-          (tier) => tier.name == userDoc.get('subscriptionTier'),
+          (tier) => tier.name == userDoc?['subscriptionTier'],
           orElse: () => SubscriptionTier.free,
         );
+        _artworkCount = userArtwork.length;
       });
-
-      final artworkDocs = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .count()
-          .get();
-
-      if (mounted) {
-        setState(() {
-          _artworkCount = artworkDocs.count ?? 0;
-        });
-      }
     } catch (e) {
       AppLogger.error('Error loading user data: $e');
     }
@@ -237,7 +230,7 @@ class _WrittenContentUploadScreenState
     if (_contentFile == null) return;
 
     if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('written_content_upload_processing_file'.tr()),
           duration: const Duration(seconds: 1),
@@ -348,9 +341,7 @@ class _WrittenContentUploadScreenState
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'written_content_upload_pdf_no_text_warning'.tr(),
-              ),
+              content: Text('written_content_upload_pdf_no_text_warning'.tr()),
               backgroundColor: Colors.red,
             ),
           );
@@ -378,9 +369,7 @@ class _WrittenContentUploadScreenState
             _contentFile!.path.toLowerCase().endsWith('.pdf')) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'written_content_upload_pdf_low_text_warning'.tr(),
-              ),
+              content: Text('written_content_upload_pdf_low_text_warning'.tr()),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 5),
             ),
@@ -393,9 +382,7 @@ class _WrittenContentUploadScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'written_content_upload_process_error'.tr(
-                args: [e.toString()],
-              ),
+              'written_content_upload_process_error'.tr(args: [e.toString()]),
             ),
             backgroundColor: Colors.red,
           ),
@@ -454,9 +441,7 @@ class _WrittenContentUploadScreenState
         // Warning for likely image-only PDFs
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'written_content_upload_image_scan_warning'.tr(),
-            ),
+            content: Text('written_content_upload_image_scan_warning'.tr()),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -599,19 +584,15 @@ class _WrittenContentUploadScreenState
   Future<bool> _checkForDuplicateContent(String contentHash) async {
     try {
       // Check recent uploads for similar content
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) return false;
+      final recentArtworks = await _artworkService.getCurrentUserArtwork();
 
-      final recentArtworks = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .where('contentType', isEqualTo: 'written')
-          .orderBy('createdAt', descending: true)
-          .limit(10)
-          .get();
-
-      for (final doc in recentArtworks.docs) {
-        final existingHash = doc.data()['contentHash'];
+      for (final artwork in recentArtworks.where(
+        (artwork) => artwork.contentType == ArtworkContentType.written,
+      )) {
+        final artworkData = await _artworkService.getArtworkDocumentData(
+          artwork.id,
+        );
+        final existingHash = artworkData?['contentHash'];
         if (existingHash == contentHash) {
           return true;
         }
@@ -730,7 +711,7 @@ class _WrittenContentUploadScreenState
         context: context,
         barrierDismissible: false,
         builder: (context) => UploadLimitUpsellDialog(
-          userId: _auth.currentUser?.uid ?? '',
+          userId: _userService.currentUserId ?? '',
           currentTier: _tierLevel ?? SubscriptionTier.free,
         ),
       );
@@ -741,7 +722,7 @@ class _WrittenContentUploadScreenState
     AppLogger.info('Starting content upload process...');
 
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) throw Exception('Not authenticated');
 
       // Create artwork using ArtworkService
@@ -812,7 +793,7 @@ class _WrittenContentUploadScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      await _firestore.collection('artwork').doc(artworkId).update(updatedData);
+      await _artworkService.updateArtworkMetadata(artworkId, updatedData);
       AppLogger.info('Artwork metadata updated successfully');
 
       // Create chapters
@@ -860,7 +841,7 @@ class _WrittenContentUploadScreenState
             context: context,
             barrierDismissible: false,
             builder: (context) => UploadLimitUpsellDialog(
-              userId: _auth.currentUser?.uid ?? '',
+              userId: _userService.currentUserId ?? '',
               currentTier: _tierLevel ?? SubscriptionTier.free,
             ),
           );
@@ -976,9 +957,7 @@ class _WrittenContentUploadScreenState
                       state: _getStepState(0),
                     ),
                     Step(
-                      title: Text(
-                        'written_content_upload_step_chapters'.tr(),
-                      ),
+                      title: Text('written_content_upload_step_chapters'.tr()),
                       subtitle: Text(
                         'written_content_upload_step_chapters_desc'.tr(),
                       ),
@@ -1236,9 +1215,8 @@ class _WrittenContentUploadScreenState
                   setState(() {
                     _chapters.add({
                       'number': 1,
-                      'title': 'written_content_upload_default_chapter_title'.tr(
-                        namedArgs: {'number': '1'},
-                      ),
+                      'title': 'written_content_upload_default_chapter_title'
+                          .tr(namedArgs: {'number': '1'}),
                       'content': _contentText,
                       'wordCount': _wordCount,
                       'readingTime': _estimatedReadingTime,
@@ -1561,15 +1539,15 @@ class _WrittenContentUploadScreenState
                             icon: const Icon(Icons.format_italic),
                             onPressed: () =>
                                 _insertMarkdownFormatting('*', '*'),
-                            tooltip:
-                                'written_content_upload_toolbar_italic'.tr(),
+                            tooltip: 'written_content_upload_toolbar_italic'
+                                .tr(),
                           ),
                           IconButton(
                             icon: const Icon(Icons.title),
                             onPressed: () =>
                                 _insertMarkdownFormatting('# ', ''),
-                            tooltip:
-                                'written_content_upload_toolbar_header'.tr(),
+                            tooltip: 'written_content_upload_toolbar_header'
+                                .tr(),
                           ),
                           IconButton(
                             icon: const Icon(Icons.link),
@@ -2011,9 +1989,7 @@ class _WrittenContentUploadScreenState
                 if (_useFileUpload && _contentFile != null) ...[
                   Text(
                     'written_content_upload_review_file'.tr(
-                      namedArgs: {
-                        'file': _contentFile!.path.split('/').last,
-                      },
+                      namedArgs: {'file': _contentFile!.path.split('/').last},
                     ),
                   ),
                 ] else if (_useRichText &&

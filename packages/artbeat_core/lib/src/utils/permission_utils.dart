@@ -26,9 +26,7 @@ class PermissionUtils {
         barrierDismissible: false,
         builder: (BuildContext context) => AlertDialog(
           title: Text('permission_location_safety_notice_title'.tr()),
-          content: Text(
-            'permission_location_safety_notice_body'.tr(),
-          ),
+          content: Text('permission_location_safety_notice_body'.tr()),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -81,9 +79,7 @@ class PermissionUtils {
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: Text('permission_required_title'.tr()),
-              content: Text(
-                'permission_photo_permanently_denied'.tr(),
-              ),
+              content: Text('permission_photo_permanently_denied'.tr()),
               actions: [
                 TextButton(
                   child: Text('common_cancel'.tr()),
@@ -150,9 +146,7 @@ class PermissionUtils {
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: Text('permission_required_title'.tr()),
-              content: Text(
-                'permission_camera_permanently_denied'.tr(),
-              ),
+              content: Text('permission_camera_permanently_denied'.tr()),
               actions: [
                 TextButton(
                   child: Text('common_cancel'.tr()),
@@ -228,9 +222,7 @@ class PermissionUtils {
             barrierDismissible: false,
             builder: (BuildContext context) => AlertDialog(
               title: Text('permission_required_title'.tr()),
-              content: Text(
-                'permission_location_permanently_denied'.tr(),
-              ),
+              content: Text('permission_location_permanently_denied'.tr()),
               actions: [
                 TextButton(
                   child: Text('common_cancel'.tr()),

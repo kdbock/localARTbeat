@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 
@@ -15,8 +16,8 @@ class WrittenContentDiscoveryScreen extends StatefulWidget {
 class _WrittenContentDiscoveryScreenState
     extends State<WrittenContentDiscoveryScreen>
     with SingleTickerProviderStateMixin {
-  final ArtworkService _artworkService = ArtworkService();
-  final ArtistService _artistService = ArtistService();
+  late final ArtworkService _artworkService;
+  late final ArtistService _artistService;
 
   late TabController _tabController;
   List<ArtworkModel> _allWrittenContent = [];
@@ -62,6 +63,8 @@ class _WrittenContentDiscoveryScreenState
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
+    _artistService = context.read<ArtistService>();
     _tabController = TabController(length: 3, vsync: this);
     _loadWrittenContent();
   }

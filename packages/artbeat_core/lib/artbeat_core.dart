@@ -34,7 +34,7 @@ export 'shared_widgets.dart';
 // Export Core Services
 export 'src/services/config_service.dart' show ConfigService;
 export 'src/config/legal_config.dart' show LegalConfig;
-export 'src/services/user_service.dart' show UserService;
+export 'src/services/user_service.dart' show UserService, UserStreakSummary;
 export 'src/services/user_progression_service.dart' show UserProgressionService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
 export 'src/services/subscription_service.dart' show SubscriptionService;
@@ -71,6 +71,8 @@ export 'src/services/unified_payment_service.dart'
 export 'src/services/crash_prevention_service.dart' show CrashPreventionService;
 // In-App Purchase Services
 export 'src/services/in_app_purchase_service.dart' show InAppPurchaseService;
+export 'src/services/in_app_subscription_service.dart'
+    show InAppSubscriptionService;
 export 'src/services/in_app_purchase_manager.dart'
     show InAppPurchaseManager, PurchaseEvent, PurchaseEventType;
 export 'src/services/in_app_purchase_setup.dart' show InAppPurchaseSetup;
@@ -78,8 +80,7 @@ export 'src/models/in_app_purchase_models.dart' show CompletedPurchase;
 export 'src/services/in_app_ad_service.dart' show InAppAdService;
 export 'src/services/notification_service.dart'
     show NotificationService, NotificationType;
-export 'src/services/messaging_status_service.dart'
-    show MessagingStatusService;
+export 'src/services/messaging_status_service.dart' show MessagingStatusService;
 export 'src/services/purchase_verification_service.dart'
     show PurchaseVerificationService;
 export 'src/services/feedback_service.dart' show FeedbackService;
@@ -89,6 +90,8 @@ export 'src/services/image_management_service.dart' show ImageManagementService;
 export 'src/services/monetization_funnel_service.dart'
     show MonetizationFunnelService;
 export 'src/services/onboarding_service.dart' show OnboardingService;
+export 'src/services/payment_analytics_service.dart'
+    show PaymentAnalyticsService;
 export 'src/services/leaderboard_service.dart'
     show LeaderboardService, LeaderboardCategory, LeaderboardEntry;
 export 'src/services/enhanced_storage_service.dart' show EnhancedStorageService;
@@ -113,6 +116,10 @@ export 'src/services/ai_service.dart' show AIService;
 export 'src/services/ai_features_service.dart'
     show AIFeaturesService, AIResult, AIFeatureAccess;
 export 'src/services/usage_tracking_service.dart' show UsageTrackingService;
+export 'src/services/store_preview_read_service.dart'
+    show StorePreviewReadService;
+export 'src/services/user_maintenance_service.dart'
+    show UserMaintenanceService, UserXpRepairResult;
 export 'src/services/subscription_migration_service.dart'
     show SubscriptionMigrationService;
 export 'src/services/chapter_partner_service.dart' show ChapterPartnerService;

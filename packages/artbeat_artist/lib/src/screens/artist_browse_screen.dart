@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:artbeat_artist/artbeat_artist.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show DocumentSnapshot;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class _FilterOption {
   final String value;
@@ -25,8 +26,8 @@ class ArtistBrowseScreen extends StatefulWidget {
 }
 
 class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
-  final SubscriptionService _subscriptionService = SubscriptionService();
   final ScrollController _scrollController = ScrollController();
+  late final SubscriptionService _subscriptionService;
 
   bool _isLoading = false;
   bool _isLoadingMore = false;
@@ -98,6 +99,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<SubscriptionService>();
     _selectedMedium = _mediumOptions.first;
     _selectedStyle = _styleOptions.first;
     _scrollController.addListener(_onScroll);

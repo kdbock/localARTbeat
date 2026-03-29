@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/shared_widgets.dart';
 
@@ -18,7 +18,6 @@ class CommissionAnalyticsScreen extends StatefulWidget {
 }
 
 class _CommissionAnalyticsScreenState extends State<CommissionAnalyticsScreen> {
-  final DirectCommissionService _commissionService = DirectCommissionService();
   final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
     symbol: '\$',
   );
@@ -39,8 +38,8 @@ class _CommissionAnalyticsScreenState extends State<CommissionAnalyticsScreen> {
   Future<void> _loadAnalytics() async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userId = context.read<core.UserService>().currentUserId;
+      if (userId == null) {
         setState(() {
           _analytics = null;
           _isLoading = false;
@@ -48,9 +47,9 @@ class _CommissionAnalyticsScreenState extends State<CommissionAnalyticsScreen> {
         return;
       }
 
-      final analytics = await _commissionService.getCommissionAnalytics(
-        user.uid,
-      );
+      final analytics = await context
+          .read<DirectCommissionService>()
+          .getCommissionAnalytics(userId);
       if (!mounted) return;
       setState(() {
         _analytics = analytics;

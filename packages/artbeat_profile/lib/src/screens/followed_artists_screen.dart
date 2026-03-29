@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide HudTopBar;
+import 'package:provider/provider.dart';
 import 'package:artbeat_profile/widgets/widgets.dart';
 
 class FollowedArtistsScreen extends StatefulWidget {
@@ -21,14 +20,14 @@ class FollowedArtistsScreen extends StatefulWidget {
 }
 
 class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
-  final _userService = UserService();
-  final _authUser = FirebaseAuth.instance.currentUser;
+  late UserService _userService;
   List<ArtistProfileModel> _artists = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _userService = context.read<UserService>();
     _loadFollowedArtists();
   }
 
@@ -81,15 +80,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
 
     if (confirm == true) {
       try {
-        await FirebaseFirestore.instance
-            .collection('artistFollows')
-            .doc('${_authUser?.uid}_${artist.id}')
-            .delete();
-
-        await FirebaseFirestore.instance
-            .collection('artistProfiles')
-            .doc(artist.id)
-            .update({'followersCount': FieldValue.increment(-1)});
+        await _userService.unfollowArtistProfile(artist.id);
 
         if (mounted) {
           setState(() {
@@ -251,7 +242,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final artist = _artists[index];
-          final isCurrentUser = artist.userId == _authUser?.uid;
+          final isCurrentUser = artist.userId == _userService.currentUserId;
 
           return GlassCard(
             padding: EdgeInsets.zero,

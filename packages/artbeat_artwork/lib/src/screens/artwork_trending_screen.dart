@@ -10,6 +10,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         MainLayout,
         WorldBackground;
+import 'package:provider/provider.dart';
+
 import '../models/artwork_model.dart';
 import '../services/artwork_pagination_service.dart';
 import '../widgets/artwork_grid_widget.dart';
@@ -23,8 +25,6 @@ class ArtworkTrendingScreen extends StatefulWidget {
 }
 
 class _ArtworkTrendingScreenState extends State<ArtworkTrendingScreen> {
-  final ArtworkPaginationService _paginationService =
-      ArtworkPaginationService();
   final ScrollController _scrollController = ScrollController();
 
   List<ArtworkModel> _trendingArtworks = [];
@@ -54,7 +54,9 @@ class _ArtworkTrendingScreenState extends State<ArtworkTrendingScreen> {
         _error = null;
       });
 
-      final state = await _paginationService.loadTrendingArtworks();
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadTrendingArtworks();
 
       if (mounted) {
         setState(() {
@@ -85,9 +87,9 @@ class _ArtworkTrendingScreenState extends State<ArtworkTrendingScreen> {
         _isLoadingMore = true;
       });
 
-      final state = await _paginationService.loadTrendingArtworks(
-        lastDocument: _lastDocument,
-      );
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadTrendingArtworks(lastDocument: _lastDocument);
 
       if (mounted) {
         setState(() {

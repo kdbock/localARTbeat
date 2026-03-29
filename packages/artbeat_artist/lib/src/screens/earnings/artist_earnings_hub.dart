@@ -6,6 +6,7 @@ import '../../models/earnings_model.dart';
 import '../../models/payout_model.dart';
 import 'payout_request_screen.dart';
 import 'payout_accounts_screen.dart';
+import 'package:provider/provider.dart';
 
 class ArtistEarningsHub extends StatefulWidget {
   const ArtistEarningsHub({super.key});
@@ -16,9 +17,11 @@ class ArtistEarningsHub extends StatefulWidget {
 
 class _ArtistEarningsHubState extends State<ArtistEarningsHub>
     with SingleTickerProviderStateMixin {
-  final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   late final TabController _tabController;
+  late final EarningsService _earningsService;
+  late final core.ArtistBoostService _giftService;
+  late final core.UserService _userService;
 
   EarningsModel? _earnings;
   List<EarningsTransaction> _recentTransactions = [];
@@ -27,11 +30,12 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
   bool _isLoading = true;
   String? _errorMessage;
 
-  final core.ArtistBoostService _giftService = core.ArtistBoostService();
-
   @override
   void initState() {
     super.initState();
+    _earningsService = context.read<EarningsService>();
+    _giftService = context.read<core.ArtistBoostService>();
+    _userService = context.read<core.UserService>();
     _tabController = TabController(length: 3, vsync: this);
     _loadEarningsData();
   }
@@ -69,7 +73,7 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
 
       // Fetch Artist XP
       int artistXP = 0;
-      final userId = core.UserService().currentUser?.uid;
+      final userId = _userService.currentUser?.uid;
       if (userId != null) {
         artistXP = await _giftService.getArtistXPBalance(userId);
       }

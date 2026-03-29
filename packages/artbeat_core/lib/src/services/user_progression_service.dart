@@ -171,8 +171,9 @@ class UserProgressionService {
           'experiencePoints': newXP,
           'level': newLevel,
           'stats.loginStreak': newStreak,
-          'stats.longestLoginStreak':
-              newStreak > longestLoginStreak ? newStreak : longestLoginStreak,
+          'stats.longestLoginStreak': newStreak > longestLoginStreak
+              ? newStreak
+              : longestLoginStreak,
           'lastXPGain': FieldValue.serverTimestamp(),
         });
 
@@ -186,11 +187,7 @@ class UserProgressionService {
       });
     } catch (e) {
       AppLogger.error('Error processing daily login: $e');
-      return {
-        'alreadyLoggedIn': false,
-        'streak': 0,
-        'xpAwarded': 0,
-      };
+      return {'alreadyLoggedIn': false, 'streak': 0, 'xpAwarded': 0};
     }
   }
 

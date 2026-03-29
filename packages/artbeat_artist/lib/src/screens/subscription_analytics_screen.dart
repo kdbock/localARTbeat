@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/subscription_model.dart';
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
+import 'package:artbeat_artwork/artbeat_artwork.dart' show ArtworkService;
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import '../services/subscription_service.dart' as artist_service;
-import '../services/visibility_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 /// Screen for showing artists detailed subscription analytics
 class SubscriptionAnalyticsScreen extends StatefulWidget {
@@ -20,16 +19,15 @@ class SubscriptionAnalyticsScreen extends StatefulWidget {
 
 class _SubscriptionAnalyticsScreenState
     extends State<SubscriptionAnalyticsScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final artist_service.SubscriptionService _subscriptionService =
-      artist_service.SubscriptionService();
-  final VisibilityService _visibilityService = VisibilityService();
   final Logger _logger = Logger();
+  late final artist.SubscriptionService _subscriptionService;
+  late final artist.VisibilityService _visibilityService;
+  late final core.UnifiedPaymentService _paymentService;
+  late final ArtworkService _artworkService;
 
   bool _isLoading = true;
   bool _hasProAccess = false;
-  SubscriptionModel? _subscription;
+  artist.SubscriptionModel? _subscription;
   Map<String, dynamic> _subscriptionDetails = {};
   Map<String, dynamic> _analyticsData = {};
 
@@ -40,6 +38,10 @@ class _SubscriptionAnalyticsScreenState
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<artist.SubscriptionService>();
+    _visibilityService = context.read<artist.VisibilityService>();
+    _paymentService = context.read<core.UnifiedPaymentService>();
+    _artworkService = context.read<ArtworkService>();
     _loadData();
   }
 
@@ -101,7 +103,7 @@ class _SubscriptionAnalyticsScreenState
 
   /// Get detailed subscription information
   Future<Map<String, dynamic>> _getSubscriptionDetails(
-    SubscriptionModel subscription,
+    artist.SubscriptionModel subscription,
   ) async {
     final Map<String, dynamic> details = {};
     details['tier'] = subscription.tier;
@@ -113,16 +115,8 @@ class _SubscriptionAnalyticsScreenState
 
     // Get billing history
     try {
-      final paymentsSnapshot = await _firestore
-          .collection('payments')
-          .where('userId', isEqualTo: _auth.currentUser?.uid)
-          .orderBy('createdAt', descending: true)
-          .limit(5)
-          .get();
-
-      details['recentPayments'] = paymentsSnapshot.docs
-          .map((doc) => doc.data())
-          .toList();
+      details['recentPayments'] = await _paymentService
+          .getRecentPaymentsForCurrentUser(limit: 5);
     } catch (e) {
       _logger.e('Error loading payment history: $e');
       details['recentPayments'] = <Map<String, dynamic>>[];
@@ -167,12 +161,8 @@ class _SubscriptionAnalyticsScreenState
       );
 
       // Get artwork count
-      final artworkSnapshot = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: _auth.currentUser?.uid)
-          .get();
-
-      analytics['artworkCount'] = artworkSnapshot.size;
+      analytics['artworkCount'] = await _artworkService
+          .getArtworkCountForCurrentUser();
     } catch (e) {
       _logger.e('Error calculating analytics: $e');
     }

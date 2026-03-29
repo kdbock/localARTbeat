@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show GlassCard, GradientCTAButton, SecureNetworkImage;
 import '../models/artwork_model.dart';
@@ -28,7 +29,7 @@ class ArtworkDiscoveryWidget extends StatefulWidget {
 }
 
 class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
-  final ArtworkDiscoveryService _discoveryService = ArtworkDiscoveryService();
+  late final ArtworkDiscoveryService _discoveryService;
   List<ArtworkModel> _recommendations = [];
   bool _isLoading = true;
   String? _error;
@@ -36,6 +37,7 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
   @override
   void initState() {
     super.initState();
+    _discoveryService = context.read<ArtworkDiscoveryService>();
     _loadRecommendations();
   }
 

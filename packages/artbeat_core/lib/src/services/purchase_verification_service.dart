@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import '../utils/logger.dart';
 import '../utils/env_loader.dart';
@@ -9,6 +10,30 @@ import '../utils/env_loader.dart';
 /// Service account credentials are stored securely in Cloud Functions, not in the client app.
 class PurchaseVerificationService {
   static String get _cloudFunctionBaseUrl => EnvLoader().cloudFunctionsBaseUrl;
+
+  static Future<http.Response> _postAuthenticated(
+    String functionName,
+    Map<String, dynamic> body,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final idToken = await user.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Failed to get ID token');
+    }
+
+    return http.post(
+      Uri.parse('$_cloudFunctionBaseUrl/$functionName'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: json.encode(body),
+    );
+  }
 
   /// Verify Android purchase via Cloud Function
   ///
@@ -99,6 +124,60 @@ class PurchaseVerificationService {
     } catch (e) {
       AppLogger.error('❌ Error verifying App Store purchase: $e');
       return false;
+    }
+  }
+
+  /// Activate a verified IAP subscription through a backend-owned path.
+  static Future<void> activateVerifiedSubscription({
+    required String productId,
+    required String transactionId,
+    String? originalTransactionId,
+    required DateTime purchaseDate,
+    required double amount,
+    required String currency,
+    required String platform,
+  }) async {
+    final response = await _postAuthenticated('activateIapSubscription', {
+      'productId': productId,
+      'transactionId': transactionId,
+      'originalTransactionId': originalTransactionId,
+      'purchaseDateMs': purchaseDate.millisecondsSinceEpoch,
+      'amount': amount,
+      'currency': currency,
+      'platform': platform,
+    });
+
+    if (response.statusCode != 200) {
+      String message = 'Failed to activate verified IAP subscription';
+      try {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        message = (data['error'] as String?) ?? message;
+      } catch (_) {
+        // Keep fallback message if response is not JSON.
+      }
+      throw Exception(message);
+    }
+  }
+
+  /// Cancel an IAP subscription through a backend-owned path.
+  static Future<void> cancelIapSubscription({
+    required String subscriptionId,
+    String reason = 'user_requested',
+  }) async {
+    final response = await _postAuthenticated('cancelIapSubscription', {
+      'subscriptionId': subscriptionId,
+      'reason': reason,
+    });
+
+    if (response.statusCode != 200) {
+      String message = 'Failed to cancel IAP subscription';
+      try {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        message = (data['error'] as String?) ?? message;
+      } catch (_) {
+        // Keep fallback message if response is not JSON.
+      }
+      throw Exception(message);
     }
   }
 

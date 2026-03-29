@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 /// Temporary widget to fix Izzy Piel's capture count issue
 class TempCaptureCountFix extends StatefulWidget {
@@ -10,9 +11,15 @@ class TempCaptureCountFix extends StatefulWidget {
 }
 
 class _TempCaptureCountFixState extends State<TempCaptureCountFix> {
-  final UserService _userService = UserService();
+  late final UserMaintenanceService _userMaintenanceService;
   bool _isFixing = false;
   String _result = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userMaintenanceService = context.read<UserMaintenanceService>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +52,9 @@ class _TempCaptureCountFixState extends State<TempCaptureCountFix> {
       const userId = 'EdH8MvWk4Ja6eoSZM59QtOaxEK43';
       AppLogger.info('🔧 Fixing capture count for Izzy Piel: $userId');
 
-      final success = await _userService.recalculateUserCaptureCount(userId);
+      final success = await _userMaintenanceService.recalculateUserCaptureCount(
+        userId,
+      );
 
       setState(() {
         _result = success

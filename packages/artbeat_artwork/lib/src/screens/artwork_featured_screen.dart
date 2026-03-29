@@ -10,6 +10,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         MainLayout,
         WorldBackground;
+import 'package:provider/provider.dart';
+
 import '../models/artwork_model.dart';
 import '../services/artwork_pagination_service.dart';
 import '../widgets/artwork_grid_widget.dart';
@@ -23,8 +25,6 @@ class ArtworkFeaturedScreen extends StatefulWidget {
 }
 
 class _ArtworkFeaturedScreenState extends State<ArtworkFeaturedScreen> {
-  final ArtworkPaginationService _paginationService =
-      ArtworkPaginationService();
   final ScrollController _scrollController = ScrollController();
 
   List<ArtworkModel> _featuredArtworks = [];
@@ -54,7 +54,9 @@ class _ArtworkFeaturedScreenState extends State<ArtworkFeaturedScreen> {
         _error = null;
       });
 
-      final state = await _paginationService.loadFeaturedArtworks();
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadFeaturedArtworks();
 
       if (mounted) {
         setState(() {
@@ -85,9 +87,9 @@ class _ArtworkFeaturedScreenState extends State<ArtworkFeaturedScreen> {
         _isLoadingMore = true;
       });
 
-      final state = await _paginationService.loadFeaturedArtworks(
-        lastDocument: _lastDocument,
-      );
+      final state = await context
+          .read<ArtworkPaginationService>()
+          .loadFeaturedArtworks(lastDocument: _lastDocument);
 
       if (mounted) {
         setState(() {

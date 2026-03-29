@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../services/subscription_service.dart' as artist_service;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Screen for creating or editing an artist profile
@@ -19,9 +19,9 @@ class ArtistProfileEditScreen extends StatefulWidget {
 
 class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _subscriptionService = artist_service.SubscriptionService();
-  final _auth = FirebaseAuth.instance;
-  final _enhancedStorage = core.EnhancedStorageService();
+  late final artist_service.SubscriptionService _subscriptionService;
+  late final core.UserService _userService;
+  late final core.EnhancedStorageService _enhancedStorage;
 
   // Text controllers
   final TextEditingController _bioController = TextEditingController();
@@ -83,6 +83,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<artist_service.SubscriptionService>();
+    _userService = context.read<core.UserService>();
+    _enhancedStorage = context.read<core.EnhancedStorageService>();
     _loadArtistProfile();
   }
 
@@ -242,7 +245,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
 
   // Upload image to Firebase Storage with optimization
   Future<String> _uploadImage(File imageFile, String type) async {
-    final userId = _auth.currentUser?.uid;
+    final userId = _userService.currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
     // debugPrint('🎨 Uploading $type image with optimization...');

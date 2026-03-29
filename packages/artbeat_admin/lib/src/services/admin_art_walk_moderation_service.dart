@@ -5,11 +5,12 @@ import '../models/admin_art_walk_model.dart';
 
 class AdminArtWalkModerationService {
   AdminArtWalkModerationService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
-  CollectionReference get _artWalksCollection => _firestore.collection('artWalks');
+  CollectionReference get _artWalksCollection =>
+      _firestore.collection('artWalks');
 
   Future<List<AdminArtWalkModel>> getAllArtWalks({int limit = 100}) async {
     try {
@@ -41,7 +42,8 @@ class AdminArtWalkModerationService {
             .limit(limit)
             .get();
 
-        final walks = snapshot.docs.map(AdminArtWalkModel.fromFirestore).toList();
+        final walks =
+            snapshot.docs.map(AdminArtWalkModel.fromFirestore).toList();
         walks.sort((a, b) => b.reportCount.compareTo(a.reportCount));
         return walks;
       }

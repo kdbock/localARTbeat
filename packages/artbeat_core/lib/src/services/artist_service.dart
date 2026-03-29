@@ -10,6 +10,9 @@ import '../utils/logger.dart';
 /// This service consolidates functionality from both artbeat_core and artbeat_artist
 /// to provide a single point of truth for artist-related operations.
 class ArtistService {
+  ArtistService({FirebaseFirestore? firestore})
+    : _firestoreInstance = firestore;
+
   FirebaseFirestore? _firestoreInstance;
 
   void initialize() {
@@ -50,8 +53,27 @@ class ArtistService {
     }
   }
 
+  Stream<List<ArtistProfileModel>> watchKioskLaneArtists({int limit = 10}) {
+    return _firestore
+        .collection('artistProfiles')
+        .where(
+          'kioskLaneUntil',
+          isGreaterThan: Timestamp.fromDate(DateTime.now()),
+        )
+        .orderBy('kioskLaneUntil', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ArtistProfileModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
   /// Get public artist profiles for dashboard/discovery surfaces.
-  Future<List<ArtistProfileModel>> getAllArtistProfiles({int limit = 20}) async {
+  Future<List<ArtistProfileModel>> getAllArtistProfiles({
+    int limit = 20,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection('artistProfiles')

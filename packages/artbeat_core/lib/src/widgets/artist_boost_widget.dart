@@ -1,7 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../services/artist_boost_service.dart';
 import '../services/in_app_purchase_setup.dart';
 import '../utils/logger.dart';
@@ -24,7 +25,7 @@ class ArtistBoostWidget extends StatefulWidget {
 }
 
 class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
-  final ArtistBoostService _boostService = ArtistBoostService();
+  late ArtistBoostService _boostService;
   final InAppPurchaseSetup _purchaseSetup = InAppPurchaseSetup();
   bool _isLoading = false;
   bool _isInitializing = true;
@@ -34,6 +35,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
   @override
   void initState() {
     super.initState();
+    _boostService = context.read<ArtistBoostService>();
     _checkAvailability();
   }
 
@@ -156,7 +158,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       AppLogger.info('🚨 User check: ${user?.uid ?? "NO USER"}');
       if (user == null) {
         _showError('boost_error_signin'.tr());

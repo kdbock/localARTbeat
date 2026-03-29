@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_profile/widgets/widgets.dart' as profile_widgets;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../models/profile_achievement_model.dart';
 import '../services/profile_achievement_read_service.dart';
 import '../services/profile_rewards_service.dart';
@@ -16,9 +17,6 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen>
     with SingleTickerProviderStateMixin {
   UserModel? _user;
-  final ProfileAchievementReadService _achievementService =
-      ProfileAchievementReadService();
-  final ProfileRewardsService _rewardsService = ProfileRewardsService();
   List<ProfileAchievementModel> _achievements = [];
   Map<String, dynamic> _userBadges = {};
   List<String> _unviewedBadges = [];
@@ -45,15 +43,17 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     setState(() => _isLoading = true);
 
     try {
-      final userService = UserService();
+      final userService = context.read<UserService>();
+      final achievementService = context.read<ProfileAchievementReadService>();
+      final rewardsService = context.read<ProfileRewardsService>();
 
       _user = await userService.getCurrentUserModel();
       if (_user != null) {
-        _achievements = await _achievementService.getUserAchievements(
+        _achievements = await achievementService.getUserAchievements(
           userId: _user!.id,
         );
-        _userBadges = await _rewardsService.getUserBadges(_user!.id);
-        _unviewedBadges = await _rewardsService.getUnviewedBadges(_user!.id);
+        _userBadges = await rewardsService.getUserBadges(_user!.id);
+        _unviewedBadges = await rewardsService.getUnviewedBadges(_user!.id);
       }
     } catch (e) {
       // Handle error

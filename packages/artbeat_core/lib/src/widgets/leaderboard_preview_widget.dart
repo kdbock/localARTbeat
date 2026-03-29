@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 class LeaderboardPreviewWidget extends StatefulWidget {
   final VoidCallback? onViewAll;
@@ -13,7 +14,7 @@ class LeaderboardPreviewWidget extends StatefulWidget {
 }
 
 class _LeaderboardPreviewWidgetState extends State<LeaderboardPreviewWidget> {
-  final LeaderboardService _leaderboardService = LeaderboardService();
+  late final LeaderboardService _leaderboardService;
   List<LeaderboardEntry> _topUsers = [];
   bool _isLoading = true;
   bool _isExpanded = false;
@@ -21,6 +22,7 @@ class _LeaderboardPreviewWidgetState extends State<LeaderboardPreviewWidget> {
   @override
   void initState() {
     super.initState();
+    _leaderboardService = context.read<LeaderboardService>();
     _loadTopUsers();
   }
 

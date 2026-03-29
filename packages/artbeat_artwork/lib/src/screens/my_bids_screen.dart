@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:provider/provider.dart';
 
 /// Screen showing user's auction bids
 class MyBidsScreen extends StatefulWidget {
@@ -12,9 +13,6 @@ class MyBidsScreen extends StatefulWidget {
 }
 
 class _MyBidsScreenState extends State<MyBidsScreen> {
-  final AuctionService _auctionService = AuctionService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   List<Map<String, dynamic>> _userBids = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -26,7 +24,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
   }
 
   Future<void> _loadUserBids() async {
-    final user = _auth.currentUser;
+    final user = context.read<core_auth.AuthService>().currentUser;
     if (user == null) return;
 
     setState(() {
@@ -35,7 +33,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
     });
 
     try {
-      final bids = await _auctionService.getUserBids(user.uid);
+      final bids = await context.read<AuctionService>().getUserBids(user.uid);
       setState(() {
         _userBids = bids;
         _isLoading = false;

@@ -1,9 +1,10 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
 import '../models/artwork_model.dart' as artist_artwork;
+import '../services/artist_auction_read_service.dart';
 
 /// Hub screen for managing all auction-related activities
 class AuctionHubScreen extends StatefulWidget {
@@ -41,85 +42,20 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
     setState(() => _isLoading = true);
 
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        debugPrint('🔴 Auction Hub: No user logged in');
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      debugPrint('🔍 Auction Hub: Loading auctions for user: $userId');
-      final now = DateTime.now();
-
-      // Get all artwork by this artist
-      final artworksSnapshot = await FirebaseFirestore.instance
-          .collection('artworks')
-          .where('userId', isEqualTo: userId)
-          .where('auctionEnabled', isEqualTo: true)
-          .get();
-
-      debugPrint(
-        '✅ Auction Hub: Found ${artworksSnapshot.docs.length} artworks with auctions',
-      );
-
-      final allAuctions = artworksSnapshot.docs
-          .map((doc) => artist_artwork.ArtworkModel.fromMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
-          .toList();
-
-      // Categorize auctions
-      final active = <artist_artwork.ArtworkModel>[];
-      final ended = <artist_artwork.ArtworkModel>[];
-      final scheduled = <artist_artwork.ArtworkModel>[];
-
-      for (final auction in allAuctions) {
-        debugPrint(
-          '📦 Auction: ${auction.title}, auctionEnd: ${auction.auctionEnd}, now: $now',
-        );
-
-        if (auction.auctionEnd == null) {
-          debugPrint('   → Scheduled (no end date)');
-          scheduled.add(auction);
-        } else if (auction.auctionEnd!.isAfter(now)) {
-          debugPrint('   → Active (ends in future)');
-          active.add(auction);
-
-          // Get bid count for active auctions
-          final bidsSnapshot = await FirebaseFirestore.instance
-              .collection('artworks')
-              .doc(auction.id)
-              .collection('bids')
-              .get();
-
-          _bidCounts[auction.id] = bidsSnapshot.docs.length;
-
-          if (auction.currentHighestBid != null) {
-            _totalBids[auction.id] = auction.currentHighestBid!;
-          }
-        } else {
-          debugPrint('   → Ended (past end date)');
-          ended.add(auction);
-
-          if (auction.currentHighestBid != null) {
-            _totalBids[auction.id] = auction.currentHighestBid!;
-          }
-        }
-      }
-
-      // Sort by end date
-      active.sort((a, b) => a.auctionEnd!.compareTo(b.auctionEnd!));
-      ended.sort((a, b) => b.auctionEnd!.compareTo(a.auctionEnd!));
-
-      debugPrint(
-        '📊 Auction Hub Summary: Active=${active.length}, Ended=${ended.length}, Scheduled=${scheduled.length}',
-      );
+      final data = await context
+          .read<ArtistAuctionReadService>()
+          .loadAuctionDashboard();
 
       setState(() {
-        _activeAuctions = active;
-        _endedAuctions = ended;
-        _scheduledAuctions = scheduled;
+        _activeAuctions = data.activeAuctions;
+        _endedAuctions = data.endedAuctions;
+        _scheduledAuctions = data.scheduledAuctions;
+        _totalBids
+          ..clear()
+          ..addAll(data.totalBids);
+        _bidCounts
+          ..clear()
+          ..addAll(data.bidCounts);
         _isLoading = false;
       });
     } catch (e, stackTrace) {

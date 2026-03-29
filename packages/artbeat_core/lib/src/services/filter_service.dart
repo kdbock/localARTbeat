@@ -85,9 +85,7 @@ class FilterService {
   }
 
   /// Filter artworks based on parameters
-  Future<List<ArtworkModel>> filterArtwork(
-    FilterParameters params,
-  ) async {
+  Future<List<ArtworkModel>> filterArtwork(FilterParameters params) async {
     try {
       Query query = _firestore.collection('artwork');
 

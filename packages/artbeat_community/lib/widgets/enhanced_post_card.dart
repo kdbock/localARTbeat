@@ -10,7 +10,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post_model.dart';
 import '../models/art_models.dart';
 import '../services/art_community_service.dart';
@@ -223,7 +222,7 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
     final content = _commentController.text.trim();
     if (content.isEmpty) return;
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user = widget.communityService!.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('community_hub_sign_in_comment'.tr())),
@@ -460,7 +459,7 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
   }
 
   Widget _buildCommentInput() {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = widget.communityService?.currentUser;
     if (user == null) return const SizedBox.shrink();
 
     return Row(

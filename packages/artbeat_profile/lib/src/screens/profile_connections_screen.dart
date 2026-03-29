@@ -19,9 +19,6 @@ class ProfileConnectionsScreen extends StatefulWidget {
 
 class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
     with TickerProviderStateMixin {
-  final ProfileConnectionService _connectionService =
-      ProfileConnectionService();
-
   late TabController _tabController;
   bool _isLoading = true;
   String? _errorMessage;
@@ -62,9 +59,10 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
         return;
       }
 
+      final connectionService = context.read<ProfileConnectionService>();
       final results = await Future.wait<dynamic>([
-        _connectionService.getMutualConnections(user.uid, user.uid),
-        _connectionService.getFriendSuggestions(user.uid),
+        connectionService.getMutualConnections(user.uid, user.uid),
+        connectionService.getFriendSuggestions(user.uid),
         _userService.getFollowers(user.uid),
         _userService.getFollowing(user.uid),
       ]);
@@ -110,7 +108,7 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
   Future<void> _dismissSuggestion(ProfileConnectionModel connection) async {
     final userId = _userService.currentUserId;
     if (userId == null) return;
-    await _connectionService.dismissConnection(
+    await context.read<ProfileConnectionService>().dismissConnection(
       userId,
       connection.connectedUserId,
     );

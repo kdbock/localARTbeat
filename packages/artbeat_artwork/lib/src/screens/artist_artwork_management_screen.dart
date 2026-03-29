@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
@@ -19,8 +19,7 @@ class ArtistArtworkManagementScreen extends StatefulWidget {
 
 class _ArtistArtworkManagementScreenState
     extends State<ArtistArtworkManagementScreen> {
-  final _artworkService = ArtworkService();
-  final _auth = FirebaseAuth.instance;
+  late final ArtworkService _artworkService;
 
   bool _isLoading = true;
   List<ArtworkModel> _artworks = [];
@@ -29,6 +28,7 @@ class _ArtistArtworkManagementScreenState
   @override
   void initState() {
     super.initState();
+    _artworkService = context.read<ArtworkService>();
     _loadArtistArtwork();
   }
 
@@ -39,29 +39,13 @@ class _ArtistArtworkManagementScreenState
     });
 
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        setState(() {
-          _error = 'You must be logged in to view your artwork';
-          _isLoading = false;
-        });
-        return;
-      }
+      final artworks = await _artworkService.getCurrentUserArtwork();
 
-      // Just use userId directly - the ArtworkService handles the profile lookup
-      final userId = currentUser.uid;
-      debugPrint('🔍 Loading artwork for userId: $userId');
-
-      // Get the user's artwork using userId
-      final artworks = await _artworkService.getArtworkByUserId(userId);
-      debugPrint('📊 Loaded ${artworks.length} artworks');
-
-      if (mounted) {
-        setState(() {
-          _artworks = artworks;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _artworks = artworks;
+        _isLoading = false;
+      });
     } catch (e) {
       debugPrint('❌ Error loading artwork: $e');
       if (mounted) {

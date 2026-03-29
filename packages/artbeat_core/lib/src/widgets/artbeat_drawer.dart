@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:math' as math;
 
+import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,12 +41,19 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   core.UserModel? _cachedUserModel;
   StreamSubscription<User?>? _authSubscription;
   String? _roleOverride; // For admin role switching
+  late final UserService _userService;
+  late final UserProgressionService _userProgressionService;
 
   late final AnimationController _loop; // ambient animation
 
   @override
   void initState() {
     super.initState();
+    _userService = Provider.of<UserService>(context, listen: false);
+    _userProgressionService = Provider.of<UserProgressionService>(
+      context,
+      listen: false,
+    );
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
@@ -54,9 +61,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
     _loadUserModel();
 
-    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((
-      User? user,
-    ) {
+    _authSubscription = _userService.authStateChanges.listen((user) {
       if (user != null && _cachedUserModel == null) {
         _loadUserModel();
       } else if (user == null && _cachedUserModel != null) {
@@ -79,15 +84,14 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
   Future<void> _loadUserModel() async {
     try {
-      final userService = Provider.of<UserService>(context, listen: false);
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _userService.currentUser;
       if (user != null) {
-        final model = await userService.getUserById(user.uid);
+        final model = await _userService.getUserById(user.uid);
         if (mounted) setState(() => _cachedUserModel = model);
 
         // Process daily login for streak tracking
         try {
-          await UserProgressionService().processDailyLogin(user.uid);
+          await _userProgressionService.processDailyLogin(user.uid);
         } catch (e) {
           AppLogger.error('❌ Error processing daily login: $e');
         }
@@ -489,7 +493,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
               // User info
               StreamBuilder<User?>(
-                stream: FirebaseAuth.instance.userChanges(),
+                stream: _userService.authStateChanges,
                 builder: (context, snapshot) {
                   final user = snapshot.data;
 
@@ -643,7 +647,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
             // Handle sign out specially (keep same logic)
             if (item.route == '/login' && item.title == 'drawer_sign_out') {
               Navigator.pop(context);
-              await FirebaseAuth.instance.signOut();
+              await _userService.signOut();
               if (mounted) {
                 setState(() => _cachedUserModel = null);
                 // ignore: use_build_context_synchronously

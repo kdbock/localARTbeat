@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import 'ad_image_rotator.dart';
@@ -22,7 +23,6 @@ class AdCarouselWidget extends StatefulWidget {
 }
 
 class _AdCarouselWidgetState extends State<AdCarouselWidget> {
-  final LocalAdService _adService = LocalAdService();
   late PageController _pageController;
   int _currentIndex = 0;
   List<LocalAd> _ads = [];
@@ -38,7 +38,8 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
 
   void _loadAds() async {
     try {
-      final ads = await _adService.getActiveAdsByZone(widget.zone);
+      final adService = context.read<LocalAdService>();
+      final ads = await adService.getActiveAdsByZone(widget.zone);
       if (mounted) {
         setState(() {
           _ads = ads;

@@ -61,17 +61,16 @@ class AdminSponsorship {
       businessName: (data['businessName'] ?? 'Local Business') as String,
       tier: (data['tier'] ?? 'capture') as String,
       status: (data['status'] ?? 'pending') as String,
-      startDate: ((data['startDate']) as Timestamp?)?.toDate() ?? DateTime.now(),
+      startDate:
+          ((data['startDate']) as Timestamp?)?.toDate() ?? DateTime.now(),
       endDate: ((data['endDate']) as Timestamp?)?.toDate() ?? DateTime.now(),
-      placementKeys:
-          (data['placementKeys'] as List<dynamic>? ?? [])
-              .whereType<String>()
-              .toList(),
+      placementKeys: (data['placementKeys'] as List<dynamic>? ?? [])
+          .whereType<String>()
+          .toList(),
       createdAt:
           ((data['createdAt']) as Timestamp?)?.toDate() ?? DateTime.now(),
       businessAddress: data['businessAddress'] as String?,
-      relatedEntityName:
-          data['relatedEntityName'] as String? ??
+      relatedEntityName: data['relatedEntityName'] as String? ??
           data['relatedEntityId'] as String?,
       paymentStatus: data['paymentStatus'] as String?,
       paymentFollowUpStatus: data['paymentFollowUpStatus'] as String?,

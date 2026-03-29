@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../models/commission_artist_preview_model.dart';
 import '../routing/app_routes.dart';
@@ -9,10 +10,7 @@ import '../services/commission_artist_preview_service.dart';
 import '../theme/artbeat_colors.dart';
 
 class CommissionArtistsPreview extends StatefulWidget {
-  const CommissionArtistsPreview({
-    super.key,
-    this.showHeader = true,
-  });
+  const CommissionArtistsPreview({super.key, this.showHeader = true});
 
   final bool showHeader;
 
@@ -22,8 +20,7 @@ class CommissionArtistsPreview extends StatefulWidget {
 }
 
 class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
-  final CommissionArtistPreviewService _service =
-      CommissionArtistPreviewService();
+  late final CommissionArtistPreviewService _service;
   final Map<String, String> _artistNames = {};
 
   bool _isLoading = false;
@@ -32,6 +29,7 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
   @override
   void initState() {
     super.initState();
+    _service = context.read<CommissionArtistPreviewService>();
     _loadArtists();
   }
 
@@ -82,7 +80,9 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
             padding: const EdgeInsets.all(32),
             child: Text(
               'No commission artists available right now.',
-              style: GoogleFonts.spaceGrotesk(color: ArtbeatColors.textSecondary),
+              style: GoogleFonts.spaceGrotesk(
+                color: ArtbeatColors.textSecondary,
+              ),
             ),
           )
         else
@@ -91,10 +91,8 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) => _buildArtistCard(
-                context,
-                _artists[index],
-              ),
+              itemBuilder: (context, index) =>
+                  _buildArtistCard(context, _artists[index]),
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemCount: _artists.length,
             ),
@@ -110,7 +108,8 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
     final imageUrl = artist.portfolioImages.isNotEmpty
         ? artist.portfolioImages.first
         : null;
-    final artistName = _artistNames[artist.artistId] ?? _fallbackName(artist.artistId);
+    final artistName =
+        _artistNames[artist.artistId] ?? _fallbackName(artist.artistId);
 
     return InkWell(
       onTap: () {
@@ -132,7 +131,9 @@ class _CommissionArtistsPreviewState extends State<CommissionArtistsPreview> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: imageUrl != null && imageUrl.isNotEmpty
                     ? Image.network(
                         imageUrl,

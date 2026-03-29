@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/profile_challenge_model.dart';
 import '../services/profile_challenge_service.dart';
 
@@ -24,8 +25,6 @@ class ProgressTab extends StatefulWidget {
 }
 
 class _ProgressTabState extends State<ProgressTab> {
-  final ProfileChallengeService _challengeService = ProfileChallengeService();
-
   ProfileChallengeModel? _todaysChallenge;
   bool _isLoading = true;
 
@@ -39,9 +38,9 @@ class _ProgressTabState extends State<ProgressTab> {
     setState(() => _isLoading = true);
 
     try {
-      final challenge = await _challengeService.getTodaysChallenge(
-        userId: widget.userId,
-      );
+      final challenge = await context
+          .read<ProfileChallengeService>()
+          .getTodaysChallenge(userId: widget.userId);
 
       if (mounted) {
         setState(() {

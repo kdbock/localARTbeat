@@ -23,8 +23,7 @@ class CreateSponsorshipScreen extends StatelessWidget {
               SponsorshipSection(
                 title: 'sponsorship_create_experiences_title'.tr(),
                 subtitle:
-                    'Art Walk is the premium curated sponsorship experience. Capture and discovery placements are now handled through Local Ads.'
-                        ,
+                    'Art Walk is the premium curated sponsorship experience. Capture and discovery placements are now handled through Local Ads.',
                 child: Column(
                   children: [
                     SponsorshipCtaTile(

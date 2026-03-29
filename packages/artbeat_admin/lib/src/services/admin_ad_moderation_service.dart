@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/admin_ad_report_model.dart';
@@ -6,14 +7,20 @@ import '../models/admin_local_ad_purchase_recovery.dart';
 import '../models/admin_local_ad.dart';
 
 class AdminAdModerationService {
-  AdminAdModerationService({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  AdminAdModerationService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
   static const String _adsCollection = 'localAds';
   static const String _reportsCollection = 'ad_reports';
   static const String _recoveriesCollection = 'localAdPurchaseRecoveries';
+
+  String get currentAdminId => _auth.currentUser?.uid ?? 'system';
 
   Future<List<AdminLocalAd>> getAdsForReview() async {
     try {
@@ -29,7 +36,9 @@ class AdminAdModerationService {
           .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => AdminLocalAd.fromSnapshot(doc)).toList();
+      return snapshot.docs
+          .map((doc) => AdminLocalAd.fromSnapshot(doc))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch ads for review: $e');
     }
@@ -47,7 +56,8 @@ class AdminAdModerationService {
       for (final doc in allAds.docs) {
         final data = doc.data();
         final status = AdminLocalAdStatusExtension.fromIndex(
-          data['status'] as int? ?? AdminLocalAdStatus.pendingReview.firestoreIndex,
+          data['status'] as int? ??
+              AdminLocalAdStatus.pendingReview.firestoreIndex,
         );
         stats[status.displayName] = (stats[status.displayName] ?? 0) + 1;
       }
@@ -66,7 +76,9 @@ class AdminAdModerationService {
           .orderBy('reviewedAt', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => AdminLocalAd.fromSnapshot(doc)).toList();
+      return snapshot.docs
+          .map((doc) => AdminLocalAd.fromSnapshot(doc))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch ads needing payment follow-up: $e');
     }
@@ -109,13 +121,13 @@ class AdminAdModerationService {
   Future<void> reviewReport({
     required String reportId,
     required AdminAdReportStatus newStatus,
-    required String adminId,
+    String? adminId,
     String? adminNotes,
   }) async {
     try {
       await _firestore.collection(_reportsCollection).doc(reportId).update({
         'status': newStatus.value,
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
         if (adminNotes != null) 'adminNotes': adminNotes,
       });
@@ -127,13 +139,13 @@ class AdminAdModerationService {
 
   Future<void> approveAd({
     required String adId,
-    required String adminId,
+    String? adminId,
     String? adminNotes,
   }) async {
     try {
       await _firestore.collection(_adsCollection).doc(adId).update({
         'status': AdminLocalAdStatus.active.firestoreIndex,
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
         if (adminNotes != null) 'adminNotes': adminNotes,
         'rejectionReason': null,
@@ -148,13 +160,13 @@ class AdminAdModerationService {
 
   Future<void> rejectAd({
     required String adId,
-    required String adminId,
+    String? adminId,
     required String reason,
   }) async {
     try {
       await _firestore.collection(_adsCollection).doc(adId).update({
         'status': AdminLocalAdStatus.rejected.firestoreIndex,
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
         'rejectionReason': reason,
         'purchaseFollowUpStatus': 'pending_refund_review',
@@ -169,13 +181,16 @@ class AdminAdModerationService {
 
   Future<void> markPurchaseRecoveryReviewed({
     required String recoveryId,
-    required String adminId,
+    String? adminId,
     required String resolutionNotes,
   }) async {
     try {
-      await _firestore.collection(_recoveriesCollection).doc(recoveryId).update({
+      await _firestore
+          .collection(_recoveriesCollection)
+          .doc(recoveryId)
+          .update({
         'status': 'reviewed_manual_follow_up',
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
         'resolutionNotes': resolutionNotes,
       });
@@ -188,7 +203,7 @@ class AdminAdModerationService {
   Future<void> updateAdPurchaseFollowUp({
     required String adId,
     required String status,
-    required String adminId,
+    String? adminId,
     String? notes,
     bool? autoRenewing,
   }) async {
@@ -196,7 +211,7 @@ class AdminAdModerationService {
       await _firestore.collection(_adsCollection).doc(adId).update({
         'purchaseFollowUpStatus': status,
         'purchaseFollowUpNotes': notes ?? FieldValue.delete(),
-        'reviewedBy': adminId,
+        'reviewedBy': adminId ?? currentAdminId,
         'reviewedAt': Timestamp.now(),
         if (autoRenewing != null) 'autoRenewing': autoRenewing,
       });

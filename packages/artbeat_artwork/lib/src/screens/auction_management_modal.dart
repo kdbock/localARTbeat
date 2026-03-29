@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' show GlassCard;
+import 'package:provider/provider.dart';
 
 /// Modal for managing auction settings for an artwork
 class AuctionManagementModal extends StatefulWidget {
@@ -15,7 +16,6 @@ class AuctionManagementModal extends StatefulWidget {
 
 class _AuctionManagementModalState extends State<AuctionManagementModal> {
   final _formKey = GlobalKey<FormState>();
-  final ArtworkService _artworkService = ArtworkService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -51,7 +51,7 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
 
     try {
       // Update artwork with auction settings
-      await _artworkService.updateArtwork(
+      await context.read<ArtworkService>().updateArtwork(
         artworkId: widget.artwork.id,
         auctionEnabled: _auctionEnabled,
         startingPrice: _startingPrice,

@@ -4,7 +4,6 @@ import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide
@@ -78,6 +77,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   late final ChallengeService _challengeService;
   late final WeeklyGoalsService _weeklyGoalsService;
   late final RewardsService _rewardsService;
+  late final OnboardingService _onboardingService;
+  late final ArtistService _artistService;
 
   // Notification monitoring
   StreamSubscription<Map<String, dynamic>>? _notificationSubscription;
@@ -88,11 +89,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     WidgetsBinding.instance.addObserver(this);
     _achievementService = context.read<AchievementService>();
     _userService = context.read<UserService>();
-    _captureService = ArtWalkCaptureReadService();
+    _captureService = context.read<ArtWalkCaptureReadService>();
     _discoveryService = context.read<InstantDiscoveryService>();
     _challengeService = context.read<ChallengeService>();
     _weeklyGoalsService = context.read<WeeklyGoalsService>();
     _rewardsService = context.read<RewardsService>();
+    _onboardingService = context.read<OnboardingService>();
+    _artistService = context.read<ArtistService>();
     _initializeAnimations();
     _loadAllData();
     _startNotificationMonitoring();
@@ -103,7 +106,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await OnboardingService()
+    final isCompleted = await _onboardingService
         .isDiscoverOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure data is loaded and layout is stable
@@ -309,7 +312,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               radarTitleKey: _radarTitleKey,
               onFinish: () {
                 setState(() => _isTourActive = false);
-                OnboardingService().markDiscoverOnboardingCompleted();
+                _onboardingService.markDiscoverOnboardingCompleted();
               },
             ),
         ],
@@ -1066,22 +1069,16 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           const SizedBox(height: ArtWalkDesignSystem.paddingS),
           SizedBox(
             height: 96,
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('artistProfiles')
-                  .where(
-                    'kioskLaneUntil',
-                    isGreaterThan: Timestamp.fromDate(DateTime.now()),
-                  )
-                  .orderBy('kioskLaneUntil', descending: true)
-                  .limit(10)
-                  .snapshots(),
+            child: StreamBuilder<List<ArtistProfileModel>>(
+              stream: _artistService.watchKioskLaneArtists(limit: 10),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                final artists = snapshot.data ?? const <ArtistProfileModel>[];
+
+                if (artists.isEmpty) {
                   return Center(
                     child: Text(
                       'dashboard_kiosk_lane_empty'.tr(),
@@ -1089,10 +1086,6 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                     ),
                   );
                 }
-
-                final artists = snapshot.data!.docs
-                    .map((doc) => ArtistProfileModel.fromFirestore(doc))
-                    .toList();
 
                 return ListView.separated(
                   scrollDirection: Axis.horizontal,

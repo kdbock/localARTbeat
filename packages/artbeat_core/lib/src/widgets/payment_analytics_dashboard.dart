@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../services/payment_analytics_service.dart';
 import '../models/payment_models.dart';
 
@@ -23,7 +24,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _analyticsService = PaymentAnalyticsService();
+    _analyticsService = context.read<PaymentAnalyticsService>();
     _loadReports();
   }
 
@@ -211,8 +212,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
                   title: Text('\$${event.amount.toStringAsFixed(2)}'),
                   subtitle: Text(event.timestamp.toString()),
                   trailing: Text(
-                    event.paymentMethod ??
-                        'payment_analytics_unknown'.tr(),
+                    event.paymentMethod ?? 'payment_analytics_unknown'.tr(),
                   ),
                 );
               },
@@ -247,9 +247,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
                 title: Text(trend.category),
                 subtitle: Text(
                   'payment_analytics_risk_score'.tr(
-                    namedArgs: {
-                      'score': trend.riskScore.toStringAsFixed(2),
-                    },
+                    namedArgs: {'score': trend.riskScore.toStringAsFixed(2)},
                   ),
                 ),
                 trailing: Text('${trend.trend}%'),
@@ -340,9 +338,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
             ? const Center(child: CircularProgressIndicator())
             : _reports.isEmpty
             ? Center(
-                child: Text(
-                  'payment_analytics_no_reports_generated_yet'.tr(),
-                ),
+                child: Text('payment_analytics_no_reports_generated_yet'.tr()),
               )
             : _buildReportHistoryList(),
       ],
@@ -416,10 +412,7 @@ class _PaymentAnalyticsDashboardState extends State<PaymentAnalyticsDashboard>
           SnackBar(
             content: Text(
               'payment_analytics_generate_error'.tr(
-                namedArgs: {
-                  'period': _periodLabel(period),
-                  'error': '$e',
-                },
+                namedArgs: {'period': _periodLabel(period), 'error': '$e'},
               ),
             ),
           ),

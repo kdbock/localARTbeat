@@ -40,7 +40,10 @@ class NetworkErrorWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: onRetry, child: Text('common_retry'.tr())),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text('common_retry'.tr()),
+            ),
           ],
         ),
       ),

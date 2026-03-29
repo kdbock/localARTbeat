@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../models/art_models.dart';
 import '../models/post_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -9,8 +9,19 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Unified service for art community operations
 /// Simplified and focused on core art-sharing functionality
 class ArtCommunityService extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UserService _userService = UserService();
+  ArtCommunityService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    UserService? userService,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _userService = userService ?? UserService() {
+    _initializeStreams();
+  }
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final UserService _userService;
   static const Duration _viewerLocationTtl = Duration(minutes: 10);
   static const Duration _artistSortInterval = Duration(seconds: 8);
   static const double _artistSortDistanceThresholdKm = 2.0;
@@ -31,6 +42,7 @@ class ArtCommunityService extends ChangeNotifier {
 
   Stream<List<ArtPost>> get feedStream => _feedController.stream;
   Stream<List<ArtistProfile>> get artistsStream => _artistsController.stream;
+  User? get currentUser => _auth.currentUser;
 
   /// Get current cached artists (synchronous)
   List<ArtistProfile> getArtists({int limit = 20}) {
@@ -47,7 +59,7 @@ class ArtCommunityService extends ChangeNotifier {
       AppLogger.info('🎨 Query returned ${snapshot.docs.length} documents');
 
       final artists = <ArtistProfile>[];
-      final authUser = FirebaseAuth.instance.currentUser;
+      final authUser = _auth.currentUser;
 
       for (final doc in snapshot.docs) {
         final userData = doc.data();
@@ -215,7 +227,7 @@ class ArtCommunityService extends ChangeNotifier {
   }
 
   Future<bool> followArtist(String artistId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    final currentUser = _auth.currentUser;
     if (currentUser == null || artistId.isEmpty) return false;
 
     try {
@@ -238,7 +250,7 @@ class ArtCommunityService extends ChangeNotifier {
   }
 
   Future<bool> unfollowArtist(String artistId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    final currentUser = _auth.currentUser;
     if (currentUser == null || artistId.isEmpty) return false;
 
     try {
@@ -271,10 +283,10 @@ class ArtCommunityService extends ChangeNotifier {
       await artistProfileQuery.docs.first.reference.update(updates);
     }
 
-    await _firestore.collection('users').doc(artistId).set(
-      updates,
-      SetOptions(merge: true),
-    );
+    await _firestore
+        .collection('users')
+        .doc(artistId)
+        .set(updates, SetOptions(merge: true));
   }
 
   // Cache for performance
@@ -283,9 +295,7 @@ class ArtCommunityService extends ChangeNotifier {
   List<ArtistProfile> _artistsRawCache = [];
   int _artistsSortHash = 0;
 
-  ArtCommunityService() {
-    _initializeStreams();
-  }
+  String? get currentUserId => _auth.currentUser?.uid;
 
   void _initializeStreams() {
     // Set up real-time listeners for feed
@@ -570,7 +580,7 @@ class ArtCommunityService extends ChangeNotifier {
     bool isArtistPost = false,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) return null;
 
       // Get user profile data
@@ -640,7 +650,7 @@ class ArtCommunityService extends ChangeNotifier {
     PostModerationStatus moderationStatus = PostModerationStatus.approved,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) return null;
 
       // Get user profile data
@@ -723,7 +733,7 @@ class ArtCommunityService extends ChangeNotifier {
     List<String>? tags,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) {
         AppLogger.error('User not authenticated');
         return false;
@@ -752,7 +762,7 @@ class ArtCommunityService extends ChangeNotifier {
   /// Delete a post
   Future<bool> deletePost(String postId) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) {
         AppLogger.error('User not authenticated');
         return false;
@@ -788,7 +798,7 @@ class ArtCommunityService extends ChangeNotifier {
         '🤍 ArtCommunityService.toggleLike called for postId: $postId',
       );
 
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) {
         AppLogger.error('🤍 No authenticated user found');
         return false;
@@ -847,7 +857,7 @@ class ArtCommunityService extends ChangeNotifier {
     try {
       AppLogger.info('🤍 Checking if user has liked post: $postId');
 
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) {
         AppLogger.info('🤍 No authenticated user, returning false');
         return false;
@@ -873,7 +883,7 @@ class ArtCommunityService extends ChangeNotifier {
 
   Future<Set<String>> _getLikedPostIds(List<String> postIds) async {
     if (postIds.isEmpty) return {};
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final userId = _auth.currentUser?.uid;
     if (userId == null) return {};
 
     try {
@@ -1039,7 +1049,7 @@ class ArtCommunityService extends ChangeNotifier {
   /// Add comment to a post
   Future<String?> addComment(String postId, String content) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) return null;
 
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
@@ -1077,7 +1087,7 @@ class ArtCommunityService extends ChangeNotifier {
 
       return docRef.id;
     } catch (e) {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       AppLogger.error('Error adding comment: $e');
       AppLogger.error(
         'Comment data: postId=$postId, content length=${content.length}',
@@ -1271,7 +1281,7 @@ class ArtCommunityService extends ChangeNotifier {
     String? additionalDetails,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _auth.currentUser;
       if (user == null) {
         AppLogger.error('Cannot report post: User not authenticated');
         return false;

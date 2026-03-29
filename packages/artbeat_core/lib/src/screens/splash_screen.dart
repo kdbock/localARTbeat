@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
@@ -118,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
     debugPrint('🧭 Splash _performNavigation() start');
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       if (user != null) {
         _syncUserInBackground();
       }

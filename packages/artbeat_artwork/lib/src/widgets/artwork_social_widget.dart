@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show UserModerationMixin, ImageUrlValidator;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:provider/provider.dart';
 import '../models/artwork_rating_model.dart';
 import '../services/artwork_rating_service.dart';
 import '../services/artwork_comment_service.dart';
@@ -33,8 +34,6 @@ class ArtworkSocialWidget extends StatefulWidget {
 
 class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
     with UserModerationMixin {
-  final ArtworkRatingService _ratingService = ArtworkRatingService();
-  final ArtworkCommentService _commentService = ArtworkCommentService();
   final TextEditingController _commentController = TextEditingController();
 
   ArtworkRatingStats? _ratingStats;
@@ -58,11 +57,12 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
   Future<void> _loadRatingData() async {
     if (!widget.showRatings) return;
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user = context.read<core_auth.AuthService>().currentUser;
     if (user == null) return;
+    final ratingService = context.read<ArtworkRatingService>();
 
-    final stats = await _ratingService.getArtworkRatingStats(widget.artworkId);
-    final userRating = await _ratingService.getUserRatingForArtwork(
+    final stats = await ratingService.getArtworkRatingStats(widget.artworkId);
+    final userRating = await ratingService.getUserRatingForArtwork(
       widget.artworkId,
       user.uid,
     );
@@ -83,7 +83,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       _isLoadingRating = true;
     });
 
-    final success = await _ratingService.submitRating(
+    final success = await context.read<ArtworkRatingService>().submitRating(
       artworkId: widget.artworkId,
       rating: _selectedRating,
     );
@@ -129,7 +129,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       _isPostingComment = true;
     });
 
-    final success = await _commentService.postComment(
+    final success = await context.read<ArtworkCommentService>().postComment(
       artworkId: widget.artworkId,
       content: _commentController.text.trim(),
     );
@@ -214,7 +214,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
             ],
 
             // User rating input
-            if (FirebaseAuth.instance.currentUser != null) ...[
+            if (context.read<core_auth.AuthService>().currentUser != null) ...[
               Text(
                 _userRating == null
                     ? 'Rate this artwork:'
@@ -292,7 +292,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
             const SizedBox(height: 16),
 
             // Comment input
-            if (FirebaseAuth.instance.currentUser != null) ...[
+            if (context.read<core_auth.AuthService>().currentUser != null) ...[
               TextField(
                 controller: _commentController,
                 maxLines: 3,
@@ -322,11 +322,13 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
 
             // Comments list
             StreamBuilder(
-              stream: _commentService.streamArtworkComments(
-                widget.artworkId,
-                limit: 10,
-                includeReplies: false,
-              ),
+              stream: context
+                  .read<ArtworkCommentService>()
+                  .streamArtworkComments(
+                    widget.artworkId,
+                    limit: 10,
+                    includeReplies: false,
+                  ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -338,7 +340,9 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
 
                 return Column(
                   children: snapshot.data!.map((comment) {
-                    final currentUser = FirebaseAuth.instance.currentUser;
+                    final currentUser = context
+                        .read<core_auth.AuthService>()
+                        .currentUser;
                     final isOwnComment = currentUser?.uid == comment.userId;
 
                     return Card(
@@ -428,7 +432,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
   /// Report a comment for inappropriate content
   Future<void> _reportComment(String commentId) async {
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = context.read<core_auth.AuthService>().currentUser;
       if (currentUser == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('art_walk_must_be_logged_in_to_report'.tr())),
@@ -437,7 +441,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       }
 
       // Call the report method from comment service
-      await _commentService.reportComment(
+      await context.read<ArtworkCommentService>().reportComment(
         widget.artworkId,
         commentId,
         'Inappropriate content',

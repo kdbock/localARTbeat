@@ -62,9 +62,7 @@ class BecomeArtistScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.artistOnboarding,
-                    );
+                    Navigator.of(context).pushNamed(AppRoutes.artistOnboarding);
                   },
                   child: Text('become_artist_get_started_button'.tr()),
                 ),

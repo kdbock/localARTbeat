@@ -1,12 +1,12 @@
 import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/post_model.dart';
 import '../../services/art_community_service.dart';
+import '../../services/community_service.dart';
 import '../../widgets/enhanced_post_card.dart';
 import '../../widgets/gradient_badge.dart';
 import '../../widgets/post_detail_modal.dart';
@@ -33,10 +33,6 @@ class UserPostsScreen extends StatefulWidget {
 }
 
 class _UserPostsScreenState extends State<UserPostsScreen> {
-  final ArtCommunityService _communityService = ArtCommunityService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   List<PostModel> _userPosts = [];
   bool _isLoading = true;
   String? _error;
@@ -47,12 +43,6 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     _loadUserPosts();
   }
 
-  @override
-  void dispose() {
-    _communityService.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadUserPosts() async {
     setState(() {
       _isLoading = true;
@@ -60,8 +50,8 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     });
 
     try {
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
+      final userId = context.read<UserService>().currentUserId;
+      if (userId == null) {
         setState(() {
           _error = 'community_user_posts.error_not_authenticated'.tr();
           _isLoading = false;
@@ -69,13 +59,10 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
         return;
       }
 
-      final postsQuery = await _firestore
-          .collection('posts')
-          .where('authorId', isEqualTo: currentUser.uid)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      final posts = postsQuery.docs.map(_mapDocToPostModel).toList();
+      final posts = await context.read<CommunityService>().getPostsByUserId(
+        userId,
+        limit: 100,
+      );
 
       if (!mounted) return;
       setState(() {
@@ -373,7 +360,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
-              communityService: _communityService,
+              communityService: context.read<ArtCommunityService>(),
               onTap: () => _openPost(post),
               onEdit: () => _handleEdit(post),
               onDelete: () => _showDeleteDialog(post),
@@ -481,7 +468,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
 
   Future<void> _deletePost(String postId) async {
     try {
-      await _firestore.collection('posts').doc(postId).delete();
+      await context.read<CommunityService>().deletePost(postId);
       setState(() {
         _userPosts.removeWhere((post) => post.id == postId);
       });
@@ -534,103 +521,6 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
       );
     }
     return 'community_user_posts.time_now'.tr();
-  }
-
-  PostModel _mapDocToPostModel(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    final data = doc.data();
-    final createdAt =
-        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
-    final imageUrls = [..._asStringList(data['imageUrls'])];
-    final fallbackImage = (data['imageUrl'] as String?)?.trim();
-    if (fallbackImage != null && fallbackImage.isNotEmpty) {
-      imageUrls.add(fallbackImage);
-    }
-
-    final tags = _asStringList(data['tags']);
-    final mentionedUsers = _asStringList(data['mentionedUsers']);
-    final engagement = data['engagementStats'] as Map<String, dynamic>?;
-
-    final likes =
-        _asInt(engagement?['likeCount']) ?? _asInt(data['likesCount']) ?? 0;
-    final comments =
-        _asInt(engagement?['commentCount']) ??
-        _asInt(data['commentsCount']) ??
-        0;
-    final shares =
-        _asInt(engagement?['shareCount']) ?? _asInt(data['sharesCount']) ?? 0;
-
-    return PostModel(
-      id: doc.id,
-      userId:
-          (data['userId'] as String?) ?? (data['authorId'] as String?) ?? '',
-      userName:
-          (data['userName'] as String?) ??
-          (data['authorName'] as String?) ??
-          '',
-      userPhotoUrl:
-          (data['userPhotoUrl'] as String?) ??
-          (data['authorProfileImage'] as String?) ??
-          '',
-      content:
-          (data['content'] as String?) ??
-          (data['postContent'] as String?) ??
-          '',
-      imageUrls: imageUrls,
-      videoUrl: data['videoUrl'] as String?,
-      audioUrl: data['audioUrl'] as String?,
-      tags: tags,
-      location:
-          (data['location'] as String?) ?? (data['city'] as String?) ?? '',
-      geoPoint: data['geoPoint'] as GeoPoint?,
-      zipCode: data['zipCode'] as String?,
-      createdAt: createdAt,
-      engagementStats: EngagementStats(
-        likeCount: likes,
-        commentCount: comments,
-        shareCount: shares,
-        lastUpdated: createdAt,
-      ),
-      isPublic: (data['isPublic'] as bool?) ?? true,
-      mentionedUsers: mentionedUsers.isEmpty ? null : mentionedUsers,
-      metadata: data['metadata'] as Map<String, dynamic>?,
-      isUserVerified:
-          (data['isUserVerified'] as bool?) ??
-          (data['authorVerified'] as bool?) ??
-          false,
-      moderationStatus: PostModerationStatus.fromString(
-        (data['moderationStatus'] as String?) ?? 'approved',
-      ),
-      flagged: (data['flagged'] as bool?) ?? false,
-      flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate(),
-      moderationNotes: data['moderationNotes'] as String?,
-      isLikedByCurrentUser: (data['isLikedByCurrentUser'] as bool?) ?? false,
-      groupType: data['groupType'] as String?,
-    );
-  }
-
-  List<String> _asStringList(dynamic source) {
-    if (source == null) return [];
-    if (source is Iterable) {
-      return source
-          .whereType<String>()
-          .map((value) => value.trim())
-          .where((value) => value.isNotEmpty)
-          .toList();
-    }
-    if (source is String && source.trim().isNotEmpty) {
-      return [source.trim()];
-    }
-    return [];
-  }
-
-  int? _asInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-    return null;
   }
 }
 

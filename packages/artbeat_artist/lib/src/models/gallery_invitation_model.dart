@@ -6,11 +6,14 @@ class GalleryInvitationModel {
   final String artistId;
   final String galleryName;
   final String artistName;
+  final String artistEmail;
   final String message;
   final String status;
   final DateTime? createdAt;
   final DateTime? expiresAt;
+  final DateTime? respondedAt;
   final String? galleryImageUrl;
+  final String? artistProfileImage;
   final String? artistImageUrl;
   final Map<String, dynamic>? terms;
 
@@ -20,11 +23,14 @@ class GalleryInvitationModel {
     required this.artistId,
     required this.galleryName,
     required this.artistName,
+    this.artistEmail = '',
     required this.message,
     required this.status,
     this.createdAt,
     this.expiresAt,
+    this.respondedAt,
     this.galleryImageUrl,
+    this.artistProfileImage,
     this.artistImageUrl,
     this.terms,
   });
@@ -41,6 +47,9 @@ class GalleryInvitationModel {
       artistName: data['artistName'] != null
           ? data['artistName'].toString()
           : '',
+      artistEmail: data['artistEmail'] != null
+          ? data['artistEmail'].toString()
+          : '',
       message: data['message'] != null ? data['message'].toString() : '',
       status: data['status'] != null ? data['status'].toString() : '',
       createdAt: data['createdAt'] is Timestamp
@@ -49,8 +58,14 @@ class GalleryInvitationModel {
       expiresAt: data['expiresAt'] is Timestamp
           ? (data['expiresAt'] as Timestamp).toDate()
           : null,
+      respondedAt: data['respondedAt'] is Timestamp
+          ? (data['respondedAt'] as Timestamp).toDate()
+          : null,
       galleryImageUrl: data['galleryImageUrl'] != null
           ? data['galleryImageUrl'].toString()
+          : null,
+      artistProfileImage: data['artistProfileImage'] != null
+          ? data['artistProfileImage'].toString()
           : null,
       artistImageUrl: data['artistImageUrl'] != null
           ? data['artistImageUrl'].toString()

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/content_model.dart';
 import 'admin_artwork_service.dart';
 
@@ -8,9 +9,17 @@ import 'admin_artwork_service.dart';
 /// Provides content management specifically for the unified admin dashboard
 /// Avoids conflicts with existing ContentReviewService
 class UnifiedAdminService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final AdminArtworkService _artworkService = AdminArtworkService();
+  UnifiedAdminService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    AdminArtworkService? artworkService,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _artworkService = artworkService ?? AdminArtworkService();
+
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final AdminArtworkService _artworkService;
 
   /// Get all content for admin dashboard
   Future<List<ContentModel>> getAllContent({
@@ -521,6 +530,78 @@ class UnifiedAdminService {
       };
     } catch (e) {
       throw Exception('Failed to get content statistics: $e');
+    }
+  }
+
+  Future<void> rewardApprovedCapture(String captureId) async {
+    try {
+      final captureDoc =
+          await _firestore.collection('captures').doc(captureId).get();
+      if (!captureDoc.exists) return;
+
+      final captureData = captureDoc.data()!;
+      final authorId = captureData['userId'] as String?;
+      if (authorId == null) return;
+
+      await _firestore.collection('users').doc(authorId).update({
+        'experiencePoints': FieldValue.increment(25),
+        'stats.capturesApproved': FieldValue.increment(1),
+      });
+    } catch (e) {
+      AppLogger.error('Failed to reward approved capture $captureId: $e');
+    }
+  }
+
+  Future<void> updateContentRecord({
+    required ContentModel content,
+    required String newTitle,
+    required String newDescription,
+    required String newStatus,
+  }) async {
+    try {
+      final collection = _collectionForContentType(content.type);
+      final updateData = <String, dynamic>{
+        'title': newTitle,
+        'description': newDescription,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (content.type == 'artwork') {
+        updateData['moderationStatus'] = newStatus;
+      } else {
+        updateData['status'] = newStatus;
+      }
+
+      await _firestore
+          .collection(collection)
+          .doc(content.id)
+          .update(updateData);
+    } catch (e) {
+      throw Exception('Failed to update content: $e');
+    }
+  }
+
+  Future<void> deleteContentRecord(ContentModel content) async {
+    try {
+      final collection = _collectionForContentType(content.type);
+      await _firestore.collection(collection).doc(content.id).delete();
+    } catch (e) {
+      throw Exception('Failed to delete content: $e');
+    }
+  }
+
+  String _collectionForContentType(String contentType) {
+    switch (contentType) {
+      case 'artwork':
+        return 'artwork';
+      case 'post':
+        return 'posts';
+      case 'event':
+        return 'events';
+      case 'capture':
+        return 'captures';
+      default:
+        return 'posts';
     }
   }
 }

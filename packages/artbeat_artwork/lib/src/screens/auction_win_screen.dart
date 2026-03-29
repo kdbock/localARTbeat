@@ -2,10 +2,11 @@ import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     as core
     show UnifiedPaymentService;
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_core/shared_widgets.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// Screen shown when user wins an auction
 class AuctionWinScreen extends StatefulWidget {
@@ -25,10 +26,6 @@ class AuctionWinScreen extends StatefulWidget {
 }
 
 class _AuctionWinScreenState extends State<AuctionWinScreen> {
-  final core.UnifiedPaymentService _paymentService =
-      core.UnifiedPaymentService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   bool _isLoading = false;
   String? _errorMessage;
   Duration _timeRemaining = const Duration(hours: 24);
@@ -56,7 +53,9 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
   }
 
   Future<void> _payForArtwork() async {
-    final user = _auth.currentUser;
+    final authService = context.read<core_auth.AuthService>();
+    final paymentService = context.read<core.UnifiedPaymentService>();
+    final user = authService.currentUser;
     if (user == null) return;
 
     setState(() {
@@ -66,7 +65,7 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
 
     try {
       // 1. Create payment intent for auction
-      final intentResult = await _paymentService.createPaymentIntent(
+      final intentResult = await paymentService.createPaymentIntent(
         amount: widget.finalPrice,
         currency: 'usd',
         artworkId: widget.artworkId,
@@ -82,15 +81,15 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
       final paymentIntentId = intentResult['paymentIntentId'] as String;
 
       // 2. Initialize Stripe Payment Sheet
-      await _paymentService.initPaymentSheetForPayment(
+      await paymentService.initPaymentSheetForPayment(
         paymentIntentClientSecret: clientSecret,
       );
 
       // 3. Present the Payment Sheet
-      await _paymentService.presentPaymentSheet();
+      await paymentService.presentPaymentSheet();
 
       // 4. Process auction win via Cloud Function
-      final processResult = await _paymentService.processArtworkSalePayment(
+      final processResult = await paymentService.processArtworkSalePayment(
         artworkId: widget.artworkId,
         amount: widget.finalPrice,
         artistId: widget.artwork.userId,

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:flutter/foundation.dart';
 
 import '../models/sponsorship_tier.dart';
 
@@ -38,22 +37,19 @@ class SponsorshipCheckoutService {
   SponsorshipCheckoutService({UnifiedPaymentService? paymentService})
     : _paymentService = paymentService ?? UnifiedPaymentService();
 
-  final UnifiedPaymentService _paymentService;
-
-  static const Map<SponsorshipTier, SponsorshipStripePlan> _fallbackPlans = {
-    SponsorshipTier.artWalk: SponsorshipStripePlan(
-      productId: 'prod_sponsorship_art_walk_2026',
-      priceId: 'price_sponsorship_art_walk_monthly_2026',
-    ),
-    SponsorshipTier.capture: SponsorshipStripePlan(
-      productId: 'prod_sponsorship_capture_2026',
-      priceId: 'price_sponsorship_capture_monthly_2026',
-    ),
-    SponsorshipTier.discover: SponsorshipStripePlan(
-      productId: 'prod_sponsorship_discovery_2026',
-      priceId: 'price_sponsorship_discovery_monthly_2026',
-    ),
+  static const Map<SponsorshipTier, String> _productEnvKeys = {
+    SponsorshipTier.artWalk: 'STRIPE_PRODUCT_SPONSORSHIP_ART_WALK',
+    SponsorshipTier.capture: 'STRIPE_PRODUCT_SPONSORSHIP_CAPTURE',
+    SponsorshipTier.discover: 'STRIPE_PRODUCT_SPONSORSHIP_DISCOVERY',
   };
+
+  static const Map<SponsorshipTier, String> _priceEnvKeys = {
+    SponsorshipTier.artWalk: 'STRIPE_PRICE_SPONSORSHIP_ART_WALK_MONTHLY',
+    SponsorshipTier.capture: 'STRIPE_PRICE_SPONSORSHIP_CAPTURE_MONTHLY',
+    SponsorshipTier.discover: 'STRIPE_PRICE_SPONSORSHIP_DISCOVERY_MONTHLY',
+  };
+
+  final UnifiedPaymentService _paymentService;
 
   Future<SponsorshipCheckoutResult> startRecurringCheckout({
     required SponsorshipTier tier,
@@ -105,15 +101,15 @@ class SponsorshipCheckoutService {
         'customerId': customerId,
         'priceId': plan.priceId,
         'productId': plan.productId,
-          'paymentMethodId': paymentMethodId,
-          'sponsorshipType': tier.value,
-          'metadata': {
-            'module': 'sponsorships',
-            'businessName': trimmedBusinessName,
-            'contactEmail': trimmedContactEmail,
-          },
+        'paymentMethodId': paymentMethodId,
+        'sponsorshipType': tier.value,
+        'metadata': {
+          'module': 'sponsorships',
+          'businessName': trimmedBusinessName,
+          'contactEmail': trimmedContactEmail,
         },
-      );
+      },
+    );
 
     if (response.statusCode != 200) {
       String message = 'Failed to create sponsorship subscription';
@@ -194,8 +190,10 @@ class SponsorshipCheckoutService {
 
   SponsorshipStripePlan _resolvePlan(SponsorshipTier tier) {
     final env = EnvLoader();
-    final product = env.get(_productEnvKey(tier));
-    final price = env.get(_priceEnvKey(tier));
+    final productEnvKey = _productEnvKey(tier);
+    final priceEnvKey = _priceEnvKey(tier);
+    final product = env.getRequired(productEnvKey).trim();
+    final price = env.getRequired(priceEnvKey).trim();
     if (product.isNotEmpty &&
         price.isNotEmpty &&
         !_looksLikePlaceholderId(product) &&
@@ -203,41 +201,15 @@ class SponsorshipCheckoutService {
       return SponsorshipStripePlan(productId: product, priceId: price);
     }
 
-    final fallback = _fallbackPlans[tier];
-    if (!kReleaseMode &&
-        fallback != null &&
-        !_looksLikePlaceholderId(fallback.productId) &&
-        !_looksLikePlaceholderId(fallback.priceId)) {
-      return fallback;
-    }
-
     throw Exception(
       'Stripe sponsorship plan is not configured for ${tier.value}. '
-      'Set ${_productEnvKey(tier)} and ${_priceEnvKey(tier)} with real Stripe IDs.',
+      'Set $productEnvKey and $priceEnvKey with real Stripe IDs.',
     );
   }
 
-  String _productEnvKey(SponsorshipTier tier) {
-    switch (tier) {
-      case SponsorshipTier.artWalk:
-        return 'STRIPE_PRODUCT_SPONSORSHIP_ART_WALK';
-      case SponsorshipTier.capture:
-        return 'STRIPE_PRODUCT_SPONSORSHIP_CAPTURE';
-      case SponsorshipTier.discover:
-        return 'STRIPE_PRODUCT_SPONSORSHIP_DISCOVERY';
-    }
-  }
+  String _productEnvKey(SponsorshipTier tier) => _productEnvKeys[tier]!;
 
-  String _priceEnvKey(SponsorshipTier tier) {
-    switch (tier) {
-      case SponsorshipTier.artWalk:
-        return 'STRIPE_PRICE_SPONSORSHIP_ART_WALK_MONTHLY';
-      case SponsorshipTier.capture:
-        return 'STRIPE_PRICE_SPONSORSHIP_CAPTURE_MONTHLY';
-      case SponsorshipTier.discover:
-        return 'STRIPE_PRICE_SPONSORSHIP_DISCOVERY_MONTHLY';
-    }
-  }
+  String _priceEnvKey(SponsorshipTier tier) => _priceEnvKeys[tier]!;
 
   bool _looksLikePlaceholderId(String value) {
     final v = value.trim();

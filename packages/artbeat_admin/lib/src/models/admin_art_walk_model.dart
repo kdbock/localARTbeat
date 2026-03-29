@@ -33,8 +33,7 @@ class AdminArtWalkModel {
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
       userId: FirestoreUtils.safeStringDefault(data['userId']),
-      artworkIds:
-          (data['artworkIds'] as List<dynamic>?)
+      artworkIds: (data['artworkIds'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           const [],

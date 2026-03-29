@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -15,6 +14,7 @@ import '../../widgets/community_drawer.dart';
 import 'feed/create_post_screen.dart';
 import 'create_art_post_screen.dart';
 import '../../services/art_community_service.dart';
+import '../../services/community_service.dart';
 
 class UnifiedCommunityHub extends StatefulWidget {
   const UnifiedCommunityHub({super.key});
@@ -119,17 +119,17 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
   /// Handle create post button tap - route based on user type
   Future<void> _handleCreatePost(BuildContext context) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final userService = context.read<UserService>();
+      final userId = userService.currentUserId;
+      if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please log in to create a post')),
         );
         return;
       }
 
-      // Check if user is an artist by looking for artist profile
-      final communityService = ArtCommunityService();
-      final artistProfile = await communityService.getArtistProfile(user.uid);
+      final communityService = context.read<ArtCommunityService>();
+      final artistProfile = await communityService.getArtistProfile(userId);
 
       if (artistProfile != null) {
         // User is an artist - show the options screen for specialized posts
@@ -150,8 +150,6 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
           ),
         );
       }
-
-      communityService.dispose();
     } catch (e) {
       // If there's an error checking artist status, default to simple create post
       Navigator.push(
@@ -177,6 +175,7 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
   final ScrollController _scrollController = ScrollController();
   final List<PostModel> _posts = [];
   final Map<String, List<CommentModel>> _postComments = {};
+  late CommunityService _communityService;
 
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -189,6 +188,7 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<CommunityService>();
     _scrollController.addListener(_onScroll);
     _loadPosts();
   }
@@ -199,15 +199,14 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
     super.dispose();
   }
 
-  String get _currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+  String get _currentUserId => _communityService.currentUserId ?? '';
 
   void _handleUserTap(String userId) async {
     try {
       if (!mounted) return;
-      Navigator.of(context).pushNamed(
-        AppRoutes.messagingUser,
-        arguments: {'userId': userId},
-      );
+      Navigator.of(
+        context,
+      ).pushNamed(AppRoutes.messagingUser, arguments: {'userId': userId});
     } catch (e) {
       AppLogger.error('Error navigating to user profile: $e');
       if (!mounted) return;
@@ -244,57 +243,23 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
     });
 
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(_postsPerPage)
-          .get();
+      final result = await _communityService.getPublicPostsPaginated(
+        limit: _postsPerPage,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
-
-        final loadedPosts = postsSnapshot.docs
-            .map((doc) => PostModel.fromFirestore(doc))
-            .toList();
-
-        // Enrich posts with user data
-        for (var post in loadedPosts) {
-          if (post.userPhotoUrl.isEmpty && post.userId.isNotEmpty) {
-            try {
-              final userDoc = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(post.userId)
-                  .get();
-
-              if (userDoc.exists) {
-                final userData = userDoc.data() as Map<String, dynamic>;
-                final photoUrl = userData['profileImageUrl'] as String? ?? '';
-                final isVerified = userData['isVerified'] as bool? ?? false;
-
-                if (photoUrl.isNotEmpty) {
-                  post = post.copyWith(
-                    userPhotoUrl: photoUrl,
-                    isUserVerified: isVerified,
-                  );
-                }
-              }
-            } catch (e) {
-              AppLogger.error('Error enriching post ${post.id} user data: $e');
-            }
-          }
-        }
+      if (result.posts.isNotEmpty) {
+        _lastDocument = result.lastDocument;
 
         // Load comments for each post
-        for (final post in loadedPosts) {
+        for (final post in result.posts) {
           await _fetchCommentsForPost(post.id);
         }
 
         if (mounted) {
           setState(() {
-            _posts.addAll(loadedPosts);
+            _posts.addAll(result.posts);
             _isLoading = false;
           });
         }
@@ -323,54 +288,22 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
     setState(() => _isLoadingMore = true);
 
     try {
-      final postsSnapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(_postsPerPage)
-          .get();
+      final result = await _communityService.getPublicPostsPaginated(
+        limit: _postsPerPage,
+        lastDocument: _lastDocument,
+      );
 
       if (!mounted) return;
 
-      if (postsSnapshot.docs.isNotEmpty) {
-        _lastDocument = postsSnapshot.docs.last;
-
-        final morePosts = postsSnapshot.docs
-            .map((doc) => PostModel.fromFirestore(doc))
-            .toList();
-
-        // Enrich and load comments for new posts
-        for (var post in morePosts) {
-          if (post.userPhotoUrl.isEmpty && post.userId.isNotEmpty) {
-            try {
-              final userDoc = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(post.userId)
-                  .get();
-
-              if (userDoc.exists) {
-                final userData = userDoc.data() as Map<String, dynamic>;
-                final photoUrl = userData['profileImageUrl'] as String? ?? '';
-                final isVerified = userData['isVerified'] as bool? ?? false;
-
-                if (photoUrl.isNotEmpty) {
-                  post = post.copyWith(
-                    userPhotoUrl: photoUrl,
-                    isUserVerified: isVerified,
-                  );
-                }
-              }
-            } catch (e) {
-              AppLogger.error('Error enriching post ${post.id} user data: $e');
-            }
-          }
+      if (result.posts.isNotEmpty) {
+        _lastDocument = result.lastDocument;
+        for (final post in result.posts) {
           await _fetchCommentsForPost(post.id);
         }
 
         if (mounted) {
           setState(() {
-            _posts.addAll(morePosts);
+            _posts.addAll(result.posts);
           });
         }
       }
@@ -390,19 +323,11 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
 
   Future<void> _fetchCommentsForPost(String postId) async {
     try {
-      final commentsSnapshot = await FirebaseFirestore.instance
-          .collection('comments')
-          .where('postId', isEqualTo: postId)
-          .where('parentCommentId', isEqualTo: '')
-          .orderBy('createdAt', descending: false)
-          .limit(3)
-          .get();
+      final comments = await _communityService.getComments(postId, limit: 3);
 
       if (mounted) {
         setState(() {
-          _postComments[postId] = commentsSnapshot.docs
-              .map((doc) => CommentModel.fromFirestore(doc))
-              .toList();
+          _postComments[postId] = comments;
         });
       }
     } catch (e) {
@@ -602,31 +527,11 @@ class _CommunityArtworksTabState extends State<CommunityArtworksTab> {
     });
 
     try {
-      // Load artworks from Firestore - you may need to adjust this based on your data structure
-      final artworksSnapshot = await FirebaseFirestore.instance
-          .collection('artwork')
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .get();
+      final artworks = await context.read<CommunityService>().getRecentArtworks(
+        limit: 50,
+      );
 
       if (!mounted) return;
-
-      final artworks = artworksSnapshot.docs.map((doc) {
-        final data = doc.data();
-        return community_artwork.ArtworkModel(
-          id: doc.id,
-          title: (data['title'] as String?) ?? 'Untitled',
-          description: (data['description'] as String?) ?? '',
-          imageUrl: (data['imageUrl'] as String?) ?? '',
-          artistId:
-              (data['artistId'] as String?) ??
-              (data['userId'] as String?) ??
-              '',
-          medium: (data['medium'] as String?) ?? 'Unknown',
-          location: (data['location'] as String?) ?? '',
-          createdAt: (data['createdAt'] as Timestamp?) ?? Timestamp.now(),
-        );
-      }).toList();
 
       if (mounted) {
         setState(() {
@@ -900,22 +805,9 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingOnlineArtists = true);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .where('isOnline', isEqualTo: true)
-          .limit(10)
-          .get();
-
-      final artists = snapshot.docs.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'userId': data['userId'] ?? '',
-          'name': data['displayName'] ?? 'Unknown Artist',
-          'avatar': data['profileImageUrl'] ?? '',
-          'isOnline': data['isOnline'] ?? false,
-        };
-      }).toList();
+      final artists = await context.read<CommunityService>().getOnlineArtists(
+        limit: 10,
+      );
 
       if (mounted) {
         setState(() {
@@ -935,18 +827,13 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingRecentPosts = true);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPublic', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(5)
-          .get();
+      final posts = await context.read<CommunityService>().getRecentPublicPosts(
+        limit: 5,
+      );
 
       if (mounted) {
         setState(() {
-          _recentPosts = snapshot.docs
-              .map((doc) => PostModel.fromFirestore(doc))
-              .toList();
+          _recentPosts = posts;
           _isLoadingRecentPosts = false;
         });
       }
@@ -962,39 +849,15 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingFeaturedArtists = true);
 
-      // Get featured artists based on active features
-      final subscriptionService = SubscriptionService();
-      final featuredArtists = await subscriptionService.getFeaturedArtists();
-
-      final artists = <Map<String, dynamic>>[];
-      for (final artist in featuredArtists) {
-        final followerCount = await _getFollowerCount(artist.id);
-
-        final mediums = artist.mediums;
-        final styles = artist.styles;
-        String specialty = '';
-
-        if (mediums.isNotEmpty) {
-          specialty = mediums.first;
-        } else if (styles.isNotEmpty) {
-          specialty = styles.first;
-        } else if (artist.location != null && artist.location!.isNotEmpty) {
-          specialty = artist.location!;
-        }
-
-        artists.add({
-          'id': artist.id,
-          'userId': artist.userId,
-          'name': artist.displayName,
-          'specialty': specialty,
-          'avatar': artist.profileImageUrl ?? '',
-          'followers': _formatFollowerCount(followerCount),
-        });
-      }
+      final artists = await context.read<CommunityService>().getFeaturedArtists(
+        subscriptionService: context.read<SubscriptionService>(),
+      );
 
       if (mounted) {
         setState(() {
-          _featuredArtists = artists;
+          _featuredArtists = artists
+              .map(_formatArtistFollowerCounts)
+              .toList(growable: false);
           _isLoadingFeaturedArtists = false;
         });
       }
@@ -1010,43 +873,15 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingVerifiedArtists = true);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .where('isVerified', isEqualTo: true)
-          .limit(10)
-          .get();
-
-      final artists = <Map<String, dynamic>>[];
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final followerCount = await _getFollowerCount(doc.id);
-
-        final mediums = data['mediums'] as List<dynamic>? ?? [];
-        final styles = data['styles'] as List<dynamic>? ?? [];
-        String specialty = '';
-
-        if (mediums.isNotEmpty) {
-          specialty = mediums.first.toString();
-        } else if (styles.isNotEmpty) {
-          specialty = styles.first.toString();
-        } else if (data['location'] != null &&
-            (data['location'] as String).isNotEmpty) {
-          specialty = data['location'] as String;
-        }
-
-        artists.add({
-          'id': doc.id,
-          'userId': data['userId'] ?? '',
-          'name': data['displayName'] ?? 'Unknown Artist',
-          'specialty': specialty,
-          'avatar': data['profileImageUrl'] ?? '',
-          'followers': _formatFollowerCount(followerCount),
-        });
-      }
+      final artists = await context.read<CommunityService>().getVerifiedArtists(
+        limit: 10,
+      );
 
       if (mounted) {
         setState(() {
-          _verifiedArtists = artists;
+          _verifiedArtists = artists
+              .map(_formatArtistFollowerCounts)
+              .toList(growable: false);
           _isLoadingVerifiedArtists = false;
         });
       }
@@ -1062,44 +897,15 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingArtists = true);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .where('isFeatured', isEqualTo: false)
-          .where('isVerified', isEqualTo: false)
-          .limit(10)
-          .get();
-
-      final artists = <Map<String, dynamic>>[];
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final followerCount = await _getFollowerCount(doc.id);
-
-        final mediums = data['mediums'] as List<dynamic>? ?? [];
-        final styles = data['styles'] as List<dynamic>? ?? [];
-        String specialty = '';
-
-        if (mediums.isNotEmpty) {
-          specialty = mediums.first.toString();
-        } else if (styles.isNotEmpty) {
-          specialty = styles.first.toString();
-        } else if (data['location'] != null &&
-            (data['location'] as String).isNotEmpty) {
-          specialty = data['location'] as String;
-        }
-
-        artists.add({
-          'id': doc.id,
-          'userId': data['userId'] ?? '',
-          'name': data['displayName'] ?? 'Unknown Artist',
-          'specialty': specialty,
-          'avatar': data['profileImageUrl'] ?? '',
-          'followers': _formatFollowerCount(followerCount),
-        });
-      }
+      final artists = await context.read<CommunityService>().getStandardArtists(
+        limit: 10,
+      );
 
       if (mounted) {
         setState(() {
-          _artists = artists;
+          _artists = artists
+              .map(_formatArtistFollowerCounts)
+              .toList(growable: false);
           _isLoadingArtists = false;
         });
       }
@@ -1108,22 +914,6 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
       if (mounted) {
         setState(() => _isLoadingArtists = false);
       }
-    }
-  }
-
-  Future<int> _getFollowerCount(String artistProfileId) async {
-    try {
-      final followersSnapshot = await FirebaseFirestore.instance
-          .collection('artistFollows')
-          .where('artistProfileId', isEqualTo: artistProfileId)
-          .get();
-
-      return followersSnapshot.docs.length;
-    } catch (e) {
-      debugPrint(
-        'Error getting follower count for artist $artistProfileId: $e',
-      );
-      return 0;
     }
   }
 
@@ -1140,6 +930,12 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     } else {
       return intCount.toString();
     }
+  }
+
+  Map<String, dynamic> _formatArtistFollowerCounts(
+    Map<String, dynamic> artist,
+  ) {
+    return {...artist, 'followers': _formatFollowerCount(artist['followers'])};
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 
 /// Fix XP points for Izzy Piel specifically
 class IzzyXPFix extends StatefulWidget {
@@ -12,7 +13,13 @@ class IzzyXPFix extends StatefulWidget {
 class _IzzyXPFixState extends State<IzzyXPFix> {
   bool _isFixing = false;
   String _status = '';
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final UserMaintenanceService _userMaintenanceService;
+
+  @override
+  void initState() {
+    super.initState();
+    _userMaintenanceService = context.read<UserMaintenanceService>();
+  }
 
   Future<void> _fixIzzyXP() async {
     if (_isFixing) return;
@@ -23,13 +30,15 @@ class _IzzyXPFixState extends State<IzzyXPFix> {
     });
 
     try {
-      // Use Izzy's specific user ID
       const izzyId = 'EdH8MvWk4Ja6eoSZM59QtOaxEK43';
-      setState(() => _status = 'Getting Izzy\'s data...');
+      setState(
+        () => _status = 'Repairing Izzy\'s XP from approved captures...',
+      );
 
-      final izzyDoc = await _firestore.collection('users').doc(izzyId).get();
+      final result = await _userMaintenanceService
+          .repairUserXpFromApprovedCaptures(izzyId);
 
-      if (!izzyDoc.exists) {
+      if (result == null) {
         setState(() {
           _status = '❌ Could not find Izzy\'s user document';
           _isFixing = false;
@@ -37,86 +46,29 @@ class _IzzyXPFixState extends State<IzzyXPFix> {
         return;
       }
 
-      await _processIzzyXP(izzyDoc);
+      if (!mounted) return;
+
+      setState(() {
+        _status = result.wasUpdated
+            ? '✅ Izzy XP Fix Complete!\n'
+                  'Approved captures: ${result.actualApprovedCaptures}\n'
+                  'Stored count: ${result.storedCapturesCount}\n'
+                  'XP: ${result.previousXp} → ${result.updatedXp}\n'
+                  'Level: ${result.previousLevel} → ${result.updatedLevel}\n'
+                  'XP gained: ${result.updatedXp - result.previousXp}'
+            : '✅ Izzy\'s XP is already correct!\n'
+                  'Approved captures: ${result.actualApprovedCaptures}\n'
+                  'Stored count: ${result.storedCapturesCount}\n'
+                  'Current XP: ${result.previousXp}\n'
+                  'Expected XP: ${result.updatedXp}';
+        _isFixing = false;
+      });
     } catch (e) {
       setState(() {
         _status = '❌ Error fixing Izzy XP: $e';
         _isFixing = false;
       });
     }
-  }
-
-  Future<void> _processIzzyXP(DocumentSnapshot izzyDoc) async {
-    final izzyData = izzyDoc.data() as Map<String, dynamic>;
-    final izzyId = izzyDoc.id;
-    final currentXP = izzyData['experiencePoints'] as int? ?? 0;
-    final currentLevel = izzyData['level'] as int? ?? 1;
-    final storedCapturesCount = izzyData['capturesCount'] as int? ?? 0;
-
-    if (!mounted) return;
-    setState(
-      () => _status =
-          'Found ${izzyData['fullName']}\nCurrent XP: $currentXP\nStored Captures: $storedCapturesCount',
-    );
-
-    // Get Izzy's actual approved captures
-    if (!mounted) return;
-    setState(() => _status = 'Counting actual approved captures...');
-
-    final capturesQuery = await _firestore
-        .collection('captures')
-        .where('userId', isEqualTo: izzyId)
-        .where('status', isEqualTo: 'approved')
-        .get();
-
-    final actualApproved = capturesQuery.docs.length;
-    final expectedXP = actualApproved * 50;
-    final expectedLevel = (expectedXP / 1000).floor() + 1;
-
-    if (!mounted) return;
-    setState(
-      () => _status =
-          'Actual approved: $actualApproved\n'
-          'Stored count: $storedCapturesCount\n'
-          'Expected XP: $expectedXP\n'
-          'Current XP: $currentXP\n'
-          'Missing XP: ${expectedXP - currentXP}',
-    );
-
-    if (expectedXP <= currentXP) {
-      if (!mounted) return;
-      setState(() {
-        _status =
-            '✅ Izzy\'s XP is already correct!\n'
-            'Approved captures: $actualApproved\n'
-            'Current XP: $currentXP\n'
-            'Expected XP: $expectedXP';
-        _isFixing = false;
-      });
-      return;
-    }
-
-    // Direct update instead of incremental awards
-    if (!mounted) return;
-    setState(() => _status = 'Updating XP directly...');
-
-    await _firestore.collection('users').doc(izzyId).update({
-      'experiencePoints': expectedXP,
-      'level': expectedLevel,
-      'capturesCount': actualApproved, // Sync the captures count
-      'lastXPGain': FieldValue.serverTimestamp(),
-    });
-
-    if (!mounted) return;
-    setState(() {
-      _status =
-          '✅ Izzy XP Fix Complete!\n'
-          'Approved captures: $actualApproved\n'
-          'XP: $currentXP → $expectedXP\n'
-          'Level: $currentLevel → $expectedLevel\n'
-          'XP gained: ${expectedXP - currentXP}';
-      _isFixing = false;
-    });
   }
 
   @override

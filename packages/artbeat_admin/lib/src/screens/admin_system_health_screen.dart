@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:provider/provider.dart';
 
 import '../services/consolidated_admin_service.dart';
 import '../widgets/admin_metrics_card.dart';
@@ -20,7 +21,7 @@ class AdminSystemHealthScreen extends StatefulWidget {
 
 class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
     with TickerProviderStateMixin {
-  final ConsolidatedAdminService _adminService = ConsolidatedAdminService();
+  late ConsolidatedAdminService _adminService;
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
 
   // Real-time monitoring
@@ -52,6 +53,7 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
   @override
   void initState() {
     super.initState();
+    _adminService = context.read<ConsolidatedAdminService>();
     _tabController = TabController(length: 7, vsync: this);
     _loadSystemData();
     _loadRemoteConfig();
@@ -1029,8 +1031,8 @@ class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
           padding: const EdgeInsets.all(16),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'admin_admin_system_monitoring_feedback_search_hint'
-                  .tr(),
+              hintText:
+                  'admin_admin_system_monitoring_feedback_search_hint'.tr(),
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
             ),

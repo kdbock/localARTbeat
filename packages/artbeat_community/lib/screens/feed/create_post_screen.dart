@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
@@ -10,6 +9,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
 import '../../services/art_community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
@@ -50,7 +51,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     with TickerProviderStateMixin {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
-  final ArtCommunityService _communityService = ArtCommunityService();
+  late ArtCommunityService _communityService;
   final FirebaseStorageService _storageService = FirebaseStorageService();
   final ModerationService _moderationService = ModerationService();
 
@@ -86,6 +87,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   @override
   void initState() {
     super.initState();
+    _communityService = context.read<ArtCommunityService>();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -131,7 +133,6 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   void dispose() {
     _contentController.dispose();
     _tagsController.dispose();
-    _communityService.dispose();
     _videoController?.dispose();
     _audioPlayer?.dispose();
     _animationController.dispose();
@@ -139,9 +140,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   }
 
   Future<void> _checkIfUserIsArtist() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final profile = await _communityService.getArtistProfile(user.uid);
+    final userId = _communityService.currentUserId;
+    if (userId != null) {
+      final profile = await _communityService.getArtistProfile(userId);
       if (mounted && profile != null) {
         setState(() => _isArtistPost = true);
       }
@@ -455,8 +456,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      if (_communityService.currentUserId == null) {
+        throw Exception('User not authenticated');
+      }
 
       // AI Moderation Check
       final moderationResult = await _moderationService.moderateContent(
@@ -779,7 +781,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   }
 
   Widget _buildUserInfoSection() {
-    final user = FirebaseAuth.instance.currentUser;
+    final isSignedIn = _communityService.currentUserId != null;
     return GlassCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(24),
@@ -791,12 +793,11 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               CircleAvatar(
                 radius: 28,
                 backgroundColor: Colors.white.withValues(alpha: 0.08),
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  user?.photoURL,
+                child: Icon(
+                  isSignedIn ? Icons.auto_awesome : Icons.person,
+                  color: Colors.white,
+                  size: 24,
                 ),
-                child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                    ? const Icon(Icons.person, color: Colors.white, size: 24)
-                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -804,7 +805,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.displayName ?? 'create_post_anonymous_user'.tr(),
+                      isSignedIn
+                          ? 'ARTbeat'
+                          : 'create_post_anonymous_user'.tr(),
                       style: _grotesk(18, FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
@@ -952,9 +955,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(
-                  child: Icon(icon, color: Colors.white, size: 26),
-                ),
+                Flexible(child: Icon(icon, color: Colors.white, size: 26)),
                 const SizedBox(height: 8),
                 Text(
                   label,

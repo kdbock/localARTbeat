@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../services/admin_data_rights_service.dart';
 
 class AdminDataRequestsScreen extends StatefulWidget {
   const AdminDataRequestsScreen({super.key});
@@ -13,11 +15,16 @@ class AdminDataRequestsScreen extends StatefulWidget {
 }
 
 class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
-  final _auth = FirebaseAuth.instance;
-  final _functions = FirebaseFunctions.instance;
+  late AdminDataRightsService _dataRightsService;
 
   String _statusFilter = 'all';
   final Set<String> _requestIdsInFlight = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _dataRightsService = context.read<AdminDataRightsService>();
+  }
 
   String _formatTimestamp(dynamic value) {
     if (value is Timestamp) {
@@ -36,10 +43,9 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
     final ackDueAt = data['slaAcknowledgementDueAt'];
     final completionDueAt = data['slaCompletionDueAt'];
     final reviewNotes = (data['reviewNotes'] ?? '').toString().trim();
-    final processingError =
-        data['processingError'] is Map<String, dynamic>
-            ? data['processingError'] as Map<String, dynamic>
-            : const <String, dynamic>{};
+    final processingError = data['processingError'] is Map<String, dynamic>
+        ? data['processingError'] as Map<String, dynamic>
+        : const <String, dynamic>{};
     final errorMessage = (processingError['message'] ?? '').toString().trim();
     final errorCode = (processingError['code'] ?? '').toString().trim();
 
@@ -76,10 +82,9 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
       return const <String>[];
     }
 
-    final summary =
-        data['deletionSummary'] is Map<String, dynamic>
-            ? data['deletionSummary'] as Map<String, dynamic>
-            : const <String, dynamic>{};
+    final summary = data['deletionSummary'] is Map<String, dynamic>
+        ? data['deletionSummary'] as Map<String, dynamic>
+        : const <String, dynamic>{};
     final startedAt = data['processingStartedAt'];
     final completedAt = data['processingCompletedAt'];
     final currentStep = (summary['currentStep'] ?? '').toString().trim();
@@ -140,48 +145,12 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
     Map<String, dynamic> currentData, {
     String? reviewNotes,
   }) async {
-    final reviewerId = _auth.currentUser?.uid;
-    final updates = <String, dynamic>{
-      'status': newStatus,
-      'updatedAt': FieldValue.serverTimestamp(),
-      'reviewedBy': reviewerId,
-    };
-
-    if (reviewNotes != null && reviewNotes.trim().isNotEmpty) {
-      updates['reviewNotes'] = reviewNotes.trim();
-    }
-
-    if (newStatus == 'in_review') {
-      updates['acknowledgedAt'] = FieldValue.serverTimestamp();
-    }
-    if (newStatus == 'fulfilled') {
-      updates['fulfilledAt'] = FieldValue.serverTimestamp();
-      updates['acknowledgedAt'] =
-          updates['acknowledgedAt'] ?? FieldValue.serverTimestamp();
-    }
-    if (newStatus == 'denied') {
-      updates['deniedAt'] = FieldValue.serverTimestamp();
-      updates['acknowledgedAt'] =
-          updates['acknowledgedAt'] ?? FieldValue.serverTimestamp();
-    }
-
-    final requestType =
-        (currentData['requestType'] ?? currentData['type'] ?? '').toString();
-    final userId = (currentData['userId'] ?? '').toString();
-    if (newStatus == 'fulfilled' && requestType == 'deletion') {
-      if (userId.trim().isEmpty) {
-        throw StateError('Cannot fulfill deletion request: missing userId.');
-      }
-      final callable = _functions.httpsCallable('processDataDeletionRequest');
-      await callable.call<Map<String, dynamic>>({
-        'requestId': ref.id,
-        'userId': userId,
-        'reviewNotes': reviewNotes,
-      });
-      return;
-    }
-
-    await ref.update(updates);
+    await _dataRightsService.updateStatus(
+      ref,
+      newStatus,
+      currentData,
+      reviewNotes: reviewNotes,
+    );
   }
 
   Future<void> _showActionSheet(
@@ -334,10 +303,9 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
   Future<bool?> _confirmDeletionFulfillment(Map<String, dynamic> data) {
     final userId = (data['userId'] ?? '').toString().trim();
     final status = (data['status'] ?? 'pending').toString();
-    final processingError =
-        data['processingError'] is Map<String, dynamic>
-            ? data['processingError'] as Map<String, dynamic>
-            : const <String, dynamic>{};
+    final processingError = data['processingError'] is Map<String, dynamic>
+        ? data['processingError'] as Map<String, dynamic>
+        : const <String, dynamic>{};
     final errorMessage = (processingError['message'] ?? '').toString().trim();
 
     return showDialog<bool>(
@@ -348,7 +316,8 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('This will run the account deletion pipeline for user `$userId`.'),
+            Text(
+                'This will run the account deletion pipeline for user `$userId`.'),
             const SizedBox(height: 12),
             Text('Current request status: $status'),
             if (errorMessage.isNotEmpty) ...[
@@ -398,10 +367,7 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final baseQuery = FirebaseFirestore.instance
-        .collection('dataRequests')
-        .orderBy('requestedAt', descending: true)
-        .limit(200);
+    final baseQuery = _dataRightsService.requestsQuery();
 
     return Scaffold(
       appBar: AppBar(

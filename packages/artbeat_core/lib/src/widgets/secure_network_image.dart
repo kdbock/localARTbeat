@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../utils/logger.dart';
 import '../utils/image_url_validator.dart';
 import '../services/image_management_service.dart';
@@ -46,10 +47,14 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
   bool _isRetrying = false;
   String? _authenticatedUrl;
   bool _usingThumbnailFallback = false;
+  late ImageManagementService _imageManagementService;
+  late core_auth.AuthService _authService;
 
   @override
   void initState() {
     super.initState();
+    _imageManagementService = context.read<ImageManagementService>();
+    _authService = context.read<core_auth.AuthService>();
     _authenticatedUrl =
         ImageUrlValidator.normalizeImageUrl(widget.imageUrl) ?? widget.imageUrl;
   }
@@ -100,7 +105,7 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
 
     try {
       // Refresh Firebase Auth token
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _authService.currentUser;
       if (user != null) {
         await user.getIdToken(true); // Force refresh
         if (kDebugMode) {
@@ -406,7 +411,7 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
     AppLogger.network('🖼️ SecureNetworkImage validating URL: $urlToCheck');
     // Removed excessive debugPrint to prevent terminal scrolling
 
-    final cacheManager = ImageManagementService().cacheManager;
+    final cacheManager = _imageManagementService.cacheManager;
     AppLogger.network(
       '🖼️ SecureNetworkImage using cache manager: ${cacheManager != null}',
     );
@@ -416,7 +421,7 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
       return _buildErrorWidget(context, 'Invalid URL', null);
     }
 
-    ImageManagementService().logDecodeDimensions(
+    _imageManagementService.logDecodeDimensions(
       label: 'SecureNetworkImage',
       width: widget.width,
       height: widget.height,

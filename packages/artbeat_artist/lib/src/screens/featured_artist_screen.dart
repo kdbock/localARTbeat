@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artist/artbeat_artist.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 
 /// Screen for showcasing featured artists with special layout and highlighting
 class FeaturedArtistScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class FeaturedArtistScreen extends StatefulWidget {
 }
 
 class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
-  final SubscriptionService _subscriptionService = SubscriptionService();
+  late final SubscriptionService _subscriptionService;
 
   bool _isLoading = true;
   List<core.ArtistProfileModel> _featuredArtists = [];
@@ -21,6 +22,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
   @override
   void initState() {
     super.initState();
+    _subscriptionService = context.read<SubscriptionService>();
     _loadFeaturedArtists();
   }
 

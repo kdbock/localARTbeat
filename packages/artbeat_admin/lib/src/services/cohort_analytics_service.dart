@@ -395,7 +395,9 @@ class CohortAnalyticsService {
     final snapshot = await _firestore.collection('users').get();
 
     return snapshot.docs
-        .where((doc) => (getEffectiveLastActive(doc.data())?.isAfter(sevenDaysAgo) ?? false))
+        .where((doc) =>
+            (getEffectiveLastActive(doc.data())?.isAfter(sevenDaysAgo) ??
+                false))
         .map((doc) => {
               'id': doc.id,
               ...doc.data(),

@@ -240,7 +240,8 @@ class CaptureService implements CaptureServiceInterface {
     }
   }
 
-  Future<({String? captureId, bool queuedOffline})> createCaptureFromLocalImage({
+  Future<({String? captureId, bool queuedOffline})>
+  createCaptureFromLocalImage({
     required CaptureModel capture,
     required String localImagePath,
   }) async {

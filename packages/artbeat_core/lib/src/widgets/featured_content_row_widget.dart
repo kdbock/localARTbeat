@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../theme/index.dart';
+import '../services/store_preview_read_service.dart';
 import 'secure_network_image.dart';
 
 /// Widget for displaying featured artist content and articles in a row
@@ -41,13 +42,10 @@ class FeaturedContentRowWidget extends StatelessWidget {
         ),
         SizedBox(
           height: 260,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('featuredContent')
-                .where('isActive', isEqualTo: true)
-                .orderBy('publishedAt', descending: true)
-                .limit(5)
-                .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: context
+                .read<StorePreviewReadService>()
+                .watchFeaturedContent(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -70,7 +68,7 @@ class FeaturedContentRowWidget extends StatelessWidget {
                 );
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Center(
@@ -84,15 +82,14 @@ class FeaturedContentRowWidget extends StatelessWidget {
                 );
               }
 
-              final featuredContent = snapshot.data!.docs;
+              final featuredContent = snapshot.data!;
 
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: featuredContent.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 itemBuilder: (context, index) {
-                  final content =
-                      featuredContent[index].data() as Map<String, dynamic>;
+                  final content = featuredContent[index];
 
                   return GestureDetector(
                     onTap: () {

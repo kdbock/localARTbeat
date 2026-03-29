@@ -11,6 +11,8 @@ class SponsorshipRepository {
 
   static const String _collection = 'sponsorships';
 
+  String nextId() => _firestore.collection(_collection).doc().id;
+
   /// Create a new sponsorship (initially pending unless specified otherwise)
   Future<void> createSponsorship(Sponsorship sponsorship) async {
     await _firestore

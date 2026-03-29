@@ -43,7 +43,8 @@ class FirebaseStorageUploadService {
           await _tokenService.refreshTokens();
         }
 
-        final shouldRetry = attempt < maxAttempts && isRetryableUploadError(error);
+        final shouldRetry =
+            attempt < maxAttempts && isRetryableUploadError(error);
         AppLogger.error('$operationLabel attempt $attempt failed: $error');
 
         if (!shouldRetry) {
@@ -82,7 +83,8 @@ class FirebaseStorageUploadService {
           await _tokenService.refreshTokens();
         }
 
-        final shouldRetry = attempt < maxAttempts && isRetryableUploadError(error);
+        final shouldRetry =
+            attempt < maxAttempts && isRetryableUploadError(error);
         AppLogger.error('$operationLabel attempt $attempt failed: $error');
 
         if (!shouldRetry) {

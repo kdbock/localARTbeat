@@ -179,7 +179,8 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
           ),
           const SizedBox(height: 8),
           Text(
-            'admin_upload_tools_type'.tr(namedArgs: {'type': widget.uploadType}),
+            'admin_upload_tools_type'
+                .tr(namedArgs: {'type': widget.uploadType}),
             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
           const SizedBox(height: 24),

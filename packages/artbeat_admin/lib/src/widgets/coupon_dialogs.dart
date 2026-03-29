@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 /// Dialog for creating new coupons
 class CreateCouponDialog extends StatefulWidget {
@@ -21,8 +22,6 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
   CouponType _selectedType = CouponType.percentageDiscount;
   DateTime? _expiresAt;
   bool _isLoading = false;
-
-  final CouponService _couponService = CouponService();
 
   @override
   void dispose() {
@@ -240,7 +239,8 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
     });
 
     try {
-      await _couponService.createCoupon(
+      final couponService = context.read<CouponService>();
+      await couponService.createCoupon(
         code: _codeController.text.trim().toUpperCase(),
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -318,8 +318,6 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
   late CouponType _selectedType;
   late DateTime? _expiresAt;
   bool _isLoading = false;
-
-  final CouponService _couponService = CouponService();
 
   @override
   void initState() {
@@ -511,6 +509,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
     });
 
     try {
+      final couponService = context.read<CouponService>();
       final updatedCoupon = widget.coupon.copyWith(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -527,7 +526,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
         updatedAt: DateTime.now(),
       );
 
-      await _couponService.updateCoupon(updatedCoupon);
+      await couponService.updateCoupon(updatedCoupon);
 
       if (mounted) {
         Navigator.of(context).pop(true);

@@ -370,7 +370,10 @@ class _BiometricPaymentDialogState extends State<BiometricPaymentDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: widget.onCancel, child: Text('common_cancel'.tr())),
+        TextButton(
+          onPressed: widget.onCancel,
+          child: Text('common_cancel'.tr()),
+        ),
         ElevatedButton(
           onPressed: _isAuthenticating ? null : _authenticateAndConfirm,
           child: const Text('Confirm with Biometric'),

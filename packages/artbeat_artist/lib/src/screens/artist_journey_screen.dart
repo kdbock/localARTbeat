@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/auth_service.dart' as core_auth;
+import 'package:provider/provider.dart';
+
 import 'artist_onboard_screen.dart';
 
 /// Comprehensive artist journey screen that guides users through becoming an artist
@@ -786,15 +788,14 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       if (user == null) {
         throw Exception('User not logged in');
       }
 
-      // Get user data
-      final userService = core.UserService();
-      final userData = await userService.getUserById(user.uid);
-
+      final userData = await context.read<core.UserService>().getUserById(
+        user.uid,
+      );
       if (userData == null) {
         throw Exception('User data not found');
       }
@@ -841,13 +842,14 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = context.read<core_auth.AuthService>().currentUser;
       if (user == null) {
         throw Exception('User not logged in');
       }
 
-      final userService = core.UserService();
-      final userData = await userService.getUserById(user.uid);
+      final userData = await context.read<core.UserService>().getUserById(
+        user.uid,
+      );
       if (userData == null) throw Exception('User data not found');
 
       if (mounted) {

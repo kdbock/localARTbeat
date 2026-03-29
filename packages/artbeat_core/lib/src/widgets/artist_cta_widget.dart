@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../theme/artbeat_colors.dart';
@@ -65,7 +66,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
     }
 
     return FutureBuilder<UserModel?>(
-      future: UserService().getCurrentUserModel(),
+      future: context.read<UserService>().getCurrentUserModel(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
@@ -262,7 +263,7 @@ class CompactArtistCTAWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<UserModel?>(
-      future: UserService().getCurrentUserModel(),
+      future: context.read<UserService>().getCurrentUserModel(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox.shrink();

@@ -227,24 +227,13 @@ class DirectCommissionService {
   /// Complete commission
   Future<void> completeCommission(String commissionId) async {
     try {
-      // 1. Update the direct_commissions document status
-      await _firestore
-          .collection('direct_commissions')
-          .doc(commissionId)
-          .update({
-            'status': CommissionStatus.completed.name,
-            'completedAt': Timestamp.now(),
-          });
-
-      // 2. Call the Cloud Function to release funds in the earnings system
-      // This transitions funds from pending to available balance
       final result = await _paymentService.completeCommission(
         commissionId: commissionId,
       );
 
       if (!result.success) {
-        AppLogger.warning(
-          '⚠️ Financial fulfillment failed for commission $commissionId: ${result.error}',
+        throw Exception(
+          result.error ?? 'Failed to complete commission financial fulfillment',
         );
       }
 

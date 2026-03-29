@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ArtMarketScreen extends StatefulWidget {
   final bool isAuction;
@@ -13,7 +13,6 @@ class ArtMarketScreen extends StatefulWidget {
 }
 
 class _ArtMarketScreenState extends State<ArtMarketScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _artistSearchController = TextEditingController();
   String _artistQuery = '';
 
@@ -25,8 +24,10 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _getArtworkStream(),
+    return StreamBuilder<List<ArtworkModel>>(
+      stream: context.read<StorePreviewReadService>().watchMarketArtworks(
+        isAuction: widget.isAuction,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -36,9 +37,9 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 
-        final docs = snapshot.data?.docs ?? [];
-        final filteredDocs = _filterByArtistQuery(docs);
-        if (docs.isEmpty) {
+        final artworks = snapshot.data ?? <ArtworkModel>[];
+        final filteredArtworks = _filterByArtistQuery(artworks);
+        if (artworks.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -90,7 +91,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${filteredDocs.length} items',
+                    '${filteredArtworks.length} items',
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -102,7 +103,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: filteredDocs.isEmpty
+              child: filteredArtworks.isEmpty
                   ? _buildNoArtistResults()
                   : GridView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -113,11 +114,10 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                           ),
-                      itemCount: filteredDocs.length,
+                      itemCount: filteredArtworks.length,
                       itemBuilder: (context, index) {
-                        final doc = filteredDocs[index];
-                        final artwork = ArtworkModel.fromFirestore(doc);
-                        final artistName = _extractArtistName(doc);
+                        final artwork = filteredArtworks[index];
+                        final artistName = _extractArtistName(artwork);
                         return _buildArtworkCard(
                           artwork,
                           artistName: artistName,
@@ -131,43 +131,20 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
     );
   }
 
-  Stream<QuerySnapshot> _getArtworkStream() {
-    Query query = _firestore
-        .collection('artwork')
-        .where('isPublic', isEqualTo: true);
-
-    if (widget.isAuction) {
-      query = query.where('auctionEnabled', isEqualTo: true);
-    } else {
-      query = query.where('isForSale', isEqualTo: true);
-    }
-
-    return query.orderBy('createdAt', descending: true).snapshots();
-  }
-
-  List<QueryDocumentSnapshot> _filterByArtistQuery(
-    List<QueryDocumentSnapshot> docs,
-  ) {
+  List<ArtworkModel> _filterByArtistQuery(List<ArtworkModel> artworks) {
     final query = _artistQuery.trim().toLowerCase();
-    if (query.isEmpty) return docs;
+    if (query.isEmpty) return artworks;
 
-    return docs.where((doc) {
-      final artistName = _extractArtistName(doc).toLowerCase();
+    return artworks.where((artwork) {
+      final artistName = _extractArtistName(artwork).toLowerCase();
       return artistName.contains(query);
     }).toList();
   }
 
-  String _extractArtistName(QueryDocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>? ?? {};
-    final candidate =
-        data['artistName'] ??
-        data['artistDisplayName'] ??
-        data['displayName'] ??
-        data['creatorName'] ??
-        data['artist'] ??
-        data['artistHandle'];
-    if (candidate is String && candidate.trim().isNotEmpty) {
-      return candidate.trim();
+  String _extractArtistName(ArtworkModel artwork) {
+    final artistName = artwork.artistName.trim();
+    if (artistName.isNotEmpty) {
+      return artistName;
     }
     return 'Unknown Artist';
   }

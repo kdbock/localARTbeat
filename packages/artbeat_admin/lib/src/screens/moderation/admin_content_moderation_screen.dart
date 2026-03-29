@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:provider/provider.dart';
 
 import '../../services/admin_capture_moderation_service.dart';
 
@@ -16,8 +17,7 @@ class AdminContentModerationScreen extends StatefulWidget {
 
 class _AdminContentModerationScreenState
     extends State<AdminContentModerationScreen> {
-  final AdminCaptureModerationService _captureService =
-      AdminCaptureModerationService();
+  late AdminCaptureModerationService _captureService;
   List<core.CaptureModel> _pendingCaptures = [];
   bool _loading = true;
   String _selectedTab = 'pending';
@@ -25,6 +25,7 @@ class _AdminContentModerationScreenState
   @override
   void initState() {
     super.initState();
+    _captureService = context.read<AdminCaptureModerationService>();
     _loadPendingCaptures();
   }
 

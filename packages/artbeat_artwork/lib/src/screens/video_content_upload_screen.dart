@@ -2,17 +2,17 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
         SubscriptionTier,
         ArtbeatColors,
         EnhancedUniversalHeader,
         MainLayout,
-        AppLogger;
+        AppLogger,
+        UserService;
 import 'package:artbeat_artwork/artbeat_artwork.dart' show ArtworkService;
 
 // Video processing imports - simplified for now
@@ -49,11 +49,9 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
   late final TextEditingController _locationController;
   late final TextEditingController _equipmentController;
 
-  final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-
   // Services
-  final ArtworkService _artworkService = ArtworkService();
+  late final ArtworkService _artworkService;
+  late final UserService _userService;
 
   File? _thumbnailFile;
   bool _isForSale = false;
@@ -138,6 +136,8 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
     _locationController = TextEditingController();
     _equipmentController = TextEditingController();
 
+    _artworkService = context.read<ArtworkService>();
+    _userService = context.read<UserService>();
     _loadUserData();
   }
 
@@ -161,30 +161,20 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
 
   Future<void> _loadUserData() async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) return;
 
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _userService.getCurrentUserProfile();
+      final userArtwork = await _artworkService.getCurrentUserArtwork();
       if (!mounted) return;
 
       setState(() {
         _tierLevel = SubscriptionTier.values.firstWhere(
-          (tier) => tier.name == userDoc.get('subscriptionTier'),
+          (tier) => tier.name == userDoc?['subscriptionTier'],
           orElse: () => SubscriptionTier.free,
         );
+        _artworkCount = userArtwork.length;
       });
-
-      final artworkDocs = await _firestore
-          .collection('artwork')
-          .where('userId', isEqualTo: userId)
-          .count()
-          .get();
-
-      if (mounted) {
-        setState(() {
-          _artworkCount = artworkDocs.count ?? 0;
-        });
-      }
     } catch (e) {
       AppLogger.error('Error loading user data: $e');
     }
@@ -399,7 +389,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _userService.currentUserId;
       if (userId == null) throw Exception('Not authenticated');
 
       // Use thumbnail as the main image for the artwork
@@ -461,10 +451,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
           'recordingDate': DateTime.now().toIso8601String(),
         };
 
-        await _firestore
-            .collection('artwork')
-            .doc(artworkId)
-            .update(updatedData);
+        await _artworkService.updateArtworkMetadata(artworkId, updatedData);
       }
 
       if (mounted) {

@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/shared_widgets.dart';
 
@@ -25,8 +25,6 @@ class CommissionDetailScreen extends StatefulWidget {
 
 class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     with SingleTickerProviderStateMixin {
-  final DirectCommissionService _commissionService = DirectCommissionService();
-  final StripeService _stripeService = StripeService();
   final TextEditingController _messageController = TextEditingController();
 
   late final TabController _tabController;
@@ -119,7 +117,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _commission = widget.commission;
-    _currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    _currentUserId = context.read<core.UserService>().currentUserId;
     _loadCommissionDetails();
   }
 
@@ -132,9 +130,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _loadCommissionDetails() async {
     try {
-      final commission = await _commissionService.getCommission(
-        widget.commission.id,
-      );
+      final commission = await context
+          .read<DirectCommissionService>()
+          .getCommission(widget.commission.id);
       if (!mounted) return;
       setState(() {
         _commission = commission;
@@ -943,7 +941,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     if (_messageController.text.trim().isEmpty) return;
 
     try {
-      await _commissionService.addMessage(
+      await context.read<DirectCommissionService>().addMessage(
         _commission!.id,
         _messageController.text.trim(),
       );
@@ -1002,7 +1000,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
         .toList();
 
     try {
-      await _commissionService.provideQuote(
+      await context.read<DirectCommissionService>().provideQuote(
         commissionId: _commission!.id,
         totalPrice: price,
         depositPercentage: 50.0,
@@ -1032,7 +1030,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _acceptQuote() async {
     try {
-      await _commissionService.acceptCommission(_commission!.id);
+      await context.read<DirectCommissionService>().acceptCommission(
+        _commission!.id,
+      );
       await _loadCommissionDetails();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1055,7 +1055,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _payDeposit() async {
     try {
-      await _stripeService.processCommissionDeposit(
+      await context.read<StripeService>().processCommissionDeposit(
         commissionId: _commission!.id,
         amount: _commission!.depositAmount,
         message: 'commission_detail_payment_deposit_memo'.tr(
@@ -1084,7 +1084,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _markComplete() async {
     try {
-      await _commissionService.completeCommission(_commission!.id);
+      await context.read<DirectCommissionService>().completeCommission(
+        _commission!.id,
+      );
       await _loadCommissionDetails();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1120,7 +1122,10 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _submitCancellation(String reason) async {
     try {
-      await _commissionService.cancelCommission(_commission!.id, reason);
+      await context.read<DirectCommissionService>().cancelCommission(
+        _commission!.id,
+        reason,
+      );
       await _loadCommissionDetails();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1143,7 +1148,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   Future<void> _payMilestone(CommissionMilestone milestone) async {
     try {
-      await _stripeService.processCommissionMilestone(
+      await context.read<StripeService>().processCommissionMilestone(
         commissionId: _commission!.id,
         milestoneId: milestone.id,
         amount: milestone.amount,

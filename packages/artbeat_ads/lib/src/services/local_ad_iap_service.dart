@@ -55,9 +55,7 @@ class LocalAdIapService {
     _purchaseSubscription = _inAppPurchase.purchaseStream.listen(
       _handlePurchaseUpdates,
       onError: (Object error) {
-        _completePendingPurchaseWithError(
-          'Purchase stream error: $error',
-        );
+        _completePendingPurchaseWithError('Purchase stream error: $error');
       },
     );
 
@@ -100,7 +98,9 @@ class LocalAdIapService {
 
     final response = await _inAppPurchase.queryProductDetails({sku});
     if (response.error != null) {
-      throw Exception('Failed to load Apple subscription product: ${response.error}');
+      throw Exception(
+        'Failed to load Apple subscription product: ${response.error}',
+      );
     }
 
     if (response.productDetails.isEmpty) {
@@ -133,7 +133,9 @@ class LocalAdIapService {
       const Duration(minutes: 5),
       onTimeout: () {
         _clearPendingPurchase();
-        throw TimeoutException('Timed out waiting for Apple subscription confirmation');
+        throw TimeoutException(
+          'Timed out waiting for Apple subscription confirmation',
+        );
       },
     );
   }
@@ -199,7 +201,9 @@ class LocalAdIapService {
         _clearPendingPurchase();
         break;
       case PurchaseStatus.canceled:
-        _completePendingPurchaseWithError('Apple subscription purchase was cancelled.');
+        _completePendingPurchaseWithError(
+          'Apple subscription purchase was cancelled.',
+        );
         break;
       case PurchaseStatus.error:
         _completePendingPurchaseWithError(

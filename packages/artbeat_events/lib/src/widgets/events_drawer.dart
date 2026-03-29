@@ -9,12 +9,11 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:provider/provider.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 
@@ -29,15 +28,17 @@ class _EventsDrawerState extends State<EventsDrawer> {
   UserModel? _currentUser;
   bool _isLoading = true;
   late final Future<PackageInfo> _packageInfoFuture;
+  late final EventService _eventService;
+  late final UserService _userService;
 
   List<ArtbeatEvent> _userEvents = [];
   List<ArtbeatEvent> _upcomingEvents = [];
 
-  final EventService _eventService = EventService();
-
   @override
   void initState() {
     super.initState();
+    _eventService = context.read<EventService>();
+    _userService = context.read<UserService>();
     _packageInfoFuture = PackageInfo.fromPlatform();
     _loadCurrentUser();
     _loadUserEvents();
@@ -45,27 +46,12 @@ class _EventsDrawerState extends State<EventsDrawer> {
 
   Future<void> _loadCurrentUser() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-
-        if (!mounted) return;
-
-        if (userDoc.exists) {
-          setState(() {
-            _currentUser = UserModel.fromFirestore(userDoc);
-            _isLoading = false;
-          });
-        } else {
-          setState(() => _isLoading = false);
-        }
-      } else {
-        if (!mounted) return;
-        setState(() => _isLoading = false);
-      }
+      final currentUser = await _userService.getCurrentUserModel();
+      if (!mounted) return;
+      setState(() {
+        _currentUser = currentUser;
+        _isLoading = false;
+      });
       // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       AppLogger.error('Error loading current user: $e');
@@ -76,9 +62,9 @@ class _EventsDrawerState extends State<EventsDrawer> {
 
   Future<void> _loadUserEvents() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userEvents = await _eventService.getEventsByArtist(user.uid);
+      final userId = _userService.currentUserId;
+      if (userId != null) {
+        final userEvents = await _eventService.getEventsByArtist(userId);
         final upcomingEvents = await _eventService.getUpcomingPublicEvents(
           limit: 5,
         );
