@@ -54,6 +54,35 @@ class SettingsService extends ChangeNotifier {
     }
   }
 
+  /// Whether user activities should be auto-shared to the community feed.
+  /// Defaults to true when unset.
+  Future<bool> getAutoShareActivitiesEnabled() async {
+    final settings = await getUserSettings();
+    final socialSettings = settings['social'];
+    if (socialSettings is Map<String, dynamic>) {
+      final enabled = socialSettings['autoShareActivities'];
+      if (enabled is bool) {
+        return enabled;
+      }
+    }
+    return true;
+  }
+
+  Future<void> setAutoShareActivitiesEnabled(bool enabled) {
+    return updateSetting('social.autoShareActivities', enabled);
+  }
+
+  Future<String> getDistanceUnit() async {
+    final settings = await getUserSettings();
+    final distanceUnit = settings['distanceUnit'] as String?;
+    return distanceUnit == 'kilometers' ? 'kilometers' : 'miles';
+  }
+
+  Future<void> setDistanceUnit(String unit) {
+    final normalized = unit == 'kilometers' ? 'kilometers' : 'miles';
+    return updateSetting('distanceUnit', normalized);
+  }
+
   /// Update a specific setting for the current user
   Future<void> updateSetting(String path, dynamic value) async {
     try {

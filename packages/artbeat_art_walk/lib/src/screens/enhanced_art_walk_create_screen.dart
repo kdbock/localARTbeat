@@ -441,15 +441,9 @@ class _EnhancedArtWalkCreateScreenState
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_selectedArtPieces.isEmpty) {
+    if (_selectedArtPieces.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'art_walk_enhanced_art_walk_create_text_please_select_at'.tr(),
-          ),
-        ),
+        const SnackBar(content: Text('Please select at least 2 stops.')),
       );
       return;
     }
@@ -460,6 +454,12 @@ class _EnhancedArtWalkCreateScreenState
 
     try {
       final isEditing = widget.artWalkId != null;
+      final generatedTitle = _titleController.text.trim().isNotEmpty
+          ? _titleController.text.trim()
+          : _buildAutoWalkTitle();
+      final generatedDescription = _descriptionController.text.trim().isNotEmpty
+          ? _descriptionController.text.trim()
+          : _buildAutoWalkDescription();
 
       // Get art piece IDs
       final artworkIds = _selectedArtPieces.map((art) => art.id).toList();
@@ -479,8 +479,8 @@ class _EnhancedArtWalkCreateScreenState
         // Update existing art walk
         await _artWalkService.updateArtWalk(
           walkId: widget.artWalkId!,
-          title: _titleController.text,
-          description: _descriptionController.text,
+          title: generatedTitle,
+          description: generatedDescription,
           artworkIds: artworkIds,
           coverImageFile: _coverImageFile,
           isPublic: _isPublic,
@@ -528,8 +528,8 @@ class _EnhancedArtWalkCreateScreenState
 
         // Create the art walk using the service method
         final artWalkId = await _artWalkService.createArtWalk(
-          title: _titleController.text,
-          description: _descriptionController.text,
+          title: generatedTitle,
+          description: generatedDescription,
           artworkIds: artworkIds,
           startLocation: startLocation,
           routeData: routeData,
@@ -541,8 +541,8 @@ class _EnhancedArtWalkCreateScreenState
           // Create ArtWalkModel from the created data
           final createdArtWalk = ArtWalkModel(
             id: artWalkId,
-            title: _titleController.text,
-            description: _descriptionController.text,
+            title: generatedTitle,
+            description: generatedDescription,
             userId: userId,
             artworkIds: artworkIds,
             isPublic: _isPublic,
@@ -729,14 +729,12 @@ class _EnhancedArtWalkCreateScreenState
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildProgressIndicator(),
-                        const SizedBox(height: 16),
-                        _buildTitleField(),
-                        const SizedBox(height: 16),
-                        _buildDescriptionField(),
                         const SizedBox(height: 24),
                         _buildMapSection(),
                         const SizedBox(height: 24),
                         _buildArtPiecesSection(),
+                        const SizedBox(height: 20),
+                        _buildOptionalDetailsSection(),
                         const SizedBox(height: 32),
                         _buildSubmitButton(),
                       ],
@@ -859,19 +857,38 @@ class _EnhancedArtWalkCreateScreenState
 
   int _calculateProgress() {
     int progress = 0;
-    if (_titleController.text.isNotEmpty) progress += 20;
-    if (_descriptionController.text.isNotEmpty) progress += 20;
-    if (_selectedArtPieces.isNotEmpty) progress += 30;
-    if (_routePoints.isNotEmpty) progress += 30;
+    if (_selectedArtPieces.length >= 2) progress += 60;
+    if (_routePoints.isNotEmpty) progress += 40;
     return progress;
   }
 
   String _getProgressMessage(int progress) {
-    if (progress < 20) return 'art_walk_create_progress_start'.tr();
-    if (progress < 40) return 'art_walk_create_progress_title'.tr();
-    if (progress < 70) return 'art_walk_create_progress_art'.tr();
-    if (progress < 100) return 'art_walk_create_progress_route'.tr();
+    if (_selectedArtPieces.length < 2) {
+      return 'Add at least 2 stops to publish your walk.';
+    }
+    if (_routePoints.isEmpty) return 'Building your route preview...';
     return 'art_walk_create_progress_ready'.tr();
+  }
+
+  bool _canPublishWalk() {
+    return _selectedArtPieces.length >= 2 && _routePoints.isNotEmpty;
+  }
+
+  String _buildAutoWalkTitle() {
+    final locationHint = _zipCodeController.text.trim();
+    if (locationHint.isNotEmpty) {
+      return 'Art Hunt near $locationHint';
+    }
+    return 'Neighborhood Art Hunt';
+  }
+
+  String _buildAutoWalkDescription() {
+    final stopCount = _selectedArtPieces.length;
+    final locationHint = _zipCodeController.text.trim();
+    final areaText = locationHint.isNotEmpty
+        ? 'around $locationHint'
+        : 'nearby';
+    return 'A community art walk with $stopCount stops $areaText. Discover local public art on a guided route.';
   }
 
   Widget _buildTitleField() {
@@ -897,12 +914,6 @@ class _EnhancedArtWalkCreateScreenState
           color: Colors.white,
           fontWeight: FontWeight.w700,
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'art_walk_create_title_error'.tr();
-          }
-          return null;
-        },
         onChanged: (_) => setState(() {}), // Update progress
       ),
     );
@@ -932,13 +943,32 @@ class _EnhancedArtWalkCreateScreenState
           fontWeight: FontWeight.w700,
         ),
         maxLines: 3,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'art_walk_create_description_error'.tr();
-          }
-          return null;
-        },
         onChanged: (_) => setState(() {}), // Update progress
+      ),
+    );
+  }
+
+  Widget _buildOptionalDetailsSection() {
+    return walk.GlassCard(
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        collapsedIconColor: Colors.white70,
+        iconColor: Colors.white,
+        title: Text(
+          'Optional details (auto-generated if left blank)',
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        children: [
+          const SizedBox(height: 8),
+          _buildTitleField(),
+          const SizedBox(height: 12),
+          _buildDescriptionField(),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -1351,12 +1381,11 @@ class _EnhancedArtWalkCreateScreenState
   }
 
   Widget _buildSubmitButton() {
-    final progress = _calculateProgress();
     return GradientCTAButton(
       label: widget.artWalkId == null
           ? 'art_walk_create_submit'.tr()
           : 'art_walk_edit_submit'.tr(),
-      onPressed: progress == 100 ? _submitForm : null,
+      onPressed: _canPublishWalk() ? _submitForm : null,
     );
   }
 

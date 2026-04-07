@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
@@ -121,6 +122,13 @@ class AdminDrawer extends StatelessWidget {
                       route: '/admin/dashboard',
                       subtitle:
                           'admin_drawer_menu_unified_dashboard_subtitle'.tr(),
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.insights,
+                      title: 'Onboarding Funnel Analytics',
+                      route: core.AppRoutes.onboardingFunnelAnalytics,
+                      subtitle: 'View onboarding conversion metrics',
                     ),
 
                     const Divider(height: 16),

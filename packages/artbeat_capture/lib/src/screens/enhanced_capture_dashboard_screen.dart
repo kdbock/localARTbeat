@@ -680,7 +680,7 @@ class _EnhancedCaptureDashboardScreenState
                                   builder: (context) => CompactArtistCTAWidget(
                                     onTap: () => Navigator.pushNamed(
                                       context,
-                                      '/2025_modern_onboarding',
+                                      AppRoutes.userOnboarding,
                                     ),
                                   ),
                                 ),

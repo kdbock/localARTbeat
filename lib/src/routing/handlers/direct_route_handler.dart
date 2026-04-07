@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import '../../../screens/in_app_purchase_demo_screen.dart';
 import '../../../test_payment_debug.dart';
 import '../../screens/ads_route_screen.dart';
+import '../../screens/onboarding_funnel_report_screen.dart';
+import '../../screens/user_onboarding_flow_screen.dart';
 import '../route_utils.dart';
 
 class DirectRouteHandler {
@@ -49,14 +51,19 @@ class DirectRouteHandler {
           child: const core.ArtbeatDashboardScreen(),
         );
       case '/2025_modern_onboarding':
+      case core.AppRoutes.userOnboarding:
         return RouteUtils.createSimpleRoute(
-          child: const core.AuthRequiredScreen(),
+          child: const UserOnboardingFlowScreen(),
         );
       case '/debug/payment':
         if (!kDebugMode) {
           return RouteUtils.createNotFoundRoute('debug');
         }
         return RouteUtils.createSimpleRoute(child: const PaymentDebugScreen());
+      case core.AppRoutes.onboardingFunnelAnalytics:
+        return RouteUtils.createMainLayoutRoute(
+          child: const OnboardingFunnelReportScreen(),
+        );
       case core.AppRoutes.artworkBrowse:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkBrowseScreen(),

@@ -1079,22 +1079,10 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
   }
 
   Future<void> _completeOnboarding() async {
-    final tier = _selectedPlanName != null
+    final selectedTier = _selectedPlanName != null
         ? _tierForPlanName(_selectedPlanName!)
         : null;
-
-    if (tier == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr('artist_modern_2025_onboarding_text_please_select_a'),
-            ),
-          ),
-        );
-      }
-      return;
-    }
+    final tier = selectedTier ?? SubscriptionTier.free;
 
     setState(() => _isProcessingPlan = true);
 

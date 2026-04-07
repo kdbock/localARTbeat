@@ -29,7 +29,9 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late final ArtWalkDistanceUnitService _distanceUnitService;
   NavigationUpdate? _lastUpdate;
+  String _distanceUnit = 'miles';
 
   @override
   bool get wantKeepAlive => true;
@@ -37,6 +39,7 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
   @override
   void initState() {
     super.initState();
+    _distanceUnitService = ArtWalkDistanceUnitService();
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -44,6 +47,13 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
     _pulseAnimation = Tween<double>(begin: 0.9, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+    _loadDistanceUnit();
+  }
+
+  Future<void> _loadDistanceUnit() async {
+    final unit = await _distanceUnitService.getDistanceUnit();
+    if (!mounted) return;
+    setState(() => _distanceUnit = unit);
   }
 
   @override
@@ -149,12 +159,9 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                 const SizedBox(height: 8),
                 if (update.distanceToNextWaypoint != null)
                   Text(
-                    'art_walk_turn_by_turn_navigation_widget_label_distance'.tr(
-                      namedArgs: {
-                        'meters': update.distanceToNextWaypoint!
-                            .round()
-                            .toString(),
-                      },
+                    _distanceUnitService.formatDistanceFromMeters(
+                      update.distanceToNextWaypoint!,
+                      _distanceUnit,
                     ),
                     style: AppTypography.helper(),
                   ),
@@ -262,14 +269,10 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'art_walk_turn_by_turn_navigation_widget_label_distance'
-                                .tr(
-                                  namedArgs: {
-                                    'meters': update.distanceToNextWaypoint!
-                                        .round()
-                                        .toString(),
-                                  },
-                                ),
+                            _distanceUnitService.formatDistanceFromMeters(
+                              update.distanceToNextWaypoint!,
+                              _distanceUnit,
+                            ),
                             style: AppTypography.helper(),
                           ),
                         ],

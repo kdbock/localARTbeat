@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_distance_unit_service.dart';
 
 class ArtWalkCard extends StatelessWidget {
   final ArtWalkModel artWalk;
@@ -212,6 +213,8 @@ class _MetadataRow extends StatelessWidget {
 
 class _StatsWrap extends StatelessWidget {
   final ArtWalkModel artWalk;
+  static final ArtWalkDistanceUnitService _distanceUnitService =
+      ArtWalkDistanceUnitService();
 
   const _StatsWrap({required this.artWalk});
 
@@ -234,11 +237,19 @@ class _StatsWrap extends StatelessWidget {
 
     if (artWalk.estimatedDistance != null) {
       stats.add(
-        _StatPill(
-          icon: Icons.straighten,
-          label: 'art_walk_art_walk_card_text_distance'.tr(
-            namedArgs: {'miles': artWalk.estimatedDistance!.toStringAsFixed(1)},
-          ),
+        FutureBuilder<String>(
+          future: _distanceUnitService.getDistanceUnit(),
+          builder: (context, snapshot) {
+            final unit = snapshot.data ?? 'miles';
+            final label = _distanceUnitService.formatDistanceFromMiles(
+              artWalk.estimatedDistance!,
+              unit,
+            );
+            return _StatPill(
+              icon: Icons.straighten,
+              label: label,
+            );
+          },
         ),
       );
     }

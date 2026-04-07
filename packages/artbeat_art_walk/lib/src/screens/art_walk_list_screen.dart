@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,7 +27,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
   // Pagination state
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
-  int _loadedCount = 0;
+  QueryDocumentSnapshot<Object?>? _lastPopularWalkDocument;
   static const int _pageSize = 20;
 
   // New filter state variables
@@ -82,15 +83,16 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
 
   Future<void> _loadArtWalks() async {
     try {
-      debugPrint('🔍 ArtWalkListScreen: Calling getPopularArtWalks...');
-      final walks = await _artWalkService.getPopularArtWalks(
+      debugPrint('🔍 ArtWalkListScreen: Calling getPopularArtWalksPage...');
+      final result = await _artWalkService.getPopularArtWalksPage(
         limit: _pageSize,
-      ); // Reduced limit for better performance
+      );
+      final walks = result.walks;
       debugPrint('📋 ArtWalkListScreen: Loaded ${walks.length} art walks');
       if (mounted) {
         setState(() {
           _artWalks = walks;
-          _loadedCount = walks.length;
+          _lastPopularWalkDocument = result.lastDocument;
           _hasMoreData = walks.length == _pageSize;
           debugPrint(
             '🔄 ArtWalkListScreen: Set state with ${walks.length} walks',
@@ -113,19 +115,23 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
     debugPrint('🔄 ArtWalkListScreen: Loading more art walks...');
 
     try {
-      // Load more by increasing the limit
-      final moreWalks = await _artWalkService.getPopularArtWalks(
-        limit: _loadedCount + _pageSize,
+      final result = await _artWalkService.getPopularArtWalksPage(
+        limit: _pageSize,
+        startAfter: _lastPopularWalkDocument,
       );
-      final newWalks = moreWalks.skip(_loadedCount).take(_pageSize).toList();
+      final newWalks = result.walks;
 
       if (mounted && newWalks.isNotEmpty) {
         setState(() {
-          _artWalks.addAll(newWalks);
-          _loadedCount += newWalks.length;
+          final existingIds = _artWalks.map((walk) => walk.id).toSet();
+          final uniqueWalks = newWalks
+              .where((walk) => !existingIds.contains(walk.id))
+              .toList();
+          _artWalks.addAll(uniqueWalks);
+          _lastPopularWalkDocument = result.lastDocument;
           _hasMoreData = newWalks.length == _pageSize;
           debugPrint(
-            '📋 ArtWalkListScreen: Added ${newWalks.length} more walks, total: ${_artWalks.length}',
+            '📋 ArtWalkListScreen: Added ${uniqueWalks.length} more walks, total: ${_artWalks.length}',
           );
         });
         _applyFilters();
@@ -754,42 +760,60 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
       drawer: const ArtWalkDrawer(),
       body: ArtWalkDesignSystem.buildScreenContainer(
         child: _isLoading
-            ? Center(
-                child: ArtWalkDesignSystem.buildGlassCard(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ArtbeatColors.primaryPurple,
-                        ),
-                      ),
-                      const SizedBox(height: ArtWalkDesignSystem.paddingM),
-                      Text(
-                        'art_walk_art_walk_list_text_loading_art_walks'.tr(),
-                        style: ArtWalkDesignSystem.cardTitleStyle,
-                      ),
-                    ],
-                  ),
-                ),
-              )
+            ? Center(child: _buildLoadingMissionCard())
             : _buildContent(),
       ),
       floatingActionButton: ArtWalkDesignSystem.buildFloatingActionButton(
         onPressed: _navigateToCreateWalk,
-        icon: Icons.add_location,
-        tooltip: 'Create Art Walk',
+        icon: Icons.explore,
+        tooltip: 'Go to Walk Hub',
       ),
     );
   }
 
   Widget _buildContent() {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
         _buildSearchAndFilterBar(),
-        _filteredWalks.isEmpty ? _buildEmptyState() : _buildWalksList(),
+        Expanded(
+          child: _filteredWalks.isEmpty
+              ? _buildEmptyState()
+              : _buildWalksList(),
+        ),
       ],
+    );
+  }
+
+  Widget _buildLoadingMissionCard() {
+    return ArtWalkDesignSystem.buildGlassCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              ArtbeatColors.primaryPurple,
+            ),
+          ),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
+          Text(
+            'Loading nearby guided walks...',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'art_walk_art_walk_list_text_loading_art_walks'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.75),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -857,21 +881,15 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
   }
 
   Widget _buildWalksList() {
-    return Column(
-      children: [
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: _filteredWalks.length,
-          itemBuilder: (context, index) {
-            final walk = _filteredWalks[index];
-            return _buildWalkCard(walk);
-          },
-        ),
-        if (_hasMoreData)
-          Padding(
-            padding: const EdgeInsets.all(16),
+    final itemCount = _filteredWalks.length + (_hasMoreData ? 1 : 0);
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: itemCount,
+      cacheExtent: 640,
+      itemBuilder: (context, index) {
+        if (index >= _filteredWalks.length) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 20),
             child: ElevatedButton(
               onPressed: _isLoadingMore ? null : _loadMoreArtWalks,
               style: ElevatedButton.styleFrom(
@@ -888,10 +906,14 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text('art_walk_art_walk_list_text_load_more_art'.tr()),
+                  : const Text('Unlock More Walks'),
             ),
-          ),
-      ],
+          );
+        }
+
+        final walk = _filteredWalks[index];
+        return _buildWalkCard(walk);
+      },
     );
   }
 
@@ -1210,56 +1232,60 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.map_outlined,
-            size: 64,
-            color: ArtbeatColors.textSecondary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _searchQuery.isNotEmpty
-                ? 'art_walk_art_walk_list_text_no_art_walks_found'.tr()
-                : 'art_walk_art_walk_list_text_no_art_walks_available'.tr(),
-            style: GoogleFonts.spaceGrotesk(
-              color: ArtbeatColors.textSecondary.withValues(alpha: 0.92),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 56),
+            Icon(
+              Icons.auto_awesome,
+              size: 64,
+              color: ArtbeatColors.secondaryTeal.withValues(alpha: 0.8),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _searchQuery.isNotEmpty
-                ? 'art_walk_art_walk_list_text_try_adjusting_search'.tr()
-                : 'art_walk_art_walk_list_text_create_first_art_walk'.tr(),
-            style: GoogleFonts.spaceGrotesk(
-              color: ArtbeatColors.textSecondary.withValues(alpha: 0.7),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 16),
+            Text(
+              _searchQuery.isNotEmpty
+                  ? 'art_walk_art_walk_list_text_no_art_walks_found'.tr()
+                  : 'No guided walks in this zone yet',
+              style: GoogleFonts.spaceGrotesk(
+                color: ArtbeatColors.textSecondary.withValues(alpha: 0.92),
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          if (_searchQuery.isEmpty) ...[
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _navigateToCreateWalk,
-              icon: const Icon(Icons.add),
-              label: Text('art_walk_art_walk_list_text_create_art_walk'.tr()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ArtbeatColors.primaryPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+            const SizedBox(height: 8),
+            Text(
+              _searchQuery.isNotEmpty
+                  ? 'art_walk_art_walk_list_text_try_adjusting_search'.tr()
+                  : 'Switch area, refresh, or launch radar to find nearby art.',
+              style: GoogleFonts.spaceGrotesk(
+                color: ArtbeatColors.textSecondary.withValues(alpha: 0.7),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (_searchQuery.isEmpty) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _navigateToCreateWalk,
+                icon: const Icon(Icons.route),
+                label: const Text('Open Discover Hub'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ArtbeatColors.primaryPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1273,6 +1299,6 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
   }
 
   void _navigateToCreateWalk() {
-    Navigator.pushNamed(context, '/art-walk/create');
+    Navigator.pushNamed(context, '/art-walk/dashboard');
   }
 }

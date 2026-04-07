@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'rewards_service.dart';
 
 /// Service for managing weekly goals (longer-term challenges)

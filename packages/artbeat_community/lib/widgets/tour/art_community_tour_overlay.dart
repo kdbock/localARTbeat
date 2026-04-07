@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'dart:math' as math;
 
 class ArtCommunityTourStep {
   final GlobalKey targetKey;
@@ -66,157 +67,26 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
   void initState() {
     super.initState();
     _steps = [
-      // 1-3: Header elements
-      ArtCommunityTourStep(
-        targetKey: widget.menuKey,
-        title: 'COMMUNITY MENU',
-        description: 'Access your community toolkit and navigation options.',
-        accentColor: ArtbeatColors.secondaryTeal,
-        details: [
-          'View trending content',
-          'Browse artwork collections',
-          'Access artist onboarding',
-          'Check leaderboards',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.titleKey,
-        title: 'ART COMMUNITY HUB',
-        description:
-            'Your central hub for connecting with artists and art enthusiasts.',
-        accentColor: ArtbeatColors.primaryGreen,
-        details: [
-          'Share your art journey',
-          'Discover new artists',
-          'Connect with the community',
-          'Commission custom artwork',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.searchKey,
-        title: 'COMMUNITY SEARCH',
-        description:
-            'Find specific posts, artists, or artwork within the community.',
-        accentColor: ArtbeatColors.primaryBlue,
-        details: [
-          'Search community posts',
-          'Find artists by name',
-          'Discover artwork by title',
-          'Filter by categories',
-        ],
-      ),
-      // 4-7: Tabs
       ArtCommunityTourStep(
         targetKey: widget.feedTabKey,
-        title: 'COMMUNITY FEED',
-        description:
-            'Stay updated with the latest posts and community activity.',
-        accentColor: const Color(0xFF7C4DFF),
-        details: [
-          'View recent posts',
-          'See community discussions',
-          'Follow artist updates',
-          'Engage with content',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.artistsTabKey,
-        title: 'ARTISTS GALLERY',
-        description: 'Explore and connect with talented artists in your area.',
-        accentColor: const Color(0xFF22D3EE),
-        details: [
-          'Browse artist profiles',
-          'View portfolios',
-          'Follow favorite artists',
-          'Discover new talent',
-        ],
+        title: 'FEED',
+        description: 'See new community posts and activity here.',
+        accentColor: ArtbeatColors.secondaryTeal,
+        details: const [],
       ),
       ArtCommunityTourStep(
         targetKey: widget.artworkTabKey,
-        title: 'ARTWORK DISCOVERY',
-        description: 'Browse and discover amazing artwork from the community.',
-        accentColor: const Color(0xFFFF3D8D),
-        details: [
-          'Explore artwork collections',
-          'Filter by style and medium',
-          'Save favorite pieces',
-          'Get inspired',
-        ],
+        title: 'DISCOVER',
+        description: 'Browse artists and artwork collections.',
+        accentColor: const Color(0xFF22D3EE),
+        details: const [],
       ),
-      ArtCommunityTourStep(
-        targetKey: widget.commissionsTabKey,
-        title: 'COMMISSION MARKET',
-        description: 'Find artists to create custom artwork for you.',
-        accentColor: const Color(0xFFFFC857),
-        details: [
-          'Browse available artists',
-          'View commission details',
-          'Request custom work',
-          'Connect with creators',
-        ],
-      ),
-      // 8: FAB
       ArtCommunityTourStep(
         targetKey: widget.fabKey,
-        title: 'SHARE YOUR ART',
-        description: 'Create and share your own posts with the community.',
+        title: 'CREATE',
+        description: 'Share your own capture or update in one tap.',
         accentColor: const Color(0xFF34D399),
-        details: [
-          'Share your artwork',
-          'Post updates and thoughts',
-          'Start discussions',
-          'Connect with others',
-        ],
-      ),
-      // 9-12: Content sections
-      ArtCommunityTourStep(
-        targetKey: widget.feedContentKey,
-        title: 'LIVE COMMUNITY FEED',
-        description: 'See real-time posts and activity from community members.',
-        accentColor: const Color(0xFF2947FF),
-        details: [
-          'Recent community posts',
-          'Artist announcements',
-          'Community discussions',
-          'Trending content',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.artistSpotlightKey,
-        title: 'FEATURED ARTISTS',
-        description: 'Discover amazing local artists and their creative work.',
-        accentColor: const Color(0xFFFF6B35),
-        details: [
-          'Artist profiles and bios',
-          'Portfolio previews',
-          'Commission availability',
-          'Contact information',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.artworkGalleryKey,
-        title: 'ARTWORK SHOWCASE',
-        description: 'Browse beautiful artworks shared by community members.',
-        accentColor: const Color(0xFF9D4EDD),
-        details: [
-          'High-quality art previews',
-          'Artist attributions',
-          'Style and medium filters',
-          'Save and share options',
-        ],
-      ),
-      ArtCommunityTourStep(
-        targetKey: widget.commissionArtistsKey,
-        title: 'COMMISSION ARTISTS',
-        description:
-            'Connect with artists who offer custom commission services.',
-        accentColor: const Color(0xFF06FFA5),
-        details: [
-          'Artist specialties',
-          'Pricing information',
-          'Portfolio samples',
-          'Commission process',
-        ],
+        details: const [],
       ),
     ];
 
@@ -391,9 +261,12 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null
-                      ? (screenHeight - bottom - topSafetyMargin)
-                      : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: math.max(
+                    0.0,
+                    bottom != null
+                        ? (screenHeight - bottom - topSafetyMargin)
+                        : (screenHeight - (top ?? 0) - 40),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -457,11 +330,31 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
 
         // Main content card
         GlassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           borderColor: step.accentColor.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'QUICK TOUR',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -479,15 +372,17 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    step.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0,
+                  Expanded(
+                    child: Text(
+                      step.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ],
@@ -496,45 +391,19 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
               Text(
                 step.description,
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 20),
-              const SizedBox(height: 20),
-              ...step.details.map(
-                (detail) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: step.accentColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          detail,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'STEP ${_currentStepIndex + 1} OF ${_steps.length}',
+                    '${_currentStepIndex + 1}/${_steps.length}',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white.withValues(alpha: 0.4),
                       letterSpacing: 0,
@@ -554,9 +423,7 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
                       ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1
-                          ? 'GOT IT!'
-                          : 'NEXT',
+                      _currentStepIndex == _steps.length - 1 ? 'DONE' : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,

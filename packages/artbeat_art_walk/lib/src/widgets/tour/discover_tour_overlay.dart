@@ -74,104 +74,22 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
     _onboardingService = context.read<OnboardingService>();
     _steps = [
       TourStep(
-        targetKey: widget.menuKey,
-        title: 'OPERATIONS HUB',
-        description: 'Access your settings, toolkit, and resource library.',
+        targetKey: widget.heroKey,
+        title: 'COMMAND',
+        description: 'See your level, XP, and mission progress.',
         accentColor: ArtbeatColors.secondaryTeal,
       ),
       TourStep(
-        targetKey: widget.searchKey,
-        title: 'ART SCANNER',
-        description:
-            'Search for specific art walks, artists, or locations across the global network.',
-        accentColor: ArtbeatColors.primaryGreen,
-      ),
-      TourStep(
-        targetKey: widget.chatKey,
-        title: 'COMMS CHANNEL',
-        description:
-            'Message other explorers to coordinate art walks or share intel.',
-        accentColor: ArtbeatColors.primaryBlue,
-      ),
-      TourStep(
-        targetKey: widget.notificationsKey,
-        title: 'INTEL FEED',
-        description:
-            'Stay updated on new engagement, nearby art walks, and achievement updates.',
-        accentColor: ArtbeatColors.primaryPurple,
-      ),
-      TourStep(
-        targetKey: widget.heroKey,
-        title: 'EXPLORER COMMAND',
-        description:
-            'Your central status hub showing your current level, XP progress, and daily mission.',
-        details: [
-          'Track Level and XP progress',
-          'Monitor your daily missions',
-          'View active explorer stats',
-        ],
-        accentColor: const Color(0xFF7C4DFF),
-      ),
-      TourStep(
         targetKey: widget.radarTitleKey,
-        title: 'DISCOVERY RADAR',
-        description:
-            'Real-time map scanning for nearby art. Tap the radar to begin an instant discovery mission.',
-        details: [
-          'See nearby art count',
-          'Access instant discovery',
-          'View local scene highlights',
-        ],
+        title: 'RADAR',
+        description: 'Scan nearby art and launch instant discovery.',
         accentColor: const Color(0xFF22D3EE),
       ),
       TourStep(
-        targetKey: widget.kioskKey,
-        title: 'ARTIST SPOTLIGHT',
-        description:
-            'Discover featured artists currently showcasing their work in the Kiosk Lane.',
-        accentColor: const Color(0xFFFF3D8D),
-      ),
-      TourStep(
-        targetKey: widget.statsKey,
-        title: 'EXPLORER STATS',
-        description:
-            'Your performance metrics at a glance. Keep your streak alive and level up!',
-        accentColor: const Color(0xFFFFC857),
-      ),
-      TourStep(
-        targetKey: widget.goalsKey,
-        title: 'SEASONAL OBJECTIVES',
-        description:
-            'Complete long-term goals to earn massive rewards and exclusive badges.',
-        accentColor: const Color(0xFF34D399),
-      ),
-      TourStep(
-        targetKey: widget.socialKey,
-        title: 'ACTIVITY STREAM',
-        description:
-            'See what other explorers are discovering in real-time. Join the global conversation.',
-        accentColor: const Color(0xFF2947FF),
-      ),
-      TourStep(
         targetKey: widget.quickActionsKey,
-        title: 'RAPID DEPLOYMENT',
-        description:
-            'Quick access to essential tools and actions for efficient art exploration.',
+        title: 'QUICK ACTIONS',
+        description: 'Jump to your most-used actions.',
         accentColor: const Color(0xFFFF6B35),
-      ),
-      TourStep(
-        targetKey: widget.achievementsKey,
-        title: 'GLORY VAULT',
-        description:
-            'Showcase your exploration achievements and unlock exclusive rewards.',
-        accentColor: const Color(0xFF9D4EDD),
-      ),
-      TourStep(
-        targetKey: widget.hotspotsKey,
-        title: 'HOT ZONE NAVIGATOR',
-        description:
-            'Discover high-activity art locations and trending discovery spots in your area.',
-        accentColor: const Color(0xFF06FFA5),
       ),
     ];
 
@@ -388,11 +306,31 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
           ),
 
         GlassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           borderColor: step.accentColor.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'QUICK TOUR',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -414,10 +352,10 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
                     child: Text(
                       step.title,
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 2,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
@@ -427,49 +365,22 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
               Text(
                 step.description,
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              if (step.details.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                ...step.details.map(
-                  (detail) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 14,
-                          color: step.accentColor,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            detail,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'STEP ${_currentStepIndex + 1} OF ${_steps.length}',
+                    '${_currentStepIndex + 1}/${_steps.length}',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white.withValues(alpha: 0.4),
-                      letterSpacing: 1,
+                      letterSpacing: 0,
                     ),
                   ),
                   ElevatedButton(
@@ -486,12 +397,10 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
                       ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1
-                          ? 'GOT IT!'
-                          : 'NEXT',
+                      _currentStepIndex == _steps.length - 1 ? 'DONE' : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),

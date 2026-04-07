@@ -9,7 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_art_walk/src/constants/routes.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_capture_read_service.dart';
+import 'package:artbeat_art_walk/src/services/go_now_flow_service.dart';
 import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
@@ -377,7 +379,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     try {
       // Load a reasonable number of public captures from all users
       // getPublicCaptures queries the publicArt collection which allows reading all users' data
-      final allCaptures = await _captureService.getPublicCaptures(limit: 300);
+      final allCaptures = await _captureService.getPublicCaptures(
+        limit: kIsWeb ? 120 : 180,
+      );
 
       // Filter captures that have location data and are within 100 miles (160.934 km)
       const double maxDistanceKm = 160.934; // 100 miles in kilometers
@@ -524,6 +528,14 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   /// Handle cluster/marker tap
   void _onClusterTapped(List<CaptureModel> cluster) {
     if (!mounted) return;
+    final first = cluster.isNotEmpty ? cluster.first : null;
+    if (first != null) {
+      GoNowFlowService().trackFunnelEvent('marker_tap', <String, Object?>{
+        'pieceId': first.id,
+        'clusterSize': cluster.length,
+        'source': 'map_marker',
+      });
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -587,7 +599,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         case 'public':
           // Get all public captures (all user-captured art)
           final publicCaptures = await _captureService.getPublicCaptures(
-            limit: 1000,
+            limit: 250,
           );
           AppLogger.info('📍 Found ${publicCaptures.length} public captures');
           nearbyCaptures = publicCaptures
@@ -931,7 +943,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               ),
             ),
 
-            // Create Art Walk button overlay
+            // Start guided mission overlay
             Positioned(
               top: 190,
               left: ArtWalkDesignSystem.paddingM,
@@ -959,18 +971,32 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/art-walk/create');
+                    Navigator.pushNamed(context, '/art-walk/list');
                   },
                   icon: const Icon(
-                    Icons.add_location,
+                    Icons.route,
                     color: ArtWalkDesignSystem.hudInactiveColor,
                   ),
-                  label: Text(
-                    'art_walk_art_walk_map_text_create_art_walk'.tr(),
-                    style: const TextStyle(
-                      color: ArtWalkDesignSystem.hudInactiveColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  label: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Start Guided Walk',
+                        style: TextStyle(
+                          color: ArtWalkDesignSystem.hudInactiveColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Guided route + radar bonuses',
+                        style: TextStyle(
+                          color: ArtWalkDesignSystem.hudInactiveColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -1015,6 +1041,7 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
 
   // Simple static cache for user info to avoid redundant fetches
   static final Map<String, UserModel> _userCache = {};
+  final GoNowFlowService _goNowFlow = GoNowFlowService();
 
   String? _resolveCaptureImageUrl(CaptureModel capture) {
     final primaryUrl = ImageUrlValidator.normalizeImageUrl(capture.imageUrl);
@@ -1036,6 +1063,13 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     super.initState();
     _pageController = PageController();
     _userService = context.read<UserService>();
+    final firstCapture = widget.captures.isNotEmpty ? widget.captures.first : null;
+    if (firstCapture != null) {
+      _goNowFlow.trackFunnelEvent('detail_open', <String, Object?>{
+        'pieceId': firstCapture.id,
+        'source': 'map_marker',
+      });
+    }
     _enrichCurrentCapture();
   }
 
@@ -1087,6 +1121,45 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     super.dispose();
   }
 
+  Future<void> _goNowToCapture(CaptureModel capture) async {
+    final location = capture.location;
+    if (location == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location unavailable for this piece')),
+      );
+      return;
+    }
+
+    _goNowFlow.trackFunnelEvent('detail_open_map_capture', <String, Object?>{
+      'pieceId': capture.id,
+      'source': 'map_marker',
+    });
+
+    final result = await Navigator.pushNamed(
+      context,
+      ArtWalkRoutes.goNowNavigation,
+      arguments: <String, dynamic>{
+        'pieceId': capture.id,
+        'title': capture.title ?? 'Artwork',
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+        'source': 'map_marker',
+        'showAddToWalkAction': false,
+      },
+    );
+
+    if (!mounted) return;
+
+    if (result == 'arrived_capture') {
+      _goNowFlow.setStatus(capture.id, GoNowStatus.arrived);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Arrived at destination')),
+      );
+    } else if (result == 'skipped') {
+      _goNowFlow.setStatus(capture.id, GoNowStatus.skipped);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.captures.isEmpty) return const SizedBox.shrink();
@@ -1094,6 +1167,13 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     final rawCapture = widget.captures[_currentIndex];
     final capture = _enrichedCaptures[_currentIndex] ?? rawCapture;
     final hasMultiple = widget.captures.length > 1;
+    final goNowStatus = _goNowFlow.statusFor(capture.id);
+    final goNowLabel = switch (goNowStatus) {
+      GoNowStatus.enRoute => 'Resume Route',
+      GoNowStatus.arrived => "You're Here",
+      GoNowStatus.captured => 'Captured',
+      _ => 'Go Now',
+    };
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -1396,13 +1476,7 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      final navigator = Navigator.of(context);
-                      navigator.pop();
-                      Future.microtask(
-                        () => navigator.pushNamed('/art-walk/create'),
-                      );
-                    },
+                    onPressed: () => _goNowToCapture(capture),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ArtWalkDesignSystem.hudActiveColor
                           .withValues(alpha: 0.15),
@@ -1411,9 +1485,9 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    icon: const Icon(Icons.add_location_alt),
+                    icon: const Icon(Icons.near_me),
                     label: Text(
-                      'art_walk_art_walk_map_text_create_art_walk'.tr(),
+                      goNowLabel,
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

@@ -460,6 +460,17 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         throw Exception('User not authenticated');
       }
 
+      final userId = _communityService.currentUserId;
+      final artistProfile = userId == null
+          ? null
+          : await _communityService.getArtistProfile(userId);
+      if (artistProfile == null) {
+        throw Exception(
+          'Direct posting is available for artist accounts. '
+          'Use Art Walk and ARTflex moments to auto-share your activity.',
+        );
+      }
+
       // AI Moderation Check
       final moderationResult = await _moderationService.moderateContent(
         content: _contentController.text.trim(),

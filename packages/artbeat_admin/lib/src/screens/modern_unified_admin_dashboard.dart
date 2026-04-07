@@ -725,6 +725,16 @@ class _ModernUnifiedAdminDashboardState
                 const Color(0xFF81C784),
                 () => Navigator.pushNamed(context, '/admin/settings'),
               ),
+              _buildModernActionCard(
+                'Onboarding Funnel',
+                'View user onboarding conversion metrics',
+                Icons.insights_rounded,
+                const Color(0xFF64B5F6),
+                () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.onboardingFunnelAnalytics,
+                ),
+              ),
             ],
           ),
         ],

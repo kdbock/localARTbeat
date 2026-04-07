@@ -820,12 +820,12 @@ class DashboardCapturesSection extends StatelessWidget {
                             Navigator.pop(context);
                             Navigator.pushNamed(
                               context,
-                              '/art-walk/create',
+                              '/art-walk/list',
                               arguments: {'captureId': capture.id},
                             );
                           },
-                          icon: const Icon(Icons.directions_walk),
-                          label: Text('dashboard_create_art_walk'.tr()),
+                          icon: const Icon(Icons.route),
+                          label: const Text('Start a Guided Walk'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ArtbeatColors.primaryGreen,
                             foregroundColor: Colors.white,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'dart:math' as math;
 
 class TourStep {
   final GlobalKey targetKey;
@@ -62,81 +63,21 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
     super.initState();
     _steps = [
       TourStep(
-        targetKey: widget.menuKey,
-        title: 'OPERATIONS MENU',
-        description: 'Access your settings, toolkit, and resource library.',
+        targetKey: widget.searchKey,
+        title: 'SEARCH',
+        description: 'Find captures, artists, or locations quickly.',
         accentColor: ArtbeatColors.secondaryTeal,
       ),
       TourStep(
-        targetKey: widget.searchKey,
-        title: 'ART SCANNER',
-        description:
-            'Search for specific captures, artists, or locations across the global network.',
-        accentColor: ArtbeatColors.primaryGreen,
-      ),
-      TourStep(
-        targetKey: widget.chatKey,
-        title: 'COMMS CHANNEL',
-        description:
-            'Message other hunters to coordinate drops or share Intel.',
-        accentColor: ArtbeatColors.primaryBlue,
-      ),
-      TourStep(
-        targetKey: widget.notificationsKey,
-        title: 'INTEL FEED',
-        description:
-            'Stay updated on new engagement, nearby drops, and mission updates.',
-        accentColor: ArtbeatColors.primaryPurple,
-      ),
-      TourStep(
-        targetKey: widget.profileKey,
-        title: 'YOUR IDENTITY',
-        description:
-            'View your rank, achievements, and your public art collection.',
-        accentColor: ArtbeatColors.accentYellow,
-      ),
-      TourStep(
-        targetKey: widget.questTrackerKey,
-        title: 'ACTIVE MISSIONS',
-        description:
-            'Complete daily challenges to earn XP and level up your Hunter rank.',
-        details: [
-          'Daily Drop: Capture 3 pieces of art',
-          'Community Scout: Engage with others',
-          'Map Block: Explore new neighborhoods',
-        ],
+        targetKey: widget.recentLootKey,
+        title: 'RECENT CAPTURES',
+        description: 'Review your latest uploads and statuses.',
         accentColor: const Color(0xFF34D399),
       ),
       TourStep(
-        targetKey: widget.communityPulseKey,
-        title: 'NEIGHBORHOOD BEAT',
-        description:
-            'Real-time stats showing the activity of fellow art hunters in your area.',
-        details: [
-          'See active hunters nearby',
-          'Track new drops in the last 24h',
-        ],
-        accentColor: const Color(0xFF22D3EE),
-      ),
-      TourStep(
-        targetKey: widget.recentLootKey,
-        title: 'YOUR COLLECTION',
-        description:
-            'Quick access to your most recent art captures and their current status.',
-        accentColor: const Color(0xFF7C4DFF),
-      ),
-      TourStep(
-        targetKey: widget.communityInspirationKey,
-        title: 'HUNTER INSPIRATION',
-        description:
-            'See what other hunters are discovering to find new spots for your next mission.',
-        accentColor: const Color(0xFFFFC857),
-      ),
-      TourStep(
         targetKey: widget.quickCaptureKey,
-        title: 'DEPLOY CAMERA',
-        description:
-            'The primary tool for every mission. Tap here to start capturing art instantly.',
+        title: 'CAPTURE',
+        description: 'Start a new capture instantly.',
         accentColor: ArtbeatColors.accentYellow,
       ),
     ];
@@ -235,7 +176,7 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    final bool isBottomNav = _currentStepIndex == 9;
+    final bool isBottomNav = _currentStepIndex == _steps.length - 1;
     final double targetCenterX = position.dx + size.width / 2;
     final double topSafetyMargin = MediaQuery.of(context).padding.top + 20;
 
@@ -308,9 +249,12 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null
-                      ? (screenHeight - bottom - topSafetyMargin)
-                      : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: math.max(
+                    0.0,
+                    bottom != null
+                        ? (screenHeight - bottom - topSafetyMargin)
+                        : (screenHeight - (top ?? 0) - 40),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -353,11 +297,31 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
           ),
 
         GlassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           borderColor: step.accentColor.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'QUICK TOUR',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -379,10 +343,10 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
                     child: Text(
                       step.title,
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 2,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
@@ -392,49 +356,22 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
               Text(
                 step.description,
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              if (step.details.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                ...step.details.map(
-                  (detail) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 14,
-                          color: step.accentColor,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            detail,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'STEP ${_currentStepIndex + 1} OF ${_steps.length}',
+                    '${_currentStepIndex + 1}/${_steps.length}',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white.withValues(alpha: 0.4),
-                      letterSpacing: 1,
+                      letterSpacing: 0,
                     ),
                   ),
                   ElevatedButton(
@@ -451,12 +388,10 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
                       ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1
-                          ? 'GOT IT!'
-                          : 'NEXT',
+                      _currentStepIndex == _steps.length - 1 ? 'DONE' : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),

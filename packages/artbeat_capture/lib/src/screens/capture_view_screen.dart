@@ -6,9 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show AppLogger, CaptureStatus, CaptureModel;
+    show AppLogger, CaptureStatus, CaptureModel, UploadSafetyService;
 import 'package:provider/provider.dart';
 
 class CaptureViewScreen extends StatefulWidget {
@@ -31,6 +33,9 @@ class CaptureViewScreen extends StatefulWidget {
 
 class _CaptureViewScreenState extends State<CaptureViewScreen> {
   bool _isSubmitting = false;
+  bool _isPostingArtFlex = false;
+  final ImagePicker _imagePicker = ImagePicker();
+  final UploadSafetyService _uploadSafetyService = UploadSafetyService();
 
   Future<void> _submit() async {
     setState(() => _isSubmitting = true);
@@ -96,6 +101,12 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));
+
+        if (!outcome.queuedOffline && outcome.captureId != null) {
+          await _promptArtFlexShot(outcome.captureId!);
+          if (!mounted) return;
+        }
+
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
@@ -111,6 +122,126 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  Future<void> _promptArtFlexShot(String captureId) async {
+    final shouldTakeArtFlex = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Drop an ARTflex Shot?'),
+        content: const Text(
+          'Take a selfie with this artwork and auto-share it to the community feed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Skip'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ARTflex Shot'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldTakeArtFlex == true) {
+      await _captureAndPostArtFlex(captureId);
+    }
+  }
+
+  Future<void> _captureAndPostArtFlex(String captureId) async {
+    if (_isPostingArtFlex) return;
+
+    setState(() => _isPostingArtFlex = true);
+    try {
+      final captureService = context.read<CaptureService>();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final selfie = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.front,
+        imageQuality: 85,
+        maxWidth: 1400,
+      );
+
+      if (selfie == null) {
+        return;
+      }
+
+      final selfieFile = File(selfie.path);
+      final moderationDecision = await _uploadSafetyService.scanImageFile(
+        imageFile: selfieFile,
+        source: 'capture_artflex_selfie_upload',
+        userId: user.uid,
+        metadata: {'captureId': captureId},
+      );
+      if (!moderationDecision.isAllowed) {
+        throw Exception(moderationDecision.reason);
+      }
+
+      final bytes = await selfie.readAsBytes();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final selfiePath = 'community/artflex/${user.uid}_$timestamp.jpg';
+
+      final selfieRef = FirebaseStorage.instance.ref().child(selfiePath);
+      await selfieRef.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      final selfieUrl = await selfieRef.getDownloadURL();
+
+      String? captureImageUrl;
+      try {
+        final createdCapture = await captureService.getCaptureById(captureId);
+        captureImageUrl = createdCapture?.imageUrl;
+      } catch (_) {
+        // Keep selfie post even if capture lookup fails.
+      }
+
+      await FirebaseFirestore.instance.collection('socialActivities').add({
+        'userId': user.uid,
+        'userName': user.displayName ?? 'Anonymous Explorer',
+        'userAvatar': user.photoURL,
+        'type': 'capture',
+        'message':
+            '${user.displayName ?? 'Someone'} dropped an ARTflex with "${widget.title.trim().isNotEmpty ? widget.title.trim() : 'Untitled'}"',
+        'timestamp': FieldValue.serverTimestamp(),
+        'metadata': {
+          'source': 'artflex_capture_selfie',
+          'captureId': captureId,
+          'artTitle': widget.title.trim().isNotEmpty
+              ? widget.title.trim()
+              : 'Untitled',
+          'selfieUrl': selfieUrl,
+          'photoUrl': selfieUrl,
+          'artPhotoUrl': captureImageUrl,
+        },
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ARTflex posted to the community feed!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not post ARTflex shot: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isPostingArtFlex = false);
       }
     }
   }

@@ -101,6 +101,8 @@ export 'src/services/firebase_storage_upload_service.dart'
     show FirebaseStorageUploadService;
 export 'src/services/coupon_service.dart' show CouponService;
 export 'src/services/user_block_service.dart' show UserBlockService;
+export 'src/services/upload_safety_service.dart'
+    show UploadSafetyService, UploadModerationDecision;
 export 'src/services/capture_service_interface.dart'
     show CaptureServiceInterface, DefaultCaptureService;
 // CRITICAL: Crash prevention services (2025 stability fixes)

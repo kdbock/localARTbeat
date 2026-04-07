@@ -130,6 +130,32 @@ class SocialService {
   CollectionReference get _userPresence =>
       _firestore.collection('userPresence');
 
+  Future<bool> _isAutoShareEnabled(String userId) async {
+    try {
+      final settingsDoc = await _firestore
+          .collection('userSettings')
+          .doc(userId)
+          .get();
+
+      final data = settingsDoc.data();
+      final socialSettings = data?['social'];
+      if (socialSettings is Map<String, dynamic>) {
+        final enabled = socialSettings['autoShareActivities'];
+        if (enabled is bool) {
+          return enabled;
+        }
+      }
+
+      // Default to ON when user has no explicit setting.
+      return true;
+    } catch (e) {
+      AppLogger.warning(
+        'Unable to read auto-share preference for $userId, defaulting to enabled: $e',
+      );
+      return true;
+    }
+  }
+
   /// Get nearby social activities within a radius
   Future<List<SocialActivity>> getNearbyActivities({
     required Position userPosition,
@@ -376,8 +402,19 @@ class SocialService {
     required String message,
     Position? location,
     Map<String, dynamic>? metadata,
+    bool respectAutoSharePreference = true,
   }) async {
     try {
+      if (respectAutoSharePreference) {
+        final isAutoShareEnabled = await _isAutoShareEnabled(userId);
+        if (!isAutoShareEnabled) {
+          AppLogger.info(
+            'Skipping social activity (${type.name}) because auto-share is disabled for user: $userId',
+          );
+          return;
+        }
+      }
+
       debugPrint('🔍 SocialService: Posting activity for user $userId');
       debugPrint('🔍 SocialService: Activity type: ${type.name}');
       debugPrint('🔍 SocialService: Message: $message');
@@ -395,6 +432,17 @@ class SocialService {
       );
 
       final docRef = await _activities.add(activity.toFirestore());
+
+      final postId = await _createFeedPostForActivity(activity, metadata);
+      if (postId != null && postId.isNotEmpty) {
+        await _activities.doc(docRef.id).set({
+          'metadata': {
+            ...(metadata ?? const <String, dynamic>{}),
+            'postId': postId,
+          },
+        }, SetOptions(merge: true));
+      }
+
       debugPrint(
         '🔍 SocialService: ✅ Successfully posted activity with ID: ${docRef.id}',
       );
@@ -404,6 +452,130 @@ class SocialService {
       AppLogger.error('Error posting activity: $e');
       rethrow;
     }
+  }
+
+  Future<String?> _createFeedPostForActivity(
+    SocialActivity activity,
+    Map<String, dynamic>? metadata,
+  ) async {
+    try {
+      final imageUrls = _extractActivityImageUrls(metadata);
+      final postData = {
+        'userId': activity.userId,
+        'userName': activity.userName,
+        'userPhotoUrl': activity.userAvatar ?? '',
+        'content': activity.message,
+        'imageUrls': imageUrls,
+        'tags': <String>['activity', activity.type.name],
+        'location': _resolveActivityLocation(metadata),
+        'createdAt': Timestamp.fromDate(activity.timestamp),
+        'isPublic': true,
+        'engagementStats': EngagementStats(
+          likeCount: 0,
+          commentCount: 0,
+          shareCount: 0,
+          lastUpdated: activity.timestamp,
+        ).toFirestore(),
+        'metadata': {
+          ...(metadata ?? const <String, dynamic>{}),
+          'source': 'socialActivity',
+          'activityType': activity.type.name,
+        },
+      };
+
+      final postRef = await _firestore.collection('posts').add(postData);
+      return postRef.id;
+    } catch (e) {
+      AppLogger.warning('Failed to mirror social activity to post: $e');
+      return null;
+    }
+  }
+
+  List<String> _extractActivityImageUrls(Map<String, dynamic>? metadata) {
+    if (metadata == null) return const <String>[];
+
+    final urls = <String>[];
+    const keys = <String>[
+      'photoUrl',
+      'imageUrl',
+      'thumbnailUrl',
+      'captureImageUrl',
+      'coverImageUrl',
+      'mapThumbnailUrl',
+    ];
+
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.isNotEmpty) {
+        urls.add(value);
+      }
+    }
+
+    final listValue = metadata['imageUrls'];
+    if (listValue is List) {
+      for (final item in listValue) {
+        if (item is String && item.isNotEmpty) {
+          urls.add(item);
+        }
+      }
+    }
+
+    final alternateLists = <dynamic>[
+      metadata['images'],
+      metadata['photoUrls'],
+      metadata['mediaUrls'],
+    ];
+    for (final list in alternateLists) {
+      if (list is! List) continue;
+      for (final item in list) {
+        if (item is String && item.isNotEmpty) {
+          urls.add(item);
+        } else if (item is Map<String, dynamic>) {
+          final nestedUrl = item['url'] ?? item['imageUrl'] ?? item['photoUrl'];
+          if (nestedUrl is String && nestedUrl.isNotEmpty) {
+            urls.add(nestedUrl);
+          }
+        }
+      }
+    }
+
+    final nestedMaps = <dynamic>[
+      metadata['capture'],
+      metadata['captureData'],
+      metadata['artwork'],
+      metadata['walk'],
+    ];
+    for (final nested in nestedMaps) {
+      if (nested is! Map<String, dynamic>) continue;
+      for (final key in keys) {
+        final value = nested[key];
+        if (value is String && value.isNotEmpty) {
+          urls.add(value);
+        }
+      }
+      final nestedImageList = nested['imageUrls'];
+      if (nestedImageList is List) {
+        for (final item in nestedImageList) {
+          if (item is String && item.isNotEmpty) {
+            urls.add(item);
+          }
+        }
+      }
+    }
+
+    return urls.toSet().toList(growable: false);
+  }
+
+  String _resolveActivityLocation(Map<String, dynamic>? metadata) {
+    if (metadata == null) return '';
+    const keys = <String>['locationName', 'location', 'city', 'area'];
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return '';
   }
 
   /// Update user presence (for active walkers count)

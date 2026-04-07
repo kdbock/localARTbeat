@@ -40,18 +40,29 @@ class CaptureArtWalkHooks implements CapturePostCaptureHooks {
     required String userName,
     String? userAvatar,
     Position? location,
-  }) => _socialService.postActivity(
-    userId: capture.userId,
-    userName: userName,
-    userAvatar: userAvatar,
-    type: art_walk.SocialActivityType.capture,
-    message: 'captured new artwork',
-    location: location,
-    metadata: {
-      'captureId': capture.id,
-      'artTitle': capture.title ?? 'Untitled',
-    },
-  );
+  }) {
+    final title = (capture.title?.trim().isNotEmpty ?? false)
+        ? capture.title!.trim()
+        : 'Untitled';
+    final locationLabel = (capture.locationName?.trim().isNotEmpty ?? false)
+        ? capture.locationName!.trim()
+        : 'their area';
+
+    return _socialService.postActivity(
+      userId: capture.userId,
+      userName: userName,
+      userAvatar: userAvatar,
+      type: art_walk.SocialActivityType.capture,
+      message: '$userName discovered "$title" in $locationLabel',
+      location: location,
+      metadata: {
+        'captureId': capture.id,
+        'artTitle': title,
+        'locationName': capture.locationName,
+        'photoUrl': capture.imageUrl,
+      },
+    );
+  }
 
   @override
   Future<void> recordCaptureChallengeProgress() async {

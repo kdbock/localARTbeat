@@ -63,7 +63,7 @@ class ArtbeatDrawerItems {
   static const artWalk = ArtbeatDrawerItem(
     title: 'drawer_art_walk',
     icon: Icons.map_outlined,
-    route: '/art-walk/map',
+    route: '/art-walk/dashboard',
   );
 
   static const messaging = ArtbeatDrawerItem(
@@ -99,7 +99,7 @@ class ArtbeatDrawerItems {
   static const createArtWalk = ArtbeatDrawerItem(
     title: 'drawer_create_art_walk',
     icon: Icons.add_location_outlined,
-    route: '/art-walk/create',
+    route: '/art-walk/dashboard',
   );
 
   // Quest & Goals items
@@ -330,7 +330,7 @@ class ArtbeatDrawerItems {
   static const artWalkCreate = ArtbeatDrawerItem(
     title: 'drawer_create_art_walk',
     icon: Icons.add_location_outlined,
-    route: '/art-walk/create',
+    route: '/art-walk/dashboard',
   );
 
   static const enhancedSearch = ArtbeatDrawerItem(

@@ -7,6 +7,11 @@ class ArtbeatInput extends StatelessWidget {
   final String? hint;
   final bool obscureText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
+  final ValueChanged<String>? onFieldSubmitted;
+  final bool autocorrect;
+  final bool enableSuggestions;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
   final String? Function(String?)? validator;
@@ -19,6 +24,11 @@ class ArtbeatInput extends StatelessWidget {
     this.hint,
     this.obscureText = false,
     this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.onFieldSubmitted,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
     this.suffixIcon,
     this.prefixIcon,
     this.validator,
@@ -31,6 +41,11 @@ class ArtbeatInput extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      autofillHints: autofillHints,
+      onFieldSubmitted: onFieldSubmitted,
+      autocorrect: autocorrect,
+      enableSuggestions: enableSuggestions,
       validator: validator,
       maxLines: obscureText ? 1 : (maxLines ?? 1),
       decoration: ArtbeatComponents.inputDecoration(

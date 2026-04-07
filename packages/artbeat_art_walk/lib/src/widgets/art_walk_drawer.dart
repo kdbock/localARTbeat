@@ -550,10 +550,10 @@ const _drawerSections = <_DrawerSectionConfig>[
     titleKey: 'art_walk_drawer_quick_actions',
     items: [
       _DrawerNavItem(
-        titleKey: 'art_walk_drawer_create_art_walk',
-        icon: Icons.add_location_alt_rounded,
-        route: '/art-walk/create',
-        accent: Color(0xFFFFC857),
+        titleKey: 'art_walk_drawer_browse_walks',
+        icon: Icons.route_rounded,
+        route: '/art-walk/list',
+        accent: Color(0xFF22D3EE),
       ),
       _DrawerNavItem(
         titleKey: 'art_walk_drawer_explore_map',
@@ -562,10 +562,10 @@ const _drawerSections = <_DrawerSectionConfig>[
         accent: Color(0xFF34D399),
       ),
       _DrawerNavItem(
-        titleKey: 'art_walk_drawer_browse_walks',
-        icon: Icons.route_rounded,
+        titleKey: 'art_walk_drawer_create_art_walk',
+        icon: Icons.add_location_alt_rounded,
         route: '/art-walk/list',
-        accent: Color(0xFF22D3EE),
+        accent: Color(0xFFFFC857),
       ),
       _DrawerNavItem(
         titleKey: 'art_walk_drawer_messages',

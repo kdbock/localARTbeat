@@ -25,7 +25,6 @@ import '../services/community_service.dart';
 import '../services/community_social_activity_service.dart';
 import '../src/services/moderation_service.dart';
 import '../widgets/enhanced_post_card.dart';
-import '../widgets/activity_card.dart';
 import '../widgets/mini_artist_card.dart';
 import '../widgets/community_hud_drawer.dart';
 import '../widgets/commission_artists_browser.dart';
@@ -159,7 +158,7 @@ mixin PostLoadingMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> loadPosts(
     ArtCommunityService communityService, {
-    int limit = 20,
+    int limit = 60,
   }) async {
     setState(() => isLoading = true);
 
@@ -779,6 +778,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late ArtCommunityService _communityService;
+  bool _canCreateDirectPosts = false;
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -805,6 +805,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     _tabController = TabController(length: 4, vsync: this);
     _communityService = context.read<ArtCommunityService>();
     _checkAuthStatus();
+    _loadPostingAccess();
     _checkOnboarding();
   }
 
@@ -821,6 +822,50 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     } else {
       AppLogger.error('🔐 User is NOT authenticated');
     }
+  }
+
+  Future<void> _loadPostingAccess() async {
+    try {
+      final userService = context.read<UserService>();
+      final userId = userService.currentUserId;
+      if (userId == null) return;
+
+      // Check if user is admin or moderator
+      final isAdmin = await userService.isCurrentUserAdmin();
+      if (isAdmin) {
+        if (mounted) {
+          setState(() => _canCreateDirectPosts = true);
+        }
+        return;
+      }
+
+      final isModerator = await userService.isCurrentUserModerator();
+      if (isModerator) {
+        if (mounted) {
+          setState(() => _canCreateDirectPosts = true);
+        }
+        return;
+      }
+
+      // Check if user is an artist
+      final artistProfile = await _communityService.getArtistProfile(userId);
+      if (!mounted) return;
+      setState(() {
+        _canCreateDirectPosts = artistProfile != null;
+      });
+    } catch (_) {
+      // Keep default false when role check fails.
+    }
+  }
+
+  void _showArtistOnlyPostingMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Direct feed posting is currently for artist accounts. Your Art Walk and ARTflex moments still post automatically.',
+        ),
+      ),
+    );
   }
 
   Future<void> _checkOnboarding() async {
@@ -964,6 +1009,10 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
         screen = const TrendingContentScreen();
         break;
       case CommunityHudDestination.createPost:
+        if (!_canCreateDirectPosts) {
+          _showArtistOnlyPostingMessage();
+          return;
+        }
         screen = const CreatePostScreen();
         break;
       case CommunityHudDestination.artworkBrowse:
@@ -1121,6 +1170,10 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   }
 
   Widget _buildFab() {
+    if (!_canCreateDirectPosts) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -1249,7 +1302,6 @@ class CommunityFeedTab extends StatefulWidget {
 class _CommunityFeedTabState extends State<CommunityFeedTab>
     with PostLoadingMixin {
   List<CommunitySocialActivity> _activities = [];
-  bool _showActivities = true;
   List<dynamic> _feedItems = [];
 
   @override
@@ -1279,7 +1331,10 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
   Future<void> _loadActivities() async {
     try {
-      final userId = context.read<UserService>().currentUserId;
+      final userService = context.read<UserService>();
+      final communityService = context.read<CommunityService>();
+      final socialActivityService = context.read<CommunitySocialActivityService>();
+      final userId = userService.currentUserId;
       if (userId == null) {
         if (mounted) {
           setState(() {
@@ -1290,18 +1345,22 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         return;
       }
 
-      final filteredActivities = await context
-          .read<CommunityService>()
-          .getPersonalizedActivities(
-            userId: userId,
-            socialActivityService: context
-                .read<CommunitySocialActivityService>(),
-          );
+      final filteredActivities = await communityService.getPersonalizedActivities(
+        userId: userId,
+        socialActivityService: socialActivityService,
+        directLimit: 20,
+        recentLimit: 40,
+      );
 
-      if (mounted) {
-        setState(() => _activities = filteredActivities);
-        _combineFeedItems();
-      }
+      if (!mounted) return;
+
+      final activitiesWithPosts = await communityService.ensureActivityFeedPosts(
+        filteredActivities,
+      );
+
+      if (!mounted) return;
+      setState(() => _activities = activitiesWithPosts);
+      _combineFeedItems();
     } catch (e) {
       AppLogger.error('📱 Error loading activities: $e');
     }
@@ -1310,23 +1369,25 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
   void _combineFeedItems() {
     final combinedItems = <dynamic>[];
     combinedItems.addAll(filteredPosts);
-    if (_showActivities) combinedItems.addAll(_activities);
+
+    final existingPostIds = filteredPosts.map((post) => post.id).toSet();
+    final activityPosts = _activities
+        .map(_activityToPost)
+        .where((post) => !existingPostIds.contains(post.id))
+        .toList(growable: false);
+    combinedItems.addAll(activityPosts);
 
     combinedItems.sort((a, b) {
       DateTime timeA, timeB;
 
       if (a is PostModel) {
         timeA = a.createdAt;
-      } else if (a is CommunitySocialActivity) {
-        timeA = a.timestamp;
       } else {
         return 0;
       }
 
       if (b is PostModel) {
         timeB = b.createdAt;
-      } else if (b is CommunitySocialActivity) {
-        timeB = b.timestamp;
       } else {
         return 0;
       }
@@ -1337,11 +1398,125 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     setState(() => _feedItems = combinedItems);
   }
 
-  void _toggleActivitiesFilter() {
-    setState(() {
-      _showActivities = !_showActivities;
-      _combineFeedItems();
-    });
+  PostModel _activityToPost(CommunitySocialActivity activity) {
+    final metadata = Map<String, dynamic>.from(activity.metadata ?? {});
+    final imageUrls = _extractActivityImageUrls(metadata);
+    final postId = metadata['postId']?.toString();
+
+    return PostModel(
+      id: (postId != null && postId.isNotEmpty) ? postId : activity.id,
+      userId: activity.userId,
+      userName: activity.userName,
+      userPhotoUrl: activity.userAvatar ?? '',
+      content: activity.message,
+      imageUrls: imageUrls,
+      tags: <String>['activity', activity.type.name],
+      location: _resolveActivityLocation(metadata),
+      createdAt: activity.timestamp,
+      engagementStats: EngagementStats(
+        likeCount: _readCount(metadata['likeCount']),
+        commentCount: _readCount(metadata['commentCount']),
+        shareCount: _readCount(metadata['shareCount']),
+        lastUpdated: activity.timestamp,
+      ),
+      isPublic: true,
+      metadata: {
+        ...metadata,
+        'activityId': activity.id,
+        'activityType': activity.type.name,
+        'origin': 'socialActivity',
+      },
+    );
+  }
+
+  List<String> _extractActivityImageUrls(Map<String, dynamic> metadata) {
+    final urls = <String>[];
+    const keys = <String>[
+      'photoUrl',
+      'imageUrl',
+      'thumbnailUrl',
+      'captureImageUrl',
+      'coverImageUrl',
+      'mapThumbnailUrl',
+    ];
+
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.isNotEmpty) {
+        urls.add(value);
+      }
+    }
+
+    final listValue = metadata['imageUrls'];
+    if (listValue is List) {
+      for (final item in listValue) {
+        if (item is String && item.isNotEmpty) {
+          urls.add(item);
+        }
+      }
+    }
+
+    final alternateLists = <dynamic>[
+      metadata['images'],
+      metadata['photoUrls'],
+      metadata['mediaUrls'],
+    ];
+    for (final list in alternateLists) {
+      if (list is! List) continue;
+      for (final item in list) {
+        if (item is String && item.isNotEmpty) {
+          urls.add(item);
+        } else if (item is Map<String, dynamic>) {
+          final nestedUrl = item['url'] ?? item['imageUrl'] ?? item['photoUrl'];
+          if (nestedUrl is String && nestedUrl.isNotEmpty) {
+            urls.add(nestedUrl);
+          }
+        }
+      }
+    }
+
+    final nestedMaps = <dynamic>[
+      metadata['capture'],
+      metadata['captureData'],
+      metadata['artwork'],
+      metadata['walk'],
+    ];
+    for (final nested in nestedMaps) {
+      if (nested is! Map<String, dynamic>) continue;
+      for (final key in keys) {
+        final value = nested[key];
+        if (value is String && value.isNotEmpty) {
+          urls.add(value);
+        }
+      }
+      final nestedImageList = nested['imageUrls'];
+      if (nestedImageList is List) {
+        for (final item in nestedImageList) {
+          if (item is String && item.isNotEmpty) {
+            urls.add(item);
+          }
+        }
+      }
+    }
+
+    return urls.toSet().toList(growable: false);
+  }
+
+  String _resolveActivityLocation(Map<String, dynamic> metadata) {
+    const keys = <String>['locationName', 'location', 'city', 'area'];
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return '';
+  }
+
+  int _readCount(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return 0;
   }
 
   // --- your existing handlers remain unchanged below ---
@@ -1576,29 +1751,35 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         });
       }
 
+      _applyLikeStateToFeedItem(post.id, invertLike: true);
+
       final success = await widget.communityService.toggleLike(post.id);
 
       if (!mounted) return;
 
-      if (!success && postIndex != -1) {
-        setState(() {
-          final currentLikeCount = posts[postIndex].engagementStats.likeCount;
-          final isCurrentlyLiked = posts[postIndex].isLikedByCurrentUser;
+      if (!success) {
+        if (postIndex != -1) {
+          setState(() {
+            final currentLikeCount = posts[postIndex].engagementStats.likeCount;
+            final isCurrentlyLiked = posts[postIndex].isLikedByCurrentUser;
 
-          final revertedEngagementStats = EngagementStats(
-            likeCount: isCurrentlyLiked
-                ? currentLikeCount - 1
-                : currentLikeCount + 1,
-            commentCount: posts[postIndex].engagementStats.commentCount,
-            shareCount: posts[postIndex].engagementStats.shareCount,
-            lastUpdated: DateTime.now(),
-          );
+            final revertedEngagementStats = EngagementStats(
+              likeCount: isCurrentlyLiked
+                  ? currentLikeCount - 1
+                  : currentLikeCount + 1,
+              commentCount: posts[postIndex].engagementStats.commentCount,
+              shareCount: posts[postIndex].engagementStats.shareCount,
+              lastUpdated: DateTime.now(),
+            );
 
-          posts[postIndex] = posts[postIndex].copyWith(
-            isLikedByCurrentUser: !isCurrentlyLiked,
-            engagementStats: revertedEngagementStats,
-          );
-        });
+            posts[postIndex] = posts[postIndex].copyWith(
+              isLikedByCurrentUser: !isCurrentlyLiked,
+              engagementStats: revertedEngagementStats,
+            );
+          });
+        }
+
+        _applyLikeStateToFeedItem(post.id, invertLike: true);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('community_hub_like_failed'.tr())),
@@ -1610,6 +1791,33 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         context,
       ).showSnackBar(SnackBar(content: Text('community_hub_error_like'.tr())));
     }
+  }
+
+  void _applyLikeStateToFeedItem(String postId, {required bool invertLike}) {
+    final feedIndex = _feedItems.indexWhere(
+      (item) => item is PostModel && item.id == postId,
+    );
+
+    if (feedIndex == -1) return;
+
+    final feedPost = _feedItems[feedIndex] as PostModel;
+    final isCurrentlyLiked = feedPost.isLikedByCurrentUser;
+    final currentLikeCount = feedPost.engagementStats.likeCount;
+    final updatedPost = feedPost.copyWith(
+      isLikedByCurrentUser: invertLike ? !isCurrentlyLiked : isCurrentlyLiked,
+      engagementStats: EngagementStats(
+        likeCount: isCurrentlyLiked
+            ? currentLikeCount - 1
+            : currentLikeCount + 1,
+        commentCount: feedPost.engagementStats.commentCount,
+        shareCount: feedPost.engagementStats.shareCount,
+        lastUpdated: DateTime.now(),
+      ),
+    );
+
+    setState(() {
+      _feedItems[feedIndex] = updatedPost;
+    });
   }
 
   void _handleShare(PostModel post) async {
@@ -1766,23 +1974,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'community_hub_show_activities'.tr(),
-                      style: const TextStyle(
-                        color: _LAB.textSecondary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Switch(
-                      value: _showActivities,
-                      onChanged: (_) => _toggleActivitiesFilter(),
-                      activeThumbColor: _LAB.teal,
-                    ),
-                  ],
-                ),
+                const SizedBox.shrink(),
               ],
             ),
           ),
@@ -1798,37 +1990,6 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
       color: _LAB.teal,
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: _Glass(
-                radius: 18,
-                blur: 14,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'community_hub_show_activities'.tr(),
-                      style: const TextStyle(
-                        color: _LAB.textSecondary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Switch(
-                      value: _showActivities,
-                      onChanged: (_) => _toggleActivitiesFilter(),
-                      activeThumbColor: _LAB.teal,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList(
@@ -1854,15 +2015,6 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                           loadPosts(widget.communityService),
                       onEdit: () => _handleEdit(item),
                       onDelete: () => _handleDelete(item),
-                    ),
-                  );
-                } else if (item is CommunitySocialActivity) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ActivityCard(
-                      activity: item,
-                      onTap: () =>
-                          AppLogger.info('Activity tapped: ${item.message}'),
                     ),
                   );
                 }

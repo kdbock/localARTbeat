@@ -196,4 +196,58 @@ class CommunitySocialActivityService {
       return [];
     }
   }
+
+  Future<List<CommunitySocialActivity>> getActivitiesForUsers({
+    required List<String> userIds,
+    int limit = 20,
+  }) async {
+    if (userIds.isEmpty) return [];
+
+    try {
+      final uniqueIds = userIds.toSet().toList(growable: false);
+      final chunks = <List<String>>[];
+      for (var i = 0; i < uniqueIds.length; i += 10) {
+        final end = (i + 10) > uniqueIds.length ? uniqueIds.length : i + 10;
+        chunks.add(uniqueIds.sublist(i, end));
+      }
+
+      final merged = <CommunitySocialActivity>[];
+      for (final chunk in chunks) {
+        final snapshot = await _activities
+            .where('userId', whereIn: chunk)
+            .orderBy('timestamp', descending: true)
+            .limit(limit)
+            .get();
+
+        merged.addAll(snapshot.docs.map(CommunitySocialActivity.fromFirestore));
+      }
+
+      merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      if (merged.length > limit) {
+        return merged.take(limit).toList(growable: false);
+      }
+      return merged;
+    } catch (e) {
+      AppLogger.error('Error loading activities for users: $e');
+      return [];
+    }
+  }
+
+  Future<List<CommunitySocialActivity>> getRecentActivities({
+    int limit = 20,
+  }) async {
+    try {
+      final snapshot = await _activities
+          .orderBy('timestamp', descending: true)
+          .limit(limit)
+          .get();
+
+      return snapshot.docs
+          .map(CommunitySocialActivity.fromFirestore)
+          .toList(growable: false);
+    } catch (e) {
+      AppLogger.error('Error loading recent community activities: $e');
+      return [];
+    }
+  }
 }

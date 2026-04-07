@@ -9,6 +9,7 @@ import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:math' show sin, cos, sqrt, atan2, pi;
+import 'dart:async';
 
 /// Enhanced art walk experience screen with turn-by-turn navigation
 class EnhancedArtWalkExperienceScreen extends StatefulWidget {
@@ -40,6 +41,10 @@ class _EnhancedArtWalkExperienceScreenState
   bool _isNavigationMode = false;
   bool _showCompactNavigation = false;
   bool _isStartingNavigation = false;
+  bool _showRadarCompanion = false;
+  bool _isRadarLoading = false;
+  List<PublicArtModel> _radarNearbyArt = [];
+  Timer? _radarRefreshTimer;
 
   // Progress tracking
   ArtWalkProgress? _currentProgress;
@@ -48,6 +53,7 @@ class _EnhancedArtWalkExperienceScreenState
   late final SocialService _socialService;
   late final core_auth.AuthService _authService;
   late final ArtWalkUserStatsService _userStatsService;
+  late final InstantDiscoveryService _instantDiscoveryService;
 
   // New services for enhanced UX
   SmartOnboardingService? _onboardingService;
@@ -73,6 +79,7 @@ class _EnhancedArtWalkExperienceScreenState
     _socialService = context.read<SocialService>();
     _authService = context.read<core_auth.AuthService>();
     _userStatsService = context.read<ArtWalkUserStatsService>();
+    _instantDiscoveryService = context.read<InstantDiscoveryService>();
     _navigationService = context.read<ArtWalkNavigationService>();
     // Ensure default art walk service is picked up when widget override is absent
     _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
@@ -93,6 +100,7 @@ class _EnhancedArtWalkExperienceScreenState
 
     debugPrint('🧭 Experience Screen: Disposing navigation service');
     _navigationService.dispose();
+    _radarRefreshTimer?.cancel();
     super.dispose();
   }
 
@@ -482,6 +490,9 @@ class _EnhancedArtWalkExperienceScreenState
       await _navigationService.startNavigation(route);
       debugPrint('🧭 Experience Screen: Navigation service started');
 
+      // Enable radar companion while user is actively navigating.
+      _startRadarCompanion();
+
       // Update map with detailed route
       _updateMapWithRoute(route);
 
@@ -512,6 +523,7 @@ class _EnhancedArtWalkExperienceScreenState
     await _hapticService?.buttonPressed();
 
     await _navigationService.stopNavigation();
+    _stopRadarCompanion();
     setState(() {
       _isNavigationMode = false;
       _currentRoute = null;
@@ -697,27 +709,30 @@ class _EnhancedArtWalkExperienceScreenState
       // Announce visit with audio
       await _audioService.celebrateArtVisit(art, 10);
 
-      // Haptic feedback for achievement
-      await _hapticService?.artPieceVisited();
-
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'art_walk_enhanced_art_walk_experience_text_marked_as_visited'
-                .tr()
-                .replaceAll('{title}', art.title),
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
+      // ── Per-stop discovery celebration ───────────────────────────────
+      // Show the full-screen "You found it!" moment before anything else.
+      // If the walk is now complete this IS the last stop, so the overlay
+      // labels it appropriately then exits — we then go straight to the
+      // walk-completion celebration screen (skipping the AlertDialog).
+      final visitedCount = updatedProgress.visitedArt.length;
+      final totalCount = _artPieces.length;
+      if (!mounted) return;
+      await ArtDiscoveryCelebration.show(
+        context,
+        art: art,
+        stopNumber: visitedCount,
+        totalStops: totalCount,
+        pointsEarned: 50,
       );
 
+      if (!mounted) return;
+
       if (_isWalkCompleted()) {
-        _showWalkCompletionDialog();
+        // Go straight to the celebration screen — no intermediate dialog.
+        _completeWalk();
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -753,100 +768,6 @@ class _EnhancedArtWalkExperienceScreenState
       debugPrint('📊 Error auto-recording segment completion visit: $e');
       // Don't throw - just silently handle errors so navigation isn't blocked
     }
-  }
-
-  void _showWalkCompletionDialog() {
-    // Haptic feedback for walk completion
-    _hapticService?.walkCompleted();
-
-    // Calculate actual rewards
-    final completionBonus = _calculateCompletionBonus();
-    final photosCount =
-        _currentProgress?.visitedArt
-            .where((v) => v.photoTaken != null)
-            .length ??
-        0;
-    final timeSpent = _currentProgress?.timeSpent ?? Duration.zero;
-    final isPerfect = _currentProgress?.progressPercentage == 1.0;
-
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'art_walk_enhanced_art_walk_experience_text_walk_completed'.tr(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'art_walk_experience_congratulations'.tr(),
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'art_walk_experience_rewards_earned'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'art_walk_enhanced_art_walk_experience_text_completionbonus_xp_total'
-                  .tr(args: [completionBonus.toString()]),
-            ),
-            if (isPerfect)
-              Text(
-                'art_walk_enhanced_art_walk_experience_text_perfect_completion_bonus'
-                    .tr(),
-              ),
-            if (timeSpent.inHours < 2)
-              Text(
-                'art_walk_enhanced_art_walk_experience_text_speed_bonus_25'
-                    .tr(),
-              ),
-            if (photosCount >= (_currentProgress?.visitedArt.length ?? 0) * 0.5)
-              Text(
-                'art_walk_enhanced_art_walk_experience_text_photo_documentation_bonus'
-                    .tr(),
-              ),
-            const SizedBox(height: 8),
-            Text(
-              '• ${'art_walk_experience_art_pieces_visited'.tr(namedArgs: {'count': (_currentProgress?.visitedArt.length ?? 0).toString()})}',
-            ),
-            Text(
-              'art_walk_enhanced_art_walk_experience_text_photoscount_photos_taken'
-                  .tr(namedArgs: {'count': photosCount.toString()}),
-            ),
-            Text(
-              'art_walk_enhanced_art_walk_experience_text_formatdurationtimespent_duration'
-                  .tr(namedArgs: {'duration': timeSpent.inMinutes.toString()}),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'art_walk_enhanced_art_walk_experience_success_achievement_progress_updated'
-                  .tr(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'art_walk_enhanced_art_walk_experience_text_review_walk'.tr(),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _completeWalk();
-            },
-            child: Text(
-              'art_walk_enhanced_art_walk_experience_text_claim_rewards'.tr(),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _completeWalk() async {
@@ -1141,6 +1062,238 @@ class _EnhancedArtWalkExperienceScreenState
     return _currentProgress!.isCompleted;
   }
 
+  Future<void> _startRadarCompanion() async {
+    _radarRefreshTimer?.cancel();
+    await _refreshRadarNearbyArt();
+    _radarRefreshTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      _refreshRadarNearbyArt();
+    });
+  }
+
+  void _stopRadarCompanion() {
+    _radarRefreshTimer?.cancel();
+    _radarRefreshTimer = null;
+    if (!mounted) return;
+    setState(() {
+      _showRadarCompanion = false;
+      _isRadarLoading = false;
+      _radarNearbyArt = [];
+    });
+  }
+
+  Future<void> _refreshRadarNearbyArt() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isRadarLoading = true;
+    });
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final nearby = await _instantDiscoveryService.getNearbyArt(
+        position,
+        radiusMeters: 500,
+      );
+
+      final walkArtIds = _artPieces.map((art) => art.id).toSet();
+      final bonusNearby = nearby
+          .where((art) => !walkArtIds.contains(art.id))
+          .take(6)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        _currentPosition = position;
+        _radarNearbyArt = bonusNearby;
+        _isRadarLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isRadarLoading = false;
+      });
+    }
+  }
+
+  double _distanceToArtMeters(PublicArtModel art) {
+    if (_currentPosition == null) return 0;
+    return Geolocator.distanceBetween(
+      _currentPosition!.latitude,
+      _currentPosition!.longitude,
+      art.location.latitude,
+      art.location.longitude,
+    );
+  }
+
+  Widget _buildRadarCompanionFab() {
+    final nearbyCount = _radarNearbyArt.length;
+    return GlassCard(
+      borderRadius: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          setState(() {
+            _showRadarCompanion = !_showRadarCompanion;
+          });
+          if (_showRadarCompanion) {
+            _refreshRadarNearbyArt();
+          }
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.radar, color: Color(0xFF22D3EE), size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'Radar $nearbyCount',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRadarCompanionPanel() {
+    return GlassCard(
+      borderRadius: 20,
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.radar, color: Color(0xFF22D3EE), size: 16),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Radar Companion',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              if (_isRadarLoading)
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Bonus art near your current route',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.75),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_radarNearbyArt.isEmpty)
+            Text(
+              'No bonus pieces in radar range right now.',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.65),
+                fontSize: 11,
+              ),
+            )
+          else
+            Column(
+              children: _radarNearbyArt.take(3).map((art) {
+                final meters = _distanceToArtMeters(art);
+                final distanceText = meters < 1000
+                    ? '${meters.round()}m'
+                    : '${(meters / 1000).toStringAsFixed(1)}km';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _showArtDetail(art),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.palette_rounded,
+                            color: Color(0xFFFFB703),
+                            size: 14,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              art.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            distanceText,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _currentPosition == null
+                  ? null
+                  : () {
+                      Navigator.pushNamed(
+                        context,
+                        ArtWalkRoutes.instantDiscovery,
+                        arguments: {
+                          'userPosition': _currentPosition,
+                          'initialNearbyArt': _radarNearbyArt,
+                        },
+                      );
+                    },
+              icon: const Icon(Icons.open_in_full, size: 14),
+              label: const Text('Open Full Radar'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -1361,6 +1514,23 @@ class _EnhancedArtWalkExperienceScreenState
                     visited: _currentProgress?.visitedArt.length ?? 0,
                     total: _currentProgress?.totalArtCount ?? _artPieces.length,
                   ),
+                ),
+
+              // Radar companion toggle while navigating
+              if (_isNavigationMode)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: _buildRadarCompanionFab(),
+                ),
+
+              // Radar companion panel (works with turn-by-turn)
+              if (_isNavigationMode && _showRadarCompanion)
+                Positioned(
+                  top: 62,
+                  right: 16,
+                  width: 240,
+                  child: _buildRadarCompanionPanel(),
                 ),
 
               // Turn-by-turn navigation widget
@@ -1856,7 +2026,7 @@ class _EnhancedArtWalkExperienceScreenState
     );
 
     if (shouldComplete == true) {
-      _showWalkCompletionDialog();
+      _completeWalk();
     }
   }
 
@@ -1994,33 +2164,6 @@ class _EnhancedArtWalkExperienceScreenState
         }
       }
     }
-  }
-
-  /// Calculate completion bonus (mirrors service logic)
-  int _calculateCompletionBonus() {
-    if (_currentProgress == null) return 0;
-
-    int bonus = 100; // Base completion bonus
-
-    // Perfect completion bonus
-    if (_currentProgress!.progressPercentage >= 1.0) {
-      bonus += 50;
-    }
-
-    // Speed bonus (completed in under 2 hours)
-    if (_currentProgress!.timeSpent.inHours < 2) {
-      bonus += 25;
-    }
-
-    // Photo documentation bonus
-    final photosCount = _currentProgress!.visitedArt
-        .where((v) => v.photoTaken != null)
-        .length;
-    if (photosCount >= _currentProgress!.visitedArt.length * 0.5) {
-      bonus += 30; // Documented at least 50% with photos
-    }
-
-    return bonus;
   }
 
   /// Format duration for display

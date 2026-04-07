@@ -12,6 +12,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart'
     hide PublicArtModel, SocialActivityType;
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/constants/routes.dart';
+import 'package:artbeat_art_walk/src/services/go_now_flow_service.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
@@ -42,6 +44,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
   String? _feedbackMessage;
   Color? _feedbackColor;
   PublicArtModel? _enrichedArt;
+  final GoNowFlowService _goNowFlow = GoNowFlowService();
 
   // Simple static cache for user info
   static final Map<String, UserModel> _userCache = {};
@@ -55,6 +58,10 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
+    _goNowFlow.trackFunnelEvent('detail_open', <String, Object?>{
+      'pieceId': widget.art.id,
+      'source': 'radar',
+    });
     _enrichArtWithUserInfo();
   }
 
@@ -149,6 +156,11 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
             },
           );
         }
+        _goNowFlow.setStatus(widget.art.id, GoNowStatus.captured);
+        _goNowFlow.trackFunnelEvent('capture_completed', <String, Object?>{
+          'pieceId': widget.art.id,
+          'source': 'radar',
+        });
 
         await Future<void>.delayed(const Duration(seconds: 3));
         if (mounted) Navigator.pop(context, true);
@@ -168,6 +180,52 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
     }
   }
 
+  Future<void> _goNowToArt() async {
+    _goNowFlow.trackFunnelEvent('go_now_tap', <String, Object?>{
+      'pieceId': widget.art.id,
+      'source': 'radar',
+    });
+    _goNowFlow.setStatus(widget.art.id, GoNowStatus.enRoute);
+
+    final result = await Navigator.pushNamed(
+      context,
+      ArtWalkRoutes.goNowNavigation,
+      arguments: <String, dynamic>{
+        'pieceId': widget.art.id,
+        'title': widget.art.title,
+        'latitude': widget.art.location.latitude,
+        'longitude': widget.art.location.longitude,
+        'source': 'radar',
+        'showAddToWalkAction': true,
+      },
+    );
+
+    if (!mounted) return;
+
+    if (result == 'arrived_capture' || result == 'arrived_add_to_walk') {
+      _goNowFlow.setStatus(widget.art.id, GoNowStatus.arrived);
+      setState(() {
+        _feedbackMessage = result == 'arrived_add_to_walk'
+            ? "Added to your walk queue. Capture when ready."
+            : "You're here. Capture now or keep exploring.";
+        _feedbackColor = Colors.tealAccent;
+      });
+      return;
+    }
+
+    if (result == 'skipped') {
+      _goNowFlow.setStatus(widget.art.id, GoNowStatus.skipped);
+    }
+  }
+
+  Future<void> _handlePrimaryGoNowAction(bool isClose) async {
+    if (isClose) {
+      await _captureDiscovery();
+      return;
+    }
+    await _goNowToArt();
+  }
+
   @override
   Widget build(BuildContext context) {
     final proximityMessage = _discoveryService.getProximityMessage(
@@ -181,6 +239,15 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
     final profileImageProvider = ImageUrlValidator.safeNetworkImage(
       _enrichedArt?.userProfileUrl ?? widget.art.userProfileUrl,
     );
+    final goNowStatus = _goNowFlow.statusFor(widget.art.id);
+    final goNowLabel = isClose
+        ? "You're Here - Capture"
+        : switch (goNowStatus) {
+            GoNowStatus.enRoute => 'Resume Route',
+            GoNowStatus.arrived => "You're Here - Capture",
+            GoNowStatus.captured => 'Captured',
+            _ => 'Go Now',
+          };
 
     return GlassCard(
       padding: const EdgeInsets.all(24),
@@ -300,6 +367,16 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                     Navigator.pushNamed(context, '/capture-sponsorship'),
               ),
               const SizedBox(height: 24),
+              GradientCTAButton(
+                label: goNowLabel,
+                icon: Icons.near_me,
+                onPressed: _captured
+                    ? null
+                    : () {
+                        _handlePrimaryGoNowAction(isClose);
+                      },
+              ),
+              const SizedBox(height: 12),
               if (!_captured)
                 GradientCTAButton(
                   label: _isCapturing

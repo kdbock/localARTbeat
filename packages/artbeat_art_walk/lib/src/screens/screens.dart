@@ -17,3 +17,4 @@ export 'instant_discovery_radar_screen.dart';
 export 'quest_history_screen.dart';
 export 'weekly_goals_screen.dart';
 export 'instant_discovery_screen.dart';
+export 'go_now_navigation_screen.dart';

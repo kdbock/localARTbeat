@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 import '../../theme/artbeat_colors.dart';
 import '../../theme/glass_card.dart';
 import '../../services/onboarding_service.dart';
@@ -57,134 +58,26 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
     super.initState();
     _onboardingService = context.read<OnboardingService>();
     _steps = [
-      // 1-4 Top navigation
-      TourStep(
-        targetKey: widget.menuKey,
-        title: 'MAIN MENU',
-        description: 'Access your full toolkit and resources.',
-        accentColor: ArtbeatColors.secondaryTeal,
-        details: [
-          'View your collections',
-          'Explore art by local artists',
-          'Get help and support',
-        ],
-      ),
-      TourStep(
-        targetKey: widget.xpKey,
-        title: 'PROGRESS TRACKER',
-        description: 'Monitor your growth and daily consistency.',
-        accentColor: ArtbeatColors.primaryGreen,
-        details: [
-          'Track Level and XP progress',
-          'Keep your daily Streak alive',
-          'See your current XP bar',
-        ],
-      ),
-      TourStep(
-        targetKey: widget.profileKey,
-        title: 'YOUR IDENTITY',
-        description: 'Customize how the art world sees you.',
-        accentColor: ArtbeatColors.accentYellow,
-        details: [
-          'Edit your public bio',
-          'View your shared captures',
-          'Check your achievements',
-        ],
-      ),
-      TourStep(
-        targetKey: widget.settingsKey,
-        title: 'PREFERENCES',
-        description: 'Tailor the app experience to your needs.',
-        accentColor: ArtbeatColors.primaryPurple,
-        details: [
-          'Manage notifications',
-          'Change language settings',
-          'Adjust privacy options',
-        ],
-      ),
-      // 5-8 Middle
-      TourStep(
-        targetKey: widget.captureKey,
-        title: 'CAPTURE ART',
-        description: 'The core tool for documentating your finds.',
-        accentColor: ArtbeatColors.primaryPurple,
-        details: [
-          'Take high-quality art photos',
-          'Add locations to your finds',
-          'Share with the community',
-        ],
-      ),
       TourStep(
         targetKey: widget.discoverKey,
-        title: 'DISCOVER QUESTS',
-        description: 'Find new art through guided challenges.',
-        accentColor: ArtbeatColors.primaryBlue,
-        details: [
-          'Join local art missions',
-          'Earn unique rewards',
-          'Follow curated paths',
-        ],
+        title: 'DISCOVER',
+        description: 'Find nearby art walks and guided routes.',
+        accentColor: ArtbeatColors.secondaryTeal,
+        details: const [],
       ),
       TourStep(
-        targetKey: widget.exploreKey,
-        title: 'EXPLORE MAP',
-        description: 'A birds-eye view of art around you.',
-        accentColor: ArtbeatColors.primaryGreen,
-        details: [
-          'See all nearby artwork',
-          'Find upcoming events',
-          'Plan your art routes',
-        ],
+        targetKey: widget.captureKey,
+        title: 'CAPTURE',
+        description: 'Quickly document art you discover.',
+        accentColor: ArtbeatColors.primaryPurple,
+        details: const [],
       ),
       TourStep(
         targetKey: widget.communityKey,
-        title: 'COMMUNITY HUB',
-        description: 'Connect with fellow art enthusiasts.',
-        accentColor: ArtbeatColors.accentOrange,
-        details: [
-          'See trending art posts',
-          'Follow your favorite artists',
-          'Comment and give feedback',
-        ],
-      ),
-      // 9-13 Bottom navigation
-      TourStep(
-        targetKey: widget.homeNavKey,
-        title: 'HOME BASE',
-        description: 'Your central starting point for everything.',
-        accentColor: ArtbeatColors.secondaryTeal,
-        details: ['Quick return to dashboard', 'View latest highlights'],
-      ),
-      TourStep(
-        targetKey: widget.walkNavKey,
-        title: 'ART WALKS',
-        description: 'Embark on curated walking tours.',
-        accentColor: ArtbeatColors.primaryBlue,
-        details: ['Discover themed routes', 'Learn about local history'],
-      ),
-      TourStep(
-        targetKey: widget.captureNavKey,
-        title: 'QUICK CAPTURE',
-        description: 'Launch the camera instantly.',
-        accentColor: ArtbeatColors.accentYellow,
-        details: ['Never miss a piece of art', 'One-tap camera access'],
-      ),
-      TourStep(
-        targetKey: widget.communityNavKey,
-        title: 'SOCIAL FEED',
-        description: 'The heartbeat of the art community.',
-        accentColor: ArtbeatColors.accentOrange,
-        details: ['See what others are finding', 'Stay connected on the go'],
-      ),
-      TourStep(
-        targetKey: widget.eventsNavKey,
-        title: 'ART EVENTS',
-        description: 'Local happenings you won\'t want to miss.',
+        title: 'COMMUNITY',
+        description: 'See posts and interact with other users.',
         accentColor: ArtbeatColors.primaryPurple,
-        details: [
-          'Exhibitions and gallery openings',
-          'Community art workshops',
-        ],
+        details: const [],
       ),
     ];
 
@@ -367,9 +260,12 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null
-                      ? (screenHeight - bottom - topSafetyMargin)
-                      : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: math.max(
+                    0.0,
+                    bottom != null
+                        ? (screenHeight - bottom - topSafetyMargin)
+                        : (screenHeight - (top ?? 0) - 40),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -416,11 +312,31 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
           ),
 
         GlassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           borderColor: step.accentColor.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'QUICK TOUR',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -438,15 +354,17 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    step.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0,
+                  Expanded(
+                    child: Text(
+                      step.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ],
@@ -455,44 +373,19 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
               Text(
                 step.description,
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 20),
-              ...step.details.map(
-                (detail) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: step.accentColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          detail,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'STEP ${_currentStepIndex + 1} OF ${_steps.length}',
+                    '${_currentStepIndex + 1}/${_steps.length}',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white.withValues(alpha: 0.4),
                       letterSpacing: 0,
@@ -512,9 +405,7 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
                       ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1
-                          ? 'GOT IT!'
-                          : 'NEXT',
+                      _currentStepIndex == _steps.length - 1 ? 'DONE' : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,

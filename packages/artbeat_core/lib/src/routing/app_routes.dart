@@ -3,9 +3,12 @@ class AppRoutes {
   // Core routes
   static const String splash = '/splash';
   static const String dashboard = '/dashboard';
+  static const String onboardingFunnelAnalytics =
+      '/analytics/onboarding-funnel';
 
   // Auth routes
   static const String auth = '/auth';
+  static const String userOnboarding = '/onboarding/user';
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';

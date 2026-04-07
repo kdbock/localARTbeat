@@ -87,9 +87,9 @@ exports.updateNotificationSummary = onDocumentWritten(
         latestSnapshotPromise,
       ]);
 
-      const lastUpdated = latestSnapshot.empty
-        ? admin.firestore.FieldValue.serverTimestamp()
-        : latestSnapshot.docs[0].get("createdAt") ||
+      const lastUpdated = latestSnapshot.empty ?
+        admin.firestore.FieldValue.serverTimestamp() :
+        latestSnapshot.docs[0].get("createdAt") ||
           admin.firestore.FieldValue.serverTimestamp();
 
       await userRef
@@ -121,7 +121,8 @@ exports.backfillArtistDisplayNameLower = onRequest(
       let scanned = 0;
       let lastDoc = null;
 
-      while (true) {
+      let hasMore = true;
+      while (hasMore) {
         let query = admin.firestore().collection("artistProfiles").orderBy("__name__").limit(500);
         if (lastDoc) {
           query = query.startAfter(lastDoc);
@@ -129,7 +130,8 @@ exports.backfillArtistDisplayNameLower = onRequest(
 
         const snapshot = await query.get();
         if (snapshot.empty) {
-          break;
+          hasMore = false;
+          continue;
         }
 
         const batch = admin.firestore().batch();
@@ -1451,7 +1453,7 @@ async function sendDailyAnalyticsReportInternal() {
   const totalRefunds = stripeMetrics.refunds + iapMetrics.refunds;
 
   const reportLines = [
-    `ARTbeat Daily Analytics Report (UTC)`,
+    "ARTbeat Daily Analytics Report (UTC)",
     `Date: ${startUtc.toISOString().slice(0, 10)}`,
     "",
     "USERS",
@@ -1627,9 +1629,9 @@ async function getFirestoreUserMetrics({startUtc, endUtc}) {
         toDate(data.lastActiveAt),
       ].filter(Boolean);
       const lastActiveAt =
-        lastActiveCandidates.length > 0
-          ? new Date(Math.max(...lastActiveCandidates.map((date) => date.getTime())))
-          : null;
+        lastActiveCandidates.length > 0 ?
+          new Date(Math.max(...lastActiveCandidates.map((date) => date.getTime()))) :
+          null;
 
       if (isInRange(createdAt, startUtc, endUtc)) {
         newUsers += 1;
@@ -2099,30 +2101,30 @@ function buildDailyReportHtml(payload) {
 
         <h3 style="margin: 28px 0 12px; color: #111827;">Revenue</h3>
         ${buildTable([
-          ["Total Gross", formatCurrency(totalGross, currency)],
-          ["Total Net", formatCurrency(totalNet, currency)],
-          ["Total Refunds", formatCurrency(totalRefunds, currency)],
-          ["Stripe Gross", formatCurrency(stripeMetrics.gross, currency)],
-          ["Stripe Net", formatCurrency(stripeMetrics.net, currency)],
-          ["Stripe Fees", formatCurrency(stripeMetrics.fees, currency)],
-          ["Stripe Refunds", formatCurrency(stripeMetrics.refunds, currency)],
-          ["IAP Gross", formatCurrency(iapMetrics.gross, currency)],
-          ["IAP Net (rate ${iapMetrics.netRate})", formatCurrency(iapMetrics.net, currency)],
-          ["IAP Refunds", formatCurrency(iapMetrics.refunds, currency)],
-        ])}
+    ["Total Gross", formatCurrency(totalGross, currency)],
+    ["Total Net", formatCurrency(totalNet, currency)],
+    ["Total Refunds", formatCurrency(totalRefunds, currency)],
+    ["Stripe Gross", formatCurrency(stripeMetrics.gross, currency)],
+    ["Stripe Net", formatCurrency(stripeMetrics.net, currency)],
+    ["Stripe Fees", formatCurrency(stripeMetrics.fees, currency)],
+    ["Stripe Refunds", formatCurrency(stripeMetrics.refunds, currency)],
+    ["IAP Gross", formatCurrency(iapMetrics.gross, currency)],
+    ["IAP Net (rate ${iapMetrics.netRate})", formatCurrency(iapMetrics.net, currency)],
+    ["IAP Refunds", formatCurrency(iapMetrics.refunds, currency)],
+  ])}
 
         <h3 style="margin: 28px 0 12px; color: #111827;">Subscriptions</h3>
         ${buildTable([
-          ["Active", subscriptionMetrics.active],
-          ["New", subscriptionMetrics.new],
-          ["Churn (approx)", formatPercent(subscriptionMetrics.churnRate)],
-        ])}
+    ["Active", subscriptionMetrics.active],
+    ["New", subscriptionMetrics.new],
+    ["Churn (approx)", formatPercent(subscriptionMetrics.churnRate)],
+  ])}
 
         <h3 style="margin: 28px 0 12px; color: #111827;">Content</h3>
         ${buildTable([
-          ["Captures added", capturesAdded ?? "N/A"],
-          ["Artwork added", artworkAdded ?? "N/A"],
-        ])}
+    ["Captures added", capturesAdded ?? "N/A"],
+    ["Artwork added", artworkAdded ?? "N/A"],
+  ])}
 
         <div style="margin-top: 24px; font-size: 12px; color: #6b7280;">
           Net revenue includes Stripe net plus IAP net based on rate ${iapMetrics.netRate}. Adjust via IAP_NET_RATE env.
@@ -2231,7 +2233,7 @@ function buildDigestCard(item) {
   const safeTime = item.createdAt ? escapeHtml(item.createdAt.toISOString()) : "";
   const image = item.imageUrl ?
     `<img src="${escapeHtml(item.imageUrl)}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover; display: block; background: #e5e7eb;" />` :
-    `<div style="height: 180px; background: #e5e7eb; display:flex; align-items:center; justify-content:center; color:#6b7280;">No image</div>`;
+    "<div style=\"height: 180px; background: #e5e7eb; display:flex; align-items:center; justify-content:center; color:#6b7280;\">No image</div>";
 
   return `
     <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #fff;">
@@ -2246,7 +2248,7 @@ function buildDigestCard(item) {
 
 function buildArtistSubscriptionList(artists) {
   if (!artists.length) {
-    return `<div style="padding: 16px; background: #f9fafb; border-radius: 10px; color: #6b7280;">No new artist subscriptions in this window.</div>`;
+    return "<div style=\"padding: 16px; background: #f9fafb; border-radius: 10px; color: #6b7280;\">No new artist subscriptions in this window.</div>";
   }
 
   return `
@@ -3014,7 +3016,6 @@ exports.processCommissionDepositPayment = onRequest(
           commissionId,
           paymentMethodId,
           customerId,
-          message: paymentMessage,
         } = request.body;
 
         if (!amount || !commissionId || !paymentMethodId || !customerId) {
@@ -3077,7 +3078,7 @@ exports.processCommissionDepositPayment = onRequest(
 
         // 3. Update commission status in Firestore
         await commissionRef.update({
-          status: "inProgress",
+          "status": "inProgress",
           "metadata.depositPaidAt": admin.firestore.FieldValue.serverTimestamp(),
           "metadata.depositPaymentId": paymentIntent.id,
           "metadata.startedAt": admin.firestore.FieldValue.serverTimestamp(),
@@ -3147,7 +3148,6 @@ exports.processCommissionMilestonePayment = onRequest(
           milestoneId,
           paymentMethodId,
           customerId,
-          message: paymentMessage,
         } = request.body;
 
         if (!amount || !commissionId || !milestoneId || !paymentMethodId || !customerId) {
@@ -3292,7 +3292,6 @@ exports.processCommissionFinalPayment = onRequest(
           commissionId,
           paymentMethodId,
           customerId,
-          message: paymentMessage,
         } = request.body;
 
         if (!amount || !commissionId || !paymentMethodId || !customerId) {
@@ -3355,10 +3354,10 @@ exports.processCommissionFinalPayment = onRequest(
 
         // 3. Update commission status in Firestore
         await commissionRef.update({
-          status: "completed",
+          "status": "completed",
           "metadata.finalPaymentPaidAt": admin.firestore.FieldValue.serverTimestamp(),
           "metadata.finalPaymentId": paymentIntent.id,
-          completedAt: admin.firestore.FieldValue.serverTimestamp(),
+          "completedAt": admin.firestore.FieldValue.serverTimestamp(),
         });
 
         // 4. Create notification for artist
@@ -4146,9 +4145,9 @@ exports.processArtworkSalePayment = onRequest(
 
         // Record earnings for the artist
         const earningDescription =
-          purchaseType === "chapter"
-            ? `Sale of chapter ${chapterNumber} for artwork ${artworkId}`
-            : `Sale of artwork ${artworkId}`;
+          purchaseType === "chapter" ?
+            `Sale of chapter ${chapterNumber} for artwork ${artworkId}` :
+            `Sale of artwork ${artworkId}`;
 
         await recordArtistEarnings(
           artistId,
@@ -4162,9 +4161,9 @@ exports.processArtworkSalePayment = onRequest(
 
         // Create notification for artist
         const notificationMessage =
-          purchaseType === "chapter"
-            ? `Chapter ${chapterNumber} purchased for $${amount}! Your share: $${artistShare.toFixed(2)}`
-            : `Your artwork has been sold for $${amount}! Your share: $${artistShare.toFixed(2)}`;
+          purchaseType === "chapter" ?
+            `Chapter ${chapterNumber} purchased for $${amount}! Your share: $${artistShare.toFixed(2)}` :
+            `Your artwork has been sold for $${amount}! Your share: $${artistShare.toFixed(2)}`;
 
         await admin.firestore().collection("notifications").add({
           userId: artistId,
@@ -4942,7 +4941,7 @@ exports.completeCommission = onRequest(
           type: "commission_completed",
           title: "Commission Completed!",
           message: `Your ${typeLabel} "${commissionData.title || commissionData.description || ""}" is completed and ${amountLabel} has been added to your balance.`,
-          data: { commissionId: commissionId },
+          data: {commissionId: commissionId},
           read: false,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
@@ -4952,7 +4951,7 @@ exports.completeCommission = onRequest(
           type: "commission_completed_client",
           title: "Commission Finished!",
           message: `The artist has completed your ${typeLabel}.`,
-          data: { commissionId: commissionId },
+          data: {commissionId: commissionId},
           read: false,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
@@ -5533,10 +5532,6 @@ exports.cancelIapSubscription = onRequest(
  * @return {Promise<Object>} Validation result
  */
 async function validateReceiptWithApple(receiptData, isSandbox = false) {
-  const url = isSandbox ?
-    "https://sandbox.itunes.apple.com/verifyReceipt" :
-    "https://buy.itunes.apple.com/verifyReceipt";
-
   const password = process.env.APPLE_SHARED_SECRET || ""; // You'll need to set this
 
   return new Promise((resolve, reject) => {
@@ -5769,7 +5764,7 @@ exports.closeAuction = onSchedule(
     memory: "256MiB",
     maxInstances: 2,
   },
-  async (event) => {
+  async () => {
     try {
       console.log("🔨 Checking for auctions to close...");
 
@@ -5911,11 +5906,11 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
 
       // Verify admin authentication
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return response.status(401).send({error: "Unauthorized: Missing token"});
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
+      const idToken = authHeader.split("Bearer ")[1];
       let decodedToken;
 
       try {
@@ -5925,13 +5920,13 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
       }
 
       // Check if user is admin (you may want to check custom claims or a Firestore document)
-      const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
+      const userDoc = await admin.firestore().collection("users").doc(decodedToken.uid).get();
       const userData = userDoc.data();
-      if (!userData || userData.role !== 'admin') {
+      if (!userData || userData.role !== "admin") {
         return response.status(403).send({error: "Forbidden: Admin access required"});
       }
 
-      const { startDate, endDate } = request.body;
+      const {startDate, endDate} = request.body;
 
       if (!startDate || !endDate) {
         return response.status(400).send({
@@ -5948,7 +5943,7 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
       const [stripeMetrics, iapMetrics, subscriptionMetrics] = await Promise.all([
         getStripeMetrics(startUtc, endUtc),
         getIapMetrics(startTimestamp, endTimestamp),
-        getSubscriptionMetrics(startTimestamp, endTimestamp)
+        getSubscriptionMetrics(startTimestamp, endTimestamp),
       ]);
 
       // Calculate totals
@@ -5970,9 +5965,9 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
             gross: totalGross,
             net: totalNet,
             refunds: totalRefunds,
-            fees: totalFees
-          }
-        }
+            fees: totalFees,
+          },
+        },
       });
     } catch (error) {
       console.error("Error getting admin financial analytics:", error);
@@ -6019,7 +6014,8 @@ async function deleteWhereFieldEquals(
 ) {
   let deleted = 0;
 
-  while (true) {
+  let hasMore = true;
+  while (hasMore) {
     let snapshot;
     try {
       snapshot = await admin
@@ -6034,7 +6030,10 @@ async function deleteWhereFieldEquals(
       );
     }
 
-    if (snapshot.empty) break;
+    if (snapshot.empty) {
+      hasMore = false;
+      continue;
+    }
 
     const batch = admin.firestore().batch();
     snapshot.docs.forEach((doc) => {
@@ -6107,9 +6106,9 @@ async function cleanupUserOwnedChatMedia(userId, summary) {
 
   try {
     const messagesSnap = await admin.firestore()
-        .collectionGroup("messages")
-        .where("senderId", "==", userId)
-        .get();
+      .collectionGroup("messages")
+      .where("senderId", "==", userId)
+      .get();
 
     for (const messageDoc of messagesSnap.docs) {
       const data = messageDoc.data() || {};
@@ -6459,3 +6458,10 @@ exports.processDataDeletionRequest = onCall(
     }
   }
 );
+
+// =====================================================
+// MODERATION & SAFETY
+// =====================================================
+
+const {moderateUploadImage} = require("./moderateUploadImage");
+exports.moderateUploadImage = moderateUploadImage;

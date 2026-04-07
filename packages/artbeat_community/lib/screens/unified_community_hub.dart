@@ -12,7 +12,6 @@ import '../../widgets/post_card.dart';
 import '../../widgets/post_detail_modal.dart';
 import '../../widgets/community_drawer.dart';
 import 'feed/create_post_screen.dart';
-import 'create_art_post_screen.dart';
 import '../../services/art_community_service.dart';
 import '../../services/community_service.dart';
 
@@ -27,6 +26,7 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
     with TickerProviderStateMixin {
   late TabController _tabController;
   bool _isDisposed = false;
+  bool _canCreateDirectPosts = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -42,7 +42,7 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
       }
     });
 
-    // Mark community as visited when this screen loads
+    // Mark community as visited and check artist status
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_isDisposed) {
         try {
@@ -51,6 +51,7 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
           // Provider might be disposed, silently ignore
           AppLogger.info('CommunityProvider access failed: $e');
         }
+        _checkArtistStatus();
       }
     });
   }
@@ -108,58 +109,63 @@ class _UnifiedCommunityHubState extends State<UnifiedCommunityHub>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _handleCreatePost(context),
-        backgroundColor: ArtbeatColors.primaryPurple,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: _canCreateDirectPosts
+          ? FloatingActionButton(
+              onPressed: () => _navigateToCreatePost(context),
+              backgroundColor: ArtbeatColors.primaryPurple,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 
-  /// Handle create post button tap - route based on user type
-  Future<void> _handleCreatePost(BuildContext context) async {
+  /// Check if the current user is an artist, admin, or moderator
+  Future<void> _checkArtistStatus() async {
     try {
       final userService = context.read<UserService>();
+      final communityService = context.read<ArtCommunityService>();
       final userId = userService.currentUserId;
       if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please log in to create a post')),
-        );
+        setState(() => _canCreateDirectPosts = false);
         return;
       }
 
-      final communityService = context.read<ArtCommunityService>();
-      final artistProfile = await communityService.getArtistProfile(userId);
+      // Check if user is admin or moderator
+      final isAdmin = await userService.isCurrentUserAdmin();
+      if (isAdmin) {
+        if (mounted) {
+          setState(() => _canCreateDirectPosts = true);
+        }
+        return;
+      }
 
-      if (artistProfile != null) {
-        // User is an artist - show the options screen for specialized posts
-        Navigator.push(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const CreatePostScreen(),
-          ),
-        );
-      } else {
-        // Regular user - go directly to the simple create post form
-        Navigator.push(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const CreateArtPostScreen(),
-          ),
-        );
+      final isModerator = await userService.isCurrentUserModerator();
+      if (isModerator) {
+        if (mounted) {
+          setState(() => _canCreateDirectPosts = true);
+        }
+        return;
+      }
+
+      // Check if user is an artist
+      final artistProfile = await communityService.getArtistProfile(userId);
+      if (mounted) {
+        setState(() => _canCreateDirectPosts = artistProfile != null);
       }
     } catch (e) {
-      // If there's an error checking artist status, default to simple create post
-      Navigator.push(
-        // ignore: use_build_context_synchronously
-        context,
-        MaterialPageRoute<void>(
-          builder: (context) => const CreateArtPostScreen(),
-        ),
-      );
+      AppLogger.error('Error checking artist/admin/moderator status: $e');
+      if (mounted) {
+        setState(() => _canCreateDirectPosts = false);
+      }
     }
+  }
+
+  /// Navigate to create post screen (only called if user is an artist)
+  void _navigateToCreatePost(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => const CreatePostScreen()),
+    );
   }
 }
 

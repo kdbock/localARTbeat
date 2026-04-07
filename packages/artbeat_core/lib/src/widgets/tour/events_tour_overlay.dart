@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 
 class EventsTourOverlay extends StatefulWidget {
   final GlobalKey menuKey;
@@ -53,162 +54,26 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
     super.initState();
     _onboardingService = context.read<OnboardingService>();
     _steps = [
-      // Step 1: Main Menu
-      TourStep(
-        targetKey: widget.menuKey,
-        title: 'EVENTS MENU',
-        description: 'Access your events toolkit and navigation options.',
-        accentColor: ArtbeatColors.secondaryTeal,
-        details: [
-          'View event categories',
-          'Access your tickets',
-          'Create new events',
-          'Manage event settings',
-        ],
-      ),
-      // Step 2: Hero Greeting
-      TourStep(
-        targetKey: widget.heroKey,
-        title: 'EVENTS DASHBOARD',
-        description:
-            'Your central hub for discovering and managing art events.',
-        accentColor: ArtbeatColors.primaryGreen,
-        details: [
-          'Personalized greeting',
-          'Dynamic time-based welcome',
-          'Quick access to search',
-          'Event discovery tools',
-        ],
-      ),
-      // Step 3: Event Search
       TourStep(
         targetKey: widget.searchKey,
-        title: 'EVENT SEARCH',
-        description: 'Find specific events, artists, or venues instantly.',
-        accentColor: ArtbeatColors.primaryBlue,
-        details: [
-          'Search by event name',
-          'Filter by location',
-          'Advanced search options',
-          'Real-time results',
-        ],
+        title: 'SEARCH',
+        description: 'Find events, artists, or venues quickly.',
+        accentColor: ArtbeatColors.secondaryTeal,
+        details: const [],
       ),
-      // Step 4: Event Stats
-      TourStep(
-        targetKey: widget.statsKey,
-        title: 'EVENT STATISTICS',
-        description: 'Quick overview of upcoming events and activity.',
-        accentColor: ArtbeatColors.primaryPurple,
-        details: [
-          'Events happening today',
-          'This week\'s schedule',
-          'Total upcoming events',
-          'Real-time attendance counts',
-        ],
-      ),
-      // Step 5: Category Filter
-      TourStep(
-        targetKey: widget.categoryKey,
-        title: 'EVENT CATEGORIES',
-        description: 'Filter events by type to find what interests you.',
-        accentColor: const Color(0xFF7C4DFF), // Purple
-        details: [
-          'Exhibition events',
-          'Workshops and classes',
-          'Art tours and walks',
-          'Concerts and performances',
-        ],
-      ),
-      // Step 6: Featured Events
       TourStep(
         targetKey: widget.featuredKey,
-        title: 'FEATURED EVENTS',
-        description: 'Highlighted events you shouldn\'t miss.',
-        accentColor: const Color(0xFF22D3EE), // Cyan
-        details: [
-          'Curated event selection',
-          'High-quality event banners',
-          'Attendance tracking',
-          'Quick event details',
-        ],
+        title: 'FEATURED',
+        description: 'See highlighted upcoming events.',
+        accentColor: const Color(0xFF22D3EE),
+        details: const [],
       ),
-      // Step 7: Quick Actions
-      TourStep(
-        targetKey: widget.quickActionsKey,
-        title: 'QUICK DISCOVERY',
-        description: 'Fast access to popular event categories and filters.',
-        accentColor: const Color(0xFFFF3D8D), // Pink/Neon
-        details: [
-          'Events near you',
-          'Trending events',
-          'This weekend\'s events',
-          'Your ticketed events',
-        ],
-      ),
-      // Step 8: Events Near Me
-      TourStep(
-        targetKey: widget.nearMeKey,
-        title: 'LOCAL EVENTS',
-        description: 'Discover art events happening in your area.',
-        accentColor: const Color(0xFFFFC857), // Yellow/Gold
-        details: [
-          'Location-based filtering',
-          'Nearby venue highlights',
-          'Distance indicators',
-          'Local artist focus',
-        ],
-      ),
-      // Step 9: Trending Events
-      TourStep(
-        targetKey: widget.trendingKey,
-        title: 'POPULAR EVENTS',
-        description: 'See what\'s hot in the art event scene.',
-        accentColor: const Color(0xFF34D399), // Emerald/Green
-        details: [
-          'High-attendance events',
-          'Community favorites',
-          'Trending categories',
-          'Popular time slots',
-        ],
-      ),
-      // Step 10: Weekend Events
-      TourStep(
-        targetKey: widget.weekendKey,
-        title: 'WEEKEND HIGHLIGHTS',
-        description: 'Plan your weekend around art events.',
-        accentColor: const Color(0xFF2947FF), // Blue
-        details: [
-          'Friday through Sunday events',
-          'Weekend-only exhibitions',
-          'Special weekend programming',
-          'Extended hours venues',
-        ],
-      ),
-      // Step 11: My Tickets
-      TourStep(
-        targetKey: widget.ticketsKey,
-        title: 'YOUR EVENTS',
-        description: 'Manage events you\'re attending or have tickets for.',
-        accentColor: const Color(0xFFFF6B35), // Orange
-        details: [
-          'Upcoming tickets',
-          'Event reminders',
-          'Ticket validation',
-          'Past event history',
-        ],
-      ),
-      // Step 12: Create Event
       TourStep(
         targetKey: widget.createKey,
-        title: 'CREATE EVENT',
-        description: 'Share your own art events with the community.',
-        accentColor: const Color(0xFF9D4EDD), // Violet
-        details: [
-          'Host exhibitions',
-          'Organize workshops',
-          'Plan art tours',
-          'Schedule performances',
-        ],
+        title: 'CREATE',
+        description: 'Publish your own event to the community.',
+        accentColor: const Color(0xFF9D4EDD),
+        details: const [],
       ),
     ];
 
@@ -376,9 +241,12 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null
-                      ? (screenHeight - bottom - topSafetyMargin)
-                      : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: math.max(
+                    0.0,
+                    bottom != null
+                        ? (screenHeight - bottom - topSafetyMargin)
+                        : (screenHeight - (top ?? 0) - 40),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -423,11 +291,31 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
           ),
 
         GlassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           borderColor: step.accentColor.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'QUICK TOUR',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -445,15 +333,17 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    step.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0,
+                  Expanded(
+                    child: Text(
+                      step.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ],
@@ -462,44 +352,19 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
               Text(
                 step.description,
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 20),
-              ...step.details.map(
-                (detail) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: step.accentColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          detail,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'STEP ${_currentStepIndex + 1} OF ${_steps.length}',
+                    '${_currentStepIndex + 1}/${_steps.length}',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: Colors.white.withValues(alpha: 0.4),
                       letterSpacing: 0,
@@ -519,9 +384,7 @@ class _EventsTourOverlayState extends State<EventsTourOverlay>
                       ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1
-                          ? 'GOT IT!'
-                          : 'NEXT',
+                      _currentStepIndex == _steps.length - 1 ? 'DONE' : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,

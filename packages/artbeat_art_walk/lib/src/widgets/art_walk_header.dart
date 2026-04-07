@@ -197,7 +197,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
                   label: 'art_walk_header_text_explore_art_walks'.tr(),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/art-walk/explore');
+                    Navigator.pushNamed(context, '/art-walk/dashboard');
                   },
                 ),
                 _MenuTile(
@@ -205,7 +205,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
                   label: 'art_walk_header_text_start_walking'.tr(),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/art-walk/start');
+                    Navigator.pushNamed(context, '/art-walk/list');
                   },
                 ),
                 _MenuTile(
@@ -213,7 +213,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
                   label: 'art_walk_header_text_nearby_art'.tr(),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/art-walk/nearby');
+                    Navigator.pushNamed(context, '/art-walk/map');
                   },
                 ),
               ],

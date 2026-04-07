@@ -102,7 +102,7 @@ class DashboardConnectMenu extends StatelessWidget {
                     title: 'dashboard_connect_start_art_walk_title'.tr(),
                     subtitle: 'dashboard_connect_start_art_walk_subtitle'.tr(),
                     color: ArtbeatColors.info,
-                    route: '/art-walk/create',
+                    route: '/art-walk/dashboard',
                   ),
                   _buildMenuTile(
                     context: context,

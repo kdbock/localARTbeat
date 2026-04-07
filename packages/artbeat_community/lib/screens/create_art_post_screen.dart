@@ -193,6 +193,14 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
   }
 
   Future<void> _createPost() async {
+    if (!_isArtistPost) {
+      _showSnackBar(
+        'Direct posting is available for artist accounts. '
+        'Use Art Walk and ARTflex moments to auto-share your activity.',
+      );
+      return;
+    }
+
     if (_contentController.text.trim().isEmpty && _selectedImages.isEmpty) {
       _showSnackBar('create_art_post_error_missing_content'.tr());
       return;

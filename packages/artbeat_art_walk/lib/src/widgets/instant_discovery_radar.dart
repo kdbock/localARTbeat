@@ -1037,10 +1037,13 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               '${distance.toInt()}m',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const Icon(
-              Icons.arrow_forward,
-              size: 16,
-              color: ArtWalkDesignSystem.textSecondary,
+            const Text(
+              'Go Now',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: ArtWalkDesignSystem.primaryTeal,
+              ),
             ),
           ],
         ),

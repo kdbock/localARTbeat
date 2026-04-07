@@ -13,10 +13,28 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 class FirebaseStorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final _uuid = const Uuid();
+  final core.UploadSafetyService _uploadSafetyService =
+      core.UploadSafetyService();
 
   // ------------------------------------------------------------
   // IMAGE UPLOADS
   // ------------------------------------------------------------
+
+  Future<void> _enforceSafeImageUpload(
+    File imageFile,
+    String source,
+    String userId,
+  ) async {
+    final decision = await _uploadSafetyService.scanImageFile(
+      imageFile: imageFile,
+      source: source,
+      userId: userId,
+    );
+
+    if (!decision.isAllowed) {
+      throw Exception(decision.reason);
+    }
+  }
 
   /// Upload a single image file
   Future<String> uploadImage(File imageFile, {String? customPath}) async {
@@ -24,6 +42,8 @@ class FirebaseStorageService {
     if (user == null) {
       throw Exception('User must be authenticated to upload images');
     }
+
+    await _enforceSafeImageUpload(imageFile, 'community_post_upload', user.uid);
 
     final fileName = '${_uuid.v4()}.jpg';
     final path = customPath ?? 'posts/${user.uid}/$fileName';
@@ -79,17 +99,19 @@ class FirebaseStorageService {
   Stream<TaskSnapshot> uploadImageWithProgress(
     File imageFile, {
     String? customPath,
-  }) {
+  }) async* {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('User must be authenticated');
     }
 
+    await _enforceSafeImageUpload(imageFile, 'community_post_upload', user.uid);
+
     final fileName = '${_uuid.v4()}.jpg';
     final path = customPath ?? 'posts/${user.uid}/$fileName';
     final ref = _storage.ref().child(path);
 
-    return ref
+    yield* ref
         .putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'))
         .snapshotEvents;
   }

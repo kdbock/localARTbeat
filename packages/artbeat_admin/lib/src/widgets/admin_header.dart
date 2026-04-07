@@ -259,6 +259,17 @@ class _AdminHeaderState extends State<AdminHeader> {
                 Navigator.pushNamed(context, '/admin/analytics');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.insights, color: _headerColor),
+              title: const Text('Onboarding Funnel Analytics'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.onboardingFunnelAnalytics,
+                );
+              },
+            ),
             const SizedBox(height: 20),
           ],
         ),

@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show TextInput;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -106,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen>
       );
 
       if (mounted && userCredential.user != null) {
+        TextInput.finishAutofillContext(shouldSave: true);
         final navigator = Navigator.of(context);
         if (navigator.canPop()) {
           navigator.pop(true);
@@ -255,252 +257,275 @@ class _LoginScreenState extends State<LoginScreen>
                       child: _GlassCard(
                         child: Form(
                           key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Top lockup
-                              Row(
-                                children: [
-                                  _MiniBadge(loop: _loop),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "Local ",
-                                            style: GoogleFonts.spaceGrotesk(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.90,
+                          child: AutofillGroup(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Top lockup
+                                Row(
+                                  children: [
+                                    _MiniBadge(loop: _loop),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: "Local ",
+                                              style: GoogleFonts.spaceGrotesk(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.90,
+                                                ),
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: -0.4,
                                               ),
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: -0.4,
                                             ),
-                                          ),
-                                          TextSpan(
-                                            text: "ART",
-                                            style: GoogleFonts.dmSerifDisplay(
-                                              color: const Color(0xFFFFC857),
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w400,
-                                              letterSpacing: -0.2,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: "beat",
-                                            style: GoogleFonts.spaceGrotesk(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.90,
+                                            TextSpan(
+                                              text: "ART",
+                                              style: GoogleFonts.dmSerifDisplay(
+                                                color: const Color(0xFFFFC857),
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w400,
+                                                letterSpacing: -0.2,
                                               ),
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: -0.4,
                                             ),
-                                          ),
-                                        ],
+                                            TextSpan(
+                                              text: "beat",
+                                              style: GoogleFonts.spaceGrotesk(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.90,
+                                                ),
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: -0.4,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                Text(
+                                  'auth_welcome'.tr(),
+                                  textAlign: TextAlign.left,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white.withValues(alpha: 0.95),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.2,
                                   ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              Text(
-                                'auth_welcome'.tr(),
-                                textAlign: TextAlign.left,
-                                style: GoogleFonts.spaceGrotesk(
-                                  color: Colors.white.withValues(alpha: 0.95),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.2,
                                 ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'auth_sign_in_continue'.tr(),
-                                style: GoogleFonts.spaceGrotesk(
-                                  color: Colors.white.withValues(alpha: 0.66),
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.25,
+                                const SizedBox(height: 6),
+                                Text(
+                                  'auth_sign_in_continue'.tr(),
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white.withValues(alpha: 0.66),
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.25,
+                                  ),
                                 ),
-                              ),
 
-                              const SizedBox(height: 18),
+                                const SizedBox(height: 18),
 
-                              // Inputs in soft glass field containers
-                              _FieldShell(
-                                child: ArtbeatInput(
-                                  key: const Key('emailField'),
-                                  controller: _emailController,
-                                  label: 'auth_email'.tr(),
-                                  keyboardType: TextInputType.emailAddress,
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'auth_error_email_required'.tr();
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              _FieldShell(
-                                child: ArtbeatInput(
-                                  key: const Key('passwordField'),
-                                  controller: _passwordController,
-                                  label: 'auth_password'.tr(),
-                                  obscureText: _obscurePassword,
-                                  prefixIcon: const Icon(Icons.lock_outlined),
-                                  suffixIcon: IconButton(
-                                    tooltip: _obscurePassword
-                                        ? 'Show password'
-                                        : 'Hide password',
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      color: const Color(0xFF1F2937),
+                                // Inputs in soft glass field containers
+                                _FieldShell(
+                                  child: ArtbeatInput(
+                                    key: const Key('emailField'),
+                                    controller: _emailController,
+                                    label: 'auth_email'.tr(),
+                                    keyboardType: TextInputType.emailAddress,
+                                    textInputAction: TextInputAction.next,
+                                    autofillHints: const [
+                                      AutofillHints.username,
+                                      AutofillHints.email,
+                                    ],
+                                    prefixIcon: const Icon(
+                                      Icons.email_outlined,
                                     ),
-                                    onPressed: () {
-                                      setState(
-                                        () => _obscurePassword =
-                                            !_obscurePassword,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'auth_error_email_required'.tr();
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                _FieldShell(
+                                  child: ArtbeatInput(
+                                    key: const Key('passwordField'),
+                                    controller: _passwordController,
+                                    label: 'auth_password'.tr(),
+                                    obscureText: _obscurePassword,
+                                    textInputAction: TextInputAction.done,
+                                    autofillHints: const [
+                                      AutofillHints.password,
+                                    ],
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    onFieldSubmitted: (_) => _handleLogin(),
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    suffixIcon: IconButton(
+                                      tooltip: _obscurePassword
+                                          ? 'Show password'
+                                          : 'Hide password',
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: const Color(0xFF1F2937),
+                                      ),
+                                      onPressed: () {
+                                        setState(
+                                          () => _obscurePassword =
+                                              !_obscurePassword,
+                                        );
+                                      },
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'auth_error_password_required'
+                                            .tr();
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Primary quest CTA
+                                SizedBox(
+                                  height: 54,
+                                  child: AnimatedBuilder(
+                                    animation: _loop,
+                                    builder: (_, __) {
+                                      final t = (_loop.value + 0.08) % 1.0;
+                                      final power =
+                                          (1.0 - (t - 0.55).abs() * 4.5).clamp(
+                                            0.0,
+                                            1.0,
+                                          );
+                                      return _QuestPrimaryButton(
+                                        width: w,
+                                        power: power,
+                                        isLoading: _isLoading,
+                                        label: 'auth_sign_in'.tr(),
+                                        onTap: _isLoading ? null : _handleLogin,
                                       );
                                     },
                                   ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'auth_error_password_required'
-                                          .tr();
-                                    }
-                                    return null;
-                                  },
                                 ),
-                              ),
 
-                              const SizedBox(height: 16),
+                                const SizedBox(height: 12),
 
-                              // Primary quest CTA
-                              SizedBox(
-                                height: 54,
-                                child: AnimatedBuilder(
-                                  animation: _loop,
-                                  builder: (_, __) {
-                                    final t = (_loop.value + 0.08) % 1.0;
-                                    final power = (1.0 - (t - 0.55).abs() * 4.5)
-                                        .clamp(0.0, 1.0);
-                                    return _QuestPrimaryButton(
-                                      width: w,
-                                      power: power,
-                                      isLoading: _isLoading,
-                                      label: 'auth_sign_in'.tr(),
-                                      onTap: _isLoading ? null : _handleLogin,
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Two quest chips (register + forgot)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _QuestChipButton(
-                                      label: 'auth_create_account'.tr(),
-                                      icon: Icons.auto_awesome_rounded,
-                                      glow: const Color(0xFF7C4DFF),
-                                      onTap: _isLoading
-                                          ? null
-                                          : () => Navigator.of(context)
-                                                .pushReplacementNamed(
-                                                  AuthRoutes.register,
-                                                ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _QuestChipButton(
-                                      label: 'auth_forgot_password'.tr(),
-                                      icon: Icons.key_rounded,
-                                      glow: const Color(0xFF22D3EE),
-                                      onTap: _isLoading
-                                          ? null
-                                          : () =>
-                                                Navigator.of(context).pushNamed(
-                                                  AuthRoutes.forgotPassword,
-                                                ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 18),
-
-                              // OR divider
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      height: 1,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.10,
+                                // Two quest chips (register + forgot)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _QuestChipButton(
+                                        label: 'auth_create_account'.tr(),
+                                        icon: Icons.auto_awesome_rounded,
+                                        glow: const Color(0xFF7C4DFF),
+                                        onTap: _isLoading
+                                            ? null
+                                            : () => Navigator.of(context)
+                                                  .pushReplacementNamed(
+                                                    AuthRoutes.register,
+                                                  ),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _QuestChipButton(
+                                        label: 'auth_forgot_password'.tr(),
+                                        icon: Icons.key_rounded,
+                                        glow: const Color(0xFF22D3EE),
+                                        onTap: _isLoading
+                                            ? null
+                                            : () => Navigator.of(context)
+                                                  .pushNamed(
+                                                    AuthRoutes.forgotPassword,
+                                                  ),
+                                      ),
                                     ),
-                                    child: Text(
-                                      'common_or'.tr(),
-                                      style: GoogleFonts.spaceGrotesk(
+                                  ],
+                                ),
+
+                                const SizedBox(height: 18),
+
+                                // OR divider
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
                                         color: Colors.white.withValues(
-                                          alpha: 0.55,
+                                          alpha: 0.10,
                                         ),
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.2,
-                                        fontSize: 11,
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      height: 1,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.10,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Text(
+                                        'common_or'.tr(),
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.55,
+                                          ),
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 1.2,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              // Social buttons (glass neon)
-                              _SocialButton(
-                                key: const Key('google_sign_in_button'),
-                                label: 'auth_sign_in_with_google'.tr(),
-                                icon: Icons.g_mobiledata,
-                                accent: const Color(0xFFFF3D8D),
-                                onTap: _isLoading ? null : _handleGoogleSignIn,
-                              ),
-                              const SizedBox(height: 10),
-                              if (_showApple)
-                                _SocialButton(
-                                  key: const Key('apple_sign_in_button'),
-                                  label: 'auth_sign_in_with_apple'.tr(),
-                                  icon: Icons.apple,
-                                  accent: const Color(0xFFFFC857),
-                                  onTap: _isLoading ? null : _handleAppleSignIn,
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.10,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
 
-                              const SizedBox(height: 6),
-                            ],
+                                const SizedBox(height: 14),
+
+                                // Social buttons (glass neon)
+                                _SocialButton(
+                                  key: const Key('google_sign_in_button'),
+                                  label: 'auth_sign_in_with_google'.tr(),
+                                  icon: Icons.g_mobiledata,
+                                  accent: const Color(0xFFFF3D8D),
+                                  onTap: _isLoading
+                                      ? null
+                                      : _handleGoogleSignIn,
+                                ),
+                                const SizedBox(height: 10),
+                                if (_showApple)
+                                  _SocialButton(
+                                    key: const Key('apple_sign_in_button'),
+                                    label: 'auth_sign_in_with_apple'.tr(),
+                                    icon: Icons.apple,
+                                    accent: const Color(0xFFFFC857),
+                                    onTap: _isLoading
+                                        ? null
+                                        : _handleAppleSignIn,
+                                  ),
+
+                                const SizedBox(height: 6),
+                              ],
+                            ),
                           ),
                         ),
                       ),

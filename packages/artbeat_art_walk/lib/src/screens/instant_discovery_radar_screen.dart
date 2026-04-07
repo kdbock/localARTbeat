@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/services/go_now_flow_service.dart';
 import 'package:artbeat_art_walk/src/widgets/instant_discovery_radar.dart';
 import 'package:artbeat_art_walk/src/widgets/discovery_capture_modal.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
@@ -67,6 +68,11 @@ class _InstantDiscoveryRadarScreenState
 
   Future<void> _handleArtTap(PublicArtModel art, double distance) async {
     if (_userPosition == null) return;
+    GoNowFlowService().trackFunnelEvent('radar_icon_tap', <String, Object?>{
+      'pieceId': art.id,
+      'distanceMeters': distance,
+      'source': 'radar',
+    });
 
     final result = await showModalBottomSheet<bool>(
       context: context,

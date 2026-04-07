@@ -3,7 +3,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedStorageService, AppLogger, FirebaseStorageUploadService;
+    show
+        EnhancedStorageService,
+        AppLogger,
+        FirebaseStorageUploadService,
+        UploadSafetyService;
 
 class StorageService {
   static final StorageService _instance = StorageService._internal();
@@ -13,6 +17,7 @@ class StorageService {
   FirebaseStorage? _storage;
   FirebaseAuth? _auth;
   EnhancedStorageService? _enhancedStorage;
+  final UploadSafetyService _uploadSafetyService = UploadSafetyService();
 
   FirebaseStorage? get _storageInstance {
     if (_storage == null) {
@@ -55,8 +60,22 @@ class StorageService {
     return _enhancedStorage!;
   }
 
+  Future<void> _enforceUploadSafety(File file, String source) async {
+    final decision = await _uploadSafetyService.scanImageFile(
+      imageFile: file,
+      source: source,
+      userId: _authInstance?.currentUser?.uid,
+    );
+
+    if (!decision.isAllowed) {
+      throw Exception(decision.reason);
+    }
+  }
+
   /// Upload capture image specifically with retry logic
   Future<String> uploadCaptureImage(File file, String userId) async {
+    await _enforceUploadSafety(file, 'capture_upload');
+
     int retryCount = 0;
     const maxRetries = 3;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -149,6 +168,8 @@ class StorageService {
   /// Legacy upload method (kept for backward compatibility)
   Future<String> uploadImage(File file) async {
     try {
+      await _enforceUploadSafety(file, 'capture_upload_legacy');
+
       // Check if Firebase services are available (test environment handling)
       if (_authInstance == null || _storageInstance == null) {
         throw Exception('Firebase services not available in test environment');

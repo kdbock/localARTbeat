@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show TextInput;
 import 'package:flutter/gestures.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -154,6 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       }
 
       if (mounted) {
+        TextInput.finishAutofillContext(shouldSave: true);
         Navigator.of(context).pushReplacementNamed(AuthRoutes.dashboard);
       }
     } on FirebaseAuthException catch (e) {
@@ -258,275 +260,318 @@ class _RegisterScreenState extends State<RegisterScreen>
                       child: _GlassCard(
                         child: Form(
                           key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: [
-                                  _MiniBadge(
-                                    loop: _loop,
-                                    icon: Icons.auto_awesome_rounded,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      'Join Local ARTbeat',
-                                      style: GoogleFonts.spaceGrotesk(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.95,
-                                        ),
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: -0.2,
-                                      ),
+                          child: AutofillGroup(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    _MiniBadge(
+                                      loop: _loop,
+                                      icon: Icons.auto_awesome_rounded,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'auth_register_subtitle'.tr(),
-                                style: GoogleFonts.spaceGrotesk(
-                                  color: Colors.white.withValues(alpha: 0.66),
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.25,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-
-                              if (_errorMessage != null) ...[
-                                _ErrorBanner(message: _errorMessage!),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Name row (responsive: stacks on narrow screens)
-                              LayoutBuilder(
-                                builder: (context, c) {
-                                  final stacked = c.maxWidth < 420;
-                                  final children = <Widget>[
-                                    Flexible(
-                                      child: _FieldShell(
-                                        child: ArtbeatInput(
-                                          controller: _firstNameController,
-                                          label: 'auth_register_first_name'
-                                              .tr(),
-                                          prefixIcon: const Icon(
-                                            Icons.person_outline,
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Join Local ARTbeat',
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.95,
                                           ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'auth_register_first_name_required'
-                                                  .tr();
-                                            }
-                                            return null;
-                                          },
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.2,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: stacked ? 0 : 12,
-                                      height: stacked ? 12 : 0,
-                                    ),
-                                    Flexible(
-                                      child: _FieldShell(
-                                        child: ArtbeatInput(
-                                          controller: _lastNameController,
-                                          label: 'auth_register_last_name'.tr(),
-                                          prefixIcon: const Icon(
-                                            Icons.person_outline,
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'auth_register_last_name_required'
-                                                  .tr();
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ];
-
-                                  return stacked
-                                      ? Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: children,
-                                        )
-                                      : Row(children: children);
-                                },
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              _FieldShell(
-                                child: ArtbeatInput(
-                                  controller: _emailController,
-                                  label: 'auth_register_email'.tr(),
-                                  keyboardType: TextInputType.emailAddress,
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'auth_register_email_required'
-                                          .tr();
-                                    }
-                                    if (!value.contains('@')) {
-                                      return 'auth_register_email_invalid'.tr();
-                                    }
-                                    return null;
-                                  },
+                                  ],
                                 ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              _FieldShell(
-                                child: ArtbeatInput(
-                                  controller: _passwordController,
-                                  label: 'auth_register_password'.tr(),
-                                  obscureText: _obscurePassword,
-                                  prefixIcon: const Icon(Icons.lock_outlined),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.70,
-                                      ),
-                                    ),
-                                    onPressed: () => setState(
-                                      () =>
-                                          _obscurePassword = !_obscurePassword,
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'auth_register_password_required'
-                                          .tr();
-                                    }
-                                    if (value.length < 8) {
-                                      return 'auth_register_password_min_length'
-                                          .tr();
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              _FieldShell(
-                                child: ArtbeatInput(
-                                  controller: _confirmPasswordController,
-                                  label: 'auth_register_confirm_password'.tr(),
-                                  obscureText: _obscureConfirmPassword,
-                                  prefixIcon: const Icon(Icons.lock_outlined),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscureConfirmPassword
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.70,
-                                      ),
-                                    ),
-                                    onPressed: () => setState(
-                                      () => _obscureConfirmPassword =
-                                          !_obscureConfirmPassword,
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'auth_register_confirm_password_required'
-                                          .tr();
-                                    }
-                                    if (value != _passwordController.text) {
-                                      return 'auth_register_passwords_mismatch'
-                                          .tr();
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              _TermsRow(
-                                value: _agreedToTerms,
-                                onChanged: _isLoading
-                                    ? null
-                                    : (v) => setState(() => _agreedToTerms = v),
-                                onTapTerms: _navigateToTerms,
-                                onTapPrivacy: _navigateToPrivacyPolicy,
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.04),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.08),
-                                  ),
-                                ),
-                                child: Text(
-                                  'ARTbeat is recommended for ages 18 and older because some content may include artistic nudity or mature artistic subject matter. Users under 18 may have messaging, location sharing, public discovery, and event features restricted.',
+                                const SizedBox(height: 6),
+                                Text(
+                                  'auth_register_subtitle'.tr(),
                                   style: GoogleFonts.spaceGrotesk(
-                                    color: Colors.white.withValues(alpha: 0.72),
-                                    fontSize: 11.5,
+                                    color: Colors.white.withValues(alpha: 0.66),
+                                    fontSize: 13.5,
                                     fontWeight: FontWeight.w600,
-                                    height: 1.35,
+                                    height: 1.25,
                                   ),
                                 ),
-                              ),
+                                const SizedBox(height: 16),
 
-                              const SizedBox(height: 14),
+                                if (_errorMessage != null) ...[
+                                  _ErrorBanner(message: _errorMessage!),
+                                  const SizedBox(height: 12),
+                                ],
 
-                              // Primary CTA (quest sweep)
-                              SizedBox(
-                                height: 54,
-                                child: AnimatedBuilder(
-                                  animation: _loop,
-                                  builder: (_, __) {
-                                    final t = (_loop.value + 0.08) % 1.0;
-                                    final power = (1.0 - (t - 0.55).abs() * 4.5)
-                                        .clamp(0.0, 1.0);
-                                    return _QuestPrimaryButton(
-                                      width: w,
-                                      power: power,
-                                      isLoading: _isLoading,
-                                      label: 'auth_register_button'.tr(),
-                                      onTap: _isLoading
-                                          ? null
-                                          : _handleRegister,
-                                    );
+                                // Name row (responsive: stacks on narrow screens)
+                                LayoutBuilder(
+                                  builder: (context, c) {
+                                    final stacked = c.maxWidth < 420;
+                                    final children = <Widget>[
+                                      Flexible(
+                                        child: _FieldShell(
+                                          child: ArtbeatInput(
+                                            controller: _firstNameController,
+                                            label: 'auth_register_first_name'
+                                                .tr(),
+                                            textInputAction:
+                                                TextInputAction.next,
+                                            autofillHints: const [
+                                              AutofillHints.givenName,
+                                            ],
+                                            prefixIcon: const Icon(
+                                              Icons.person_outline,
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'auth_register_first_name_required'
+                                                    .tr();
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: stacked ? 0 : 12,
+                                        height: stacked ? 12 : 0,
+                                      ),
+                                      Flexible(
+                                        child: _FieldShell(
+                                          child: ArtbeatInput(
+                                            controller: _lastNameController,
+                                            label: 'auth_register_last_name'
+                                                .tr(),
+                                            textInputAction:
+                                                TextInputAction.next,
+                                            autofillHints: const [
+                                              AutofillHints.familyName,
+                                            ],
+                                            prefixIcon: const Icon(
+                                              Icons.person_outline,
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'auth_register_last_name_required'
+                                                    .tr();
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ];
+
+                                    return stacked
+                                        ? Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: children,
+                                          )
+                                        : Row(children: children);
                                   },
                                 ),
-                              ),
 
-                              const SizedBox(height: 10),
+                                const SizedBox(height: 12),
 
-                              _QuestChipButton(
-                                label: 'auth_register_login_link'.tr(),
-                                icon: Icons.login_rounded,
-                                glow: const Color(0xFF22D3EE),
-                                onTap: _isLoading
-                                    ? null
-                                    : () => Navigator.pushReplacementNamed(
-                                        context,
-                                        AuthRoutes.login,
+                                _FieldShell(
+                                  child: ArtbeatInput(
+                                    controller: _emailController,
+                                    label: 'auth_register_email'.tr(),
+                                    keyboardType: TextInputType.emailAddress,
+                                    textInputAction: TextInputAction.next,
+                                    autofillHints: const [
+                                      AutofillHints.username,
+                                      AutofillHints.email,
+                                    ],
+                                    prefixIcon: const Icon(
+                                      Icons.email_outlined,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'auth_register_email_required'
+                                            .tr();
+                                      }
+                                      if (!value.contains('@')) {
+                                        return 'auth_register_email_invalid'
+                                            .tr();
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                _FieldShell(
+                                  child: ArtbeatInput(
+                                    controller: _passwordController,
+                                    label: 'auth_register_password'.tr(),
+                                    obscureText: _obscurePassword,
+                                    textInputAction: TextInputAction.next,
+                                    autofillHints: const [
+                                      AutofillHints.newPassword,
+                                    ],
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.70,
+                                        ),
                                       ),
-                              ),
-                            ],
+                                      onPressed: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'auth_register_password_required'
+                                            .tr();
+                                      }
+                                      if (value.length < 8) {
+                                        return 'auth_register_password_min_length'
+                                            .tr();
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                _FieldShell(
+                                  child: ArtbeatInput(
+                                    controller: _confirmPasswordController,
+                                    label: 'auth_register_confirm_password'
+                                        .tr(),
+                                    obscureText: _obscureConfirmPassword,
+                                    textInputAction: TextInputAction.done,
+                                    autofillHints: const [
+                                      AutofillHints.newPassword,
+                                    ],
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    onFieldSubmitted: (_) => _handleRegister(),
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.70,
+                                        ),
+                                      ),
+                                      onPressed: () => setState(
+                                        () => _obscureConfirmPassword =
+                                            !_obscureConfirmPassword,
+                                      ),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'auth_register_confirm_password_required'
+                                            .tr();
+                                      }
+                                      if (value != _passwordController.text) {
+                                        return 'auth_register_passwords_mismatch'
+                                            .tr();
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                _TermsRow(
+                                  value: _agreedToTerms,
+                                  onChanged: _isLoading
+                                      ? null
+                                      : (v) =>
+                                            setState(() => _agreedToTerms = v),
+                                  onTapTerms: _navigateToTerms,
+                                  onTapPrivacy: _navigateToPrivacyPolicy,
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.04),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'ARTbeat is recommended for ages 18 and older because some content may include artistic nudity or mature artistic subject matter. Users under 18 may have messaging, location sharing, public discovery, and event features restricted.',
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.72,
+                                      ),
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // Primary CTA (quest sweep)
+                                SizedBox(
+                                  height: 54,
+                                  child: AnimatedBuilder(
+                                    animation: _loop,
+                                    builder: (_, __) {
+                                      final t = (_loop.value + 0.08) % 1.0;
+                                      final power =
+                                          (1.0 - (t - 0.55).abs() * 4.5).clamp(
+                                            0.0,
+                                            1.0,
+                                          );
+                                      return _QuestPrimaryButton(
+                                        width: w,
+                                        power: power,
+                                        isLoading: _isLoading,
+                                        label: 'auth_register_button'.tr(),
+                                        onTap: _isLoading
+                                            ? null
+                                            : _handleRegister,
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                _QuestChipButton(
+                                  label: 'auth_register_login_link'.tr(),
+                                  icon: Icons.login_rounded,
+                                  glow: const Color(0xFF22D3EE),
+                                  onTap: _isLoading
+                                      ? null
+                                      : () => Navigator.pushReplacementNamed(
+                                          context,
+                                          AuthRoutes.login,
+                                        ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

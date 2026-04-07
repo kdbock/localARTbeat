@@ -429,16 +429,33 @@ class CommunityService extends ChangeNotifier {
     required String userId,
     CommunitySocialActivityService? socialActivityService,
     int directLimit = 10,
+    int recentLimit = 20,
     int nearbyLimit = 10,
     double nearbyRadiusKm = 80.0,
   }) async {
     final activityService =
         socialActivityService ?? CommunitySocialActivityService();
 
-    final activities = await activityService.getUserActivities(
-      userId: userId,
+    final followingUsers = await _userService.getFollowing(userId);
+    final scopedUserIds = <String>{
+      userId,
+      ...followingUsers.map((user) => user.id),
+    }.toList(growable: false);
+
+    final activities = await activityService.getActivitiesForUsers(
+      userIds: scopedUserIds,
       limit: directLimit,
     );
+
+    final recent = await activityService.getRecentActivities(
+      limit: recentLimit,
+    );
+    final existingIds = activities.map((activity) => activity.id).toSet();
+    for (final activity in recent) {
+      if (!existingIds.contains(activity.id)) {
+        activities.add(activity);
+      }
+    }
 
     if (activities.length >= 5) {
       return _filterNonFeedActivities(activities);
@@ -467,6 +484,182 @@ class CommunityService extends ChangeNotifier {
     }
 
     return _filterNonFeedActivities(activities);
+  }
+
+  Future<List<CommunitySocialActivity>> ensureActivityFeedPosts(
+    List<CommunitySocialActivity> activities,
+  ) async {
+    if (activities.isEmpty) return activities;
+
+    final updated = <CommunitySocialActivity>[];
+    for (final activity in activities) {
+      try {
+        final postId = await _ensurePostForActivity(activity);
+        if (postId == null || postId.isEmpty) {
+          updated.add(activity);
+          continue;
+        }
+
+        final metadata = Map<String, dynamic>.from(activity.metadata ?? {});
+        metadata['postId'] = postId;
+
+        updated.add(
+          CommunitySocialActivity(
+            id: activity.id,
+            userId: activity.userId,
+            userName: activity.userName,
+            userAvatar: activity.userAvatar,
+            type: activity.type,
+            message: activity.message,
+            timestamp: activity.timestamp,
+            location: activity.location,
+            metadata: metadata,
+          ),
+        );
+      } catch (e) {
+        AppLogger.warning(
+          'Failed to ensure post for activity ${activity.id}: $e',
+        );
+        updated.add(activity);
+      }
+    }
+
+    return updated;
+  }
+
+  Future<String?> _ensurePostForActivity(
+    CommunitySocialActivity activity,
+  ) async {
+    final metadata = Map<String, dynamic>.from(activity.metadata ?? {});
+    final existingPostId = metadata['postId']?.toString();
+
+    if (existingPostId != null && existingPostId.isNotEmpty) {
+      final existingDoc = await _firestore
+          .collection('posts')
+          .doc(existingPostId)
+          .get();
+      if (existingDoc.exists) {
+        return existingPostId;
+      }
+    }
+
+    final imageUrls = _extractActivityImageUrls(metadata);
+    final createdAt = Timestamp.fromDate(activity.timestamp);
+    final postData = {
+      'userId': activity.userId,
+      'userName': activity.userName,
+      'userPhotoUrl': activity.userAvatar ?? '',
+      'content': activity.message,
+      'imageUrls': imageUrls,
+      'tags': <String>['activity', activity.type.name],
+      'location': _resolveActivityLocation(metadata),
+      'createdAt': createdAt,
+      'isPublic': true,
+      'engagementStats': EngagementStats(
+        likeCount: 0,
+        commentCount: 0,
+        shareCount: 0,
+        lastUpdated: activity.timestamp,
+      ).toFirestore(),
+      'metadata': {
+        ...metadata,
+        'activityId': activity.id,
+        'activityType': activity.type.name,
+        'origin': 'socialActivity',
+      },
+    };
+
+    final postRef = await _firestore.collection('posts').add(postData);
+
+    await _firestore.collection('socialActivities').doc(activity.id).set({
+      'metadata': {...metadata, 'postId': postRef.id},
+    }, SetOptions(merge: true));
+
+    return postRef.id;
+  }
+
+  List<String> _extractActivityImageUrls(Map<String, dynamic> metadata) {
+    final images = <String>[];
+    final keys = <String>[
+      'photoUrl',
+      'imageUrl',
+      'thumbnailUrl',
+      'captureImageUrl',
+      'coverImageUrl',
+      'mapThumbnailUrl',
+    ];
+
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.isNotEmpty) {
+        images.add(value);
+      }
+    }
+
+    final dynamicList = metadata['imageUrls'];
+    if (dynamicList is List) {
+      for (final item in dynamicList) {
+        if (item is String && item.isNotEmpty) {
+          images.add(item);
+        }
+      }
+    }
+
+    final alternateLists = <dynamic>[
+      metadata['images'],
+      metadata['photoUrls'],
+      metadata['mediaUrls'],
+    ];
+    for (final list in alternateLists) {
+      if (list is! List) continue;
+      for (final item in list) {
+        if (item is String && item.isNotEmpty) {
+          images.add(item);
+        } else if (item is Map<String, dynamic>) {
+          final nestedUrl = item['url'] ?? item['imageUrl'] ?? item['photoUrl'];
+          if (nestedUrl is String && nestedUrl.isNotEmpty) {
+            images.add(nestedUrl);
+          }
+        }
+      }
+    }
+
+    final nestedMaps = <dynamic>[
+      metadata['capture'],
+      metadata['captureData'],
+      metadata['artwork'],
+      metadata['walk'],
+    ];
+    for (final nested in nestedMaps) {
+      if (nested is! Map<String, dynamic>) continue;
+      for (final key in keys) {
+        final value = nested[key];
+        if (value is String && value.isNotEmpty) {
+          images.add(value);
+        }
+      }
+      final nestedImageList = nested['imageUrls'];
+      if (nestedImageList is List) {
+        for (final item in nestedImageList) {
+          if (item is String && item.isNotEmpty) {
+            images.add(item);
+          }
+        }
+      }
+    }
+
+    return images.toSet().toList(growable: false);
+  }
+
+  String _resolveActivityLocation(Map<String, dynamic> metadata) {
+    final keys = <String>['locationName', 'location', 'city', 'area'];
+    for (final key in keys) {
+      final value = metadata[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return '';
   }
 
   List<CommunitySocialActivity> _filterNonFeedActivities(

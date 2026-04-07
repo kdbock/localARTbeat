@@ -35,9 +35,11 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   Position? _currentPosition;
   List<CaptureModel> _localCaptures = [];
   List<AchievementModel> _artWalkAchievements = [];
+  List<ArtWalkModel> _nearbyPublicWalks = [];
   UserModel? _currentUser;
   bool _isDisposed = false;
   bool _hasDiscoveriesMade = false; // Track if discoveries were made
+  bool _isLoadingNearbyWalks = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isTourActive = false;
@@ -79,6 +81,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   late final RewardsService _rewardsService;
   late final OnboardingService _onboardingService;
   late final ArtistService _artistService;
+  late final ArtWalkService _artWalkService;
 
   // Notification monitoring
   StreamSubscription<Map<String, dynamic>>? _notificationSubscription;
@@ -96,6 +99,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     _rewardsService = context.read<RewardsService>();
     _onboardingService = context.read<OnboardingService>();
     _artistService = context.read<ArtistService>();
+    _artWalkService = context.read<ArtWalkService>();
     _initializeAnimations();
     _loadAllData();
     _startNotificationMonitoring();
@@ -179,6 +183,10 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   Widget build(BuildContext context) {
     final slivers = <Widget>[
       SliverToBoxAdapter(child: _buildHeroSection(key: _heroKey)),
+      const SliverToBoxAdapter(
+        child: SizedBox(height: ArtWalkDesignSystem.paddingL),
+      ),
+      SliverToBoxAdapter(child: _buildWalksNearYouSection()),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
@@ -443,6 +451,150 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           _buildHeroMissionHighlight(),
           const SizedBox(height: 20),
           _buildHeroPrimaryCtas(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWalksNearYouSection() {
+    final topWalk = _nearbyPublicWalks.isNotEmpty
+        ? _nearbyPublicWalks.first
+        : null;
+    final imageProvider = topWalk == null
+        ? null
+        : ImageUrlValidator.safeCorrectedNetworkImage(topWalk.coverImageUrl);
+    final stopCount = topWalk?.artworkIds.length ?? 0;
+    final distanceMiles = topWalk == null
+        ? null
+        : _distanceMilesForWalk(topWalk);
+
+    return _glassCard(
+      margin: const EdgeInsets.symmetric(
+        horizontal: ArtWalkDesignSystem.paddingL,
+      ),
+      padding: EdgeInsets.zero,
+      radius: ArtWalkDesignSystem.radiusXXL,
+      colors: const [Color(0x3A34D399), Color(0x2A22D3EE), Color(0x1A05060A)],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 180,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(ArtWalkDesignSystem.radiusXXL),
+              ),
+              child: imageProvider != null
+                  ? Image(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    )
+                  : Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF12384A), Color(0xFF234B7A)],
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.route_rounded,
+                          size: 56,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Walks Near You',
+                  style: AppTypography.screenTitle().copyWith(fontSize: 24),
+                ),
+                const SizedBox(height: ArtWalkDesignSystem.paddingS),
+                if (_isLoadingNearbyWalks)
+                  const LinearProgressIndicator(minHeight: 3)
+                else if (topWalk != null) ...[
+                  Text(
+                    topWalk.title,
+                    style: AppTypography.body().copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: ArtWalkDesignSystem.paddingXS),
+                  Text(
+                    'Guided navigation to each stop with turn-by-turn directions.',
+                    style: AppTypography.body(
+                      Colors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                  const SizedBox(height: ArtWalkDesignSystem.paddingS),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildHeroTagChip(
+                        icon: Icons.palette_rounded,
+                        label: '$stopCount stops',
+                      ),
+                      if (distanceMiles != null)
+                        _buildHeroTagChip(
+                          icon: Icons.near_me_rounded,
+                          label: '${distanceMiles.toStringAsFixed(1)} mi away',
+                        ),
+                      _buildHeroTagChip(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Community walk',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: ArtWalkDesignSystem.paddingM),
+                  GradientCTAButton(
+                    label: 'Start Guided Walk',
+                    icon: Icons.directions_walk_rounded,
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/art-walk/experience',
+                        arguments: {
+                          'artWalkId': topWalk.id,
+                          'artWalk': topWalk,
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: ArtWalkDesignSystem.paddingS),
+                  GlassSecondaryButton(
+                    label: 'Use Instant Radar',
+                    icon: Icons.radar,
+                    onTap: _openInstantDiscovery,
+                  ),
+                ] else ...[
+                  Text(
+                    'No nearby walks yet. Browse public walks to get started.',
+                    style: AppTypography.body(
+                      Colors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                  const SizedBox(height: ArtWalkDesignSystem.paddingM),
+                  GlassSecondaryButton(
+                    label: 'Browse Public Walks',
+                    icon: Icons.route_rounded,
+                    onTap: () => Navigator.pushNamed(context, '/art-walk/list'),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1302,7 +1454,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 'art_walk_dashboard_action_create_walk'.tr(),
                 Icons.add_location_rounded,
                 ArtWalkDesignSystem.accentOrange,
-                () => Navigator.pushNamed(context, '/art-walk/create'),
+                () => Navigator.pushNamed(context, '/art-walk/list'),
               ),
               _buildActionCard(
                 'art_walk_dashboard_action_browse_art'.tr(),
@@ -1798,6 +1950,58 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
     // Load nearby art count after position is available
     await _loadNearbyArtCount();
+    await _loadNearbyPublicWalks();
+  }
+
+  Future<void> _loadNearbyPublicWalks() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingNearbyWalks = true);
+
+    try {
+      final walks = await _artWalkService.getPopularArtWalks(limit: 25);
+      final publicWalks = walks
+          .where((walk) => walk.isPublic && walk.artworkIds.length >= 2)
+          .toList();
+
+      if (_currentPosition != null) {
+        publicWalks.sort((a, b) {
+          final aDist = _distanceMilesForWalk(a) ?? 999999;
+          final bDist = _distanceMilesForWalk(b) ?? 999999;
+          return aDist.compareTo(bDist);
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _nearbyPublicWalks = publicWalks;
+          _isLoadingNearbyWalks = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _nearbyPublicWalks = const [];
+          _isLoadingNearbyWalks = false;
+        });
+      }
+    }
+  }
+
+  double? _distanceMilesForWalk(ArtWalkModel walk) {
+    final position = _currentPosition;
+    final start = walk.startLocation;
+    if (position == null || start == null) {
+      return walk.estimatedDistance;
+    }
+
+    final meters = Geolocator.distanceBetween(
+      position.latitude,
+      position.longitude,
+      start.latitude,
+      start.longitude,
+    );
+    return meters / 1609.34;
   }
 
   Future<void> _loadNearbyArtCount() async {

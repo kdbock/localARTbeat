@@ -23,9 +23,20 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // 1. Load the single local runtime env file only for non-release builds.
-      // `.env.example` is documentation only and is not used at runtime.
-      if (!kReleaseMode) {
+      // 1. Load the appropriate env file.
+      // In release mode, load the bundled .env.production asset.
+      // In debug/profile mode, load the local .env file.
+      if (kReleaseMode) {
+        try {
+          await dotenv.load(fileName: '.env.production');
+          _envVars.addAll(dotenv.env);
+          AppLogger.info('📝 Loaded bundled .env.production file');
+        } catch (_) {
+          AppLogger.info(
+            '📝 No .env.production asset found. Falling back to build-time defines.',
+          );
+        }
+      } else {
         try {
           await dotenv.load(fileName: '.env');
           _envVars.addAll(dotenv.env);
@@ -35,10 +46,6 @@ class EnvLoader {
             '📝 No local .env file found. Falling back to build-time defines.',
           );
         }
-      } else {
-        AppLogger.info(
-          '📝 Release mode detected. Skipping local .env and using build-time defines only.',
-        );
       }
 
       // 2. Merge with String.fromEnvironment for build-time overrides.

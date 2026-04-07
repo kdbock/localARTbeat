@@ -24,3 +24,5 @@ export 'weekly_goals_service.dart';
 export 'social_service.dart';
 export 'challenge_service.dart';
 export 'step_tracking_service.dart';
+export 'walk_directions_launcher_service.dart';
+export 'go_now_flow_service.dart';

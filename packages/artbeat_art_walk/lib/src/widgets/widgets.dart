@@ -34,3 +34,4 @@ export 'hud_top_bar.dart';
 export 'typography.dart';
 export 'world_background.dart';
 export 'art_walk_world_scaffold.dart';
+export 'art_discovery_celebration.dart';

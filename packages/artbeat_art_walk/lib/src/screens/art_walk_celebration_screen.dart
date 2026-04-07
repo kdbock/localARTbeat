@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
 import 'package:lottie/lottie.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
@@ -39,6 +41,8 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
   late Animation<double> _fadeInAnimation;
   late Animation<double> _slideUpAnimation;
   late Animation<int> _pointsCountAnimation;
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isPostingSelfie = false;
 
   @override
   void initState() {
@@ -427,6 +431,19 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           GradientCTAButton(
+            label: _isPostingSelfie
+                ? 'Posting Selfie...'
+                : 'Take Celebration Selfie',
+            onPressed: _isPostingSelfie ? null : _takeCelebrationSelfie,
+          ),
+          const SizedBox(height: 12),
+          GlassSecondaryButton(
+            icon: Icons.add_location_alt_rounded,
+            label: 'Create Your Own Walk',
+            onTap: () => Navigator.pushNamed(context, '/art-walk/create'),
+          ),
+          const SizedBox(height: 12),
+          GradientCTAButton(
             label: 'art_walk_art_walk_celebration_text_share_achievement'.tr(),
             onPressed: _shareAchievement,
           ),
@@ -476,6 +493,7 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
         userAvatar: user.photoURL,
         type: SocialActivityType.achievement,
         message: message,
+        respectAutoSharePreference: false,
         metadata: {
           'walkTitle': widget.celebrationData.walk.title,
           'artPiecesVisited': widget.celebrationData.artPiecesVisited,
@@ -503,6 +521,84 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _takeCelebrationSelfie() async {
+    try {
+      setState(() => _isPostingSelfie = true);
+
+      final picked = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+        maxWidth: 1400,
+      );
+
+      if (picked == null) {
+        if (mounted) {
+          setState(() => _isPostingSelfie = false);
+        }
+        return;
+      }
+
+      final user = context.read<core_auth.AuthService>().currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final bytes = await picked.readAsBytes();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filePath = 'community/walk_selfies/${user.uid}_$timestamp.jpg';
+
+      final storageRef = FirebaseStorage.instance.ref().child(filePath);
+      final uploadTask = await storageRef.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      final selfieUrl = await uploadTask.ref.getDownloadURL();
+
+      final socialService = context.read<SocialService>();
+      await socialService.postActivity(
+        userId: user.uid,
+        userName: user.displayName ?? 'Anonymous Walker',
+        userAvatar: user.photoURL,
+        type: SocialActivityType.walkCompleted,
+        message:
+            '${user.displayName ?? 'A walker'} just completed "${widget.celebrationData.walk.title}" and shared a celebration selfie! 📸',
+        respectAutoSharePreference: false,
+        metadata: {
+          'walkId': widget.celebrationData.walk.id,
+          'walkTitle': widget.celebrationData.walk.title,
+          'artPiecesVisited': widget.celebrationData.artPiecesVisited,
+          'distanceWalked': widget.celebrationData.distanceWalked,
+          'walkDuration': widget.celebrationData.walkDuration.inMinutes,
+          'selfieUrl': selfieUrl,
+          'photoUrl': selfieUrl,
+          'source': 'art_walk_completion_selfie',
+        },
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Celebration selfie posted to the community feed!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not post selfie: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPostingSelfie = false);
+      }
     }
   }
 

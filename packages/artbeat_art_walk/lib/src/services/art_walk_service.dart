@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
@@ -24,6 +25,12 @@ import 'package:artbeat_art_walk/src/services/art_walk_cache_service.dart';
 import 'package:artbeat_art_walk/src/services/rewards_service.dart';
 import 'package:artbeat_art_walk/src/services/achievement_service.dart';
 import 'package:artbeat_art_walk/src/services/art_location_clustering_service.dart';
+import 'package:artbeat_art_walk/src/services/social_service.dart';
+
+typedef ArtWalkPageResult = ({
+  List<ArtWalkModel> walks,
+  QueryDocumentSnapshot<Object?>? lastDocument,
+});
 
 /// Service for managing Art Walks and Public Art
 class ArtWalkService {
@@ -47,6 +54,8 @@ class ArtWalkService {
   FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
   FirebaseStorage get _storage => _storageInstance ??= FirebaseStorage.instance;
   final Logger _logger = Logger();
+  final core.UploadSafetyService _uploadSafetyService =
+      core.UploadSafetyService();
 
   // Collection references - lazy initialization
   CollectionReference? _artWalksCollectionInstance;
@@ -846,6 +855,47 @@ class ArtWalkService {
     }
   }
 
+  /// Get popular art walks with cursor-based pagination
+  Future<ArtWalkPageResult> getPopularArtWalksPage({
+    int limit = 10,
+    QueryDocumentSnapshot<Object?>? startAfter,
+  }) async {
+    try {
+      Query query = _artWalksCollection
+          .where('isPublic', isEqualTo: true)
+          .orderBy('viewCount', descending: true)
+          .limit(limit);
+
+      if (startAfter != null) {
+        query = query.startAfterDocument(startAfter);
+      }
+
+      final snapshot = await query.get();
+      final walks = snapshot.docs
+          .map((doc) => ArtWalkModel.fromFirestore(doc))
+          .toList();
+
+      for (final walk in walks) {
+        unawaited(() async {
+          try {
+            final artPieces = await getArtInWalk(walk.id);
+            await _cache.cacheArtWalk(walk, artPieces);
+          } catch (cacheError) {
+            _logger.w('Error caching art walk: $cacheError');
+          }
+        }());
+      }
+
+      return (
+        walks: walks,
+        lastDocument: snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+      );
+    } catch (e) {
+      _logger.e('Error getting popular art walks page: $e');
+      return (walks: <ArtWalkModel>[], lastDocument: null);
+    }
+  }
+
   /// Get public art pieces for an art walk
   Future<List<PublicArtModel>> getPublicArtForWalk(String walkId) async {
     return getArtInWalk(walkId);
@@ -1029,6 +1079,16 @@ class ArtWalkService {
       final userId = getCurrentUserId();
       if (userId == null) throw Exception('User not authenticated');
 
+      final moderationDecision = await _uploadSafetyService.scanImageFile(
+        imageFile: imageFile,
+        source: 'art_walk_cover_upload',
+        userId: userId,
+        metadata: {'walkId': walkId},
+      );
+      if (!moderationDecision.isAllowed) {
+        throw Exception(moderationDecision.reason);
+      }
+
       core.AppLogger.info('📸 ArtWalkService: Starting cover image upload');
       final result = await _enhancedStorage.uploadImageWithOptimization(
         imageFile: imageFile,
@@ -1054,6 +1114,15 @@ class ArtWalkService {
 
     try {
       final file = File(imageFile.path);
+      final moderationDecision = await _uploadSafetyService.scanImageFile(
+        imageFile: file,
+        source: 'public_art_image_upload',
+        userId: userId,
+      );
+      if (!moderationDecision.isAllowed) {
+        throw Exception(moderationDecision.reason);
+      }
+
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_$userId.jpg';
       final ref = _storage
           .ref()
@@ -1085,6 +1154,16 @@ class ArtWalkService {
       // Validate image file exists
       if (!await imageFile.exists()) {
         throw Exception('Image file does not exist: ${imageFile.path}');
+      }
+
+      final moderationDecision = await _uploadSafetyService.scanImageFile(
+        imageFile: imageFile,
+        source: 'art_walk_image_upload',
+        userId: userId,
+        metadata: {'folder': folder},
+      );
+      if (!moderationDecision.isAllowed) {
+        throw Exception(moderationDecision.reason);
       }
 
       // Check file size (limit to 10MB)
@@ -1311,6 +1390,46 @@ class ArtWalkService {
       } catch (e) {
         _logger.w('Failed to award XP for art walk creation: $e');
         // Continue even if XP awarding fails
+      }
+
+      // Auto-post new public walk activity to community feed.
+      if (isPublic) {
+        try {
+          final currentUser = _auth.currentUser;
+          final socialService = SocialService();
+          final walkPosition = Position(
+            latitude: startLocation.latitude,
+            longitude: startLocation.longitude,
+            timestamp: DateTime.now(),
+            accuracy: 0,
+            altitude: 0,
+            altitudeAccuracy: 0,
+            heading: 0,
+            headingAccuracy: 0,
+            speed: 0,
+            speedAccuracy: 0,
+          );
+
+          await socialService.postActivity(
+            userId: userId,
+            userName: currentUser?.displayName ?? 'Anonymous Creator',
+            userAvatar: currentUser?.photoURL,
+            type: SocialActivityType.milestone,
+            message:
+                '${currentUser?.displayName ?? 'A creator'} created a new Art Walk: "$title" - ${artworkIds.length} stops in $zipCode',
+            location: walkPosition,
+            metadata: {
+              'walkId': docRef.id,
+              'walkTitle': title,
+              'stopCount': artworkIds.length,
+              'zipCode': zipCode,
+              'photoUrl': coverImageUrl,
+              'source': 'art_walk_creation',
+            },
+          );
+        } catch (e) {
+          _logger.w('Failed to auto-post art walk creation activity: $e');
+        }
       }
 
       return docRef.id;

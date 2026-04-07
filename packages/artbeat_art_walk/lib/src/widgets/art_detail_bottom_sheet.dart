@@ -24,13 +24,9 @@ class ArtDetailBottomSheet extends StatelessWidget {
     this.distanceText,
   });
 
-  void _createArtWalk(BuildContext context) {
+  void _startWalkFromHere(BuildContext context) {
     Navigator.pop(context);
-    Navigator.pushNamed(
-      context,
-      '/art-walk/create',
-      arguments: {'capture': art},
-    );
+    Navigator.pushNamed(context, '/art-walk/list', arguments: {'capture': art});
   }
 
   @override
@@ -287,10 +283,8 @@ class ArtDetailBottomSheet extends StatelessWidget {
                         ],
                         _GlassOutlineButton(
                           icon: Icons.route,
-                          label:
-                              'art_walk_art_detail_bottom_sheet_button_create_art_walk'
-                                  .tr(),
-                          onPressed: () => _createArtWalk(context),
+                          label: 'Start a Guided Walk',
+                          onPressed: () => _startWalkFromHere(context),
                         ),
                       ],
                     ),

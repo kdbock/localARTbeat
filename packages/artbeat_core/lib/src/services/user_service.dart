@@ -261,6 +261,16 @@ class UserService extends ChangeNotifier {
     return userType == 'admin' || role == 'admin' || isAdmin;
   }
 
+  Future<bool> isCurrentUserModerator() async {
+    final profile = await getCurrentUserProfile();
+    if (profile == null) return false;
+
+    final userType = profile['userType']?.toString().toLowerCase() ?? '';
+    final role = profile['role']?.toString().toLowerCase() ?? '';
+    final isModerator = profile['isModerator'] as bool? ?? false;
+    return userType == 'moderator' || role == 'moderator' || isModerator;
+  }
+
   Stream<int> watchUnreadNotificationCount({int limit = 50}) {
     final userId = currentUserId;
     if (userId == null) {
