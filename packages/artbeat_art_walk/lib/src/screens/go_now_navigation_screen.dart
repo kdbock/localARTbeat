@@ -223,9 +223,7 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
     setState(() {
       _nearbyArt = nearby
           .where((art) => art.id != widget.pieceId)
-          .where(
-            (art) => !_addedStops.any((added) => added.id == art.id),
-          )
+          .where((art) => !_addedStops.any((added) => added.id == art.id))
           .toList(growable: false);
     });
   }
@@ -322,9 +320,9 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
 
     await _loadTurnByTurnRoute(current);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${art.title} added to your walk')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${art.title} added to your walk')));
   }
 
   Future<void> _recenterMap() async {
@@ -374,7 +372,10 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
     final etaMinutes = distance == null ? null : (distance / 84).ceil();
     final formattedDistance = distance == null
         ? null
-        : _distanceUnitService.formatDistanceFromMeters(distance, _distanceUnit);
+        : _distanceUnitService.formatDistanceFromMeters(
+            distance,
+            _distanceUnit,
+          );
     final estimatedSteps = distance == null
         ? null
         : _distanceUnitService.estimateStepsFromMeters(distance);
@@ -387,8 +388,7 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
         : (currentLatLng == null
               ? <LatLng>[destination]
               : <LatLng>[currentLatLng, destination]);
-    final activeStep =
-        (_steps.isNotEmpty && _currentStepIndex < _steps.length)
+    final activeStep = (_steps.isNotEmpty && _currentStepIndex < _steps.length)
         ? _steps[_currentStepIndex]
         : null;
     final stepInstruction = activeStep?.cleanInstruction;
@@ -404,7 +404,10 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  widget.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   distance == null
@@ -560,7 +563,10 @@ class _GoNowNavigationScreenState extends State<GoNowNavigationScreen> {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          _goNowFlow.setStatus(widget.pieceId, GoNowStatus.skipped);
+                          _goNowFlow.setStatus(
+                            widget.pieceId,
+                            GoNowStatus.skipped,
+                          );
                           _goNowFlow.trackFunnelEvent(
                             'navigation_skipped',
                             <String, Object?>{

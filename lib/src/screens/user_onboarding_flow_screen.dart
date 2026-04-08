@@ -151,91 +151,88 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: const Color(0xFF0A0E27),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => _completeAndEnterApp(action: 'skip'),
-                      child: const Text('Skip'),
-                    ),
-                  ],
+    backgroundColor: const Color(0xFF0A0E27),
+    body: SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => _completeAndEnterApp(action: 'skip'),
+                  child: const Text('Skip'),
                 ),
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _controller,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildRoleSelectionScreen(),
-                    _buildActionScreen(),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+          Expanded(
+            child: PageView(
+              controller: _controller,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [_buildRoleSelectionScreen(), _buildActionScreen()],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildRoleSelectionScreen() => SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 24),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF1B3158),
-                      Color(0xFF0F4E4E),
-                      Color(0xFF4B1C42),
-                    ],
-                  ),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Icon(
-                    Icons.palette_outlined,
-                    size: 84,
-                    color: Colors.white,
-                  ),
-                ),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 24),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1B3158),
+                  Color(0xFF0F4E4E),
+                  Color(0xFF4B1C42),
+                ],
               ),
-              const SizedBox(height: 32),
-              const Text(
-                'Discover, photograph, and share public art.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  height: 1.25,
-                ),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(40),
+              child: Icon(
+                Icons.palette_outlined,
+                size: 84,
+                color: Colors.white,
               ),
-              const SizedBox(height: 32),
-              FilledButton(
-                onPressed: () => _selectRole(false),
-                child: const Text('Explore as a Fan'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => _selectRole(true),
-                child: const Text("I'm an Artist"),
-              ),
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 32),
+          const Text(
+            'Discover, photograph, and share public art.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              height: 1.25,
+            ),
+          ),
+          const SizedBox(height: 32),
+          FilledButton(
+            onPressed: () => _selectRole(false),
+            child: const Text('Explore as a Fan'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => _selectRole(true),
+            child: const Text("I'm an Artist"),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildActionScreen() {
     if (!_roleSelected) {
@@ -250,11 +247,7 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              const Icon(
-                Icons.collections,
-                size: 56,
-                color: Colors.white,
-              ),
+              const Icon(Icons.collections, size: 56, color: Colors.white),
               const SizedBox(height: 20),
               const Text(
                 'Upload one photo of your work.',
@@ -347,8 +340,7 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
             ),
             const SizedBox(height: 12),
             OutlinedButton(
-              onPressed: () =>
-                  _completeAndEnterApp(action: 'location_skipped'),
+              onPressed: () => _completeAndEnterApp(action: 'location_skipped'),
               child: const Text('Skip for Now'),
             ),
             const SizedBox(height: 32),

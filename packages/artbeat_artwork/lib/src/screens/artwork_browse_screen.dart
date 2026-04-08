@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +31,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
   late final ArtworkService _artworkService;
   final _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  final List<String> _recentSearches = <String>[];
   String _selectedLocation = 'common_all'.tr();
   String _selectedMedium = 'common_all'.tr();
   List<String> _availableLocations = ['common_all'.tr()];
@@ -49,6 +52,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -194,6 +198,44 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
               );
             },
           ),
+          if (_recentSearches.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _recentSearches
+                  .map(
+                    (query) => GestureDetector(
+                      onTap: () {
+                        _searchController.text = query;
+                        _performSearch();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.14),
+                          ),
+                        ),
+                        child: Text(
+                          query,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ],
         ],
       ),
     );
@@ -222,6 +264,13 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           },
         ),
       ),
+      onChanged: (_) {
+        _searchDebounce?.cancel();
+        _searchDebounce = Timer(const Duration(milliseconds: 420), () {
+          if (!mounted) return;
+          _performSearch();
+        });
+      },
       onSubmitted: (_) => _performSearch(),
     );
   }
@@ -394,22 +443,86 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     }
 
     if (_artworks.isEmpty) {
+      final hasActiveFilters =
+          _selectedLocation != 'common_all'.tr() ||
+          _selectedMedium != 'common_all'.tr() ||
+          _searchController.text.trim().isNotEmpty;
       return Center(
-        child: Text(
-          'artwork_no_results'.tr(),
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
+        child: GlassCard(
+          margin: const EdgeInsets.symmetric(horizontal: 18),
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'artwork_no_results'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (hasActiveFilters) ...[
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _selectedLocation = 'common_all'.tr();
+                      _selectedMedium = 'common_all'.tr();
+                    });
+                    _performSearch();
+                  },
+                  child: Text('common_clear'.tr()),
+                ),
+              ],
+            ],
           ),
         ),
       );
     }
 
     final artworks = _artworks;
+    final hasActiveFilters =
+        _selectedLocation != 'common_all'.tr() ||
+        _selectedMedium != 'common_all'.tr() ||
+        _searchController.text.trim().isNotEmpty;
 
     return CustomScrollView(
       slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 6),
+            child: Row(
+              children: [
+                Text(
+                  _searchController.text.trim().isNotEmpty
+                      ? '${artworks.length} result${artworks.length == 1 ? '' : 's'} for "${_searchController.text.trim()}"'
+                      : '${artworks.length} result${artworks.length == 1 ? '' : 's'}',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                if (hasActiveFilters)
+                  TextButton(
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _selectedLocation = 'common_all'.tr();
+                        _selectedMedium = 'common_all'.tr();
+                      });
+                      _performSearch();
+                    },
+                    child: Text('common_clear'.tr()),
+                  ),
+              ],
+            ),
+          ),
+        ),
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.all(8),
@@ -621,6 +734,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   }
 
   Future<void> _performSearch() async {
+    final query = _searchController.text.trim();
     setState(() {
       _isLoadingArtworks = true;
       _artworkError = null;
@@ -628,7 +742,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
     try {
       final results = await _artworkService.browsePublicArtwork(
-        query: _searchController.text,
+        query: query,
         location: _selectedLocation != 'common_all'.tr()
             ? _selectedLocation
             : null,
@@ -636,6 +750,15 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
       );
       if (!mounted) return;
       setState(() {
+        if (query.isNotEmpty) {
+          _recentSearches.removeWhere(
+            (existing) => existing.toLowerCase() == query.toLowerCase(),
+          );
+          _recentSearches.insert(0, query);
+          if (_recentSearches.length > 6) {
+            _recentSearches.removeRange(6, _recentSearches.length);
+          }
+        }
         _artworks = results;
         _isLoadingArtworks = false;
       });

@@ -29,9 +29,7 @@ class ArtWalkDistanceUnitService {
 
     final data = doc.data();
     final distanceUnit = data?['distanceUnit'] as String?;
-    _cachedDistanceUnit = distanceUnit == 'kilometers'
-        ? 'kilometers'
-        : 'miles';
+    _cachedDistanceUnit = distanceUnit == 'kilometers' ? 'kilometers' : 'miles';
     return _cachedDistanceUnit!;
   }
 

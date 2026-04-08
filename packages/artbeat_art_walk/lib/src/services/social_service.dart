@@ -460,12 +460,14 @@ class SocialService {
   ) async {
     try {
       final imageUrls = _extractActivityImageUrls(metadata);
+      final primaryImageUrl = imageUrls.isNotEmpty ? imageUrls.first : '';
       final postData = {
         'userId': activity.userId,
         'userName': activity.userName,
         'userPhotoUrl': activity.userAvatar ?? '',
         'content': activity.message,
         'imageUrls': imageUrls,
+        'imageUrl': primaryImageUrl,
         'tags': <String>['activity', activity.type.name],
         'location': _resolveActivityLocation(metadata),
         'createdAt': Timestamp.fromDate(activity.timestamp),

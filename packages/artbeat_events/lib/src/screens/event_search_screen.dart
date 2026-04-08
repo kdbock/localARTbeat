@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -28,6 +30,7 @@ class EventSearchScreen extends StatefulWidget {
 class _EventSearchScreenState extends State<EventSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  Timer? _searchDebounce;
 
   // Search state
   List<ArtbeatEvent> _searchResults = [];
@@ -68,6 +71,7 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -159,6 +163,11 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
         );
       }
     }
+  }
+
+  void _runSearch(String query) {
+    _searchController.text = query;
+    _performSearch();
   }
 
   void _clearSearch() {
@@ -277,6 +286,26 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
             ),
             const SizedBox(height: 16),
             _buildSearchField(),
+            if (_searchController.text.trim().isNotEmpty &&
+                _recentSearches.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 34,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _recentSearches.length,
+                  separatorBuilder: (_, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final query = _recentSearches[index];
+                    return _buildSuggestionChip(
+                      label: query,
+                      icon: Icons.history,
+                      onTap: () => _runSearch(query),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -311,7 +340,9 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
               ),
               onChanged: (value) {
                 setState(() {});
-                Future.delayed(const Duration(milliseconds: 450), () {
+                _searchDebounce?.cancel();
+                _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+                  if (!mounted) return;
                   if (_searchController.text == value) {
                     _performSearch();
                   }
@@ -443,7 +474,25 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
       return _buildEmptyState();
     }
 
-    return _buildSearchResults();
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${_searchResults.length} result${_searchResults.length == 1 ? '' : 's'} for "${_searchController.text.trim()}"',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: _buildSearchResults()),
+      ],
+    );
   }
 
   Widget _buildSearchSuggestions() {
@@ -477,8 +526,7 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
                             label: search,
                             icon: Icons.history,
                             onTap: () {
-                              _searchController.text = search;
-                              _performSearch();
+                              _runSearch(search);
                             },
                           ),
                         )
@@ -514,8 +562,7 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
                           icon: Icons.trending_up,
                           accent: true,
                           onTap: () {
-                            _searchController.text = suggestion;
-                            _performSearch();
+                            _runSearch(suggestion);
                           },
                         ),
                       )
@@ -568,6 +615,12 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
   }
 
   Widget _buildEmptyState() {
+    final hasActiveFilters =
+        _selectedCategory != 'All' ||
+        _startDate != null ||
+        _selectedLocation != null ||
+        _searchController.text.trim().isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: GlassSurface(
@@ -611,6 +664,14 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+            if (hasActiveFilters) ...[
+              const SizedBox(height: 14),
+              TextButton.icon(
+                onPressed: _clearSearch,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: Text('common_clear'.tr()),
+              ),
+            ],
           ],
         ),
       ),

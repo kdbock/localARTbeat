@@ -18,18 +18,16 @@ class _WrittenContentDiscoveryScreenState
     with SingleTickerProviderStateMixin {
   late final ArtworkService _artworkService;
   late final ArtistService _artistService;
+  late final TabController _tabController;
 
-  late TabController _tabController;
   List<ArtworkModel> _allWrittenContent = [];
   List<ArtworkModel> _serializedStories = [];
   List<ArtworkModel> _completedBooks = [];
   bool _isLoading = true;
   String? _error;
 
-  // Cache for artist names
   final Map<String, String> _artistNameCache = {};
 
-  // Filter options
   String _selectedGenre = 'All';
   String _selectedSort = 'Newest';
   bool _showOnlyFree = false;
@@ -79,7 +77,6 @@ class _WrittenContentDiscoveryScreenState
     try {
       setState(() => _isLoading = true);
 
-      // Load different types of written content in parallel
       final results = await Future.wait([
         _artworkService.getWrittenContent(
           limit: 50,
@@ -98,6 +95,7 @@ class _WrittenContentDiscoveryScreenState
         ),
       ]);
 
+      if (!mounted) return;
       setState(() {
         _allWrittenContent = results[0];
         _serializedStories = results[1];
@@ -106,6 +104,7 @@ class _WrittenContentDiscoveryScreenState
         _error = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -116,23 +115,20 @@ class _WrittenContentDiscoveryScreenState
   List<ArtworkModel> _getFilteredContent(List<ArtworkModel> content) {
     var filtered = content;
 
-    // Apply genre filter
     if (_selectedGenre != 'All') {
       filtered = filtered.where((artwork) {
         final tags = artwork.tags ?? <String>[];
-        final styles = artwork.styles;
-        return tags.contains(_selectedGenre) || styles.contains(_selectedGenre);
+        return tags.contains(_selectedGenre) ||
+            artwork.styles.contains(_selectedGenre);
       }).toList();
     }
 
-    // Apply free content filter
     if (_showOnlyFree) {
       filtered = filtered
           .where((artwork) => artwork.isForSale == false)
           .toList();
     }
 
-    // Apply sorting
     switch (_selectedSort) {
       case 'Newest':
         filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -158,7 +154,6 @@ class _WrittenContentDiscoveryScreenState
         });
         break;
       case 'Highest Rated':
-        // If averageRating is not available, fallback to likeCount or another metric
         filtered.sort(
           (a, b) => b.engagementStats.likeCount.compareTo(
             a.engagementStats.likeCount,
@@ -175,24 +170,20 @@ class _WrittenContentDiscoveryScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('written_content_discovery_title'.tr()),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'written_content_discovery_tab_all'.tr()),
-            Tab(text: 'written_content_discovery_tab_serialized'.tr()),
-            Tab(text: 'written_content_discovery_tab_completed'.tr()),
-          ],
-        ),
+    return MainLayout(
+      currentIndex: -1,
+      appBar: HudTopBar(
+        title: 'written_content_discovery_title'.tr(),
+        subtitle: '',
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).maybePop(),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             onPressed: _showFilterDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
               Navigator.pushNamed(
                 context,
@@ -203,44 +194,93 @@ class _WrittenContentDiscoveryScreenState
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? _buildErrorView()
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildContentGrid(_getFilteredContent(_allWrittenContent)),
-                _buildContentGrid(_getFilteredContent(_serializedStories)),
-                _buildContentGrid(_getFilteredContent(_completedBooks)),
-              ],
-            ),
+      child: WorldBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              GlassCard(
+                margin: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                radius: 22,
+                child: TabBar(
+                  controller: _tabController,
+                  indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white70,
+                  tabs: [
+                    Tab(text: 'written_content_discovery_tab_all'.tr()),
+                    Tab(text: 'written_content_discovery_tab_serialized'.tr()),
+                    Tab(text: 'written_content_discovery_tab_completed'.tr()),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null
+                    ? _buildErrorView()
+                    : TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildContentGrid(
+                            _getFilteredContent(_allWrittenContent),
+                          ),
+                          _buildContentGrid(
+                            _getFilteredContent(_serializedStories),
+                          ),
+                          _buildContentGrid(
+                            _getFilteredContent(_completedBooks),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildErrorView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            'written_content_discovery_error'.tr(),
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? 'common_error'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadWrittenContent,
-            child: Text('common_retry'.tr()),
-          ),
-        ],
+      child: GlassCard(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: Colors.white70),
+            const SizedBox(height: 12),
+            Text(
+              'written_content_discovery_error'.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error ?? 'common_error'.tr(),
+              style: const TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 14),
+            GradientCTAButton(
+              text: 'common_retry'.tr(),
+              icon: Icons.refresh,
+              onPressed: _loadWrittenContent,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -258,14 +298,11 @@ class _WrittenContentDiscoveryScreenState
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
       itemCount: content.length,
-      itemBuilder: (context, index) {
-        final artwork = content[index];
-        return _buildContentCard(artwork);
-      },
+      itemBuilder: (context, index) => _buildContentCard(content[index]),
     );
   }
 
@@ -273,7 +310,6 @@ class _WrittenContentDiscoveryScreenState
     if (_artistNameCache.containsKey(artistProfileId)) {
       return _artistNameCache[artistProfileId]!;
     }
-
     final profile = await _artistService.getArtistProfileById(artistProfileId);
     final name = profile?.displayName ?? 'Unknown Author';
     _artistNameCache[artistProfileId] = name;
@@ -285,112 +321,100 @@ class _WrittenContentDiscoveryScreenState
       future: _getArtistName(artwork.artistProfileId),
       builder: (context, snapshot) {
         final authorName = snapshot.data ?? 'Loading...';
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => _navigateToDetail(artwork),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Cover image
-                Expanded(
-                  flex: 3,
+        return GlassCard(
+          padding: EdgeInsets.zero,
+          radius: 16,
+          onTap: () => _navigateToDetail(artwork),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: artwork.imageUrl.isNotEmpty
-                      ? Image.network(
-                          artwork.imageUrl,
+                      ? SecureNetworkImage(
+                          imageUrl: artwork.imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                child: const Icon(Icons.book, size: 48),
-                              ),
                         )
                       : Container(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          child: const Icon(Icons.book, size: 48),
+                          color: Colors.white10,
+                          child: const Center(
+                            child: Icon(
+                              Icons.book,
+                              size: 42,
+                              color: Colors.white54,
+                            ),
+                          ),
                         ),
                 ),
-
-                // Content info
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title
-                        Text(
-                          artwork.title,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+              ),
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artwork.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
                         ),
-
-                        const SizedBox(height: 4),
-
-                        // Author
-                        Text(
-                          authorName,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        authorName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
                         ),
-
-                        const Spacer(),
-
-                        // Status indicators
-                        Row(
-                          children: [
-                            if (artwork.isSerializing == true) ...[
-                              Icon(
-                                Icons.schedule,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Ongoing',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ] else ...[
-                              Icon(
-                                Icons.check_circle,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Complete',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                            const Spacer(),
-                            if (artwork.isForSale == true)
-                              Icon(
-                                Icons.attach_money,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Icon(
+                            artwork.isSerializing == true
+                                ? Icons.schedule
+                                : Icons.check_circle,
+                            size: 14,
+                            color: artwork.isSerializing == true
+                                ? const Color(0xFF22D3EE)
+                                : const Color(0xFF34D399),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            artwork.isSerializing == true
+                                ? 'Ongoing'
+                                : 'Complete',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (artwork.isForSale == true)
+                            const Icon(
+                              Icons.attach_money,
+                              size: 14,
+                              color: Color(0xFF34D399),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -399,99 +423,111 @@ class _WrittenContentDiscoveryScreenState
 
   Widget _buildEmptyState(String title, String message) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.library_books, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: GlassCard(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.library_books, size: 56, color: Colors.white54),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _showFilterDialog() {
+    String dialogGenre = _selectedGenre;
+    String dialogSort = _selectedSort;
+    bool dialogFreeOnly = _showOnlyFree;
+
     showDialog<void>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text('written_content_discovery_filters'.tr()),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Genre filter
-                Text(
-                  'written_content_discovery_genre'.tr(),
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedGenre,
-                  items: _genres.map((genre) {
-                    return DropdownMenuItem(value: genre, child: Text(genre));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedGenre = value!);
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Sort filter
-                Text(
-                  'written_content_discovery_sort'.tr(),
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedSort,
-                  items: _sortOptions.map((sort) {
-                    return DropdownMenuItem(value: sort, child: Text(sort));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedSort = value!);
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Free content filter
-                CheckboxListTile(
-                  title: Text('written_content_discovery_free_only'.tr()),
-                  value: _showOnlyFree,
-                  onChanged: (value) {
-                    setState(() => _showOnlyFree = value ?? false);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('common_cancel'.tr()),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                this.setState(() {}); // Trigger rebuild with new filters
-              },
-              child: Text('common_apply'.tr()),
-            ),
-          ],
+      builder: (context) => AlertDialog(
+        title: Text('written_content_discovery_filters'.tr()),
+        content: StatefulBuilder(
+          builder: (context, setDialogState) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('written_content_discovery_genre'.tr()),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: dialogGenre,
+                    items: _genres
+                        .map(
+                          (genre) => DropdownMenuItem(
+                            value: genre,
+                            child: Text(genre),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setDialogState(() => dialogGenre = value!),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('written_content_discovery_sort'.tr()),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: dialogSort,
+                    items: _sortOptions
+                        .map(
+                          (sort) =>
+                              DropdownMenuItem(value: sort, child: Text(sort)),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setDialogState(() => dialogSort = value!),
+                  ),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    title: Text('written_content_discovery_free_only'.tr()),
+                    value: dialogFreeOnly,
+                    onChanged: (value) =>
+                        setDialogState(() => dialogFreeOnly = value ?? false),
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('common_cancel'.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _selectedGenre = dialogGenre;
+                _selectedSort = dialogSort;
+                _showOnlyFree = dialogFreeOnly;
+              });
+              Navigator.of(context).pop();
+            },
+            child: Text('common_apply'.tr()),
+          ),
+        ],
       ),
     );
   }

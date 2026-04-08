@@ -72,7 +72,9 @@ class _NotificationSettingsScreenState
       if (!mounted) return;
       setState(() => _distanceUnit = previousUnit);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not save distance unit preference.')),
+        const SnackBar(
+          content: Text('Could not save distance unit preference.'),
+        ),
       );
     }
   }

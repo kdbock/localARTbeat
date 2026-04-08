@@ -245,10 +245,7 @@ class _StatsWrap extends StatelessWidget {
               artWalk.estimatedDistance!,
               unit,
             );
-            return _StatPill(
-              icon: Icons.straighten,
-              label: label,
-            );
+            return _StatPill(icon: Icons.straighten, label: label);
           },
         ),
       );

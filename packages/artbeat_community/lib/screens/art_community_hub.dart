@@ -1169,42 +1169,6 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     );
   }
 
-  Widget _buildFab() {
-    if (!_canCreateDirectPosts) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [_LAB.purple, _LAB.teal, _LAB.green],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: _LAB.purple.withValues(alpha: 0.35),
-            blurRadius: 18,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        key: _fabKey,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) => const CreatePostScreen(),
-            ),
-          ).then((_) => setState(() {}));
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final baseTheme = Theme.of(context);
@@ -1224,6 +1188,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
               onTabSelected: (index) => _tabController.animateTo(index),
               onNavigate: _handleHudNavigation,
               closeDrawerAnd: _closeDrawerAnd,
+              canCreatePosts: _canCreateDirectPosts,
             ),
             body: HudWorldBackground(
               child: TabBarView(
@@ -1251,7 +1216,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 ],
               ),
             ),
-            floatingActionButton: _buildFab(),
+            floatingActionButton: null,
           ),
           if (_showOnboarding)
             ArtCommunityTourOverlay(
@@ -1333,7 +1298,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     try {
       final userService = context.read<UserService>();
       final communityService = context.read<CommunityService>();
-      final socialActivityService = context.read<CommunitySocialActivityService>();
+      final socialActivityService = context
+          .read<CommunitySocialActivityService>();
       final userId = userService.currentUserId;
       if (userId == null) {
         if (mounted) {
@@ -1345,18 +1311,18 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         return;
       }
 
-      final filteredActivities = await communityService.getPersonalizedActivities(
-        userId: userId,
-        socialActivityService: socialActivityService,
-        directLimit: 20,
-        recentLimit: 40,
-      );
+      final filteredActivities = await communityService
+          .getPersonalizedActivities(
+            userId: userId,
+            socialActivityService: socialActivityService,
+            directLimit: 20,
+            recentLimit: 40,
+          );
 
       if (!mounted) return;
 
-      final activitiesWithPosts = await communityService.ensureActivityFeedPosts(
-        filteredActivities,
-      );
+      final activitiesWithPosts = await communityService
+          .ensureActivityFeedPosts(filteredActivities);
 
       if (!mounted) return;
       setState(() => _activities = activitiesWithPosts);

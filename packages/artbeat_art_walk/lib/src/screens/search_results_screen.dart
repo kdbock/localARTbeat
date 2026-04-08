@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -34,6 +36,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
   late final TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _searchDebounce;
 
   bool _isSearching = false;
   int _currentTabIndex = 0;
@@ -67,6 +70,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
         setState(() => _currentTabIndex = _tabController.index);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    _scrollController.dispose();
+    _tabController.dispose();
+    super.dispose();
   }
 
   void _updateCriteria(String query) {
@@ -126,6 +138,19 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                       _updateCriteria(q);
                       _performSearch();
                     },
+                    onChanged: (q) {
+                      _searchDebounce?.cancel();
+                      _searchDebounce = Timer(
+                        const Duration(milliseconds: 350),
+                        () {
+                          if (!mounted) return;
+                          _updateCriteria(q);
+                          if (q.trim().isNotEmpty) {
+                            _performSearch();
+                          }
+                        },
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   GradientCTAButton(
@@ -153,6 +178,24 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                     Tab(text: 'art_walk_search_tab_walks'.tr()),
                     Tab(text: 'art_walk_search_tab_public_art'.tr()),
                   ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _currentTabIndex == 0
+                    ? '${_artWalkResults.length} walk result${_artWalkResults.length == 1 ? '' : 's'}'
+                    : '${_publicArtResults.length} artwork result${_publicArtResults.length == 1 ? '' : 's'}',
+                style: AppTextStyles.body.copyWith(
+                  color: Colors.white70,
+                  fontSize: 12,
                 ),
               ),
             ),

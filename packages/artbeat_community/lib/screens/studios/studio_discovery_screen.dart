@@ -40,12 +40,11 @@ class _StudioDiscoveryScreenState extends State<StudioDiscoveryScreen> {
       for (final studio in studios) {
         tags.addAll(studio.tags);
       }
+      if (!mounted) return;
       setState(() {
         _availableTags = ['All', ...tags.toList()..sort()];
       });
-    } catch (e) {
-      // Handle error silently
-    }
+    } catch (_) {}
   }
 
   Stream<QuerySnapshot> _getStudiosStream() {
@@ -61,10 +60,8 @@ class _StudioDiscoveryScreenState extends State<StudioDiscoveryScreen> {
           _searchQuery.isEmpty ||
           studio.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           studio.description.toLowerCase().contains(_searchQuery.toLowerCase());
-
       final matchesTag =
           _selectedTag == 'All' || studio.tags.contains(_selectedTag);
-
       return matchesSearch && matchesTag;
     }).toList();
   }
@@ -72,259 +69,261 @@ class _StudioDiscoveryScreenState extends State<StudioDiscoveryScreen> {
   @override
   Widget build(BuildContext context) {
     return core.MainLayout(
-      scaffoldKey: GlobalKey<ScaffoldState>(),
-      currentIndex: -1, // Detail screen
-      appBar: core.EnhancedUniversalHeader(
+      currentIndex: -1,
+      appBar: core.HudTopBar(
         title: 'screen_title_discover_studios'.tr(),
-        backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: const LinearGradient(
-          colors: [Colors.white, Colors.white],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        foregroundColor: Colors.white,
+        subtitle: '',
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).maybePop(),
       ),
-      child: Column(
-        children: [
-          // Search and filter section
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey.shade50,
-            child: Column(
-              children: [
-                // Search bar
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search studios...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // Tag filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _availableTags.length,
-                    itemBuilder: (context, index) {
-                      final tag = _availableTags[index];
-                      final isSelected = tag == _selectedTag;
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(tag),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedTag = tag;
-                            });
+      child: core.WorldBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              core.GlassCard(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      cursorColor: const Color(0xFF22D3EE),
+                      decoration: core.GlassInputDecoration.search(
+                        hintText: 'Search studios...',
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.white70,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white70),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
                           },
-                          backgroundColor: Colors.white,
-                          selectedColor: CommunityColors.primary.withValues(
-                            alpha: 0.1,
-                          ),
-                          checkmarkColor: CommunityColors.primary,
+                        ),
+                      ),
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 36,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _availableTags.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final tag = _availableTags[index];
+                          final isSelected = tag == _selectedTag;
+                          return FilterChip(
+                            label: Text(tag),
+                            selected: isSelected,
+                            onSelected: (_) =>
+                                setState(() => _selectedTag = tag),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.08,
+                            ),
+                            selectedColor: CommunityColors.primary.withValues(
+                              alpha: 0.24,
+                            ),
+                            checkmarkColor: CommunityColors.primary,
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.16),
+                            ),
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.white70,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: _getStudiosStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.white70),
                         ),
                       );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-          // Studios list
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _getStudiosStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+                    final studios = snapshot.data!.docs
+                        .map((doc) => StudioModel.fromFirestore(doc))
+                        .toList();
+                    final filteredStudios = _filterStudios(studios);
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final studios = snapshot.data!.docs
-                    .map((doc) => StudioModel.fromFirestore(doc))
-                    .toList();
-
-                final filteredStudios = _filterStudios(studios);
-
-                if (filteredStudios.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.business,
-                          size: 64,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchQuery.isEmpty && _selectedTag == 'All'
-                              ? 'No studios available yet'
-                              : 'No studios match your search',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey.shade600,
+                    if (filteredStudios.isEmpty) {
+                      return Center(
+                        child: core.GlassCard(
+                          margin: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.business,
+                                size: 56,
+                                color: Colors.white54,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                _searchQuery.isEmpty && _selectedTag == 'All'
+                                    ? 'No studios available yet'
+                                    : 'No studios match your search',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }
+                      );
+                    }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredStudios.length,
-                  itemBuilder: (context, index) {
-                    final studio = filteredStudios[index];
-                    return StudioCard(
-                      studio: studio,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<Widget>(
-                            builder: (context) => StudioChatScreen(
-                              studioId: studio.id,
-                              studio: studio,
-                            ),
-                          ),
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount: filteredStudios.length,
+                      itemBuilder: (context, index) {
+                        final studio = filteredStudios[index];
+                        return _StudioCard(
+                          studio: studio,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (context) => StudioChatScreen(
+                                  studioId: studio.id,
+                                  studio: studio,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
                   },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class StudioCard extends StatelessWidget {
-  final StudioModel studio;
-  final VoidCallback onTap;
-
-  const StudioCard({super.key, required this.studio, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Studio name and member count
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      studio.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CommunityColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${studio.memberList.length} members',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: CommunityColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Description
-              Text(
-                studio.description,
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-
-              // Tags
-              if (studio.tags.isNotEmpty)
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: studio.tags.map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-              const SizedBox(height: 12),
-
-              // Join button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onTap,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CommunityColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  child: const Text('Join Studio'),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StudioCard extends StatelessWidget {
+  final StudioModel studio;
+  final VoidCallback onTap;
+
+  const _StudioCard({required this.studio, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return core.GlassCard(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  studio.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: CommunityColors.primary.withValues(alpha: 0.24),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${studio.memberList.length} members',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            studio.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.white70,
+              height: 1.35,
+            ),
+          ),
+          if (studio.tags.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: studio.tags.map((tag) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: core.GradientCTAButton(
+              text: 'Join Studio',
+              icon: Icons.group_add,
+              onPressed: onTap,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedUniversalHeader, MainLayout, AppLogger;
+    show
+        AppLogger,
+        GlassCard,
+        GlassInputDecoration,
+        GradientCTAButton,
+        HudTopBar,
+        MainLayout,
+        SecureNetworkImage,
+        WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
 
@@ -21,8 +30,9 @@ class _AdvancedArtworkSearchScreenState
     extends State<AdvancedArtworkSearchScreen> {
   late final ArtworkService _artworkService;
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _minPriceController = TextEditingController();
+  final TextEditingController _maxPriceController = TextEditingController();
 
-  // Filter values
   String _selectedLocation = 'All';
   String _selectedMedium = 'All';
   List<String> _selectedStyles = [];
@@ -33,14 +43,12 @@ class _AdvancedArtworkSearchScreenState
   bool? _isForSale;
   bool? _isFeatured;
 
-  // UI state
   List<ArtworkModel> _searchResults = [];
   List<String> _searchSuggestions = [];
   List<Map<String, dynamic>> _savedSearches = [];
   bool _isLoading = false;
   bool _showFilters = false;
 
-  // Available options
   final List<String> _locations = [
     'All',
     'New York',
@@ -62,10 +70,8 @@ class _AdvancedArtworkSearchScreenState
   void initState() {
     super.initState();
     _artworkService = context.read<ArtworkService>();
-    // Set initial query if provided
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _searchController.text = widget.initialQuery!;
-      // Auto-perform search with initial query
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performAdvancedSearch();
       });
@@ -77,12 +83,15 @@ class _AdvancedArtworkSearchScreenState
   @override
   void dispose() {
     _searchController.dispose();
+    _minPriceController.dispose();
+    _maxPriceController.dispose();
     super.dispose();
   }
 
   Future<void> _loadSavedSearches() async {
     try {
       final savedSearches = await _artworkService.getSavedSearches();
+      if (!mounted) return;
       setState(() {
         _savedSearches = savedSearches;
       });
@@ -94,6 +103,7 @@ class _AdvancedArtworkSearchScreenState
   Future<void> _loadSearchSuggestions() async {
     try {
       final suggestions = await _artworkService.getSearchSuggestions();
+      if (!mounted) return;
       setState(() {
         _searchSuggestions = suggestions;
       });
@@ -103,9 +113,7 @@ class _AdvancedArtworkSearchScreenState
   }
 
   Future<void> _performAdvancedSearch() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final results = await _artworkService.advancedSearchArtwork(
@@ -121,16 +129,15 @@ class _AdvancedArtworkSearchScreenState
         isFeatured: _isFeatured,
       );
 
+      if (!mounted) return;
       setState(() {
         _searchResults = results;
         _isLoading = false;
       });
     } catch (e) {
       AppLogger.error('Error performing advanced search: $e');
-      setState(() {
-        _isLoading = false;
-      });
       if (!mounted) return;
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('advanced_search_error'.tr())));
@@ -139,8 +146,7 @@ class _AdvancedArtworkSearchScreenState
 
   Future<void> _saveCurrentSearch() async {
     final searchNameController = TextEditingController();
-
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('advanced_search_save_dialog_title'.tr()),
@@ -159,35 +165,34 @@ class _AdvancedArtworkSearchScreenState
           TextButton(
             onPressed: () async {
               if (searchNameController.text.isNotEmpty) {
+                final criteria = {
+                  'query': _searchController.text,
+                  'location': _selectedLocation,
+                  'medium': _selectedMedium,
+                  'styles': _selectedStyles,
+                  'minPrice': _minPrice,
+                  'maxPrice': _maxPrice,
+                  'startDate': _startDate?.toIso8601String(),
+                  'endDate': _endDate?.toIso8601String(),
+                  'isForSale': _isForSale,
+                  'isFeatured': _isFeatured,
+                };
                 try {
-                  final criteria = {
-                    'query': _searchController.text,
-                    'location': _selectedLocation,
-                    'medium': _selectedMedium,
-                    'styles': _selectedStyles,
-                    'minPrice': _minPrice,
-                    'maxPrice': _maxPrice,
-                    'startDate': _startDate?.toIso8601String(),
-                    'endDate': _endDate?.toIso8601String(),
-                    'isForSale': _isForSale,
-                    'isFeatured': _isFeatured,
-                  };
-
                   await _artworkService.saveSearch(
                     searchNameController.text,
                     criteria,
                   );
-                  await _loadSavedSearches();
-                  // ignore: use_build_context_synchronously
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  // ignore: use_build_context_synchronously
+                  await _loadSavedSearches();
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('advanced_search_saved_success'.tr()),
                     ),
                   );
-                } catch (e) {
-                  // ignore: use_build_context_synchronously
+                } catch (_) {
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('advanced_search_save_error'.tr())),
                   );
@@ -201,7 +206,7 @@ class _AdvancedArtworkSearchScreenState
     );
   }
 
-  void _applySavedSearch(Map<String, dynamic> savedSearch) async {
+  Future<void> _applySavedSearch(Map<String, dynamic> savedSearch) async {
     final criteria = savedSearch['criteria'] as Map<String, dynamic>;
 
     setState(() {
@@ -221,6 +226,8 @@ class _AdvancedArtworkSearchScreenState
           : null;
       _isForSale = criteria['isForSale'] as bool?;
       _isFeatured = criteria['isFeatured'] as bool?;
+      _minPriceController.text = _minPrice?.toString() ?? '';
+      _maxPriceController.text = _maxPrice?.toString() ?? '';
     });
 
     await _artworkService.updateSavedSearchUsage(savedSearch['id'] as String);
@@ -231,29 +238,14 @@ class _AdvancedArtworkSearchScreenState
   Widget build(BuildContext context) {
     return MainLayout(
       currentIndex: 0,
-      appBar: EnhancedUniversalHeader(
+      appBar: HudTopBar(
         title: 'advanced_search_title'.tr(),
-        showLogo: false,
+        subtitle: '',
         showBackButton: true,
-        backgroundGradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.topRight,
-          colors: [
-            Color(0xFF7B2FF2), // Purple
-            Color(0xFF00FF87), // Green
-          ],
-        ),
-        titleGradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.topRight,
-          colors: [
-            Color(0xFF7B2FF2), // Purple
-            Color(0xFF00FF87), // Green
-          ],
-        ),
+        onBackPressed: () => Navigator.of(context).maybePop(),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
             onPressed: () => setState(() => _showFilters = !_showFilters),
             tooltip: 'advanced_search_toggle_filters'.tr(),
           ),
@@ -264,281 +256,86 @@ class _AdvancedArtworkSearchScreenState
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Search input
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'advanced_search_hint'.tr(),
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {});
-                  },
-                ),
-              ),
-              onSubmitted: (_) => _performAdvancedSearch(),
-            ),
-          ),
-
-          // Search suggestions
-          if (_searchController.text.isEmpty && _searchSuggestions.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'advanced_search_popular'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: _searchSuggestions.take(5).map((suggestion) {
-                      return ActionChip(
-                        label: Text(suggestion),
-                        onPressed: () {
-                          _searchController.text = suggestion;
-                          _performAdvancedSearch();
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-
-          // Saved searches
-          if (_savedSearches.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'advanced_search_saved'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _savedSearches.length,
-                      itemBuilder: (context, index) {
-                        final savedSearch = _savedSearches[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: ActionChip(
-                            label: Text(savedSearch['name'] as String),
-                            onPressed: () => _applySavedSearch(savedSearch),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Filters panel
-          if (_showFilters) _buildFiltersPanel(),
-
-          // Search button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ElevatedButton.icon(
-              onPressed: _performAdvancedSearch,
-              icon: const Icon(Icons.search),
-              label: Text('advanced_search_button'.tr()),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-
-          // Results
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _searchController.text.isEmpty && _savedSearches.isEmpty
-                ? Center(child: Text('advanced_search_empty_state'.tr()))
-                : _buildSearchResults(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFiltersPanel() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      child: WorldBackground(
+        child: SafeArea(
+          bottom: false,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'advanced_search_filters_title'.tr(),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              GlassCard(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: const EdgeInsets.all(14),
+                child: TextField(
+                  controller: _searchController,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                  cursorColor: const Color(0xFF22D3EE),
+                  decoration: GlassInputDecoration.search(
+                    hintText: 'advanced_search_hint'.tr(),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.white70),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  onSubmitted: (_) => _performAdvancedSearch(),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Location filter
-              Text(
-                'advanced_search_location'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedLocation,
-                items: _locations.map((location) {
-                  return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
-                  );
-                }).toList(),
-                onChanged: (value) =>
-                    setState(() => _selectedLocation = value!),
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Medium filter
-              Text(
-                'advanced_search_medium'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedMedium,
-                items: _mediums.map((medium) {
-                  return DropdownMenuItem(value: medium, child: Text(medium));
-                }).toList(),
-                onChanged: (value) => setState(() => _selectedMedium = value!),
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Price range
-              Text(
-                'art_walk_price_range'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Min',
-                        prefixText: '\$',
-                        border: OutlineInputBorder(),
+              if (_searchController.text.isEmpty &&
+                  _searchSuggestions.isNotEmpty)
+                _buildSuggestionStrip(),
+              if (_savedSearches.isNotEmpty) _buildSavedSearchStrip(),
+              if (_showFilters) _buildFiltersPanel(),
+              if (!_isLoading && _searchController.text.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 2),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${_searchResults.length} result${_searchResults.length == 1 ? '' : 's'}',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => _minPrice = double.tryParse(value),
-                    ),
+                      const Spacer(),
+                      if (_hasActiveFilters)
+                        TextButton(
+                          onPressed: _clearAllFilters,
+                          child: const Text('Clear filters'),
+                        ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Max',
-                        prefixText: '\$',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => _maxPrice = double.tryParse(value),
-                    ),
-                  ),
-                ],
+                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: GradientCTAButton(
+                  text: _isLoading
+                      ? 'art_walk_search_button_searching'.tr()
+                      : 'advanced_search_button'.tr(),
+                  icon: Icons.search,
+                  onPressed: _performAdvancedSearch,
+                ),
               ),
-
-              const SizedBox(height: 16),
-
-              // Date range
-              Text(
-                'art_walk_date_range'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _startDate ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) setState(() => _startDate = date);
-                      },
-                      child: Text(
-                        _startDate != null
-                            ? '${_startDate!.month}/${_startDate!.day}/${_startDate!.year}'
-                            : 'Start Date',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _endDate ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) setState(() => _endDate = date);
-                      },
-                      child: Text(
-                        _endDate != null
-                            ? '${_endDate!.month}/${_endDate!.day}/${_endDate!.year}'
-                            : 'End Date',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Additional filters
-              Wrap(
-                spacing: 8,
-                children: [
-                  FilterChip(
-                    label: Text('art_walk_for_sale'.tr()),
-                    selected: _isForSale == true,
-                    onSelected: (selected) =>
-                        setState(() => _isForSale = selected ? true : null),
-                  ),
-                  FilterChip(
-                    label: Text('art_walk_featured'.tr()),
-                    selected: _isFeatured == true,
-                    onSelected: (selected) =>
-                        setState(() => _isFeatured = selected ? true : null),
-                  ),
-                ],
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _searchController.text.isEmpty && _savedSearches.isEmpty
+                    ? Center(
+                        child: Text(
+                          'advanced_search_empty_state'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white70,
+                          ),
+                        ),
+                      )
+                    : _buildSearchResults(),
               ),
             ],
           ),
@@ -547,10 +344,250 @@ class _AdvancedArtworkSearchScreenState
     );
   }
 
+  Widget _buildSuggestionStrip() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'advanced_search_popular'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _searchSuggestions.take(6).map((suggestion) {
+                return ActionChip(
+                  label: Text(suggestion),
+                  onPressed: () {
+                    _searchController.text = suggestion;
+                    _performAdvancedSearch();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavedSearchStrip() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'advanced_search_saved'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _savedSearches.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final savedSearch = _savedSearches[index];
+                  return ActionChip(
+                    label: Text(savedSearch['name'] as String),
+                    onPressed: () => _applySavedSearch(savedSearch),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFiltersPanel() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: GlassCard(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'advanced_search_filters_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDropdown(
+                    label: 'advanced_search_location'.tr(),
+                    value: _selectedLocation,
+                    options: _locations,
+                    onChanged: (value) =>
+                        setState(() => _selectedLocation = value),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildDropdown(
+                    label: 'advanced_search_medium'.tr(),
+                    value: _selectedMedium,
+                    options: _mediums,
+                    onChanged: (value) =>
+                        setState(() => _selectedMedium = value),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _minPriceController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: GlassInputDecoration.glass(
+                      hintText: 'Min \$',
+                      prefixIcon: const Icon(Icons.attach_money, size: 18),
+                    ),
+                    onChanged: (value) => _minPrice = double.tryParse(value),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _maxPriceController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: GlassInputDecoration.glass(
+                      hintText: 'Max \$',
+                      prefixIcon: const Icon(Icons.attach_money, size: 18),
+                    ),
+                    onChanged: (value) => _maxPrice = double.tryParse(value),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) setState(() => _startDate = date);
+                    },
+                    icon: const Icon(Icons.calendar_today, size: 16),
+                    label: Text(
+                      _startDate != null
+                          ? '${_startDate!.month}/${_startDate!.day}/${_startDate!.year}'
+                          : 'Start Date',
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _endDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) setState(() => _endDate = date);
+                    },
+                    icon: const Icon(Icons.calendar_today, size: 16),
+                    label: Text(
+                      _endDate != null
+                          ? '${_endDate!.month}/${_endDate!.day}/${_endDate!.year}'
+                          : 'End Date',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilterChip(
+                  label: Text('art_walk_for_sale'.tr()),
+                  selected: _isForSale == true,
+                  onSelected: (selected) =>
+                      setState(() => _isForSale = selected ? true : null),
+                ),
+                FilterChip(
+                  label: Text('art_walk_featured'.tr()),
+                  selected: _isFeatured == true,
+                  onSelected: (selected) =>
+                      setState(() => _isFeatured = selected ? true : null),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String value,
+    required List<String> options,
+    required ValueChanged<String> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      isExpanded: true,
+      dropdownColor: const Color(0xFF07060F),
+      style: const TextStyle(color: Colors.white),
+      decoration: GlassInputDecoration.glass(labelText: label),
+      onChanged: (newValue) {
+        if (newValue != null) {
+          onChanged(newValue);
+        }
+      },
+      items: options
+          .map(
+            (option) => DropdownMenuItem<String>(
+              value: option,
+              child: Text(option, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          )
+          .toList(),
+    );
+  }
+
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) {
       return Center(
-        child: Text('art_walk_no_artwork_found_matching_criteria'.tr()),
+        child: Text(
+          'art_walk_no_artwork_found_matching_criteria'.tr(),
+          style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+        ),
       );
     }
 
@@ -559,71 +596,73 @@ class _AdvancedArtworkSearchScreenState
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final artwork = _searchResults[index];
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 3,
-          child: InkWell(
-            onTap: () => _navigateToArtworkDetail(artwork.id),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Image.network(
-                    artwork.imageUrl,
+        return GlassCard(
+          padding: EdgeInsets.zero,
+          radius: 18,
+          onTap: () => _navigateToArtworkDetail(artwork.id),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(18),
+                  ),
+                  child: SecureNetworkImage(
+                    imageUrl: artwork.imageUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
+                    enableThumbnailFallback: true,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        artwork.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      artwork.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      artwork.medium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                    if (artwork.isForSale && artwork.price != null) ...[
+                      const SizedBox(height: 4),
                       Text(
-                        artwork.medium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
+                        '\$${artwork.price!.toStringAsFixed(2)}',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF34D399),
                           fontSize: 12,
                         ),
                       ),
-                      if (artwork.isForSale && artwork.price != null)
-                        Text(
-                          '\$${artwork.price!.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
                     ],
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -636,5 +675,34 @@ class _AdvancedArtworkSearchScreenState
       '/artist/artwork-detail',
       arguments: {'artworkId': artworkId},
     );
+  }
+
+  bool get _hasActiveFilters {
+    return _selectedLocation != 'All' ||
+        _selectedMedium != 'All' ||
+        _selectedStyles.isNotEmpty ||
+        _minPrice != null ||
+        _maxPrice != null ||
+        _startDate != null ||
+        _endDate != null ||
+        _isForSale != null ||
+        _isFeatured != null;
+  }
+
+  void _clearAllFilters() {
+    _minPriceController.clear();
+    _maxPriceController.clear();
+    setState(() {
+      _selectedLocation = 'All';
+      _selectedMedium = 'All';
+      _selectedStyles = <String>[];
+      _minPrice = null;
+      _maxPrice = null;
+      _startDate = null;
+      _endDate = null;
+      _isForSale = null;
+      _isFeatured = null;
+    });
+    _performAdvancedSearch();
   }
 }

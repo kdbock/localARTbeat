@@ -878,10 +878,13 @@ class ArtworkService {
       chapterId: chapterId,
     );
     final normalizedQuery = query?.trim().toLowerCase();
+    final queryTokens = normalizedQuery == null || normalizedQuery.isEmpty
+        ? const <String>[]
+        : _tokenizeSearchQuery(normalizedQuery);
     final normalizedLocation = location?.trim().toLowerCase();
     final normalizedMedium = medium?.trim().toLowerCase();
 
-    return artworks.where((artwork) {
+    final filtered = artworks.where((artwork) {
       final locationMatches =
           normalizedLocation == null ||
           normalizedLocation.isEmpty ||
@@ -904,19 +907,20 @@ class ArtworkService {
         return true;
       }
 
-      return artwork.title.toLowerCase().contains(normalizedQuery) ||
-          artwork.description.toLowerCase().contains(normalizedQuery) ||
-          artwork.medium.toLowerCase().contains(normalizedQuery) ||
-          (artwork.location?.toLowerCase().contains(normalizedQuery) ??
-              false) ||
-          artwork.styles.any(
-            (style) => style.toLowerCase().contains(normalizedQuery),
-          ) ||
-          (artwork.tags?.any(
-                (tag) => tag.toLowerCase().contains(normalizedQuery),
-              ) ??
-              false);
+      return _matchesArtworkQuery(artwork, normalizedQuery, queryTokens);
     }).toList();
+
+    if (normalizedQuery == null || normalizedQuery.isEmpty) {
+      return filtered;
+    }
+
+    filtered.sort((a, b) {
+      final scoreA = _scoreArtworkRelevance(a, normalizedQuery, queryTokens);
+      final scoreB = _scoreArtworkRelevance(b, normalizedQuery, queryTokens);
+      if (scoreA != scoreB) return scoreB.compareTo(scoreA);
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return filtered;
   }
 
   Future<List<ArtworkModel>> getCurrentUserArtwork() async {
@@ -1020,21 +1024,18 @@ class ArtworkService {
 
       // Apply client-side filters that Firestore doesn't support well
       if (query != null && query.isNotEmpty) {
-        final lowercaseQuery = query.toLowerCase();
+        final lowercaseQuery = query.toLowerCase().trim();
+        final queryTokens = _tokenizeSearchQuery(lowercaseQuery);
         artworks = artworks.where((artwork) {
-          return artwork.title.toLowerCase().contains(lowercaseQuery) ||
-              artwork.description.toLowerCase().contains(lowercaseQuery) ||
-              artwork.medium.toLowerCase().contains(lowercaseQuery) ||
-              artwork.styles.any(
-                (style) => style.toLowerCase().contains(lowercaseQuery),
-              ) ||
-              (artwork.tags?.any(
-                    (tag) => tag.toLowerCase().contains(lowercaseQuery),
-                  ) ??
-                  false) ||
-              (artwork.materials?.toLowerCase().contains(lowercaseQuery) ??
-                  false);
+          return _matchesArtworkQuery(artwork, lowercaseQuery, queryTokens);
         }).toList();
+
+        artworks.sort((a, b) {
+          final scoreA = _scoreArtworkRelevance(a, lowercaseQuery, queryTokens);
+          final scoreB = _scoreArtworkRelevance(b, lowercaseQuery, queryTokens);
+          if (scoreA != scoreB) return scoreB.compareTo(scoreA);
+          return b.createdAt.compareTo(a.createdAt);
+        });
       }
 
       if (styles != null && styles.isNotEmpty) {
@@ -1081,6 +1082,97 @@ class ArtworkService {
       AppLogger.error('Error in advanced search: $e');
       return [];
     }
+  }
+
+  bool _matchesArtworkQuery(
+    ArtworkModel artwork,
+    String normalizedQuery,
+    List<String> queryTokens,
+  ) {
+    final title = artwork.title.toLowerCase();
+    final description = artwork.description.toLowerCase();
+    final medium = artwork.medium.toLowerCase();
+    final location = artwork.location?.toLowerCase() ?? '';
+    final materials = artwork.materials?.toLowerCase() ?? '';
+    final artistName = artwork.artistName.toLowerCase();
+    final styles = artwork.styles.map((style) => style.toLowerCase()).toList();
+    final tags = (artwork.tags ?? []).map((tag) => tag.toLowerCase()).toList();
+
+    if (title.contains(normalizedQuery) ||
+        description.contains(normalizedQuery) ||
+        medium.contains(normalizedQuery) ||
+        location.contains(normalizedQuery) ||
+        materials.contains(normalizedQuery) ||
+        artistName.contains(normalizedQuery) ||
+        styles.any((style) => style.contains(normalizedQuery)) ||
+        tags.any((tag) => tag.contains(normalizedQuery))) {
+      return true;
+    }
+
+    return queryTokens.every(
+      (token) =>
+          title.contains(token) ||
+          description.contains(token) ||
+          medium.contains(token) ||
+          location.contains(token) ||
+          materials.contains(token) ||
+          artistName.contains(token) ||
+          styles.any((style) => style.contains(token)) ||
+          tags.any((tag) => tag.contains(token)),
+    );
+  }
+
+  int _scoreArtworkRelevance(
+    ArtworkModel artwork,
+    String normalizedQuery,
+    List<String> queryTokens,
+  ) {
+    final title = artwork.title.toLowerCase();
+    final description = artwork.description.toLowerCase();
+    final medium = artwork.medium.toLowerCase();
+    final location = artwork.location?.toLowerCase() ?? '';
+    final materials = artwork.materials?.toLowerCase() ?? '';
+    final artistName = artwork.artistName.toLowerCase();
+    final styles = artwork.styles.map((style) => style.toLowerCase()).toList();
+    final tags = (artwork.tags ?? []).map((tag) => tag.toLowerCase()).toList();
+    var score = 0;
+
+    if (title == normalizedQuery) score += 120;
+    if (title.startsWith(normalizedQuery)) score += 90;
+    if (title.contains(normalizedQuery)) score += 60;
+
+    if (artistName.contains(normalizedQuery)) score += 30;
+    if (medium == normalizedQuery) score += 35;
+    if (medium.contains(normalizedQuery)) score += 20;
+    if (location.contains(normalizedQuery)) score += 18;
+    if (materials.contains(normalizedQuery)) score += 16;
+    if (description.contains(normalizedQuery)) score += 14;
+    if (styles.any((style) => style == normalizedQuery)) score += 24;
+    if (styles.any((style) => style.contains(normalizedQuery))) score += 14;
+    if (tags.any((tag) => tag == normalizedQuery)) score += 24;
+    if (tags.any((tag) => tag.contains(normalizedQuery))) score += 14;
+
+    for (final token in queryTokens) {
+      if (title.startsWith(token)) score += 20;
+      if (title.contains(token)) score += 14;
+      if (artistName.contains(token)) score += 10;
+      if (medium.contains(token)) score += 9;
+      if (location.contains(token)) score += 8;
+      if (materials.contains(token)) score += 7;
+      if (description.contains(token)) score += 5;
+      if (styles.any((style) => style.contains(token))) score += 8;
+      if (tags.any((tag) => tag.contains(token))) score += 8;
+    }
+
+    return score;
+  }
+
+  List<String> _tokenizeSearchQuery(String query) {
+    return query
+        .toLowerCase()
+        .split(RegExp(r'[^a-z0-9]+'))
+        .where((token) => token.length >= 2)
+        .toList();
   }
 
   /// Get all published written works (books)

@@ -27,7 +27,9 @@ void logExpectedMissingImageError(Object error) {
   if (!kDebugMode) {
     return;
   }
-  debugPrint('🖼️ Expected image load failure: ${error.toString().split(',').first}');
+  debugPrint(
+    '🖼️ Expected image load failure: ${error.toString().split(',').first}',
+  );
 }
 
 void installGlobalErrorHandlers() {

@@ -1063,7 +1063,9 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     super.initState();
     _pageController = PageController();
     _userService = context.read<UserService>();
-    final firstCapture = widget.captures.isNotEmpty ? widget.captures.first : null;
+    final firstCapture = widget.captures.isNotEmpty
+        ? widget.captures.first
+        : null;
     if (firstCapture != null) {
       _goNowFlow.trackFunnelEvent('detail_open', <String, Object?>{
         'pieceId': firstCapture.id,
@@ -1152,9 +1154,9 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
 
     if (result == 'arrived_capture') {
       _goNowFlow.setStatus(capture.id, GoNowStatus.arrived);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Arrived at destination')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Arrived at destination')));
     } else if (result == 'skipped') {
       _goNowFlow.setStatus(capture.id, GoNowStatus.skipped);
     }

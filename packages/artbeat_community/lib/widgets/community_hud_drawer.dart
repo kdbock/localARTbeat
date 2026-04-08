@@ -25,12 +25,14 @@ class CommunityHudDrawer extends StatelessWidget {
     required this.onTabSelected,
     required this.onNavigate,
     required this.closeDrawerAnd,
+    required this.canCreatePosts,
   });
 
   final int selectedTabIndex;
   final ValueChanged<int> onTabSelected;
   final ValueChanged<CommunityHudDestination> onNavigate;
   final void Function(VoidCallback action) closeDrawerAnd;
+  final bool canCreatePosts;
 
   @override
   Widget build(BuildContext context) {
@@ -143,19 +145,22 @@ class CommunityHudDrawer extends StatelessWidget {
                         () => onNavigate(CommunityHudDestination.artDiscovery),
                       ),
                     ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_create'.tr(),
-                    ),
-                    HudPillTile(
-                      icon: Icons.add_circle,
-                      title: 'community_hub_drawer_item_create_post_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_create_post_subtitle'
-                          .tr(),
-                      accent: HudPalette.pink,
-                      onTap: () => closeDrawerAnd(
-                        () => onNavigate(CommunityHudDestination.createPost),
+                    if (canCreatePosts)
+                      lab_drawer.DrawerSection(
+                        title: 'community_hub_drawer_section_create'.tr(),
                       ),
-                    ),
+                    if (canCreatePosts)
+                      HudPillTile(
+                        icon: Icons.post_add,
+                        title: 'artist_artist_dashboard_text_add_post'.tr(),
+                        subtitle:
+                            'community_hub_drawer_item_create_post_subtitle'
+                                .tr(),
+                        accent: HudPalette.pink,
+                        onTap: () => closeDrawerAnd(
+                          () => onNavigate(CommunityHudDestination.createPost),
+                        ),
+                      ),
                     HudPillTile(
                       icon: Icons.person_add,
                       title: 'community_hub_drawer_item_artist_onboarding_title'

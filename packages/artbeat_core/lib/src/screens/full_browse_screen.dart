@@ -15,6 +15,8 @@ class FullBrowseScreen extends StatefulWidget {
 class _FullBrowseScreenState extends State<FullBrowseScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _browseSearchController = TextEditingController();
+  final List<String> _recentBrowseQueries = <String>[];
 
   @override
   void initState() {
@@ -24,6 +26,7 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
 
   @override
   void dispose() {
+    _browseSearchController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -336,6 +339,8 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
       child: Column(
         children: [
           _buildTabHeader(title, subtitle, icon, accent),
+          const SizedBox(height: 14),
+          _buildQuickSearchPanel(accent),
           const SizedBox(height: 20),
           _buildQuickActions(actions),
           const SizedBox(height: 20),
@@ -343,6 +348,155 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildQuickSearchPanel(Color accent) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            color: Colors.white.withValues(alpha: 0.04),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.search_rounded, color: accent, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Quick search',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _browseSearchController,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: _submitBrowseQuery,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Search artwork, artists, events, and walks',
+                        hintStyle: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        filled: true,
+                        fillColor: Colors.black.withValues(alpha: 0.2),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: accent, width: 1.2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton.tonal(
+                    onPressed: () =>
+                        _submitBrowseQuery(_browseSearchController.text),
+                    style: FilledButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: accent.withValues(alpha: 0.42),
+                      minimumSize: const Size(84, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text('Explore'),
+                  ),
+                ],
+              ),
+              if (_recentBrowseQueries.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _recentBrowseQueries
+                      .map(
+                        (query) => GestureDetector(
+                          onTap: () => _submitBrowseQuery(query),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(999),
+                              color: Colors.white.withValues(alpha: 0.08),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.14),
+                              ),
+                            ),
+                            child: Text(
+                              query,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.92),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _submitBrowseQuery(String rawQuery) {
+    final query = rawQuery.trim();
+    if (query.isEmpty) return;
+
+    setState(() {
+      _browseSearchController.clear();
+      _recentBrowseQueries.removeWhere(
+        (existing) => existing.toLowerCase() == query.toLowerCase(),
+      );
+      _recentBrowseQueries.insert(0, query);
+      if (_recentBrowseQueries.length > 5) {
+        _recentBrowseQueries.removeRange(5, _recentBrowseQueries.length);
+      }
+    });
+
+    Navigator.pushNamed(context, '/search', arguments: {'query': query});
   }
 
   Widget _buildTabHeader(

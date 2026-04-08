@@ -233,8 +233,12 @@ class EventService {
   /// Search events by title or description
   Future<List<ArtbeatEvent>> searchEvents(String query) async {
     try {
-      // Note: This is a simple implementation. For production, consider using
-      // a dedicated search service like Algolia or Elasticsearch
+      final normalizedQuery = query.trim().toLowerCase();
+      if (normalizedQuery.isEmpty) {
+        return [];
+      }
+      final queryTokens = _tokenize(normalizedQuery);
+
       final snapshot = await _firestore
           .collection(_eventsCollection)
           .where('isPublic', isEqualTo: true)
@@ -252,19 +256,15 @@ class EventService {
           })
           .whereType<ArtbeatEvent>()
           .where(
-            (event) =>
-                event.title.toLowerCase().contains(query.toLowerCase()) ||
-                event.description.toLowerCase().contains(query.toLowerCase()) ||
-                event.location.toLowerCase().contains(query.toLowerCase()),
+            (event) => _matchesEventQuery(event, normalizedQuery, queryTokens),
           )
           .toList();
 
-      // Sort by relevance (events with query in title first)
+      // Sort by relevance, then upcoming date
       events.sort((a, b) {
-        final aInTitle = a.title.toLowerCase().contains(query.toLowerCase());
-        final bInTitle = b.title.toLowerCase().contains(query.toLowerCase());
-        if (aInTitle && !bInTitle) return -1;
-        if (!aInTitle && bInTitle) return 1;
+        final scoreA = _scoreEvent(a, normalizedQuery, queryTokens);
+        final scoreB = _scoreEvent(b, normalizedQuery, queryTokens);
+        if (scoreA != scoreB) return scoreB.compareTo(scoreA);
         return a.dateTime.compareTo(b.dateTime);
       });
 
@@ -681,5 +681,72 @@ class EventService {
       return 'medium';
     }
     return 'low';
+  }
+
+  bool _matchesEventQuery(
+    ArtbeatEvent event,
+    String normalizedQuery,
+    List<String> queryTokens,
+  ) {
+    final title = event.title.toLowerCase();
+    final description = event.description.toLowerCase();
+    final location = event.location.toLowerCase();
+    final tags = event.tags.map((tag) => tag.toLowerCase()).toList();
+
+    if (title.contains(normalizedQuery) ||
+        description.contains(normalizedQuery) ||
+        location.contains(normalizedQuery) ||
+        tags.any((tag) => tag.contains(normalizedQuery))) {
+      return true;
+    }
+
+    return queryTokens.every(
+      (token) =>
+          title.contains(token) ||
+          description.contains(token) ||
+          location.contains(token) ||
+          tags.any((tag) => tag.contains(token)),
+    );
+  }
+
+  int _scoreEvent(
+    ArtbeatEvent event,
+    String normalizedQuery,
+    List<String> queryTokens,
+  ) {
+    final title = event.title.toLowerCase();
+    final description = event.description.toLowerCase();
+    final location = event.location.toLowerCase();
+    final tags = event.tags.map((tag) => tag.toLowerCase()).toList();
+    var score = 0;
+
+    if (title == normalizedQuery) score += 120;
+    if (title.startsWith(normalizedQuery)) score += 80;
+    if (title.contains(normalizedQuery)) score += 50;
+
+    if (location == normalizedQuery) score += 45;
+    if (location.contains(normalizedQuery)) score += 30;
+
+    if (description.contains(normalizedQuery)) score += 20;
+    if (tags.any((tag) => tag == normalizedQuery)) score += 35;
+    if (tags.any((tag) => tag.contains(normalizedQuery))) score += 20;
+
+    for (final token in queryTokens) {
+      if (title.startsWith(token)) score += 20;
+      if (title.contains(token)) score += 14;
+      if (location.contains(token)) score += 10;
+      if (description.contains(token)) score += 6;
+      if (tags.any((tag) => tag.contains(token))) score += 9;
+    }
+
+    return score;
+  }
+
+  List<String> _tokenize(String input) {
+    return input
+        .toLowerCase()
+        .split(RegExp('[^a-z0-9]+'))
+        .where((token) => token.length >= 2)
+        .toList();
   }
 }

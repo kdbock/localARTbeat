@@ -38,6 +38,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   late _FilterOption _selectedMedium;
   late _FilterOption _selectedStyle;
   final TextEditingController _searchController = TextEditingController();
+  final List<String> _recentSearches = <String>[];
   Timer? _searchDebounce;
 
   static const List<_FilterOption> _mediumOptions = [
@@ -181,6 +182,12 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
 
   void _applyFilters() => _loadArtists(reset: true);
 
+  void _runSearch(String query) {
+    _searchController.text = query;
+    setState(() {});
+    _loadArtists(reset: true);
+  }
+
   void _resetFilters() {
     setState(() {
       _selectedMedium = _mediumOptions.first;
@@ -203,6 +210,16 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       setState(() {});
+      final query = value.trim();
+      if (query.isNotEmpty) {
+        _recentSearches.removeWhere(
+          (existing) => existing.toLowerCase() == query.toLowerCase(),
+        );
+        _recentSearches.insert(0, query);
+        if (_recentSearches.length > 6) {
+          _recentSearches.removeRange(6, _recentSearches.length);
+        }
+      }
       if (value.isEmpty || value.length > 2) {
         _loadArtists(reset: true);
       }
@@ -352,6 +369,44 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                   : null,
             ),
           ),
+          if (_recentSearches.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 34,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _recentSearches.length,
+                separatorBuilder: (_, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final query = _recentSearches[index];
+                  return GestureDetector(
+                    onTap: () => _runSearch(query),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.14),
+                        ),
+                      ),
+                      child: Text(
+                        query,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -410,11 +465,45 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
           return ArtistBrowseEmptyState(onReset: _resetFilters);
         }
 
-        return _ArtistBrowseListView(
-          artists: artists,
-          controller: _scrollController,
-          isLoadingMore: _isLoadingMore,
-          onArtistTap: _openProfile,
+        final hasActiveFilters =
+            _selectedMedium.value != 'All' ||
+            _selectedStyle.value != 'All' ||
+            _searchController.text.trim().isNotEmpty;
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+              child: Row(
+                children: [
+                  Text(
+                    _searchController.text.trim().isNotEmpty
+                        ? '${artists.length} result${artists.length == 1 ? '' : 's'} for "${_searchController.text.trim()}"'
+                        : '${artists.length} result${artists.length == 1 ? '' : 's'}',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (hasActiveFilters)
+                    TextButton(
+                      onPressed: _resetFilters,
+                      child: Text(tr('common_clear')),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _ArtistBrowseListView(
+                artists: artists,
+                controller: _scrollController,
+                isLoadingMore: _isLoadingMore,
+                onArtistTap: _openProfile,
+              ),
+            ),
+          ],
         );
       },
     );

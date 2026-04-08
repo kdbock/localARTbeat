@@ -83,10 +83,10 @@ class ArtbeatDrawerItems {
 
   // Role-specific creation items
   static const createPost = ArtbeatDrawerItem(
-    title: 'drawer_community_hub',
-    icon: Icons.groups_outlined,
+    title: 'artist_artist_dashboard_text_add_post',
+    icon: Icons.post_add_outlined,
     route: '/community/hub',
-    requiredRoles: ['artist', 'admin', 'gallery'],
+    requiredRoles: ['artist', 'admin', 'moderator'],
   );
 
   static const createEvent = ArtbeatDrawerItem(
@@ -505,7 +505,6 @@ class ArtbeatDrawerItems {
   ];
 
   static List<ArtbeatDrawerItem> get creationItems => [
-    createPost,
     createEvent,
     createArtWalk,
     advertise,
@@ -533,7 +532,6 @@ class ArtbeatDrawerItems {
     artistProfileEdit,
     artistPublicProfile,
     uploadArtwork,
-    createPost, // Post to feed
     // Artist Discovery
     artistBrowse,
     featuredArtists,
@@ -603,6 +601,15 @@ class ArtbeatDrawerItems {
 
     // 1. Core Navigation (Always Visible)
     final navigationItems = _filterItemsForRole(coreItems, userRole);
+    final canQuickAddPost =
+        userRole == 'artist' || userRole == 'admin' || userRole == 'moderator';
+    if (canQuickAddPost) {
+      final dashboardIndex = navigationItems.indexWhere(
+        (item) => item.route == dashboard.route,
+      );
+      final insertionIndex = dashboardIndex >= 0 ? dashboardIndex + 1 : 0;
+      navigationItems.insert(insertionIndex, createPost);
+    }
     if (navigationItems.isNotEmpty) {
       sections.add(
         DrawerSection(

@@ -41,9 +41,6 @@ class CaptureArtWalkHooks implements CapturePostCaptureHooks {
     String? userAvatar,
     Position? location,
   }) {
-    final title = (capture.title?.trim().isNotEmpty ?? false)
-        ? capture.title!.trim()
-        : 'Untitled';
     final locationLabel = (capture.locationName?.trim().isNotEmpty ?? false)
         ? capture.locationName!.trim()
         : 'their area';
@@ -53,13 +50,28 @@ class CaptureArtWalkHooks implements CapturePostCaptureHooks {
       userName: userName,
       userAvatar: userAvatar,
       type: art_walk.SocialActivityType.capture,
-      message: '$userName discovered "$title" in $locationLabel',
+      message:
+          '$userName discovered outdoor artwork in $locationLabel and got XP points',
       location: location,
       metadata: {
         'captureId': capture.id,
-        'artTitle': title,
+        if (capture.title != null && capture.title!.trim().isNotEmpty)
+          'artTitle': capture.title!.trim(),
         'locationName': capture.locationName,
         'photoUrl': capture.imageUrl,
+        'imageUrl': capture.imageUrl,
+        if (capture.thumbnailUrl != null &&
+            capture.thumbnailUrl!.trim().isNotEmpty)
+          'thumbnailUrl': capture.thumbnailUrl!.trim(),
+        'capture': {
+          'id': capture.id,
+          'imageUrl': capture.imageUrl,
+          if (capture.thumbnailUrl != null &&
+              capture.thumbnailUrl!.trim().isNotEmpty)
+            'thumbnailUrl': capture.thumbnailUrl!.trim(),
+          if (capture.title != null && capture.title!.trim().isNotEmpty)
+            'title': capture.title!.trim(),
+        },
       },
     );
   }

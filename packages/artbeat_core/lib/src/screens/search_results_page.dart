@@ -29,6 +29,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _searchController.addListener(_onSearchTextChanged);
     _searchProvider = context.read<search_controller.SearchController>();
 
     // Initialize with query from URL if provided
@@ -42,8 +43,15 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchTextChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -61,11 +69,23 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         child: Column(
           children: [
             _buildSearchBar(),
+            if (_searchController.text.trim().isNotEmpty)
+              _buildRecentSearchesInline(),
             Consumer<search_controller.SearchController>(
               builder: (context, searchProvider, child) {
                 if (searchProvider.query.isNotEmpty &&
                     !searchProvider.isEmpty) {
                   return _buildFiltersAndSort(searchProvider);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            Consumer<search_controller.SearchController>(
+              builder: (context, searchProvider, child) {
+                if (searchProvider.query.isNotEmpty &&
+                    !searchProvider.isLoading &&
+                    !searchProvider.hasError) {
+                  return _buildResultSummary(searchProvider);
                 }
                 return const SizedBox.shrink();
               },
@@ -168,6 +188,57 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         },
       ),
     );
+  }
+
+  Widget _buildRecentSearchesInline() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: SearchHistory().getSearchHistory(),
+      builder: (context, snapshot) {
+        final recentSearches = (snapshot.data ?? const <Map<String, dynamic>>[])
+            .take(5)
+            .toList();
+        if (recentSearches.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: SizedBox(
+            height: 34,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                final query = (recentSearches[index]['query'] as String? ?? '')
+                    .trim();
+                if (query.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return ActionChip(
+                  label: Text(
+                    query,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ArtbeatColors.textPrimary,
+                    ),
+                  ),
+                  backgroundColor: Colors.white.withValues(alpha: 0.85),
+                  onPressed: () => _runSearch(query),
+                );
+              },
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemCount: recentSearches.length,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _runSearch(String query) {
+    _searchController.text = query;
+    _searchProvider.search(query);
   }
 
   Widget _buildFiltersAndSort(
@@ -342,6 +413,33 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     }
   }
 
+  Widget _buildResultSummary(
+    search_controller.SearchController searchProvider,
+  ) {
+    final resultCount = searchProvider.results.length;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          Text(
+            '$resultCount result${resultCount == 1 ? '' : 's'}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: ArtbeatColors.textSecondary.withValues(alpha: 0.8),
+            ),
+          ),
+          const Spacer(),
+          if (searchProvider.hasActiveFilters)
+            TextButton(
+              onPressed: searchProvider.clearFilters,
+              child: const Text('Clear filters'),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent(search_controller.SearchController searchProvider) {
     if (searchProvider.query.isEmpty) {
       return _buildEmptyState();
@@ -457,8 +555,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           return GestureDetector(
                             onTap: query.isNotEmpty
                                 ? () {
-                                    _searchController.text = query;
-                                    _searchProvider.search(query);
+                                    _runSearch(query);
                                   }
                                 : null,
                             child: Container(
