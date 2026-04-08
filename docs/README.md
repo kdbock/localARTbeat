@@ -1,54 +1,57 @@
 # ARTbeat Documentation Index
 
-This directory contains the canonical project docs used to plan work,
-understand architecture, test safely, and ship changes.
+Last updated: April 7, 2026
 
-## Core Operating Docs
+## Purpose
+
+This folder contains current, operational documentation for the live app.
+
+## Canonical Core Docs
 
 - `ARCHITECTURE.md`
-  - Current system structure, package boundaries, and dependency intent.
-- `ROADMAP.md`
-  - Current priorities, next steps, and deferred work.
-- `WORK_QUEUE.md`
-  - Active engineering queue with status and release/test notes.
-- `RELEASE_CHECKLIST.md`
-  - Standard release process for Android, iOS, Firebase rules, and functions.
-- `PRE_SUBMISSION_REMAINING_WORK.md`
-  - Short current-state checklist of what is still left before store upload.
-- `TEST_STRATEGY.md`
-  - Testing pyramid, ownership, and release-critical coverage.
-- `DEPENDENCY_RULES.md`
-  - Package dependency policy and architectural guardrails.
-- `DECISIONS.md`
-  - Short architecture and process decisions with rationale.
+  - Current app and package architecture, routing ownership, and runtime boundaries.
+- `FEATURES.md`
+  - Current production feature surface by domain.
 - `OPERATIONS.md`
-  - Practical runbooks for env setup, secrets, translations, deploys, and
-    incident handling.
+  - Setup, quality gates, release operations, and incident/compliance runbook links.
+- `TEST_STRATEGY.md`
+  - Test layers and release gate expectations.
+- `RELEASE_CHECKLIST.md`
+  - Canonical release checklist.
+- `RELEASE_CONFIDENCE_QA_CHECKLIST.md`
+  - Manual QA checklist for release-critical flows.
+- `WORK_QUEUE.md`
+  - Active engineering work and risk tracking.
+- `ROADMAP.md`
+  - Near-term priorities.
 - `KNOWN_ISSUES.md`
-  - Live issues, impact, workarounds, and target fixes.
-- `FEATURE_SPECS/`
-  - Short specs for active feature work.
-
-## Existing Domain Docs
-
-Many older docs in this folder are still useful reference material, especially
-for legal, payment, onboarding, and one-off project work. Prefer the core
-operating docs above for current process and project control.
+  - Current known issues and mitigations.
+- `DEPENDENCY_RULES.md`
+  - Package boundary and dependency policy.
+- `PACKAGE_DEPENDENCY_INVENTORY.md`
+  - Current generated package dependency graph.
+- `DECISIONS.md`
+  - Architecture/process decisions log.
+- `REPO_HYGIENE.md`
+  - Repo structure and cleanup policy.
 
 ## Legal And Safety Docs
 
-- `COMMUNITY_GUIDELINES.md`
-  - Platform conduct rules, nudity rules, minors restrictions, and enforcement.
-- `COPYRIGHT_AND_DMCA_POLICY.md`
-  - Copyright complaint, takedown, counter-notice, and repeat infringer policy.
-- `SAFETY_AND_ABUSE_RESPONSE_POLICY.md`
-  - Abuse intake priorities, response targets, evidence retention, and actions.
-- `LAW_ENFORCEMENT_REQUEST_POLICY.md`
-  - Owner-routed intake path for law enforcement requests.
+- `security/COMMUNITY_GUIDELINES.md`
+- `security/COPYRIGHT_AND_DMCA_POLICY.md`
+- `security/SAFETY_AND_ABUSE_RESPONSE_POLICY.md`
+- `security/LAW_ENFORCEMENT_REQUEST_POLICY.md`
+- `security/UPLOAD_SAFETY_IMPLEMENTATION.md`
 - `security/LEGAL_INCIDENT_RESPONSE_PLAN.md`
-  - Incident handling framework for privacy, safety, payment, and legal events.
+- `security/LEGAL_RELEASE_STATUS.md`
+- `security/LEGAL_PRODUCTION_CANARY_ROLLOUT_RUNBOOK.md`
 
-## Maintenance Rule
+## Domain/Implementation Docs
 
-If a doc here stops influencing decisions or execution, archive it or remove it.
-The goal is a working system, not documentation volume.
+- `SPONSORSHIP_IMPLEMENTATION.md`
+- `STARTUP_INTEGRITY_STANDARD.md`
+
+## Archive Policy
+
+- Time-bound plans, one-off audits, and session notes belong in `docs/archive/`.
+- Root `docs/` should stay limited to docs that actively drive current engineering, release, and operations decisions.

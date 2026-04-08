@@ -46,9 +46,14 @@ class AuthGuard {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
 
-    // This would typically check custom claims or user document
-    // For now, return basic authentication status
-    return user.emailVerified;
+    final normalizedRole = role.trim().toLowerCase();
+    if (normalizedRole == 'authenticated') {
+      return true;
+    }
+
+    // Role-specific authorization must be resolved from canonical userType
+    // in Firestore, and should not be inferred from email verification.
+    return false;
   }
 
   /// Check if user is an artist

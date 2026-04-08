@@ -60,14 +60,14 @@ export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 // 2025 Enhanced Services (Consolidated into UnifiedPaymentService)
 export 'src/services/unified_payment_service.dart'
     show
-        PaymentMethod,
         UnifiedPaymentService,
         PaymentResult,
         SubscriptionResult,
         RiskAssessment,
         PaymentMethodWithRisk,
-        ArtbeatModule,
         RevenueStream;
+export 'src/services/payment_strategy_service.dart'
+    show PaymentMethod, ArtbeatModule, PaymentStrategyService;
 export 'src/services/crash_prevention_service.dart' show CrashPreventionService;
 // In-App Purchase Services
 export 'src/services/in_app_purchase_service.dart' show InAppPurchaseService;

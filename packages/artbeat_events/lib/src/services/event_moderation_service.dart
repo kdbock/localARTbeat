@@ -317,8 +317,8 @@ class EventModerationService {
 
   /// Helper: Check if user has moderator permissions
   bool _hasModeratorPermissions(Map<String, dynamic> userData) {
-    final role = (userData['userType'] ?? userData['role']) as String?;
-    return role == 'admin' || role == 'moderator';
+    final userType = (userData['userType'] as String? ?? '').toLowerCase();
+    return userType == 'admin' || userType == 'moderator';
   }
 
   /// Get moderation analytics

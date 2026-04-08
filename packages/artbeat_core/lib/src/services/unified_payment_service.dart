@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart' show ThemeMode;
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide PaymentMethod;
 import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +12,8 @@ import '../models/in_app_purchase_models.dart';
 import '../utils/env_loader.dart';
 import '../utils/logger.dart';
 import 'crash_prevention_service.dart';
+import 'payment_strategy_service.dart'
+    show ArtbeatModule, PaymentMethod, PaymentStrategyService;
 
 // ============================================================================
 // RESULT CLASSES FOR API RESPONSES
@@ -92,29 +94,6 @@ class PaymentMethodWithRisk extends PaymentMethodModel {
   }
 }
 
-// ============================================================================
-// ENUMS FOR PAYMENT STRATEGY
-// ============================================================================
-
-/// Enum for different ArtBeat modules
-enum ArtbeatModule {
-  core, // artbeat_core - subscriptions, AI credits
-  artist, // artbeat_artist - payouts, commissions
-  ads, // artbeat_ads - advertising
-  events, // artbeat_events - ticketing
-  messaging, // artbeat_messaging - gifts, chat perks
-  capture, // artbeat_capture - premium features
-  artWalk, // artbeat_art_walk - premium features
-  profile, // artbeat_profile - customization
-  settings, // artbeat_settings - premium settings
-}
-
-/// Enum for payment methods
-enum PaymentMethod {
-  iap, // In-App Purchase (Apple/Google)
-  stripe, // Stripe payment processing
-}
-
 /// Enum for revenue stream types
 enum RevenueStream {
   subscription, // Subscriptions (IAP + Stripe)
@@ -163,6 +142,7 @@ class UnifiedPaymentService {
   late final FirebaseFirestore _firestore;
   late final http.Client _httpClient;
   late final DeviceInfoPlugin _deviceInfo;
+  final PaymentStrategyService _paymentStrategy = PaymentStrategyService();
 
   // Device fingerprinting for fraud detection
   String? _deviceFingerprint;
@@ -426,48 +406,7 @@ class UnifiedPaymentService {
   PaymentMethod getPaymentMethod(
     PurchaseType purchaseType,
     ArtbeatModule module,
-  ) {
-    switch (module) {
-      case ArtbeatModule.core:
-        return _getCorePaymentMethod(purchaseType);
-      case ArtbeatModule.artist:
-        return PaymentMethod.stripe; // Artist earnings need payouts
-      case ArtbeatModule.ads:
-        return PaymentMethod.stripe; // Apple forbids IAP for ads
-      case ArtbeatModule.events:
-        return PaymentMethod.stripe; // Events need payout processing
-      case ArtbeatModule.messaging:
-        return _getMessagingPaymentMethod(purchaseType);
-      case ArtbeatModule.capture:
-      case ArtbeatModule.artWalk:
-        return PaymentMethod.iap; // Premium features use IAP
-      case ArtbeatModule.profile:
-      case ArtbeatModule.settings:
-        return PaymentMethod.iap; // Customization is digital goods
-    }
-  }
-
-  PaymentMethod _getCorePaymentMethod(PurchaseType purchaseType) {
-    switch (purchaseType) {
-      case PurchaseType.subscription:
-        return PaymentMethod.iap; // App Store requirement
-      case PurchaseType.consumable:
-        return PaymentMethod.iap; // AI credits
-      case PurchaseType.nonConsumable:
-        return PaymentMethod.iap; // Premium features
-    }
-  }
-
-  PaymentMethod _getMessagingPaymentMethod(PurchaseType purchaseType) {
-    switch (purchaseType) {
-      case PurchaseType.consumable:
-        return PaymentMethod.iap; // Digital perks
-      case PurchaseType.nonConsumable:
-        return PaymentMethod.stripe; // Boosts that may result in payouts
-      case PurchaseType.subscription:
-        return PaymentMethod.iap;
-    }
-  }
+  ) => _paymentStrategy.getPaymentMethod(purchaseType, module);
 
   /// Check if a purchase requires payout processing
   bool requiresPayout(ArtbeatModule module, PurchaseType purchaseType) {

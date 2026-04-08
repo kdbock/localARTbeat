@@ -28,88 +28,74 @@ class PaymentStrategyService {
   factory PaymentStrategyService() => _instance;
   PaymentStrategyService._internal();
 
+  static const List<PurchaseType> _allPurchaseTypes = PurchaseType.values;
+
+  // Canonical source-of-truth routing table for IAP vs Stripe by module and purchase type.
+  static final Map<ArtbeatModule, Map<PurchaseType, PaymentMethod>>
+  _policyTable = {
+    ArtbeatModule.core: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.artist: {
+      PurchaseType.subscription: PaymentMethod.stripe,
+      PurchaseType.consumable: PaymentMethod.stripe,
+      PurchaseType.nonConsumable: PaymentMethod.stripe,
+    },
+    ArtbeatModule.ads: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.events: {
+      PurchaseType.subscription: PaymentMethod.stripe,
+      PurchaseType.consumable: PaymentMethod.stripe,
+      PurchaseType.nonConsumable: PaymentMethod.stripe,
+    },
+    ArtbeatModule.messaging: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.capture: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.artWalk: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.profile: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+    ArtbeatModule.settings: {
+      PurchaseType.subscription: PaymentMethod.iap,
+      PurchaseType.consumable: PaymentMethod.iap,
+      PurchaseType.nonConsumable: PaymentMethod.iap,
+    },
+  };
+
   /// Get the appropriate payment method for a purchase type in a specific module
   PaymentMethod getPaymentMethod(
     PurchaseType purchaseType,
     ArtbeatModule module,
   ) {
-    switch (module) {
-      case ArtbeatModule.core:
-        return _getCorePaymentMethod(purchaseType);
-      case ArtbeatModule.artist:
-        return _getArtistPaymentMethod(purchaseType);
-      case ArtbeatModule.ads:
-        return _getAdsPaymentMethod(purchaseType);
-      case ArtbeatModule.events:
-        return _getEventsPaymentMethod(purchaseType);
-      case ArtbeatModule.messaging:
-        return _getMessagingPaymentMethod(purchaseType);
-      case ArtbeatModule.capture:
-      case ArtbeatModule.artWalk:
-        return _getCaptureArtWalkPaymentMethod(purchaseType);
-      case ArtbeatModule.profile:
-      case ArtbeatModule.settings:
-        return _getProfileSettingsPaymentMethod(purchaseType);
+    final modulePolicy = _policyTable[module];
+    if (modulePolicy == null) {
+      throw StateError('Missing payment policy for module: $module');
     }
-  }
-
-  /// Core module payment strategy
-  PaymentMethod _getCorePaymentMethod(PurchaseType purchaseType) {
-    switch (purchaseType) {
-      case PurchaseType.subscription:
-        return PaymentMethod.iap; // App Store requirement
-      case PurchaseType.consumable:
-        return PaymentMethod.iap; // AI credits, digital goods
-      case PurchaseType.nonConsumable:
-        return PaymentMethod.iap; // Premium features
+    final method = modulePolicy[purchaseType];
+    if (method == null) {
+      throw StateError(
+        'Missing payment policy for module: $module and purchaseType: $purchaseType',
+      );
     }
-  }
-
-  /// Artist module payment strategy - primarily Stripe for payouts
-  PaymentMethod _getArtistPaymentMethod(PurchaseType purchaseType) {
-    // Artist earnings require Stripe for payouts to bank accounts
-    return PaymentMethod.stripe;
-  }
-
-  /// Ads module payment strategy - IAP required (Apple policy)
-  PaymentMethod _getAdsPaymentMethod(PurchaseType purchaseType) {
-    // Advertising purchases are digital goods and MUST use IAP (Apple Guideline 3.1.1)
-    return PaymentMethod.iap;
-  }
-
-  /// Events module payment strategy - hybrid based on event type
-  PaymentMethod _getEventsPaymentMethod(PurchaseType purchaseType) {
-    // Physical events require Stripe for payouts to organizers
-    // Virtual/digital events can use IAP
-    return PaymentMethod.stripe; // Default to Stripe for safety
-  }
-
-  /// Messaging module payment strategy - IAP only for gifts and digital perks
-  PaymentMethod _getMessagingPaymentMethod(PurchaseType purchaseType) {
-    switch (purchaseType) {
-      case PurchaseType.consumable:
-        // Digital-only perks (emoji packs, themes) use IAP
-        return PaymentMethod.iap;
-      case PurchaseType.nonConsumable:
-        // ✅ APPLE COMPLIANT: Gifts use IAP only (no payouts to recipients)
-        // Gift credits are in-app only and cannot be withdrawn/cashed out
-        // Per App Store Review Guidelines: "gifts may only be refunded to the original purchaser and may not be exchanged"
-        return PaymentMethod.iap;
-      case PurchaseType.subscription:
-        return PaymentMethod.iap;
-    }
-  }
-
-  /// Capture/Art Walk payment strategy
-  PaymentMethod _getCaptureArtWalkPaymentMethod(PurchaseType purchaseType) {
-    // Premium features and digital unlocks use IAP
-    return PaymentMethod.iap;
-  }
-
-  /// Profile/Settings payment strategy
-  PaymentMethod _getProfileSettingsPaymentMethod(PurchaseType purchaseType) {
-    // All profile customizations are digital goods
-    return PaymentMethod.iap;
+    return method;
   }
 
   /// Check if a purchase requires payout processing
@@ -152,5 +138,27 @@ class PaymentStrategyService {
     } else {
       return 'This purchase requires Stripe for payout processing to artists/organizers';
     }
+  }
+
+  /// Exposes the canonical policy table for tests and diagnostics.
+  Map<ArtbeatModule, Map<PurchaseType, PaymentMethod>> getPolicyTable() {
+    return _policyTable.map(
+      (module, policy) => MapEntry(
+        module,
+        policy.map((type, method) => MapEntry(type, method)),
+      ),
+    );
+  }
+
+  /// Validates every module has a policy for every purchase type.
+  bool hasCompletePolicyCoverage() {
+    for (final module in ArtbeatModule.values) {
+      final policy = _policyTable[module];
+      if (policy == null) return false;
+      for (final type in _allPurchaseTypes) {
+        if (!policy.containsKey(type)) return false;
+      }
+    }
+    return true;
   }
 }

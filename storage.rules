@@ -125,10 +125,11 @@ service firebase.storage {
     match /artwork_videos/{userId}/{artworkId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate video file types
-        (resource.contentType == null ||
-         resource.contentType.matches('video/*') ||
-         resource.contentType.matches('application/octet-stream')); // For files without proper MIME type
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('video/*') ||
+         request.resource.contentType.matches('application/octet-stream')); // For files without proper MIME type
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 
@@ -136,10 +137,11 @@ service firebase.storage {
     match /artwork_videos/{userId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate video file types
-        (resource.contentType == null ||
-         resource.contentType.matches('video/*') ||
-         resource.contentType.matches('application/octet-stream'));
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('video/*') ||
+         request.resource.contentType.matches('application/octet-stream'));
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 
@@ -152,10 +154,11 @@ service firebase.storage {
     match /artwork_audio/{userId}/{artworkId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate audio file types
-        (resource.contentType == null ||
-         resource.contentType.matches('audio/*') ||
-         resource.contentType.matches('application/octet-stream')); // For files without proper MIME type
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('audio/*') ||
+         request.resource.contentType.matches('application/octet-stream')); // For files without proper MIME type
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 
@@ -163,10 +166,11 @@ service firebase.storage {
     match /artwork_audio/{userId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate audio file types
-        (resource.contentType == null ||
-         resource.contentType.matches('audio/*') ||
-         resource.contentType.matches('application/octet-stream'));
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('audio/*') ||
+         request.resource.contentType.matches('application/octet-stream'));
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 
@@ -179,15 +183,16 @@ service firebase.storage {
     match /written_content/{userId}/{artworkId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate file types for written content
-        (resource.contentType == null ||
-         resource.contentType.matches('text/plain') ||
-         resource.contentType.matches('text/markdown') ||
-         resource.contentType.matches('application/pdf') ||
-         resource.contentType.matches('application/msword') ||
-         resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
-         resource.contentType.matches('application/rtf') ||
-         resource.contentType.matches('text/rtf'));
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('text/plain') ||
+         request.resource.contentType.matches('text/markdown') ||
+         request.resource.contentType.matches('application/pdf') ||
+         request.resource.contentType.matches('application/msword') ||
+         request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+         request.resource.contentType.matches('application/rtf') ||
+         request.resource.contentType.matches('text/rtf'));
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 
@@ -195,15 +200,16 @@ service firebase.storage {
     match /written_content/{userId}/{artworkId}/{chapterId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthorized() && request.auth.uid == userId &&
+        request.resource != null &&
         // Validate file types for written content
-        (resource.contentType == null ||
-         resource.contentType.matches('text/plain') ||
-         resource.contentType.matches('text/markdown') ||
-         resource.contentType.matches('application/pdf') ||
-         resource.contentType.matches('application/msword') ||
-         resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
-         resource.contentType.matches('application/rtf') ||
-         resource.contentType.matches('text/rtf'));
+        (request.resource.contentType == null ||
+         request.resource.contentType.matches('text/plain') ||
+         request.resource.contentType.matches('text/markdown') ||
+         request.resource.contentType.matches('application/pdf') ||
+         request.resource.contentType.matches('application/msword') ||
+         request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+         request.resource.contentType.matches('application/rtf') ||
+         request.resource.contentType.matches('text/rtf'));
       allow delete: if isAuthorized() && request.auth.uid == userId;
     }
 

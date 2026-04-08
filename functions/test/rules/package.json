@@ -1,0 +1,10 @@
+{
+  "name": "firestore-rules-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Isolated dependency set for Firestore rules emulator tests",
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.14.1"
+  }
+}

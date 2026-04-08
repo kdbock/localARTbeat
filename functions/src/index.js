@@ -18,6 +18,17 @@ const https = require("https");
 const crypto = require("crypto");
 const {google} = require("googleapis");
 const cors = require("cors")({origin: true});
+const {
+  createHttpError,
+  assertOwnedCustomerId,
+  assertStripeCustomerOwnership,
+} = require("./lib/paymentAuthGuards");
+const {isAdminByUserType} = require("./lib/adminRoleContract");
+const {
+  getRequestType,
+  getStatus,
+  evaluateSlaBreaches,
+} = require("./lib/dataRequestSla");
 
 // Set global options for all functions
 setGlobalOptions({
@@ -41,6 +52,38 @@ function getStripeClient() {
     throw new Error("STRIPE_SECRET_KEY is not configured");
   }
   return require("stripe")(secret);
+}
+
+async function requireAuthenticatedUid(request) {
+  const authHeader = request.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw createHttpError(401, "Unauthorized");
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  const decodedToken = await admin.auth().verifyIdToken(idToken);
+  return decodedToken.uid;
+}
+
+async function getUserStripeCustomerId(uid) {
+  const userDoc = await admin.firestore().collection("users").doc(uid).get();
+  const userData = userDoc.data() || {};
+  const stripeCustomerId = String(userData.stripeCustomerId || "").trim();
+  if (!stripeCustomerId) {
+    throw createHttpError(400, "Stripe customer is not configured for this user");
+  }
+  return stripeCustomerId;
+}
+
+async function requireOwnedCustomerId(uid, requestedCustomerId) {
+  const ownedCustomerId = await getUserStripeCustomerId(uid);
+  return assertOwnedCustomerId(ownedCustomerId, requestedCustomerId);
+}
+
+async function requireOwnedSubscription(stripe, subscriptionId, ownedCustomerId) {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  assertStripeCustomerOwnership(subscription.customer, ownedCustomerId);
+  return subscription;
 }
 
 function normalizeDisplayName(value) {
@@ -2689,8 +2732,6 @@ exports.createCustomer = onRequest(
     cors(request, response, async () => {
       try {
         console.log("🔍 createCustomer called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -2765,23 +2806,7 @@ exports.createSetupIntent = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        console.log("🔍 createSetupIntent called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
-
-        // Verify Firebase Auth token
-        const authHeader = request.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          console.log("❌ No valid auth header found");
-          return response.status(401).send({error: "Unauthorized"});
-        }
-
-        const idToken = authHeader.split("Bearer ")[1];
-        console.log("🔐 Token received, length:", idToken.length);
-
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const authUserId = decodedToken.uid;
-        console.log("✅ Auth successful for user:", authUserId);
+        const authUserId = await requireAuthenticatedUid(request);
 
         const stripe = getStripeClient();
 
@@ -2797,8 +2822,13 @@ exports.createSetupIntent = onRequest(
           });
         }
 
+        const ownedCustomerId = await requireOwnedCustomerId(
+          authUserId,
+          customerId
+        );
+
         const setupIntent = await stripe.setupIntents.create({
-          customer: customerId,
+          customer: ownedCustomerId,
           usage: "off_session",
         });
 
@@ -2808,7 +2838,7 @@ exports.createSetupIntent = onRequest(
         });
       } catch (error) {
         console.error("Error creating setup intent:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -2829,8 +2859,6 @@ exports.createPaymentIntent = onRequest(
     cors(request, response, async () => {
       try {
         console.log("🔍 createPaymentIntent called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -3395,23 +3423,7 @@ exports.getPaymentMethods = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        console.log("🔍 getPaymentMethods called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
-
-        // Verify Firebase Auth token
-        const authHeader = request.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          console.log("❌ No valid auth header found");
-          return response.status(401).send({error: "Unauthorized"});
-        }
-
-        const idToken = authHeader.split("Bearer ")[1];
-        console.log("🔐 Token received, length:", idToken.length);
-
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const authUserId = decodedToken.uid;
-        console.log("✅ Auth successful for user:", authUserId);
+        const authUserId = await requireAuthenticatedUid(request);
 
         const stripe = getStripeClient();
 
@@ -3427,9 +3439,14 @@ exports.getPaymentMethods = onRequest(
           });
         }
 
-        console.log("🔄 Getting payment methods for customer:", customerId);
+        const ownedCustomerId = await requireOwnedCustomerId(
+          authUserId,
+          customerId
+        );
+
+        console.log("🔄 Getting payment methods for customer:", ownedCustomerId);
         const paymentMethods = await stripe.paymentMethods.list({
-          customer: customerId,
+          customer: ownedCustomerId,
           type: "card",
         });
 
@@ -3440,7 +3457,7 @@ exports.getPaymentMethods = onRequest(
         });
       } catch (error) {
         console.error("❌ Error getting payment methods:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3454,23 +3471,7 @@ exports.updateCustomer = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        console.log("🔍 updateCustomer called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
-
-        // Verify Firebase Auth token
-        const authHeader = request.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          console.log("❌ No valid auth header found");
-          return response.status(401).send({error: "Unauthorized"});
-        }
-
-        const idToken = authHeader.split("Bearer ")[1];
-        console.log("🔐 Token received, length:", idToken.length);
-
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const authUserId = decodedToken.uid;
-        console.log("✅ Auth successful for user:", authUserId);
+        const authUserId = await requireAuthenticatedUid(request);
 
         const stripe = getStripeClient();
 
@@ -3486,6 +3487,11 @@ exports.updateCustomer = onRequest(
           });
         }
 
+        const ownedCustomerId = await requireOwnedCustomerId(
+          authUserId,
+          customerId
+        );
+
         const updateData = {};
         if (email) updateData.email = email;
         if (name) updateData.name = name;
@@ -3495,7 +3501,10 @@ exports.updateCustomer = onRequest(
           };
         }
 
-        const customer = await stripe.customers.update(customerId, updateData);
+        const customer = await stripe.customers.update(
+          ownedCustomerId,
+          updateData
+        );
 
         response.status(200).send({
           customer,
@@ -3503,7 +3512,7 @@ exports.updateCustomer = onRequest(
         });
       } catch (error) {
         console.error("Error updating customer:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3517,23 +3526,7 @@ exports.detachPaymentMethod = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
-        console.log("🔍 detachPaymentMethod called - Method:", request.method);
-        console.log("🔍 Headers:", JSON.stringify(request.headers, null, 2));
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
-
-        // Verify Firebase Auth token
-        const authHeader = request.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          console.log("❌ No valid auth header found");
-          return response.status(401).send({error: "Unauthorized"});
-        }
-
-        const idToken = authHeader.split("Bearer ")[1];
-        console.log("🔐 Token received, length:", idToken.length);
-
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const authUserId = decodedToken.uid;
-        console.log("✅ Auth successful for user:", authUserId);
+        const authUserId = await requireAuthenticatedUid(request);
 
         const stripe = getStripeClient();
 
@@ -3549,17 +3542,21 @@ exports.detachPaymentMethod = onRequest(
           });
         }
 
-        const paymentMethod = await stripe.paymentMethods.detach(
+        const ownedCustomerId = await getUserStripeCustomerId(authUserId);
+        const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+        assertStripeCustomerOwnership(paymentMethod.customer, ownedCustomerId);
+
+        const detachedPaymentMethod = await stripe.paymentMethods.detach(
           paymentMethodId
         );
 
         response.status(200).send({
-          paymentMethod,
+          paymentMethod: detachedPaymentMethod,
           success: true,
         });
       } catch (error) {
         console.error("Error detaching payment method:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3573,6 +3570,7 @@ exports.createSubscription = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
+        const authUserId = await requireAuthenticatedUid(request);
         const stripe = getStripeClient();
 
         if (request.method !== "POST") {
@@ -3587,8 +3585,13 @@ exports.createSubscription = onRequest(
           });
         }
 
+        const ownedCustomerId = await requireOwnedCustomerId(
+          authUserId,
+          customerId
+        );
+
         const subscription = await stripe.subscriptions.create({
-          customer: customerId,
+          customer: ownedCustomerId,
           items: [{price: priceId}],
           default_payment_method: paymentMethodId,
           metadata: metadata || {},
@@ -3608,7 +3611,7 @@ exports.createSubscription = onRequest(
         });
       } catch (error) {
         console.error("Error creating subscription:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3622,6 +3625,7 @@ exports.cancelSubscription = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
+        const authUserId = await requireAuthenticatedUid(request);
         const stripe = getStripeClient();
 
         if (request.method !== "POST") {
@@ -3635,6 +3639,9 @@ exports.cancelSubscription = onRequest(
             error: "Missing subscription ID",
           });
         }
+
+        const ownedCustomerId = await getUserStripeCustomerId(authUserId);
+        await requireOwnedSubscription(stripe, subscriptionId, ownedCustomerId);
 
         let subscription;
         if (cancelAtPeriodEnd) {
@@ -3651,7 +3658,7 @@ exports.cancelSubscription = onRequest(
         });
       } catch (error) {
         console.error("Error canceling subscription:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3665,6 +3672,7 @@ exports.changeSubscriptionTier = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
+        const authUserId = await requireAuthenticatedUid(request);
         const stripe = getStripeClient();
 
         if (request.method !== "POST") {
@@ -3680,8 +3688,11 @@ exports.changeSubscriptionTier = onRequest(
         }
 
         // Get current subscription
-        const subscription = await stripe.subscriptions.retrieve(
-          subscriptionId
+        const ownedCustomerId = await getUserStripeCustomerId(authUserId);
+        const subscription = await requireOwnedSubscription(
+          stripe,
+          subscriptionId,
+          ownedCustomerId
         );
 
         // Update subscription with new price
@@ -3704,7 +3715,7 @@ exports.changeSubscriptionTier = onRequest(
         });
       } catch (error) {
         console.error("Error changing subscription tier:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -3724,7 +3735,6 @@ exports.processGiftPayment = onRequest(
     cors(request, response, async () => {
       try {
         console.log("🎁 processGiftPayment called - Method:", request.method);
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -4357,7 +4367,6 @@ exports.processSubscriptionPayment = onRequest(
     cors(request, response, async () => {
       try {
         console.log("💳 processSubscriptionPayment called");
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -4455,7 +4464,6 @@ exports.processAdPayment = onRequest(
     cors(request, response, async () => {
       try {
         console.log("📢 processAdPayment called");
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -4552,7 +4560,6 @@ exports.processSponsorshipPayment = onRequest(
     cors(request, response, async () => {
       try {
         console.log("🤝 processSponsorshipPayment called");
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -4699,7 +4706,6 @@ exports.processCommissionPayment = onRequest(
     cors(request, response, async () => {
       try {
         console.log("🎨 processCommissionPayment called");
-        console.log("🔍 Body:", JSON.stringify(request.body, null, 2));
 
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
@@ -4977,6 +4983,7 @@ exports.requestRefund = onRequest(
   (request, response) => {
     cors(request, response, async () => {
       try {
+        const authUserId = await requireAuthenticatedUid(request);
         const stripe = getStripeClient();
 
         if (request.method !== "POST") {
@@ -4991,6 +4998,14 @@ exports.requestRefund = onRequest(
             error: "Missing required fields",
           });
         }
+
+        if (userId !== authUserId) {
+          return response.status(403).send({error: "Forbidden"});
+        }
+
+        const ownedCustomerId = await getUserStripeCustomerId(authUserId);
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+        assertStripeCustomerOwnership(paymentIntent.customer, ownedCustomerId);
 
         // Create refund in Stripe
         const refundOptions = {
@@ -5094,7 +5109,7 @@ exports.requestRefund = onRequest(
         });
       } catch (error) {
         console.error("Error requesting refund:", error);
-        response.status(500).send({error: error.message});
+        response.status(error?.status || 500).send({error: error.message});
       }
     });
   }
@@ -5919,10 +5934,7 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
         return response.status(401).send({error: "Unauthorized: Invalid token"});
       }
 
-      // Check if user is admin (you may want to check custom claims or a Firestore document)
-      const userDoc = await admin.firestore().collection("users").doc(decodedToken.uid).get();
-      const userData = userDoc.data();
-      if (!userData || userData.role !== "admin") {
+      if (!(await isAdminUser(decodedToken.uid))) {
         return response.status(403).send({error: "Forbidden: Admin access required"});
       }
 
@@ -5981,7 +5993,7 @@ async function isAdminUser(uid) {
   const userDoc = await admin.firestore().collection("users").doc(uid).get();
   if (!userDoc.exists) return false;
   const data = userDoc.data() || {};
-  return data.userType === "admin" || data.role === "admin";
+  return isAdminByUserType(data);
 }
 
 async function runDeletionStep(summary, step, operation) {
@@ -6456,6 +6468,168 @@ exports.processDataDeletionRequest = onCall(
         `Deletion pipeline failed: ${error?.message || String(error)}`
       );
     }
+  }
+);
+
+async function setDataRequestAlert({
+  requestId,
+  userId,
+  requestType,
+  status,
+  alertType,
+  severity,
+  message,
+  dueAt = null,
+  active,
+}) {
+  const alertRef = admin.firestore()
+    .collection("dataRequestAlerts")
+    .doc(`${requestId}_${alertType}`);
+
+  if (active) {
+    await alertRef.set({
+      requestId,
+      userId,
+      requestType,
+      status,
+      alertType,
+      severity,
+      message,
+      dueAt: dueAt || null,
+      active: true,
+      triggeredAt: admin.firestore.FieldValue.serverTimestamp(),
+      resolvedAt: null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, {merge: true});
+    return;
+  }
+
+  await alertRef.set({
+    requestId,
+    userId,
+    requestType,
+    status,
+    alertType,
+    active: false,
+    resolvedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, {merge: true});
+}
+
+exports.onDataRequestCreated = onDocumentCreated(
+  "dataRequests/{requestId}",
+  async (event) => {
+    const requestId = event.params.requestId;
+    const data = event.data?.data() || {};
+    const requestType = getRequestType(data);
+    const status = getStatus(data) || "pending";
+    const userId = String(data.userId || "").trim();
+
+    if (!requestId || requestType !== "deletion" || status !== "pending") {
+      return;
+    }
+
+    const requestRef = admin.firestore().collection("dataRequests").doc(requestId);
+    await requestRef.set({
+      operationalQueuedAt: admin.firestore.FieldValue.serverTimestamp(),
+      operationalQueueStatus: "pending_admin_processing",
+      operationalQueueSource: "onDataRequestCreated",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, {merge: true});
+
+    await admin.firestore().collection("dataRequestAudit").add({
+      requestId,
+      userId: userId || null,
+      action: "deletion_request_queued",
+      performedBy: "system",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+);
+
+exports.monitorDataRequestSla = onSchedule(
+  {
+    schedule: "every 1 hours",
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 1,
+  },
+  async () => {
+    const snapshot = await admin.firestore()
+      .collection("dataRequests")
+      .where("status", "in", ["pending", "in_review", "fulfilled", "denied"])
+      .get();
+
+    if (snapshot.empty) return;
+
+    const now = new Date();
+    const counts = {
+      pending: 0,
+      in_review: 0,
+      fulfilled: 0,
+      denied: 0,
+      ackOverdue: 0,
+      completionOverdue: 0,
+    };
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data() || {};
+      const requestId = doc.id;
+      const userId = String(data.userId || "").trim() || null;
+      const requestType = getRequestType(data) || "unknown";
+      const status = getStatus(data) || "unknown";
+      if (Object.prototype.hasOwnProperty.call(counts, status)) {
+        counts[status] += 1;
+      }
+
+      const sla = evaluateSlaBreaches(data, now);
+
+      if (sla.ackOverdue) {
+        counts.ackOverdue += 1;
+      }
+      await setDataRequestAlert({
+        requestId,
+        userId,
+        requestType,
+        status,
+        alertType: "ack_overdue",
+        severity: "high",
+        message: "Data request acknowledgment SLA missed.",
+        dueAt: sla.ackDueAt,
+        active: sla.ackOverdue,
+      });
+
+      if (sla.completionOverdue) {
+        counts.completionOverdue += 1;
+      }
+      await setDataRequestAlert({
+        requestId,
+        userId,
+        requestType,
+        status,
+        alertType: "completion_overdue",
+        severity: "critical",
+        message: "Data request completion SLA missed.",
+        dueAt: sla.completionDueAt,
+        active: sla.completionOverdue,
+      });
+    }
+
+    await admin.firestore().collection("opsMetrics").doc("dataRequestSla").set({
+      stateCounts: {
+        pending: counts.pending,
+        in_review: counts.in_review,
+        fulfilled: counts.fulfilled,
+        denied: counts.denied,
+      },
+      overdueCounts: {
+        acknowledgement: counts.ackOverdue,
+        completion: counts.completionOverdue,
+      },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, {merge: true});
+
+    logger.info("data request SLA monitor completed", counts);
   }
 );
 
