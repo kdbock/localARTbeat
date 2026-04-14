@@ -2,7 +2,7 @@ name: artbeat
 description: "Local ARTbeat - A modular Flutter application for artists, galleries, and art lovers."
 publish_to: "none"
 
-version: 2.6.17+122
+version: 2.6.17+123
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
@@ -126,7 +126,7 @@ dev_dependencies:
   build_test: ^3.5.5
   fake_cloud_firestore: ^4.0.0
   firebase_auth_mocks: ^0.15.1
-  firebase_auth_platform_interface: any
+  firebase_auth_platform_interface: ^8.1.8
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

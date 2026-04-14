@@ -60,4 +60,4 @@ dev_dependencies:
   mockito: ^5.4.2
   build_runner: ^2.4.9
   fake_cloud_firestore: ^4.0.0
-  cloud_firestore_platform_interface: any
+  cloud_firestore_platform_interface: ^7.1.0

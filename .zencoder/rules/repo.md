@@ -55,11 +55,8 @@ flutter pub get
 # Run the app in development mode
 flutter run
 
-# Build for Android
-./scripts/build_android.sh
-
-# Build for iOS
-./scripts/build_ios.sh
+# Build production artifacts
+RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh all
 ```
 
 ## Testing

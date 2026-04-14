@@ -11,6 +11,7 @@ import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
 import '../routing/app_routes.dart';
+import '../utils/logger.dart';
 
 /// Splash screen that matches the "Quest / Glass / Neon" theme.
 /// - Keeps your existing auth + navigation logic
@@ -135,7 +136,13 @@ class _SplashScreenState extends State<SplashScreen>
         AppRoutes.dashboard,
         (Route<dynamic> route) => false,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.warning(
+        'Splash navigation fallback triggered after navigation error.',
+        logger: 'SplashScreen',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
       FocusScope.of(context).unfocus();
@@ -152,10 +159,20 @@ class _SplashScreenState extends State<SplashScreen>
         await UserSyncHelper.ensureUserDocumentExists().timeout(
           const Duration(seconds: 5),
         );
-      } on TimeoutException {
-        // ignore
-      } catch (_) {
-        // ignore
+      } on TimeoutException catch (error, stackTrace) {
+        AppLogger.warning(
+          'User sync timed out during splash background sync.',
+          logger: 'SplashScreen',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      } catch (error, stackTrace) {
+        AppLogger.warning(
+          'User sync failed during splash background sync.',
+          logger: 'SplashScreen',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     });
   }

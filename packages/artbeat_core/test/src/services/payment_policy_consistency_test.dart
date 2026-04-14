@@ -28,6 +28,54 @@ void main() {
         PaymentMethod.stripe,
       );
     });
-  });
 
+    test('keeps payout modules on Stripe for all purchase types', () {
+      const payoutModules = <ArtbeatModule>[
+        ArtbeatModule.artist,
+        ArtbeatModule.events,
+      ];
+
+      for (final module in payoutModules) {
+        for (final purchaseType in PurchaseType.values) {
+          expect(
+            strategy.getPaymentMethod(purchaseType, module),
+            PaymentMethod.stripe,
+            reason: 'Expected $module/$purchaseType to remain Stripe-routed',
+          );
+          expect(
+            strategy.requiresPayout(module, purchaseType),
+            isTrue,
+            reason: 'Expected $module/$purchaseType to require payout flow',
+          );
+        }
+      }
+    });
+
+    test('keeps app-store-governed modules on IAP for all purchase types', () {
+      const iapModules = <ArtbeatModule>[
+        ArtbeatModule.core,
+        ArtbeatModule.ads,
+        ArtbeatModule.messaging,
+        ArtbeatModule.capture,
+        ArtbeatModule.artWalk,
+        ArtbeatModule.profile,
+        ArtbeatModule.settings,
+      ];
+
+      for (final module in iapModules) {
+        for (final purchaseType in PurchaseType.values) {
+          expect(
+            strategy.getPaymentMethod(purchaseType, module),
+            PaymentMethod.iap,
+            reason: 'Expected $module/$purchaseType to remain IAP-routed',
+          );
+          expect(
+            strategy.requiresPayout(module, purchaseType),
+            isFalse,
+            reason: 'Expected $module/$purchaseType to avoid payout flow',
+          );
+        }
+      }
+    });
+  });
 }

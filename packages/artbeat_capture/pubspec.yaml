@@ -40,7 +40,7 @@ dependencies:
   shared_preferences: ^2.3.3
   easy_localization: ^3.0.7
 
-  intl: any
+  intl: ^0.20.2
 flutter:
   uses-material-design: true
 
@@ -50,8 +50,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mockito: ^5.4.4
   build_runner: ^2.4.12
-  camera_platform_interface: any
-  image_picker_platform_interface: any
+  camera_platform_interface: ^2.12.0
+  image_picker_platform_interface: ^2.11.1
   plugin_platform_interface: ^2.1.8
-  cloud_firestore_platform_interface: any
-  connectivity_plus_platform_interface: any
+  cloud_firestore_platform_interface: ^7.1.0
+  connectivity_plus_platform_interface: ^2.0.1

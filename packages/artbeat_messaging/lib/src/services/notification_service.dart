@@ -70,7 +70,13 @@ class NotificationService {
         settings: settings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.debug(
+        'Falling back to legacy local notifications initialize signature.',
+        logger: 'MessagingNotifications',
+        error: error,
+        stackTrace: stackTrace,
+      );
       await plugin.initialize(
         settings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
@@ -94,7 +100,13 @@ class NotificationService {
         notificationDetails: notificationDetails,
         payload: payload,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.debug(
+        'Falling back to legacy local notifications show signature.',
+        logger: 'MessagingNotifications',
+        error: error,
+        stackTrace: stackTrace,
+      );
       await plugin.show(id, title, body, notificationDetails, payload: payload);
     }
   }
@@ -118,7 +130,13 @@ class NotificationService {
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.debug(
+        'Falling back to legacy local notifications zonedSchedule signature.',
+        logger: 'MessagingNotifications',
+        error: error,
+        stackTrace: stackTrace,
+      );
       await plugin.zonedSchedule(
         id,
         title,
@@ -145,7 +163,13 @@ class NotificationService {
         settings: settings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.debug(
+        'Falling back to legacy iOS local notifications initialize signature.',
+        logger: 'MessagingNotifications',
+        error: error,
+        stackTrace: stackTrace,
+      );
       await iosPlugin.initialize(
         settings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
@@ -157,7 +181,13 @@ class NotificationService {
     final dynamic plugin = _localNotifications;
     try {
       await plugin.cancel(id: notificationId);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.debug(
+        'Falling back to legacy local notifications cancel signature.',
+        logger: 'MessagingNotifications',
+        error: error,
+        stackTrace: stackTrace,
+      );
       await plugin.cancel(notificationId);
     }
   }

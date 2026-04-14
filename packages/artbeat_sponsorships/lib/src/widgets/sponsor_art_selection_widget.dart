@@ -38,7 +38,13 @@ class _SponsorArtSelectionWidgetState extends State<SponsorArtSelectionWidget> {
           _isLoading = false;
         });
       }
-    } on Exception catch (_) {
+    } on Exception catch (error, stackTrace) {
+      AppLogger.warning(
+        'SponsorArtSelectionWidget failed to load capture options.',
+        logger: 'Sponsorships',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (mounted) {
         setState(() => _isLoading = false);
       }

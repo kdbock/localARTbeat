@@ -104,8 +104,13 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
           _feedItems.addAll(moreItems);
         });
       }
-    } on Exception {
-      // Handle pagination error silently
+    } on Exception catch (error, stackTrace) {
+      AppLogger.warning(
+        'SocialFeedWidget pagination request failed; keeping current feed state.',
+        logger: 'Events',
+        error: error,
+        stackTrace: stackTrace,
+      );
     } finally {
       setState(() {
         _isLoading = false;

@@ -19,7 +19,8 @@ class AdminRouteHandler {
     if (adminRoute != null) {
       return _createGuardedRoute(
         settings: settings,
-        childBuilder: (context) => _buildResolvedRouteWidget(adminRoute, context),
+        childBuilder: (context) =>
+            _buildResolvedRouteWidget(adminRoute, context),
       );
     }
 
@@ -67,15 +68,13 @@ class AdminRouteHandler {
   Route<dynamic> _createGuardedRoute({
     required RouteSettings settings,
     required WidgetBuilder childBuilder,
-  }) {
-    return MaterialPageRoute(
-      builder: (context) => _AdminRouteAccessGate(
-        adminAccessChecker: _adminAccessChecker,
-        childBuilder: childBuilder,
-      ),
-      settings: settings,
-    );
-  }
+  }) => MaterialPageRoute(
+    builder: (context) => _AdminRouteAccessGate(
+      adminAccessChecker: _adminAccessChecker,
+      childBuilder: childBuilder,
+    ),
+    settings: settings,
+  );
 
   static Widget _buildResolvedRouteWidget(
     Route<dynamic> resolvedRoute,
@@ -120,35 +119,26 @@ class _AdminRouteAccessGate extends StatelessWidget {
   final WidgetBuilder childBuilder;
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: adminAccessChecker(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+  Widget build(BuildContext context) => FutureBuilder<bool>(
+    future: adminAccessChecker(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState != ConnectionState.done) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
 
-        if (snapshot.data == true) {
-          return childBuilder(context);
-        }
+      if (snapshot.data ?? false) {
+        return childBuilder(context);
+      }
 
-        return const _AdminAccessDeniedScreen();
-      },
-    );
-  }
+      return const _AdminAccessDeniedScreen();
+    },
+  );
 }
 
 class _AdminAccessDeniedScreen extends StatelessWidget {
   const _AdminAccessDeniedScreen();
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Admin access required'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: Text('Admin access required')));
 }

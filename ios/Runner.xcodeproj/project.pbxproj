@@ -521,7 +521,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "";
 				DEVELOPMENT_TEAM = H49R32NPY6;
 				ENABLE_BITCODE = "$(inherited)";
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -722,7 +722,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "";
 				DEVELOPMENT_TEAM = H49R32NPY6;
 				ENABLE_BITCODE = "$(inherited)";
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -755,7 +755,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "";
 				DEVELOPMENT_TEAM = H49R32NPY6;
 				ENABLE_BITCODE = "$(inherited)";
 				INFOPLIST_FILE = Runner/Info.plist;

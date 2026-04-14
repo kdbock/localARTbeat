@@ -2,6 +2,8 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
+import '../utils/logger.dart';
+
 /// Handles Firebase App Check configuration ONLY
 class SecureFirebaseConfig {
   const SecureFirebaseConfig._();
@@ -98,7 +100,14 @@ class SecureFirebaseConfig {
               if (parts.length >= 2) {
                 debugPrint('🛡️ Token payload length: ${parts[1].length}');
               }
-            } catch (_) {}
+            } catch (error, stackTrace) {
+              AppLogger.debug(
+                'Unable to parse App Check token payload metadata.',
+                logger: 'AppCheck',
+                error: error,
+                stackTrace: stackTrace,
+              );
+            }
           }
           debugPrint('🛡️ ============================================');
         },
@@ -172,7 +181,13 @@ class SecureFirebaseConfig {
     try {
       await FirebaseStorage.instance.ref('test').listAll();
       return true;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.warning(
+        'Firebase Storage App Check probe failed.',
+        logger: 'AppCheck',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }

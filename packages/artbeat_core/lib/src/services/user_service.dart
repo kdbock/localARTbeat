@@ -372,7 +372,13 @@ class UserService extends ChangeNotifier {
     String? authToken;
     try {
       authToken = await auth.currentUser?.getIdToken();
-    } catch (_) {}
+    } catch (error, stackTrace) {
+      AppLogger.warning(
+        'Failed to fetch auth token for profile image upload diagnostics.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
 
     debugPrint(
       '👤 UserService uploadProfileImage: currentUid=${auth.currentUser?.uid}, targetUserId=$targetUserId, path=$storagePath, hasAuthToken=${authToken?.isNotEmpty == true}',

@@ -11,8 +11,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  architecture_drift:
+    name: Architecture Drift Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check sibling dependency drift
+        run: python3 tools/architecture/check_sibling_dependency_drift.py
+
+      - name: Check package dependency inventory
+        run: python3 tools/architecture/generate_package_dependency_inventory.py --check
+
   test:
     runs-on: ubuntu-latest
+    needs: architecture_drift
     strategy:
       fail-fast: false
       matrix:
@@ -75,7 +94,7 @@ jobs:
 
   integration_test:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [architecture_drift, test]
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
 
     steps:

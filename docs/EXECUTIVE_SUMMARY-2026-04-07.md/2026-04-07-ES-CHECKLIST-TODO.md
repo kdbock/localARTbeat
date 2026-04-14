@@ -66,6 +66,105 @@ Purpose: turn the audit into an execution checklist phased by risk so release co
 - [ ] Manual verification: cross-account payment and notification abuse attempts are rejected.
 - [ ] Security sign-off recorded in release notes.
 
+#### P0 Manual Abuse Verification Runbook (Staging)
+- Run date: `2026-04-08`
+- Environment: `staging` (`wordnerd-artbeat`)
+- Test identities:
+  - `attackerUserId`: `TODO_FILL`
+  - `victimUserId`: `TODO_FILL`
+  - `attackerAuthToken`: `TODO_FILL`
+  - `victimStripeCustomerId`: `TODO_FILL`
+  - `victimSubscriptionId`: `TODO_FILL`
+  - `victimPaymentMethodId`: `TODO_FILL`
+  - `victimPaymentIntentId`: `TODO_FILL`
+
+Expected result for each step: HTTP `403` or rules `PERMISSION_DENIED` with no victim-side state mutation.
+
+1. Cross-user payment methods read abuse (`getPaymentMethods`)
+```bash
+curl -i -X POST \
+  "https://us-central1-wordnerd-artbeat.cloudfunctions.net/getPaymentMethods" \
+  -H "Authorization: Bearer TODO_ATTACKER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"customerId":"TODO_VICTIM_CUSTOMER_ID"}'
+```
+
+2. Cross-user subscription cancel abuse (`cancelSubscription`)
+```bash
+curl -i -X POST \
+  "https://us-central1-wordnerd-artbeat.cloudfunctions.net/cancelSubscription" \
+  -H "Authorization: Bearer TODO_ATTACKER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"subscriptionId":"TODO_VICTIM_SUBSCRIPTION_ID"}'
+```
+
+3. Cross-user refund abuse (`requestRefund`)
+```bash
+curl -i -X POST \
+  "https://us-central1-wordnerd-artbeat.cloudfunctions.net/requestRefund" \
+  -H "Authorization: Bearer TODO_ATTACKER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"paymentIntentId":"TODO_VICTIM_PAYMENT_INTENT_ID","reason":"fraudulent"}'
+```
+
+4. Cross-user payment method detach abuse (`detachPaymentMethod`)
+```bash
+curl -i -X POST \
+  "https://us-central1-wordnerd-artbeat.cloudfunctions.net/detachPaymentMethod" \
+  -H "Authorization: Bearer TODO_ATTACKER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"paymentMethodId":"TODO_VICTIM_PAYMENT_METHOD_ID"}'
+```
+
+Automation helper (recommended):
+```bash
+tools/security/run_p0_cross_account_abuse_checks.sh tools/security/p0-abuse-checks.env
+```
+Template env file:
+- `tools/security/p0-abuse-checks.env.example`
+Required env vars:
+- `ATTACKER_TOKEN`
+- `VICTIM_CUSTOMER_ID`
+- `VICTIM_SUBSCRIPTION_ID`
+- `VICTIM_PAYMENT_INTENT_ID`
+- `VICTIM_PAYMENT_METHOD_ID`
+
+5. Cross-user Firestore notification spoof abuse (emulator/rules harness)
+```bash
+cd functions && npm run test:rules
+```
+
+Current execution notes (2026-04-08):
+- Attempted at `2026-04-08T20:19:15Z`.
+- Initial blocker: shell runtime missing `node` on PATH.
+- Re-run at `2026-04-08T20:21:00Z` with Node 20 path + emulator permissions succeeded:
+  - Command: `cd functions && PATH=/opt/homebrew/opt/node@20/bin:$PATH npm run test:rules`
+  - Result: `7/7 pass`, exit code `0`.
+  - Abuse-path assertions observed `PERMISSION_DENIED` on denied cases (expected), including notification spoof paths.
+- Re-run at `2026-04-08T20:29:28Z` under elevated terminal permissions (sandbox port/config limits) also succeeded:
+  - Command: `cd functions && PATH=/opt/homebrew/opt/node@20/bin:$PATH npm run test:rules`
+  - Result: `7/7 pass`, exit code `0`.
+  - Confirms rules abuse harness remains green after latest hardening updates.
+- Cross-account Cloud Functions abuse checks automation run attempted:
+  - Command: `tools/security/run_p0_cross_account_abuse_checks.sh`
+  - Result: blocked pending required credentials/env vars (listed above).
+  - Note: script now exits non-zero when any endpoint does not return expected `403` (to support CI/manual gate use).
+
+Evidence capture fields (fill per step):
+- Step:
+- Timestamp (UTC):
+- Command:
+- Response code / error:
+- Victim state checked:
+- Result: `PASS` / `FAIL`
+
+#### Release Sign-Off Capture (Required)
+- Security Owner: `TODO_FILL` | Date: `TODO_FILL` | Decision: `TODO_FILL`
+- Product Owner: `TODO_FILL` | Date: `TODO_FILL` | Decision: `TODO_FILL`
+- Legal/Compliance Owner: `TODO_FILL` | Date: `TODO_FILL` | Decision: `TODO_FILL`
+- Residual Risk Accepted (if any): `TODO_FILL`
+- Release Notes Link: `TODO_FILL`
+
 ---
 
 ## Phase 1 - High Priority Hardening (P1)
@@ -104,31 +203,86 @@ Purpose: turn the audit into an execution checklist phased by risk so release co
 - [x] Document canonical Cloud Functions entrypoint and ownership.
 
 ### P2.2 Dependency Risk Reduction
-- [ ] Replace broad `any` pins with bounded versions where practical.
+- [x] Replace broad `any` pins with bounded versions where practical.
+  - Evidence (2026-04-08):
+    - Replaced first-party `any` constraints with bounded ranges across root and package `pubspec.yaml` files (left `third_party/pub_overrides/**` as vendor-managed).
+    - Resolution verification passed:
+      - `flutter pub get` success in root plus packages:
+        - `artbeat_core`, `artbeat_auth`, `artbeat_art_walk`, `artbeat_profile`, `artbeat_community`, `artbeat_events`, `artbeat_artist`, `artbeat_capture`, `artbeat_messaging`, `artbeat_sponsorships`.
 - [x] Eliminate high/critical dependency findings in immediate release path.
-- [ ] Add dependency drift checks in CI.
+- [x] Add dependency drift checks in CI.
+  - Evidence (2026-04-08):
+    - Added `architecture_drift` job in `.github/workflows/tests.yml` running:
+      - `python3 tools/architecture/check_sibling_dependency_drift.py`
+      - `python3 tools/architecture/generate_package_dependency_inventory.py --check`
+    - Local verification:
+      - `Sibling dependency drift check passed.`
+      - `Package dependency inventory is up to date.`
 
 ### P2.3 Observability and Failure Transparency
-- [ ] Replace silent catches in deferred startup with structured logs/telemetry.
-- [ ] Keep graceful UX fallbacks but emit actionable diagnostics.
+- [x] Replace silent catches in deferred startup with structured logs/telemetry.
+  - Status: deferred startup silent catches replaced with structured `AppLogger.warning/error` diagnostics in `lib/src/bootstrap/deferred_startup.dart` (2026-04-08).
+- [x] Keep graceful UX fallbacks but emit actionable diagnostics.
+  - Status: sponsorship fallback paths now emit structured warnings while preserving UX fallback behavior:
+    - `packages/artbeat_sponsorships/lib/src/widgets/sponsor_banner.dart`
+    - `packages/artbeat_sponsorships/lib/src/widgets/sponsor_art_selection_widget.dart`
+  - Status: events feed pagination fallback now emits structured warning diagnostics (no UX regression):
+    - `packages/artbeat_events/lib/src/widgets/social_feed_widget.dart`
+  - Status: splash startup fallbacks now emit structured warning diagnostics (no navigation behavior change):
+    - `packages/artbeat_core/lib/src/screens/splash_screen.dart`
+  - Status: user-service upload diagnostic fallback now emits structured warning diagnostics:
+    - `packages/artbeat_core/lib/src/services/user_service.dart`
+  - Status: App Check configuration/probe silent catches replaced with structured diagnostics:
+    - `packages/artbeat_core/lib/src/firebase/secure_firebase_config.dart`
+  - Status: messaging notification compatibility fallbacks now emit structured debug diagnostics:
+    - `packages/artbeat_messaging/lib/src/services/notification_service.dart`
 
 ### P2.4 Focused Coverage Expansion
-- [ ] Add high-risk integration tests for package seams (payments, moderation, admin actions, data rights).
-- [ ] Add regression tests for policy-critical flows before release cut.
+- [x] Add high-risk integration tests for package seams (payments, moderation, admin actions, data rights).
+  - Evidence (2026-04-08):
+    - Added `artbeat_ads` seam test for purchase-verification failure recovery flow:
+      - `packages/artbeat_ads/test/src/services/local_ad_service_test.dart`
+      - Verifies `createPurchasedAd` writes `localAdPurchaseRecoveries` fallback record with expected metadata/status.
+    - Added `artbeat_ads` moderation/admin seam tests:
+      - `packages/artbeat_ads/test/src/services/local_ad_service_test.dart`
+      - Verifies `getAdsForReview` includes only pending/flagged ads.
+      - Verifies `updateAdStatus` persists admin moderation metadata (`reviewedBy`, `reviewedAt`, `rejectionReason`).
+    - Added `artbeat_sponsorships` seam test for active placement + radius targeting:
+      - `packages/artbeat_sponsorships/test/sponsor_service_test.dart`
+      - Verifies invalid placement rejection and in-radius/out-of-radius behavior for `getSponsorForPlacement`.
+- [x] Add regression tests for policy-critical flows before release cut.
+  - Evidence (2026-04-08):
+    - Expanded `packages/artbeat_core/test/src/services/payment_policy_consistency_test.dart` with policy-boundary regression coverage:
+      - payout modules (`artist`, `events`) remain Stripe-routed for all purchase types.
+      - app-store-governed modules (`core`, `ads`, `messaging`, `capture`, `artWalk`, `profile`, `settings`) remain IAP-routed for all purchase types.
+      - includes `requiresPayout` assertions to detect routing drift in payout handling.
+    - Verification:
+      - `flutter test packages/artbeat_core/test/src/services/payment_policy_consistency_test.dart` (`pass`).
 
 ### P2 Exit Criteria
-- [ ] Deployed code path is unambiguous.
-- [ ] Critical modules have deterministic dependency behavior.
-- [ ] Silent failure paths are observable.
+- [x] Deployed code path is unambiguous.
+- [x] Critical modules have deterministic dependency behavior.
+- [x] Silent failure paths are observable.
 
 ---
 
 ## Phase 3 - Re-Review and Confidence Raise
 
 ### Re-Audit Delta
-- [ ] Re-run targeted security audit on payment/admin/rules surfaces.
-- [ ] Re-run legal/compliance evidence check against implemented controls.
-- [ ] Re-score release confidence using post-fix evidence.
+- [x] Re-run targeted security audit on payment/admin/rules surfaces.
+  - Evidence (2026-04-08):
+    - `flutter test test/admin_route_handler_guard_test.dart` -> pass (2/2).
+    - `flutter test packages/artbeat_core/test/src/services/payment_policy_consistency_test.dart` -> pass.
+    - `flutter test packages/artbeat_sponsorships/test/sponsor_service_test.dart` -> pass.
+    - `flutter test packages/artbeat_ads/test/src/services/local_ad_service_test.dart` -> pass.
+    - `python3 tools/architecture/check_sibling_dependency_drift.py` -> pass.
+    - `python3 tools/architecture/generate_package_dependency_inventory.py --check` -> pass.
+    - `cd functions && PATH=/opt/homebrew/opt/node@20/bin:$PATH npm run test:rules` -> pass (7/7).
+- [x] Re-run legal/compliance evidence check against implemented controls.
+  - Engineering reconciliation complete against checklist evidence for payment authz, rules tightening, consent/data-rights workflow wiring, and audit log minimization.
+  - Remaining required human governance artifacts are tracked in "Release Sign-Off Capture (Required)".
+- [x] Re-score release confidence using post-fix evidence.
+  - Updated engineering confidence: `7.5/10` (as of 2026-04-08), blocked from `8/10+` by pending manual cross-account Cloud Functions abuse verification credentials and formal owner sign-offs.
 
 ### Release Gate
 - [ ] No open P0 items.
@@ -140,13 +294,13 @@ Purpose: turn the audit into an execution checklist phased by risk so release co
 ## Suggested Execution Order by Team
 
 ### Backend/Functions
-- [ ] P0.1, P0.2 (functions side), P1.4
+- [x] P0.1, P0.2 (functions side), P1.4
 
 ### Firebase Rules
-- [ ] P0.3, P1.1
+- [x] P0.3, P1.1
 
 ### App Shell / Core
-- [ ] P1.2, P1.3, P2.3
+- [x] P1.2, P1.3, P2.3
 
 ### Release/QA
 - [ ] P0/P1 test harness updates, Phase 3 re-review

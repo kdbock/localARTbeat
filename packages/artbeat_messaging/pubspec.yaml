@@ -42,7 +42,7 @@ dependencies:
   # following page: https://dart.dev/tools/pub/pubspec
 
   # The following section is specific to Flutter packages.
-  flutter_local_notifications: any
+  flutter_local_notifications: ^21.0.0
 flutter:
   uses-material-design: true
 
@@ -84,5 +84,5 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.9
   fake_cloud_firestore: ^4.0.0
-  cloud_firestore_platform_interface: any
-  firebase_auth_platform_interface: any
+  cloud_firestore_platform_interface: ^7.1.0
+  firebase_auth_platform_interface: ^8.1.8

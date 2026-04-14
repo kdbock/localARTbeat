@@ -1,108 +1,135 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# ArtBeat Build Script with Secure Configuration
-# This script helps build the app with proper environment variables
+# Canonical production build script for Android and iOS.
+#
+# Usage examples:
+#   RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh android
+#   RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh ios --clean
+#   RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh all
+#   RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh ios-ipa
+#   RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... GOOGLE_MAPS_API_KEY=... ./scripts/build_secure.sh all-ipa
 
-set -e
+set -euo pipefail
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print colored output
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}ERROR: $1${NC}" >&2
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${GREEN}OK: $1${NC}"
 }
 
 print_info() {
-    echo -e "${GREEN}ℹ️  $1${NC}"
+    echo -e "${YELLOW}INFO: $1${NC}"
 }
 
-# Check if .env exists
-if [ ! -f ".env" ]; then
-    print_error ".env file not found!"
-    print_info "Please create .env with your API keys:"
-    echo ""
-    echo "  cp .env.example .env"
-    echo ""
+usage() {
+    cat <<EOF
+Usage: ./scripts/build_secure.sh [android|ios|all|ios-ipa|all-ipa] [--clean] [--export-options-plist=path]
+
+Options:
+    android    Build Android release AAB.
+    ios        Build iOS release (no codesign).
+    all        Build both Android and iOS (default).
+    ios-ipa    Build signed iOS IPA for Transporter/App Store Connect upload.
+    all-ipa    Build Android AAB and signed iOS IPA.
+    --clean    Run flutter clean before building.
+    --export-options-plist=path
+               Export options plist for IPA export (default: ios/export_options.plist).
+
+Required environment variables:
+    GOOGLE_MAPS_API_KEY
+    RELEASE_STRIPE_PUBLISHABLE_KEY (preferred) or STRIPE_PUBLISHABLE_KEY
+
+Optional environment variables:
+    ENVIRONMENT (defaults to production)
+    FIREBASE_REGION
+    FIREBASE_PROJECT_ID
+    FIREBASE_FUNCTIONS_BASE_URL
+    API_BASE_URL
+EOF
+}
+
+if [[ ! -f "pubspec.yaml" ]]; then
+    print_error "Run this script from the repository root."
     exit 1
 fi
 
-# Load environment variables
-print_info "Loading environment variables from .env..."
-set -a
-source .env
-set +a
-
-# Validate required variables
-if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
-    print_error "GOOGLE_MAPS_API_KEY not set in .env"
+if ! command -v flutter >/dev/null 2>&1; then
+    print_error "flutter is not installed or not on PATH."
     exit 1
 fi
 
-if [ -z "$STRIPE_PUBLISHABLE_KEY" ]; then
-    print_error "STRIPE_PUBLISHABLE_KEY not set in .env"
+TARGET="all"
+DO_CLEAN=false
+EXPORT_OPTIONS_PLIST="ios/export_options.plist"
+
+for arg in "$@"; do
+    case "$arg" in
+        android|ios|all|ios-ipa|all-ipa)
+            TARGET="$arg"
+            ;;
+        --clean)
+            DO_CLEAN=true
+            ;;
+        --export-options-plist=*)
+            EXPORT_OPTIONS_PLIST="${arg#*=}"
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            print_error "Unknown argument: $arg"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+ENVIRONMENT="${ENVIRONMENT:-production}"
+if [[ "$ENVIRONMENT" != "production" ]]; then
+    print_error "ENVIRONMENT must be production for this release script (current: $ENVIRONMENT)."
     exit 1
 fi
 
-# Set default environment if not specified
-if [ -z "$ENVIRONMENT" ]; then
-    ENVIRONMENT="development"
-    print_warning "ENVIRONMENT not set, defaulting to development"
+# Fall back to .env when required values are not already exported.
+if [[ ( -z "${GOOGLE_MAPS_API_KEY:-}" || ( -z "${RELEASE_STRIPE_PUBLISHABLE_KEY:-}" && -z "${STRIPE_PUBLISHABLE_KEY:-}" ) ) && -f ".env" ]]; then
+    print_info "Loading missing build variables from .env..."
+    set -a
+    # shellcheck disable=SC1091
+    source .env
+    set +a
 fi
 
-# Validate Stripe key matches environment
-if [[ "$ENVIRONMENT" == "production" && "$STRIPE_PUBLISHABLE_KEY" == pk_test_* ]]; then
-    print_error "Cannot use test Stripe key in production environment!"
+GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-}"
+if [[ -z "$GOOGLE_MAPS_API_KEY" ]]; then
+    print_error "GOOGLE_MAPS_API_KEY is required."
     exit 1
 fi
 
-if [[ "$ENVIRONMENT" == "development" && "$STRIPE_PUBLISHABLE_KEY" == pk_live_* ]]; then
-    print_warning "Using live Stripe key in development environment!"
-    read -p "Are you sure? (yes/no): " confirm
-    if [ "$confirm" != "yes" ]; then
-        exit 1
-    fi
+STRIPE_KEY="${RELEASE_STRIPE_PUBLISHABLE_KEY:-${STRIPE_PUBLISHABLE_KEY:-}}"
+if [[ -z "$STRIPE_KEY" ]]; then
+    print_error "Set RELEASE_STRIPE_PUBLISHABLE_KEY (preferred) or STRIPE_PUBLISHABLE_KEY."
+    exit 1
+fi
+if [[ "$STRIPE_KEY" != pk_live_* ]]; then
+    print_error "Production release requires a live Stripe publishable key (pk_live_...)."
+    exit 1
 fi
 
-# Determine build type
-BUILD_TYPE="${1:-run}"
-
-RELEASE_BUILD=false
-case "$BUILD_TYPE" in
-    build-apk|build-appbundle|build-ios|build-ipa)
-        RELEASE_BUILD=true
-        ;;
-esac
-
-# Production releases must use a dedicated release Stripe key source.
-if [[ "$RELEASE_BUILD" == true && "$ENVIRONMENT" == "production" ]]; then
-    if [ -z "$RELEASE_STRIPE_PUBLISHABLE_KEY" ]; then
-        print_error "RELEASE_STRIPE_PUBLISHABLE_KEY must be provided outside .env for production release builds"
-        print_info "Example:"
-        echo "  RELEASE_STRIPE_PUBLISHABLE_KEY=pk_live_... $0 $BUILD_TYPE"
-        exit 1
-    fi
-
-    STRIPE_PUBLISHABLE_KEY="$RELEASE_STRIPE_PUBLISHABLE_KEY"
+if [[ "$DO_CLEAN" == true ]]; then
+    print_info "Cleaning previous build artifacts..."
+    flutter clean
 fi
 
-print_success "Configuration validated"
-echo ""
-echo "  Environment: $ENVIRONMENT"
-echo "  Google Maps Key: ${GOOGLE_MAPS_API_KEY:0:10}...${GOOGLE_MAPS_API_KEY: -4}"
-echo "  Stripe Key: ${STRIPE_PUBLISHABLE_KEY:0:12}...${STRIPE_PUBLISHABLE_KEY: -4}"
-echo ""
+print_info "Fetching Flutter dependencies..."
+flutter pub get
 
 print_info "Running release payment/config gate..."
 bash tools/architecture/check_release_payment_config.sh
@@ -112,59 +139,50 @@ print_info "Running release monetization prerequisite gate..."
 bash tools/architecture/check_release_monetization_prereqs.sh
 print_success "Release monetization prerequisite gate passed"
 
-# Build Flutter command with dart-defines
 DART_DEFINES=(
     "--dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
-    "--dart-define=STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY"
+    "--dart-define=STRIPE_PUBLISHABLE_KEY=$STRIPE_KEY"
     "--dart-define=ENVIRONMENT=$ENVIRONMENT"
-    "--dart-define=FIREBASE_REGION=$FIREBASE_REGION"
-    "--dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID"
-    "--dart-define=FIREBASE_FUNCTIONS_BASE_URL=$FIREBASE_FUNCTIONS_BASE_URL"
-    "--dart-define=API_BASE_URL=$API_BASE_URL"
 )
 
-# Execute build command
-case "$BUILD_TYPE" in
-    run)
-        print_info "Running app in development mode..."
-        flutter run "${DART_DEFINES[@]}"
-        ;;
-    
-    build-apk)
-        print_info "Building Android APK..."
-        flutter build apk "${DART_DEFINES[@]}" --release
-        print_success "APK built successfully!"
-        ;;
-    
-    build-appbundle)
-        print_info "Building Android App Bundle..."
-        flutter build appbundle "${DART_DEFINES[@]}" --release
-        print_success "App Bundle built successfully!"
-        ;;
-    
-    build-ios)
-        print_info "Building iOS app..."
-        flutter build ios "${DART_DEFINES[@]}" --release
-        print_success "iOS app built successfully!"
-        ;;
-    
-    build-ipa)
-        print_info "Building iOS IPA..."
-        flutter build ipa "${DART_DEFINES[@]}" --release
-        print_success "IPA built successfully!"
-        ;;
-    
-    *)
-        print_error "Unknown build type: $BUILD_TYPE"
-        echo ""
-        echo "Usage: $0 [build-type]"
-        echo ""
-        echo "Available build types:"
-        echo "  run              - Run in development mode (default)"
-        echo "  build-apk        - Build Android APK"
-        echo "  build-appbundle  - Build Android App Bundle"
-        echo "  build-ios        - Build iOS app"
-        echo "  build-ipa        - Build iOS IPA"
+if [[ -n "${FIREBASE_REGION:-}" ]]; then
+    DART_DEFINES+=("--dart-define=FIREBASE_REGION=$FIREBASE_REGION")
+fi
+if [[ -n "${FIREBASE_PROJECT_ID:-}" ]]; then
+    DART_DEFINES+=("--dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID")
+fi
+if [[ -n "${FIREBASE_FUNCTIONS_BASE_URL:-}" ]]; then
+    DART_DEFINES+=("--dart-define=FIREBASE_FUNCTIONS_BASE_URL=$FIREBASE_FUNCTIONS_BASE_URL")
+fi
+if [[ -n "${API_BASE_URL:-}" ]]; then
+    DART_DEFINES+=("--dart-define=API_BASE_URL=$API_BASE_URL")
+fi
+
+print_info "Build target: $TARGET"
+
+if [[ "$TARGET" == "ios-ipa" || "$TARGET" == "all-ipa" ]]; then
+    if [[ ! -f "$EXPORT_OPTIONS_PLIST" ]]; then
+        print_error "Export options plist not found: $EXPORT_OPTIONS_PLIST"
         exit 1
-        ;;
-esac
+    fi
+fi
+
+if [[ "$TARGET" == "android" || "$TARGET" == "all" || "$TARGET" == "all-ipa" ]]; then
+    print_info "Building Android appbundle (release)..."
+    flutter build appbundle --release "${DART_DEFINES[@]}"
+    print_success "Android appbundle ready at build/app/outputs/bundle/release/app-release.aab"
+fi
+
+if [[ "$TARGET" == "ios" || "$TARGET" == "all" ]]; then
+    print_info "Building iOS app (release, no codesign)..."
+    flutter build ios --release --no-codesign "${DART_DEFINES[@]}"
+    print_success "iOS app ready at build/ios/iphoneos/Runner.app"
+fi
+
+if [[ "$TARGET" == "ios-ipa" || "$TARGET" == "all-ipa" ]]; then
+    print_info "Building signed iOS IPA (release)..."
+    flutter build ipa --release --export-options-plist="$EXPORT_OPTIONS_PLIST" "${DART_DEFINES[@]}"
+    print_success "iOS IPA ready at build/ios/ipa"
+fi
+
+print_success "Production build completed."

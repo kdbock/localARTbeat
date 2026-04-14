@@ -49,7 +49,13 @@ void _initializeNonCriticalServices() {
           },
         ).initialize();
         AppLogger.info('✅ Notifications ready');
-      } on Object catch (_) {}
+      } on Object catch (error, stackTrace) {
+        _logDeferredInitFailure(
+          stage: 'non_critical.notifications',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     } else {
       AppLogger.warning(
         '⚠️ Skipping notification startup: Firebase Core unavailable',
@@ -62,7 +68,13 @@ void _initializeNonCriticalServices() {
       await stepTrackingService.initialize(challengeService: challengeService);
       await stepTrackingService.startTracking();
       AppLogger.info('✅ Step tracking active');
-    } on Object catch (_) {}
+    } on Object catch (error, stackTrace) {
+      _logDeferredInitFailure(
+        stage: 'non_critical.step_tracking',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   });
 }
 
@@ -71,6 +83,30 @@ void _initializeAppPermissions() {
     try {
       await AppPermissionService().initializePermissions();
       AppLogger.info('✅ Permissions initialized');
-    } on Object catch (_) {}
+    } on Object catch (error, stackTrace) {
+      _logDeferredInitFailure(
+        stage: 'non_critical.permissions',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   });
+}
+
+void _logDeferredInitFailure({
+  required String stage,
+  required Object error,
+  required StackTrace stackTrace,
+}) {
+  AppLogger.warning(
+    '⚠️ Deferred startup stage failed: $stage',
+    error: error,
+    stackTrace: stackTrace,
+  );
+  AppLogger.error(
+    'Deferred startup diagnostics',
+    error: error,
+    stackTrace: stackTrace,
+    logger: 'DeferredStartup',
+  );
 }

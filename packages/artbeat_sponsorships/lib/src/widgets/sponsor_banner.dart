@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -84,8 +85,13 @@ class _SponsorBannerState extends State<SponsorBanner> {
         _sponsor = sponsor;
         _isLoading = false;
       });
-    } on Exception catch (_) {
-      // Fail silently — sponsorships must never break UI
+    } on Exception catch (error, stackTrace) {
+      AppLogger.warning(
+        'SponsorBanner failed to load sponsor for placement ${widget.placementKey}',
+        logger: 'Sponsorships',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (!mounted || token != _requestToken) return;
 
       setState(() {
@@ -348,7 +354,13 @@ Future<void> _openLink(BuildContext context, String url) async {
 
   try {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  } on Exception catch (_) {
+  } on Exception catch (error, stackTrace) {
+    AppLogger.warning(
+      'SponsorBanner failed to open sponsor link: $url',
+      logger: 'Sponsorships',
+      error: error,
+      stackTrace: stackTrace,
+    );
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Unable to open sponsor link.')),
