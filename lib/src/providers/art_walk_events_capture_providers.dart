@@ -87,6 +87,10 @@ List<SingleChildWidget> createArtWalkEventsCaptureProviders() => [
         capture.CaptureService(postCaptureHooks: CaptureArtWalkHooks()),
     lazy: true,
   ),
+  Provider<capture.OfflineQueueService>(
+    create: (_) => capture.OfflineQueueService(),
+    lazy: false,
+  ),
   ProxyProvider<capture.CaptureService, core.CaptureServiceInterface>(
     update: (_, captureService, __) => captureService,
     lazy: true,

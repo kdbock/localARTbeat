@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:artbeat_core/artbeat_core.dart' show CaptureModel, AppLogger;
 import 'package:artbeat_capture/src/models/offline_queue_item.dart';
@@ -42,6 +44,9 @@ class OfflineQueueService {
     // Start periodic sync
     _startPeriodicSync();
 
+    // Ensure pending uploads are attempted on startup when already online.
+    _attemptImmediateSync();
+
     AppLogger.info('OfflineQueueService initialized');
   }
 
@@ -59,12 +64,13 @@ class OfflineQueueService {
     try {
       final localCaptureId = _uuid.v4();
       final queueItemId = _uuid.v4();
+      final persistedImagePath = await _persistQueueImage(localImagePath);
 
       final queueItem = OfflineQueueItem(
         id: queueItemId,
         localCaptureId: localCaptureId,
         captureData: captureData.copyWith(id: localCaptureId),
-        localImagePath: localImagePath,
+        localImagePath: persistedImagePath,
         status: OfflineQueueStatus.pending,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -94,6 +100,30 @@ class OfflineQueueService {
       AppLogger.error('Error adding capture to offline queue: $e');
       rethrow;
     }
+  }
+
+  Future<String> _persistQueueImage(String sourcePath) async {
+    final sourceFile = File(sourcePath);
+    if (!await sourceFile.exists()) {
+      throw Exception('Local image file not found: $sourcePath');
+    }
+
+    final appSupportDir = await getApplicationSupportDirectory();
+    final queueImageDir = Directory(
+      p.join(appSupportDir.path, 'offline_capture_queue_images'),
+    );
+    if (!await queueImageDir.exists()) {
+      await queueImageDir.create(recursive: true);
+    }
+
+    final extension = p.extension(sourcePath).isEmpty
+        ? '.jpg'
+        : p.extension(sourcePath);
+    final fileName = '${_uuid.v4()}$extension';
+    final destinationPath = p.join(queueImageDir.path, fileName);
+
+    final copiedFile = await sourceFile.copy(destinationPath);
+    return copiedFile.path;
   }
 
   /// Get all pending items for a user

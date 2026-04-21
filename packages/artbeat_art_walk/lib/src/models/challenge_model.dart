@@ -8,6 +8,8 @@ enum ChallengeType { daily, weekly, monthly, special }
 class ChallengeModel {
   final String id;
   final String userId;
+  final String? templateId;
+  final String? categoryId;
   final String title;
   final String description;
   final ChallengeType type;
@@ -19,10 +21,15 @@ class ChallengeModel {
   final DateTime createdAt;
   final DateTime expiresAt;
   final DateTime? completedAt;
+  final int? lastBaseXP;
+  final int? lastAwardedXP;
+  final double? lastMultiplier;
 
   const ChallengeModel({
     required this.id,
     required this.userId,
+    this.templateId,
+    this.categoryId,
     required this.title,
     required this.description,
     required this.type,
@@ -34,6 +41,9 @@ class ChallengeModel {
     required this.createdAt,
     required this.expiresAt,
     this.completedAt,
+    this.lastBaseXP,
+    this.lastAwardedXP,
+    this.lastMultiplier,
   });
 
   /// Create ChallengeModel from Firestore document
@@ -41,6 +51,8 @@ class ChallengeModel {
     return ChallengeModel(
       id: FirestoreUtils.safeStringDefault(map['id']),
       userId: FirestoreUtils.safeStringDefault(map['userId']),
+      templateId: FirestoreUtils.safeString(map['templateId']),
+      categoryId: FirestoreUtils.safeString(map['categoryId']),
       title: FirestoreUtils.safeStringDefault(map['title']),
       description: FirestoreUtils.safeStringDefault(map['description']),
       type: ChallengeType.values.firstWhere(
@@ -64,6 +76,9 @@ class ChallengeModel {
       completedAt: map['completedAt'] != null
           ? FirestoreUtils.safeDateTime(map['completedAt'])
           : null,
+      lastBaseXP: map['lastBaseXP'] as int?,
+      lastAwardedXP: map['lastAwardedXP'] as int?,
+      lastMultiplier: (map['lastMultiplier'] as num?)?.toDouble(),
     );
   }
 
@@ -72,6 +87,8 @@ class ChallengeModel {
     return {
       'id': id,
       'userId': userId,
+      'templateId': templateId,
+      'categoryId': categoryId,
       'title': title,
       'description': description,
       'type': type.toString().split('.').last,
@@ -85,6 +102,9 @@ class ChallengeModel {
       'completedAt': completedAt != null
           ? Timestamp.fromDate(completedAt!)
           : null,
+      'lastBaseXP': lastBaseXP,
+      'lastAwardedXP': lastAwardedXP,
+      'lastMultiplier': lastMultiplier,
     };
   }
 
@@ -103,6 +123,8 @@ class ChallengeModel {
   ChallengeModel copyWith({
     String? id,
     String? userId,
+    String? templateId,
+    String? categoryId,
     String? title,
     String? description,
     ChallengeType? type,
@@ -114,10 +136,15 @@ class ChallengeModel {
     DateTime? createdAt,
     DateTime? expiresAt,
     DateTime? completedAt,
+    int? lastBaseXP,
+    int? lastAwardedXP,
+    double? lastMultiplier,
   }) {
     return ChallengeModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      templateId: templateId ?? this.templateId,
+      categoryId: categoryId ?? this.categoryId,
       title: title ?? this.title,
       description: description ?? this.description,
       type: type ?? this.type,
@@ -129,6 +156,9 @@ class ChallengeModel {
       createdAt: createdAt ?? this.createdAt,
       expiresAt: expiresAt ?? this.expiresAt,
       completedAt: completedAt ?? this.completedAt,
+      lastBaseXP: lastBaseXP ?? this.lastBaseXP,
+      lastAwardedXP: lastAwardedXP ?? this.lastAwardedXP,
+      lastMultiplier: lastMultiplier ?? this.lastMultiplier,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
+import 'package:artbeat_art_walk/src/constants/quest_tuning_defaults.dart';
 import 'social_service.dart';
 
 /// Service for managing user rewards, XP, and achievements
@@ -791,13 +792,21 @@ class RewardsService {
   /// Call this when a weekly goal is completed
   Future<void> checkPerfectWeek(String userId, String weekKey) async {
     try {
+      final match = RegExp(r'^(\d{4})-W(\d{1,2})$').firstMatch(weekKey);
+      if (match == null) {
+        _logger.w('Invalid weekKey format: $weekKey');
+        return;
+      }
+      final year = int.parse(match.group(1)!);
+      final weekNumber = int.parse(match.group(2)!);
+
       // Get all weekly goals for this week
       final goalsQuery = await _firestore
           .collection('users')
           .doc(userId)
           .collection('weeklyGoals')
-          .where('weekNumber', isEqualTo: int.parse(weekKey.split('_')[0]))
-          .where('year', isEqualTo: int.parse(weekKey.split('_')[1]))
+          .where('weekNumber', isEqualTo: weekNumber)
+          .where('year', isEqualTo: year)
           .get();
 
       // Check if all 3 goals are completed
@@ -960,22 +969,24 @@ class RewardsService {
   /// Returns the final XP amount after applying multipliers
   int calculateXPWithMultiplier({
     required int baseXP,
-    required bool isDailyChallenge,
-    required bool isWeeklyGoal,
     required int questsCompletedToday,
+    bool hasDailyWeeklyCombo = false,
   }) {
     double multiplier = 1.0;
 
     // Combo multiplier for completing multiple quests in one day
     if (questsCompletedToday >= 3) {
-      multiplier = 1.5; // +50% for 3+ quests
+      multiplier = QuestRuntimeConfig.threePlusMultiplier;
     } else if (questsCompletedToday >= 2) {
-      multiplier = 1.25; // +25% for 2 quests
+      multiplier = QuestRuntimeConfig.twoQuestsMultiplier;
     }
 
     // Bonus for completing both daily challenge and weekly goal on same day
-    if (isDailyChallenge && isWeeklyGoal) {
-      multiplier += 0.25; // Additional +25% bonus
+    if (hasDailyWeeklyCombo) {
+      multiplier += QuestRuntimeConfig.dailyWeeklyBonus;
+    }
+    if (multiplier > QuestRuntimeConfig.maxMultiplier) {
+      multiplier = QuestRuntimeConfig.maxMultiplier;
     }
 
     final finalXP = (baseXP * multiplier).round();
@@ -989,14 +1000,14 @@ class RewardsService {
 
   /// Award XP with combo multiplier support
   /// Call this instead of awardXP when you want to apply combo bonuses
-  Future<void> awardXPWithCombo(
+  Future<int> awardXPWithCombo(
     String action, {
     required int baseXP,
     bool isDailyChallenge = false,
     bool isWeeklyGoal = false,
   }) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) return 0;
 
     try {
       // Get today's quest completion count
@@ -1012,13 +1023,21 @@ class RewardsService {
           userData['dailyQuestStats'] as Map<String, dynamic>? ?? {};
       final todayStats = dailyStats[todayKey] as Map<String, dynamic>? ?? {};
       final questsCompletedToday = (todayStats['questsCompleted'] as int? ?? 0);
+      final dailyCompleted = todayStats['dailyCompleted'] as bool? ?? false;
+      final weeklyCompleted = todayStats['weeklyCompleted'] as bool? ?? false;
+      final comboAwarded = todayStats['comboAwarded'] as bool? ?? false;
+
+      final hasDailyWeeklyCombo =
+          (isDailyChallenge && weeklyCompleted) ||
+          (isWeeklyGoal && dailyCompleted);
+      final shouldAwardComboCompletion =
+          hasDailyWeeklyCombo && !comboAwarded;
 
       // Calculate final XP with multiplier
       final finalXP = calculateXPWithMultiplier(
         baseXP: baseXP,
-        isDailyChallenge: isDailyChallenge,
-        isWeeklyGoal: isWeeklyGoal,
         questsCompletedToday: questsCompletedToday,
+        hasDailyWeeklyCombo: hasDailyWeeklyCombo,
       );
 
       // Award the XP
@@ -1031,12 +1050,15 @@ class RewardsService {
         isDailyChallenge,
         isWeeklyGoal,
         questsCompletedToday + 1,
+        shouldAwardComboCompletion,
       );
 
       // Check for combo badge
-      await _checkComboAchievements(user.uid, isDailyChallenge && isWeeklyGoal);
+      await _checkComboAchievements(user.uid, shouldAwardComboCompletion);
+      return finalXP;
     } catch (e) {
       _logger.e('Error awarding XP with combo: $e');
+      return 0;
     }
   }
 
@@ -1047,6 +1069,7 @@ class RewardsService {
     bool isDailyChallenge,
     bool isWeeklyGoal,
     int newCount,
+    bool shouldAwardComboCompletion,
   ) async {
     try {
       final userRef = _firestore.collection('users').doc(userId);
@@ -1055,10 +1078,17 @@ class RewardsService {
         'dailyQuestStats.$todayKey.questsCompleted': newCount,
         'dailyQuestStats.$todayKey.lastUpdated': FieldValue.serverTimestamp(),
       };
+      if (isDailyChallenge) {
+        updates['dailyQuestStats.$todayKey.dailyCompleted'] = true;
+      }
+      if (isWeeklyGoal) {
+        updates['dailyQuestStats.$todayKey.weeklyCompleted'] = true;
+      }
 
       // Track if both types completed on same day
-      if (isDailyChallenge && isWeeklyGoal) {
+      if (shouldAwardComboCompletion) {
         updates['stats.comboCompletions'] = FieldValue.increment(1);
+        updates['dailyQuestStats.$todayKey.comboAwarded'] = true;
       }
 
       await userRef.update(updates);

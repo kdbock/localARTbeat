@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
+import 'package:artbeat_art_walk/src/constants/quest_tuning_defaults.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'rewards_service.dart';
 
@@ -83,6 +84,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_explorer_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_explorer',
         title: 'goal_weekly_art_explorer_title'.tr(),
         description: 'goal_weekly_art_explorer_desc'.tr(
           namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
@@ -109,6 +111,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_neighborhoods_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_neighborhoods',
         title: 'goal_neighborhood_navigator_title'.tr(),
         description: 'goal_neighborhood_navigator_desc'.tr(
           namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
@@ -137,6 +140,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_photographer_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_photographer',
         title: 'goal_master_photographer_title'.tr(),
         description: 'goal_master_photographer_desc'.tr(
           namedArgs: {'count': _scaleTarget(20, userLevel).toString()},
@@ -163,6 +167,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_golden_hour_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_golden_hour',
         title: 'goal_golden_hour_master_title'.tr(),
         description: 'goal_golden_hour_master_desc'.tr(
           namedArgs: {'count': _scaleTarget(10, userLevel).toString()},
@@ -191,6 +196,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_social_butterfly_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_social_butterfly',
         title: 'goal_social_butterfly_title'.tr(),
         description: 'goal_social_butterfly_desc'.tr(
           namedArgs: {
@@ -220,6 +226,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_community_builder_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_community_builder',
         title: 'goal_community_builder_title'.tr(),
         description: 'goal_community_builder_desc'.tr(
           namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
@@ -248,6 +255,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_walker_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_walker',
         title: 'goal_urban_walker_title'.tr(),
         description: 'goal_urban_walker_desc'.tr(
           namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
@@ -274,6 +282,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_step_champion_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_step_champion',
         title: 'goal_step_champion_title'.tr(),
         description: 'goal_step_champion_desc'.tr(
           namedArgs: {'count': _scaleTarget(35000, userLevel).toString()},
@@ -302,6 +311,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_quest_master_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_quest_master',
         title: 'goal_quest_master_title'.tr(),
         description: 'goal_quest_master_desc'.tr(
           namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
@@ -328,6 +338,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_streak_keeper_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_streak_keeper',
         title: 'goal_streak_keeper_title'.tr(),
         description: 'goal_streak_keeper_desc'.tr(),
         category: WeeklyGoalCategory.mastery,
@@ -354,6 +365,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_style_collector_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_style_collector',
         title: 'goal_style_collector_title'.tr(),
         description: 'goal_style_collector_desc'.tr(
           namedArgs: {'count': _scaleTarget(8, userLevel).toString()},
@@ -380,6 +392,7 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_artist_fan_${now.millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'weekly_artist_fan',
         title: 'goal_artist_fan_title'.tr(),
         description: 'goal_artist_fan_desc'.tr(
           namedArgs: {'count': _scaleTarget(10, userLevel).toString()},
@@ -436,18 +449,20 @@ class WeeklyGoalsService {
 
   /// Scale target count based on user level
   int _scaleTarget(int baseTarget, int userLevel) {
-    if (userLevel <= 5) return baseTarget;
-    if (userLevel <= 10) return (baseTarget * 1.2).round();
-    if (userLevel <= 20) return (baseTarget * 1.5).round();
-    return (baseTarget * 2).round();
+    final tier = QuestTuningDefaults.scalingTiers.firstWhere(
+      (t) => t.containsLevel(userLevel),
+      orElse: () => QuestTuningDefaults.level1to5,
+    );
+    return (baseTarget * tier.targetMultiplier).round();
   }
 
   /// Scale reward XP based on user level
   int _scaleReward(int baseReward, int userLevel) {
-    if (userLevel <= 5) return baseReward;
-    if (userLevel <= 10) return (baseReward * 1.3).round();
-    if (userLevel <= 20) return (baseReward * 1.6).round();
-    return (baseReward * 2).round();
+    final tier = QuestTuningDefaults.scalingTiers.firstWhere(
+      (t) => t.containsLevel(userLevel),
+      orElse: () => QuestTuningDefaults.level1to5,
+    );
+    return (baseReward * tier.rewardMultiplier).round();
   }
 
   /// Get user statistics for goal personalization
@@ -460,7 +475,8 @@ class WeeklyGoalsService {
 
       return {
         'level': userData['level'] ?? 1,
-        'totalXP': userData['totalXP'] ?? 0,
+        'totalXP':
+            userData['experiencePoints'] ?? userData['totalXP'] ?? 0,
       };
     } catch (e) {
       AppLogger.error('Error getting user stats: $e');
@@ -469,9 +485,14 @@ class WeeklyGoalsService {
   }
 
   /// Update weekly goal progress
-  Future<void> updateWeeklyGoalProgress(String goalId, int increment) async {
+  Future<Map<String, dynamic>> updateWeeklyGoalProgress(
+    String goalId,
+    int increment,
+  ) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      return {'counted': false, 'reason': 'not_authenticated'};
+    }
 
     try {
       final now = DateTime.now();
@@ -483,30 +504,46 @@ class WeeklyGoalsService {
           .collection('weeklyGoals')
           .doc('${weekKey}_$goalId');
 
+      Map<String, dynamic> result = {'counted': false, 'reason': 'no_change'};
       await _firestore.runTransaction((transaction) async {
         final goalDoc = await transaction.get(goalRef);
 
-        if (!goalDoc.exists) return;
+        if (!goalDoc.exists) {
+          result = {'counted': false, 'reason': 'goal_not_found'};
+          return;
+        }
 
         final goal = WeeklyGoalModel.fromMap(goalDoc.data()!);
+        if (goal.isCompleted) {
+          result = {'counted': false, 'reason': 'already_completed'};
+          return;
+        }
         final newCount = (goal.currentCount + increment).clamp(
           0,
           goal.targetCount,
         );
+        if (newCount == goal.currentCount) {
+          result = {'counted': false, 'reason': 'no_progress'};
+          return;
+        }
 
         if (newCount >= goal.targetCount && !goal.isCompleted) {
           // Goal completed! Award XP with combo multiplier
-          await _rewardsService.awardXPWithCombo(
+          final awardedXP = await _rewardsService.awardXPWithCombo(
             'weekly_goal_completed',
             baseXP: goal.rewardXP,
             isDailyChallenge: false,
             isWeeklyGoal: true,
           );
+          final multiplier = goal.rewardXP > 0 ? (awardedXP / goal.rewardXP) : 1.0;
 
           transaction.update(goalRef, {
             'currentCount': newCount,
             'isCompleted': true,
             'completedAt': Timestamp.now(),
+            'lastBaseXP': goal.rewardXP,
+            'lastAwardedXP': awardedXP,
+            'lastMultiplier': multiplier,
           });
 
           AppLogger.info('Weekly goal completed: ${goal.title}');
@@ -517,12 +554,42 @@ class WeeklyGoalsService {
 
           // Check quest milestones
           await _rewardsService.checkQuestMilestones(user.uid);
+          result = {
+            'counted': true,
+            'reason': 'completed',
+            'newProgress': newCount,
+            'target': goal.targetCount,
+            'xpAwarded': awardedXP,
+            'baseXP': goal.rewardXP,
+          };
         } else {
           transaction.update(goalRef, {'currentCount': newCount});
+          result = {
+            'counted': true,
+            'reason': 'progress_updated',
+            'newProgress': newCount,
+            'target': goal.targetCount,
+            'xpAwarded': 0,
+            'baseXP': goal.rewardXP,
+          };
         }
       });
+      if (QuestRuntimeConfig.eventLoggingEnabled) {
+        AppLogger.info(
+          'quest_event_weekly goalId=$goalId increment=$increment result=$result',
+        );
+      }
+      await _recordQuestEvent(
+        userId: user.uid,
+        eventType: 'weekly_progress_update',
+        entityId: goalId,
+        increment: increment,
+        payload: result,
+      );
+      return result;
     } catch (e) {
       AppLogger.error('Error updating weekly goal progress: $e');
+      return {'counted': false, 'reason': 'error', 'error': e.toString()};
     }
   }
 
@@ -612,7 +679,7 @@ class WeeklyGoalsService {
     final goals = await getCurrentWeekGoals();
     for (final goal in goals) {
       if (goal.category == WeeklyGoalCategory.mastery &&
-          goal.title == 'Quest Master') {
+          goal.templateId == 'weekly_quest_master') {
         await updateWeeklyGoalProgress(goal.id, 1);
       }
     }
@@ -623,9 +690,36 @@ class WeeklyGoalsService {
     final goals = await getCurrentWeekGoals();
     for (final goal in goals) {
       if (goal.category == WeeklyGoalCategory.mastery &&
-          goal.title == 'Streak Keeper') {
+          goal.templateId == 'weekly_streak_keeper') {
         await updateWeeklyGoalProgress(goal.id, 1);
       }
+    }
+  }
+
+  Future<void> _recordQuestEvent({
+    required String userId,
+    required String eventType,
+    required String entityId,
+    required int increment,
+    required Map<String, dynamic> payload,
+  }) async {
+    if (!QuestRuntimeConfig.eventLoggingEnabled) return;
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('questEvents')
+          .add({
+            'eventType': eventType,
+            'entityId': entityId,
+            'increment': increment,
+            'counted': payload['counted'] == true,
+            'reason': payload['reason'],
+            'payload': payload,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      AppLogger.error('Failed to record weekly quest event: $e');
     }
   }
 }

@@ -15,6 +15,7 @@ enum WeeklyGoalCategory {
 class WeeklyGoalModel {
   final String id;
   final String userId;
+  final String? templateId;
   final String title;
   final String description;
   final WeeklyGoalCategory category;
@@ -26,6 +27,9 @@ class WeeklyGoalModel {
   final DateTime createdAt;
   final DateTime expiresAt;
   final DateTime? completedAt;
+  final int? lastBaseXP;
+  final int? lastAwardedXP;
+  final double? lastMultiplier;
   final int weekNumber; // ISO week number
   final int year;
   final String? iconEmoji; // Optional emoji for visual representation
@@ -34,6 +38,7 @@ class WeeklyGoalModel {
   const WeeklyGoalModel({
     required this.id,
     required this.userId,
+    this.templateId,
     required this.title,
     required this.description,
     required this.category,
@@ -45,6 +50,9 @@ class WeeklyGoalModel {
     required this.createdAt,
     required this.expiresAt,
     this.completedAt,
+    this.lastBaseXP,
+    this.lastAwardedXP,
+    this.lastMultiplier,
     required this.weekNumber,
     required this.year,
     this.iconEmoji,
@@ -56,6 +64,7 @@ class WeeklyGoalModel {
     return WeeklyGoalModel(
       id: FirestoreUtils.safeStringDefault(map['id']),
       userId: FirestoreUtils.safeStringDefault(map['userId']),
+      templateId: FirestoreUtils.safeString(map['templateId']),
       title: FirestoreUtils.safeStringDefault(map['title']),
       description: FirestoreUtils.safeStringDefault(map['description']),
       category: WeeklyGoalCategory.values.firstWhere(
@@ -79,6 +88,9 @@ class WeeklyGoalModel {
       completedAt: map['completedAt'] != null
           ? FirestoreUtils.safeDateTime(map['completedAt'])
           : null,
+      lastBaseXP: map['lastBaseXP'] as int?,
+      lastAwardedXP: map['lastAwardedXP'] as int?,
+      lastMultiplier: (map['lastMultiplier'] as num?)?.toDouble(),
       weekNumber: FirestoreUtils.safeInt(map['weekNumber'], 1),
       year: FirestoreUtils.safeInt(map['year'], DateTime.now().year),
       iconEmoji: FirestoreUtils.safeString(map['iconEmoji']),
@@ -95,6 +107,7 @@ class WeeklyGoalModel {
     return {
       'id': id,
       'userId': userId,
+      'templateId': templateId,
       'title': title,
       'description': description,
       'category': category.toString().split('.').last,
@@ -108,6 +121,9 @@ class WeeklyGoalModel {
       'completedAt': completedAt != null
           ? Timestamp.fromDate(completedAt!)
           : null,
+      'lastBaseXP': lastBaseXP,
+      'lastAwardedXP': lastAwardedXP,
+      'lastMultiplier': lastMultiplier,
       'weekNumber': weekNumber,
       'year': year,
       'iconEmoji': iconEmoji,
@@ -159,6 +175,7 @@ class WeeklyGoalModel {
   WeeklyGoalModel copyWith({
     String? id,
     String? userId,
+    String? templateId,
     String? title,
     String? description,
     WeeklyGoalCategory? category,
@@ -170,6 +187,9 @@ class WeeklyGoalModel {
     DateTime? createdAt,
     DateTime? expiresAt,
     DateTime? completedAt,
+    int? lastBaseXP,
+    int? lastAwardedXP,
+    double? lastMultiplier,
     int? weekNumber,
     int? year,
     String? iconEmoji,
@@ -178,6 +198,7 @@ class WeeklyGoalModel {
     return WeeklyGoalModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      templateId: templateId ?? this.templateId,
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
@@ -189,6 +210,9 @@ class WeeklyGoalModel {
       createdAt: createdAt ?? this.createdAt,
       expiresAt: expiresAt ?? this.expiresAt,
       completedAt: completedAt ?? this.completedAt,
+      lastBaseXP: lastBaseXP ?? this.lastBaseXP,
+      lastAwardedXP: lastAwardedXP ?? this.lastAwardedXP,
+      lastMultiplier: lastMultiplier ?? this.lastMultiplier,
       weekNumber: weekNumber ?? this.weekNumber,
       year: year ?? this.year,
       iconEmoji: iconEmoji ?? this.iconEmoji,

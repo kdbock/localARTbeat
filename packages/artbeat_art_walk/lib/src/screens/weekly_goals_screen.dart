@@ -162,7 +162,7 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
                   ),
                   const SizedBox(height: 16),
                   GradientCTAButton(
-                    label: 'weekly_goals.progress'.tr(),
+                    label: _goalActionLabel(goal),
                     onPressed: () {},
                   ),
                 ],
@@ -221,5 +221,22 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
         ),
       ],
     );
+  }
+
+  String _goalActionLabel(WeeklyGoalModel goal) {
+    switch (goal.category) {
+      case WeeklyGoalCategory.exploration:
+        return 'Start Exploring';
+      case WeeklyGoalCategory.photography:
+        return 'Capture Now';
+      case WeeklyGoalCategory.social:
+        return 'Share Activity';
+      case WeeklyGoalCategory.fitness:
+        return 'Continue Walking';
+      case WeeklyGoalCategory.mastery:
+        return 'Continue Streak';
+      case WeeklyGoalCategory.collection:
+        return 'Collect Progress';
+    }
   }
 }

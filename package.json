@@ -1,4 +1,14 @@
 {
+  "scripts": {
+    "quests:backfill:dry": "node scripts/backfill_quest_system_fields.js",
+    "quests:backfill:write": "node scripts/backfill_quest_system_fields.js --write",
+    "quests:seed:dry": "node scripts/seed_quest_events.js",
+    "quests:seed:write": "node scripts/seed_quest_events.js --write",
+    "quests:seed:cleanup:dry": "node scripts/cleanup_seeded_quest_events.js",
+    "quests:seed:cleanup:write": "node scripts/cleanup_seeded_quest_events.js --write",
+    "quests:kpi:14d": "node scripts/quest_kpi_report.js --days 14 --user-limit 1000",
+    "quests:kpi:7d": "node scripts/quest_kpi_report.js --days 7 --user-limit 1000"
+  },
   "dependencies": {
     "firebase-admin": "^13.5.0",
     "firebase-functions": "^6.3.2"

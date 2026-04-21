@@ -141,6 +141,14 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
           children: [
             _goalHeader(goal),
             const SizedBox(height: 12),
+            Text(
+              'Counts when: ${_getCountsWhen(goal)}',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 11,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 8),
             _progressBar(goal),
             if (goal.milestones.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -306,7 +314,7 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
         const Icon(Icons.stars, color: Color(0xFFFFC857), size: 16),
         const SizedBox(width: 4),
         Text(
-          '+${goal.rewardXP} XP',
+          _buildXpBreakdown(goal),
           style: GoogleFonts.spaceGrotesk(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -336,5 +344,30 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
 
   int _getCompletedCount() {
     return widget.goals.where((g) => g.isCompleted).length;
+  }
+
+  String _getCountsWhen(WeeklyGoalModel goal) {
+    switch (goal.category) {
+      case WeeklyGoalCategory.exploration:
+        return 'you discover artworks and new areas';
+      case WeeklyGoalCategory.photography:
+        return 'you capture qualifying photos';
+      case WeeklyGoalCategory.social:
+        return 'you complete eligible social actions';
+      case WeeklyGoalCategory.fitness:
+        return 'tracked distance or steps increase';
+      case WeeklyGoalCategory.mastery:
+        return 'you complete linked daily quests/streak days';
+      case WeeklyGoalCategory.collection:
+        return 'you collect eligible styles/artists';
+    }
+  }
+
+  String _buildXpBreakdown(WeeklyGoalModel goal) {
+    final base = goal.lastBaseXP ?? goal.rewardXP;
+    final awarded = goal.lastAwardedXP ?? goal.rewardXP;
+    final multiplier = goal.lastMultiplier;
+    if (multiplier == null) return '+$awarded XP';
+    return 'base $base x ${multiplier.toStringAsFixed(2)} = $awarded XP';
   }
 }

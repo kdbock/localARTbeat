@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:confetti/confetti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +48,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
   Color? _feedbackColor;
   PublicArtModel? _enrichedArt;
   final GoNowFlowService _goNowFlow = GoNowFlowService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   // Simple static cache for user info
   static final Map<String, UserModel> _userCache = {};
@@ -124,6 +128,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
       );
 
       if (discoveryId != null && mounted) {
+        final selfieUrl = await _promptAndUploadArtFlexSelfie();
+
         setState(() {
           _captured = true;
           _isCapturing = false;
@@ -153,6 +159,9 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
               'artTitle': widget.art.title,
               'artist': widget.art.artistName,
               'discoveryId': discoveryId,
+              if (selfieUrl != null) 'photoUrl': selfieUrl,
+              if (selfieUrl != null) 'selfieUrl': selfieUrl,
+              if (selfieUrl != null) 'source': 'artflex_discovery_selfie',
             },
           );
         }
@@ -177,6 +186,141 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
           _feedbackColor = Colors.red;
         });
       }
+    }
+  }
+
+  Future<String?> _promptAndUploadArtFlexSelfie() async {
+    final shouldPrompt = await _shouldPromptForDiscoveryArtFlex();
+    if (!shouldPrompt) {
+      return null;
+    }
+    if (!mounted) {
+      return null;
+    }
+
+    bool dontAskAgain = false;
+    final shouldTakeSelfie = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add a selfie with this art?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Optional: share an ARTflex selfie to the social feed for this discovery.',
+              ),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                value: dontAskAgain,
+                onChanged: (value) => setDialogState(() {
+                  dontAskAgain = value ?? false;
+                }),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: const Text("Don't ask again"),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Skip'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Add Selfie'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (dontAskAgain) {
+      await _setDiscoveryArtFlexPromptEnabled(false);
+    }
+
+    if (shouldTakeSelfie != true) {
+      return null;
+    }
+
+    final selfie = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
+      imageQuality: 85,
+      maxWidth: 1400,
+    );
+    if (selfie == null) {
+      return null;
+    }
+
+    try {
+      final user = _userService.currentUser;
+      if (user == null) {
+        return null;
+      }
+
+      final selfieBytes = await selfie.readAsBytes();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final selfiePath = 'community/artflex/${user.uid}_$timestamp.jpg';
+      final selfieRef = FirebaseStorage.instance.ref().child(selfiePath);
+
+      await selfieRef.putData(
+        selfieBytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      return await selfieRef.getDownloadURL();
+    } catch (e) {
+      AppLogger.warning('Optional discovery ARTflex selfie upload failed: $e');
+      return null;
+    }
+  }
+
+  Future<bool> _shouldPromptForDiscoveryArtFlex() async {
+    try {
+      final user = _userService.currentUser;
+      if (user == null) {
+        return true;
+      }
+
+      final doc = await FirebaseFirestore.instance
+          .collection('userSettings')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      final social = data?['social'];
+      if (social is Map<String, dynamic>) {
+        final enabled = social['promptDiscoveryArtFlex'];
+        if (enabled is bool) {
+          return enabled;
+        }
+      }
+      return true;
+    } catch (e) {
+      AppLogger.warning(
+        'Failed reading discovery ARTflex prompt setting, defaulting enabled: $e',
+      );
+      return true;
+    }
+  }
+
+  Future<void> _setDiscoveryArtFlexPromptEnabled(bool enabled) async {
+    try {
+      final user = _userService.currentUser;
+      if (user == null) {
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('userSettings')
+          .doc(user.uid)
+          .set({
+            'social': {'promptDiscoveryArtFlex': enabled},
+          }, SetOptions(merge: true));
+    } catch (e) {
+      AppLogger.warning('Failed writing discovery ARTflex prompt setting: $e');
     }
   }
 

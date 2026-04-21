@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/challenge_model.dart';
+import 'package:artbeat_art_walk/src/constants/quest_tuning_defaults.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'rewards_service.dart';
 
@@ -98,6 +99,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'discover_art_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'discover_art',
+        categoryId: 'exploration',
         title: 'quest_art_explorer_title'.tr(),
         description: 'quest_art_explorer_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -116,6 +119,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'discover_neighborhood_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'discover_neighborhood',
+        categoryId: 'exploration',
         title: 'quest_neighborhood_scout_title'.tr(),
         description: 'quest_neighborhood_scout_desc'.tr(
           namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
@@ -136,6 +141,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'capture_photos_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'capture_photos',
+        categoryId: 'photography',
         title: 'quest_photo_hunter_title'.tr(),
         description: 'quest_photo_hunter_desc'.tr(
           namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
@@ -154,6 +161,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'golden_hour_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'golden_hour',
+        categoryId: 'photography',
         title: 'quest_golden_hour_artist_title'.tr(),
         description: 'quest_golden_hour_artist_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -174,6 +183,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'social_share_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'social_share',
+        categoryId: 'social',
         title: 'quest_art_sharer_title'.tr(),
         description: 'quest_art_sharer_desc'.tr(
           namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
@@ -192,6 +203,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'community_connector_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'community_connector',
+        categoryId: 'social',
         title: 'quest_community_connector_title'.tr(),
         description: 'quest_community_connector_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -212,6 +225,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'walk_distance_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'walk_distance',
+        categoryId: 'walking',
         title: 'quest_urban_wanderer_title'.tr(),
         description: 'quest_urban_wanderer_desc'.tr(
           namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
@@ -230,6 +245,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'step_master_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'step_master',
+        categoryId: 'walking',
         title: 'quest_step_master_title'.tr(),
         description: 'quest_step_master_desc'.tr(
           namedArgs: {'count': _scaleTarget(5000, userLevel).toString()},
@@ -250,6 +267,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'early_bird_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'early_bird',
+        categoryId: 'time',
         title: 'quest_early_bird_title'.tr(),
         description: 'quest_early_bird_desc'.tr(),
         type: ChallengeType.daily,
@@ -266,6 +285,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'night_owl_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'night_owl',
+        categoryId: 'time',
         title: 'quest_night_owl_title'.tr(),
         description: 'quest_night_owl_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -286,6 +307,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'art_critic_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'art_critic',
+        categoryId: 'engagement',
         title: 'quest_art_critic_title'.tr(),
         description: 'quest_art_critic_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -304,6 +327,8 @@ class ChallengeService {
       ChallengeModel(
         id: 'style_collector_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
+        templateId: 'style_collector',
+        categoryId: 'engagement',
         title: 'quest_style_collector_title'.tr(),
         description: 'quest_style_collector_desc'.tr(
           namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
@@ -325,6 +350,8 @@ class ChallengeService {
         ChallengeModel(
           id: 'streak_warrior_${DateTime.now().millisecondsSinceEpoch}',
           userId: userId,
+          templateId: 'streak_warrior',
+          categoryId: 'streak',
           title: 'quest_streak_warrior_title'.tr(),
           description: 'quest_streak_warrior_desc'.tr(
             namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
@@ -351,18 +378,20 @@ class ChallengeService {
 
   /// Scale target count based on user level
   int _scaleTarget(int baseTarget, int userLevel) {
-    if (userLevel <= 5) return baseTarget;
-    if (userLevel <= 10) return (baseTarget * 1.2).round();
-    if (userLevel <= 20) return (baseTarget * 1.5).round();
-    return (baseTarget * 2).round();
+    final tier = QuestTuningDefaults.scalingTiers.firstWhere(
+      (t) => t.containsLevel(userLevel),
+      orElse: () => QuestTuningDefaults.level1to5,
+    );
+    return (baseTarget * tier.targetMultiplier).round();
   }
 
   /// Scale reward XP based on user level
   int _scaleReward(int baseReward, int userLevel) {
-    if (userLevel <= 5) return baseReward;
-    if (userLevel <= 10) return (baseReward * 1.3).round();
-    if (userLevel <= 20) return (baseReward * 1.6).round();
-    return (baseReward * 2).round();
+    final tier = QuestTuningDefaults.scalingTiers.firstWhere(
+      (t) => t.containsLevel(userLevel),
+      orElse: () => QuestTuningDefaults.level1to5,
+    );
+    return (baseReward * tier.rewardMultiplier).round();
   }
 
   /// Get user statistics for challenge personalization
@@ -376,7 +405,8 @@ class ChallengeService {
 
       return {
         'level': userData['level'] ?? 1,
-        'totalXP': userData['totalXP'] ?? 0,
+        'totalXP':
+            userData['experiencePoints'] ?? userData['totalXP'] ?? 0,
         'completedChallenges': stats['completedChallenges'] ?? 0,
         'currentStreak': stats['currentStreak'] ?? 0,
       };
@@ -387,12 +417,14 @@ class ChallengeService {
   }
 
   /// Update challenge progress
-  Future<void> updateChallengeProgress(
+  Future<Map<String, dynamic>> updateChallengeProgress(
     String challengeId,
     int increment,
   ) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      return {'counted': false, 'reason': 'not_authenticated'};
+    }
 
     try {
       final today = DateTime.now();
@@ -405,25 +437,44 @@ class ChallengeService {
           .collection('dailyChallenges')
           .doc(todayKey);
 
+      Map<String, dynamic> result = {'counted': false, 'reason': 'no_change'};
       await _firestore.runTransaction((transaction) async {
         final challengeDoc = await transaction.get(challengeRef);
 
-        if (!challengeDoc.exists) return;
+        if (!challengeDoc.exists) {
+          result = {'counted': false, 'reason': 'challenge_not_found'};
+          return;
+        }
 
         final challenge = ChallengeModel.fromMap(challengeDoc.data()!);
+        if (challenge.id != challengeId) {
+          result = {'counted': false, 'reason': 'challenge_mismatch'};
+          return;
+        }
+        if (challenge.isCompleted) {
+          result = {'counted': false, 'reason': 'already_completed'};
+          return;
+        }
         final newCount = (challenge.currentCount + increment).clamp(
           0,
           challenge.targetCount,
         );
+        if (newCount == challenge.currentCount) {
+          result = {'counted': false, 'reason': 'no_progress'};
+          return;
+        }
 
         if (newCount >= challenge.targetCount && !challenge.isCompleted) {
           // Challenge completed! Award XP with combo multiplier
-          await _rewardsService.awardXPWithCombo(
+          final awardedXP = await _rewardsService.awardXPWithCombo(
             'challenge_completed',
             baseXP: challenge.rewardXP,
             isDailyChallenge: true,
             isWeeklyGoal: false,
           );
+          final multiplier = challenge.rewardXP > 0
+              ? (awardedXP / challenge.rewardXP)
+              : 1.0;
 
           // Check for streak badges
           final currentStreak = await _getCurrentStreak(user.uid);
@@ -433,7 +484,8 @@ class ChallengeService {
           await _rewardsService.checkQuestMilestones(user.uid);
 
           // Track category-specific streak (extract category from challenge title)
-          final category = _extractChallengeCategory(challenge.title);
+          final category =
+              challenge.categoryId ?? _extractChallengeCategory(challenge.title);
           if (category != null) {
             await _rewardsService.trackCategoryStreak(user.uid, category);
           }
@@ -446,9 +498,27 @@ class ChallengeService {
             type: NotificationType.achievement,
             data: {
               'challengeId': challenge.id,
-              'xpAwarded': challenge.rewardXP,
+              'xpAwarded': awardedXP,
             },
           );
+          transaction.update(challengeRef, {
+            'currentCount': newCount,
+            'isCompleted': true,
+            'completedAt': FieldValue.serverTimestamp(),
+            'lastBaseXP': challenge.rewardXP,
+            'lastAwardedXP': awardedXP,
+            'lastMultiplier': multiplier,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+          result = {
+            'counted': true,
+            'reason': 'completed',
+            'newProgress': newCount,
+            'target': challenge.targetCount,
+            'xpAwarded': awardedXP,
+            'baseXP': challenge.rewardXP,
+          };
+          return;
         }
 
         transaction.update(challengeRef, {
@@ -456,9 +526,31 @@ class ChallengeService {
           'isCompleted': newCount >= challenge.targetCount,
           'updatedAt': FieldValue.serverTimestamp(),
         });
+        result = {
+          'counted': true,
+          'reason': 'progress_updated',
+          'newProgress': newCount,
+          'target': challenge.targetCount,
+          'xpAwarded': 0,
+          'baseXP': challenge.rewardXP,
+        };
       });
+      if (QuestRuntimeConfig.eventLoggingEnabled) {
+        AppLogger.info(
+          'quest_event_daily challengeId=$challengeId increment=$increment result=$result',
+        );
+      }
+      await _recordQuestEvent(
+        userId: user.uid,
+        eventType: 'daily_progress_update',
+        entityId: challengeId,
+        increment: increment,
+        payload: result,
+      );
+      return result;
     } catch (e) {
       AppLogger.error('Error updating challenge progress: $e');
+      return {'counted': false, 'reason': 'error', 'error': e.toString()};
     }
   }
 
@@ -627,7 +719,8 @@ class ChallengeService {
   Future<void> recordArtDiscovery() async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Discover') &&
+        (challenge.templateId == 'discover_art' ||
+            challenge.templateId == 'discover_neighborhood') &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, 1);
     }
@@ -637,7 +730,8 @@ class ChallengeService {
   Future<void> recordPhotoCapture() async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Photo') &&
+        (challenge.templateId == 'capture_photos' ||
+            challenge.templateId == 'golden_hour') &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, 1);
     }
@@ -647,8 +741,7 @@ class ChallengeService {
   Future<void> recordWalkDistance(double meters) async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        (challenge.title.contains('Walk') ||
-            challenge.title.contains('Wanderer')) &&
+        challenge.templateId == 'walk_distance' &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, meters.round());
     }
@@ -658,7 +751,7 @@ class ChallengeService {
   Future<void> recordSteps(int steps) async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Step') &&
+        challenge.templateId == 'step_master' &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, steps);
     }
@@ -668,7 +761,7 @@ class ChallengeService {
   Future<void> recordSocialShare() async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Sharer') &&
+        challenge.templateId == 'social_share' &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, 1);
     }
@@ -678,8 +771,7 @@ class ChallengeService {
   Future<void> recordComment() async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        (challenge.title.contains('Community') ||
-            challenge.title.contains('Connector')) &&
+        challenge.templateId == 'community_connector' &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, 1);
     }
@@ -689,9 +781,13 @@ class ChallengeService {
   Future<void> recordNeighborhoodDiscovery(String neighborhood) async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Neighborhood') &&
+        challenge.templateId == 'discover_neighborhood' &&
         !challenge.isCompleted) {
-      // Track unique neighborhoods visited today
+      final marked = await _tryMarkUniqueDailyValue(
+        bucket: 'neighborhoods',
+        value: neighborhood,
+      );
+      if (!marked) return;
       await updateChallengeProgress(challenge.id, 1);
     }
   }
@@ -704,18 +800,18 @@ class ChallengeService {
     final hour = DateTime.now().hour;
 
     // Early bird: before 9 AM
-    if (hour < 9 && challenge.title.contains('Early Bird')) {
+    if (hour < 9 && challenge.templateId == 'early_bird') {
       await updateChallengeProgress(challenge.id, 1);
     }
 
     // Night owl: after sunset (simplified to after 6 PM)
-    if (hour >= 18 && challenge.title.contains('Night Owl')) {
+    if (hour >= 18 && challenge.templateId == 'night_owl') {
       await updateChallengeProgress(challenge.id, 1);
     }
 
     // Golden hour: sunrise (5-7 AM) or sunset (5-7 PM)
     if ((hour >= 5 && hour <= 7) || (hour >= 17 && hour <= 19)) {
-      if (challenge.title.contains('Golden Hour')) {
+      if (challenge.templateId == 'golden_hour') {
         await updateChallengeProgress(challenge.id, 1);
       }
     }
@@ -725,7 +821,7 @@ class ChallengeService {
   Future<void> recordDetailedDescription(String description) async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Critic') &&
+        challenge.templateId == 'art_critic' &&
         !challenge.isCompleted &&
         description.length >= 50) {
       // Require at least 50 characters
@@ -737,10 +833,82 @@ class ChallengeService {
   Future<void> recordStyleDiscovery(String artStyle) async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Style Collector') &&
+        challenge.templateId == 'style_collector' &&
         !challenge.isCompleted) {
-      // Track unique art styles discovered today
+      final marked = await _tryMarkUniqueDailyValue(
+        bucket: 'styles',
+        value: artStyle,
+      );
+      if (!marked) return;
       await updateChallengeProgress(challenge.id, 1);
+    }
+  }
+
+  Future<bool> _tryMarkUniqueDailyValue({
+    required String bucket,
+    required String value,
+  }) async {
+    if (!QuestRuntimeConfig.uniqueDailyGuardsEnabled) return true;
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    final normalized = value.trim().toLowerCase();
+    if (normalized.isEmpty) return false;
+
+    final today = DateTime.now();
+    final todayKey =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+    final userRef = _firestore.collection('users').doc(user.uid);
+    final userDoc = await userRef.get();
+    final userData = userDoc.data() ?? {};
+    final uniqueMap = userData['dailyQuestUnique'] as Map<String, dynamic>? ?? {};
+    final bucketMap = uniqueMap[bucket] as Map<String, dynamic>? ?? {};
+    final existing =
+        (bucketMap[todayKey] as List<dynamic>?)?.map((e) => '$e').toSet() ??
+        <String>{};
+    if (existing.contains(normalized)) {
+      if (QuestRuntimeConfig.eventLoggingEnabled) {
+        AppLogger.info(
+          'quest_event_unique_rejected bucket=$bucket value=$normalized reason=duplicate',
+        );
+      }
+      return false;
+    }
+
+    await userRef.set({
+      'dailyQuestUnique': {
+        bucket: {
+          todayKey: FieldValue.arrayUnion([normalized]),
+        },
+      },
+    }, SetOptions(merge: true));
+    return true;
+  }
+
+  Future<void> _recordQuestEvent({
+    required String userId,
+    required String eventType,
+    required String entityId,
+    required int increment,
+    required Map<String, dynamic> payload,
+  }) async {
+    if (!QuestRuntimeConfig.eventLoggingEnabled) return;
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('questEvents')
+          .add({
+            'eventType': eventType,
+            'entityId': entityId,
+            'increment': increment,
+            'counted': payload['counted'] == true,
+            'reason': payload['reason'],
+            'payload': payload,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      AppLogger.error('Failed to record daily quest event: $e');
     }
   }
 
@@ -748,7 +916,7 @@ class ChallengeService {
   Future<void> recordAnyActivity() async {
     final challenge = await getTodaysChallenge();
     if (challenge != null &&
-        challenge.title.contains('Streak Warrior') &&
+        challenge.templateId == 'streak_warrior' &&
         !challenge.isCompleted) {
       await updateChallengeProgress(challenge.id, 1);
     }

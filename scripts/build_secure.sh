@@ -41,6 +41,8 @@ Options:
     --clean    Run flutter clean before building.
     --export-options-plist=path
                Export options plist for IPA export (default: ios/export_options.plist).
+    --no-pod-repo-update
+               Skip pod repo update before iOS IPA build.
 
 Required environment variables:
     GOOGLE_MAPS_API_KEY
@@ -68,6 +70,7 @@ fi
 TARGET="all"
 DO_CLEAN=false
 EXPORT_OPTIONS_PLIST="ios/export_options.plist"
+DO_POD_REPO_UPDATE=true
 
 for arg in "$@"; do
     case "$arg" in
@@ -79,6 +82,9 @@ for arg in "$@"; do
             ;;
         --export-options-plist=*)
             EXPORT_OPTIONS_PLIST="${arg#*=}"
+            ;;
+        --no-pod-repo-update)
+            DO_POD_REPO_UPDATE=false
             ;;
         -h|--help)
             usage
@@ -180,6 +186,60 @@ if [[ "$TARGET" == "ios" || "$TARGET" == "all" ]]; then
 fi
 
 if [[ "$TARGET" == "ios-ipa" || "$TARGET" == "all-ipa" ]]; then
+    if [[ "$DO_POD_REPO_UPDATE" == true ]]; then
+        if command -v pod >/dev/null 2>&1; then
+            print_info "Updating CocoaPods specs repo (pod repo update)..."
+            (cd ios && pod repo update)
+            print_success "CocoaPods specs repo updated"
+
+            print_info "Refreshing iOS pods with latest specs (pod install --repo-update)..."
+            (
+                cd ios
+                if ! pod install --repo-update; then
+                    print_info "Pod install hit lockfile conflicts; running targeted pod updates..."
+                    pod update \
+                        Firebase/Auth \
+                        Firebase/CoreOnly \
+                        Firebase/Crashlytics \
+                        Firebase/Firestore \
+                        Firebase/Functions \
+                        Firebase/Messaging \
+                        Firebase/RemoteConfig \
+                        Firebase/Storage \
+                        FirebaseABTesting \
+                        FirebaseAnalytics \
+                        FirebaseAppCheck \
+                        FirebaseAppCheckInterop \
+                        FirebaseAuth \
+                        FirebaseAuthInterop \
+                        FirebaseCore \
+                        FirebaseCoreExtension \
+                        FirebaseCoreInternal \
+                        FirebaseCrashlytics \
+                        FirebaseFirestore \
+                        FirebaseFirestoreInternal \
+                        FirebaseFunctions \
+                        FirebaseInstallations \
+                        FirebaseMessaging \
+                        FirebaseMessagingInterop \
+                        FirebaseRemoteConfig \
+                        FirebaseRemoteConfigInterop \
+                        FirebaseSessions \
+                        FirebaseSharedSwift \
+                        FirebaseStorage \
+                        cloud_firestore \
+                        firebase_core \
+                        firebase_app_check
+                    pod install --repo-update
+                fi
+            )
+            print_success "iOS pods and Podfile.lock refreshed"
+        else
+            print_error "CocoaPods is required for IPA builds but `pod` is not on PATH."
+            exit 1
+        fi
+    fi
+
     print_info "Building signed iOS IPA (release)..."
     flutter build ipa --release --export-options-plist="$EXPORT_OPTIONS_PLIST" "${DART_DEFINES[@]}"
     print_success "iOS IPA ready at build/ios/ipa"

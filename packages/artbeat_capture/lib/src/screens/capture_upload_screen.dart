@@ -21,7 +21,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   File? _selectedImage;
-  final bool _isSubmitting = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -57,6 +57,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) {
+      return;
+    }
     if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('capture_upload_error_no_image'.tr())),
@@ -70,6 +73,8 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       );
       return;
     }
+
+    setState(() => _isSubmitting = true);
 
     final hasAcceptedCaptureTerms =
         await CaptureTermsService.hasAcceptedTerms();
@@ -92,11 +97,12 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('capture_upload_error_terms_required'.tr())),
         );
+        setState(() => _isSubmitting = false);
         return;
       }
     }
 
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => CaptureViewScreen(
           imageFile: _selectedImage!,
@@ -106,6 +112,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
         ),
       ),
     );
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
   }
 
   @override

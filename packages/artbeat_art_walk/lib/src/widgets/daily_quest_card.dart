@@ -76,6 +76,11 @@ class _DailyQuestCardState extends State<DailyQuestCard>
                     challenge.description,
                     style: AppTypography.body(Colors.white),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Counts when: ${_getCountsWhen(challenge)}',
+                    style: AppTypography.helper(Colors.white70),
+                  ),
                   const SizedBox(height: 16),
                   if (!isCompleted)
                     _buildProgressSection(challenge, progress)
@@ -232,6 +237,11 @@ class _DailyQuestCardState extends State<DailyQuestCard>
                 ),
                 Text(
                   challenge.rewardDescription,
+                  style: AppTypography.helper(Colors.white70),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _buildXpBreakdown(challenge),
                   style: AppTypography.helper(Colors.white70),
                 ),
               ],
@@ -396,5 +406,48 @@ class _DailyQuestCardState extends State<DailyQuestCard>
     if (diff.inHours > 0) return '${diff.inHours}h ${diff.inMinutes % 60}m';
     if (diff.inMinutes > 0) return '${diff.inMinutes}m';
     return 'soon';
+  }
+
+  String _getCountsWhen(ChallengeModel challenge) {
+    switch (challenge.templateId) {
+      case 'discover_art':
+        return 'you discover artworks';
+      case 'discover_neighborhood':
+        return 'you discover unique neighborhoods';
+      case 'capture_photos':
+        return 'you capture eligible photos';
+      case 'golden_hour':
+        return 'you capture during golden-hour windows';
+      case 'social_share':
+        return 'you share quest-eligible content';
+      case 'community_connector':
+        return 'you post eligible community interactions';
+      case 'walk_distance':
+        return 'tracked walking distance increases';
+      case 'step_master':
+        return 'tracked steps are recorded';
+      case 'early_bird':
+        return 'eligible activity happens before 9 AM';
+      case 'night_owl':
+        return 'eligible activity happens after 6 PM';
+      case 'art_critic':
+        return 'you submit a detailed (50+ char) description';
+      case 'style_collector':
+        return 'you discover eligible art styles';
+      case 'streak_warrior':
+        return 'you complete any eligible quest activity';
+      default:
+        return 'you complete the listed objective';
+    }
+  }
+
+  String _buildXpBreakdown(ChallengeModel challenge) {
+    final lastBase = challenge.lastBaseXP ?? challenge.rewardXP;
+    final lastAwarded = challenge.lastAwardedXP ?? challenge.rewardXP;
+    final multiplier = challenge.lastMultiplier;
+    if (multiplier == null) {
+      return 'XP: base $lastBase, awarded $lastAwarded';
+    }
+    return 'XP: base $lastBase x ${multiplier.toStringAsFixed(2)} = $lastAwarded';
   }
 }
