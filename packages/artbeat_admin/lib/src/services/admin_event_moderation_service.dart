@@ -213,6 +213,87 @@ class AdminEventModerationService {
     }
   }
 
+  Future<List<AdminEventModel>> getAllEvents({int limit = 150}) async {
+    final user = _requireUser();
+    await _ensureModerator(user.uid);
+
+    final query = await _firestore
+        .collection('events')
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get();
+
+    return query.docs.map(AdminEventModel.fromFirestore).toList();
+  }
+
+  Future<String> createLocalEvent({
+    required String title,
+    required String description,
+    required String location,
+    required List<String> imageUrls,
+    required DateTime startDate,
+    DateTime? endDate,
+    required bool isPublic,
+    required bool isActive,
+  }) async {
+    final user = _requireUser();
+    await _ensureModerator(user.uid);
+
+    final doc = _firestore.collection('events').doc();
+    await doc.set({
+      'title': title.trim(),
+      'description': description.trim(),
+      'location': location.trim(),
+      'imageUrls': imageUrls.where((url) => url.trim().isNotEmpty).toList(),
+      'startDate': Timestamp.fromDate(startDate),
+      'dateTime': Timestamp.fromDate(startDate),
+      'endDate': endDate != null ? Timestamp.fromDate(endDate) : null,
+      'isPublic': isPublic,
+      'isActive': isActive,
+      'moderationStatus': isActive ? 'approved' : 'pending',
+      'userId': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'lastModerated': FieldValue.serverTimestamp(),
+      'reviewedBy': user.uid,
+      'reviewedAt': FieldValue.serverTimestamp(),
+      'isRecurring': false,
+    });
+    return doc.id;
+  }
+
+  Future<void> updateLocalEvent({
+    required String eventId,
+    required String title,
+    required String description,
+    required String location,
+    required List<String> imageUrls,
+    required DateTime startDate,
+    DateTime? endDate,
+    required bool isPublic,
+    required bool isActive,
+  }) async {
+    final user = _requireUser();
+    await _ensureModerator(user.uid);
+
+    await _firestore.collection('events').doc(eventId).update({
+      'title': title.trim(),
+      'description': description.trim(),
+      'location': location.trim(),
+      'imageUrls': imageUrls.where((url) => url.trim().isNotEmpty).toList(),
+      'startDate': Timestamp.fromDate(startDate),
+      'dateTime': Timestamp.fromDate(startDate),
+      'endDate': endDate != null ? Timestamp.fromDate(endDate) : null,
+      'isPublic': isPublic,
+      'isActive': isActive,
+      'moderationStatus': isActive ? 'approved' : 'pending',
+      'updatedAt': FieldValue.serverTimestamp(),
+      'lastModerated': FieldValue.serverTimestamp(),
+      'reviewedBy': user.uid,
+      'reviewedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   User _requireUser() {
     final user = _auth.currentUser;
     if (user == null) {

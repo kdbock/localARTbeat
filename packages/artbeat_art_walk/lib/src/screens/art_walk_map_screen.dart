@@ -1,14 +1,16 @@
 import 'dart:async';
-import 'dart:io' show SocketException;
+import 'dart:io' show SocketException, Platform;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as am;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:artbeat_art_walk/src/constants/routes.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_capture_read_service.dart';
 import 'package:artbeat_art_walk/src/services/go_now_flow_service.dart';
@@ -46,6 +48,33 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   // Map data
   final Set<Marker> _markers = <Marker>{};
   List<CaptureModel> _nearbyCaptures = [];
+
+  Set<am.Annotation> _appleAnnotationsFromMarkers() {
+    return _markers
+        .map(
+          (marker) => am.Annotation(
+            annotationId: am.AnnotationId(marker.markerId.value),
+            position: am.LatLng(
+              marker.position.latitude,
+              marker.position.longitude,
+            ),
+            infoWindow: am.InfoWindow(
+              title: marker.infoWindow.title,
+              snippet: marker.infoWindow.snippet,
+            ),
+          ),
+        )
+        .toSet();
+  }
+
+  Future<void> _openMapInBrowser() async {
+    final target = _currentMapCenter;
+    if (target == null) return;
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${target.latitude},${target.longitude}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
   final String _artFilter = 'public'; // 'public', 'my_captures', 'my_artwalks'
 
   // Location and timer
@@ -689,8 +718,10 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'art_walk_art_walk_map_text_map_features_mobile'
-                                  .tr(),
+                              Platform.isMacOS
+                                  ? 'Map view is not available on macOS yet. Use iOS/Android for interactive map features.'
+                                  : 'art_walk_art_walk_map_text_map_features_mobile'
+                                      .tr(),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                 fontSize: 14,
@@ -698,24 +729,45 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                                 color: Colors.grey[500],
                               ),
                             ),
+                            if (Platform.isMacOS) ...[
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: _openMapInBrowser,
+                                icon: const Icon(Icons.open_in_new),
+                                label: const Text('Open Google Map'),
+                              ),
+                            ],
                           ],
                         ),
                       ),
                     )
-                  : GoogleMap(
-                      initialCameraPosition: _defaultLocation,
-                      markers: _markers,
-                      onMapCreated: (GoogleMapController controller) {
-                        _mapController = controller;
-                        if (!_mapControllerCompleter.isCompleted) {
-                          _mapControllerCompleter.complete(controller);
-                        }
-                      },
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
-                      mapToolbarEnabled: false,
-                    ),
+                  : Platform.isMacOS
+                      ? am.AppleMap(
+                          initialCameraPosition: am.CameraPosition(
+                            target: am.LatLng(
+                              _defaultLocation.target.latitude,
+                              _defaultLocation.target.longitude,
+                            ),
+                            zoom: _defaultLocation.zoom,
+                          ),
+                          annotations: _appleAnnotationsFromMarkers(),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: false,
+                        )
+                      : GoogleMap(
+                          initialCameraPosition: _defaultLocation,
+                          markers: _markers,
+                          onMapCreated: (GoogleMapController controller) {
+                            _mapController = controller;
+                            if (!_mapControllerCompleter.isCompleted) {
+                              _mapControllerCompleter.complete(controller);
+                            }
+                          },
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: false,
+                          zoomControlsEnabled: false,
+                          mapToolbarEnabled: false,
+                        ),
             ),
 
             // Glass header AppBar overlay

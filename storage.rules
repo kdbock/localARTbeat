@@ -350,15 +350,27 @@ service firebase.storage {
     // Event images - for event creation (headshots, banners, event images)
     match /events/{userId}/{eventId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && request.auth.uid == userId;
-      allow delete: if isAuthorized() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
 
     // Event images fallback path (owner-only)
     match /events/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && request.auth.uid == userId;
-      allow delete: if isAuthorized() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
 
     // Art Walk images - allow authenticated users to upload to their own folder
