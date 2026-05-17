@@ -5,6 +5,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../app.dart';
 import '../services/app_permission_service.dart';
@@ -82,6 +83,7 @@ void _initializeAppPermissions() {
   Future.delayed(const Duration(milliseconds: 500), () async {
     try {
       await AppPermissionService().initializePermissions();
+      await _requestLocationPermissionAtStartup();
       AppLogger.info('✅ Permissions initialized');
     } on Object catch (error, stackTrace) {
       _logDeferredInitFailure(
@@ -91,6 +93,39 @@ void _initializeAppPermissions() {
       );
     }
   });
+}
+
+Future<void> _requestLocationPermissionAtStartup() async {
+  try {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      AppLogger.warning('⚠️ Location services are disabled on this device');
+      return;
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      AppLogger.warning('⚠️ Location permission denied by user');
+      return;
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      AppLogger.warning('⚠️ Location permission denied forever');
+      return;
+    }
+
+    AppLogger.info('✅ Location permission available: $permission');
+  } on Object catch (error, stackTrace) {
+    _logDeferredInitFailure(
+      stage: 'non_critical.location_permission',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
 }
 
 void _logDeferredInitFailure({

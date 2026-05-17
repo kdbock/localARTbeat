@@ -26,6 +26,10 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ARTbeat uses your location to discover nearby art walks, map routes, and location-based artwork.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>ARTbeat uses your location to discover nearby art walks, map routes, and location-based artwork.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

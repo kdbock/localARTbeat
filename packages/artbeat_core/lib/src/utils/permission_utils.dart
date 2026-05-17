@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,6 +11,7 @@ import 'logger.dart';
 class PermissionUtils {
   static const String _locationSafetyDisclosureKey =
       'location_safety_disclosure_ack_v1';
+  static Completer<bool>? _locationPermissionRequestCompleter;
 
   /// Show a one-time safety notice before first location permission request.
   static Future<bool> showLocationSafetyDisclosureIfNeeded(
@@ -55,10 +58,34 @@ class PermissionUtils {
   static Future<bool> requestLocationPermissionWithSafety(
     BuildContext context,
   ) async {
+    // Prevent overlapping OS permission prompts; return the same in-flight result.
+    final inFlight = _locationPermissionRequestCompleter;
+    if (inFlight != null) {
+      return inFlight.future;
+    }
+
+    final completer = Completer<bool>();
+    _locationPermissionRequestCompleter = completer;
+
+    try {
     final canProceed = await showLocationSafetyDisclosureIfNeeded(context);
-    if (!canProceed) return false;
-    if (!context.mounted) return false;
-    return requestLocationPermission(context);
+    if (!canProceed) {
+      completer.complete(false);
+      return false;
+    }
+    if (!context.mounted) {
+      completer.complete(false);
+      return false;
+    }
+    final allowed = await requestLocationPermission(context);
+    completer.complete(allowed);
+    return allowed;
+    } catch (_) {
+      if (!completer.isCompleted) completer.complete(false);
+      rethrow;
+    } finally {
+      _locationPermissionRequestCompleter = null;
+    }
   }
 
   /// Request photo library permission with proper error handling

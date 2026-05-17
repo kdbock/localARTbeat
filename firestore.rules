@@ -1198,7 +1198,13 @@ service cloud.firestore {
 
     // Captures
     match /captures/{captureId} {
-      allow read, list: if isAuthenticated();
+      // Public browsing support (e.g. unauthenticated desktop startup):
+      // only allow reads for captures explicitly marked public.
+      allow read, list: if
+        (resource.data.isPublic == true &&
+         (!('moderationStatus' in resource.data) ||
+          resource.data.moderationStatus == 'approved')) ||
+        isAuthenticated();
       allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
         isAdmin(request.auth.uid)
