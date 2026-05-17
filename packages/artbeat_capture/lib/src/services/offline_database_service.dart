@@ -177,11 +177,8 @@ class OfflineDatabaseService {
 
       final List<Map<String, dynamic>> maps = await db.query(
         'offline_queue',
-        where: 'status IN (?, ?)',
-        whereArgs: [
-          OfflineQueueStatus.pending.toString(),
-          OfflineQueueStatus.failed.toString(),
-        ],
+        where: 'status = ?',
+        whereArgs: [OfflineQueueStatus.pending.toString()],
         orderBy: 'syncPriority DESC, createdAt ASC',
       );
 
@@ -303,6 +300,35 @@ class OfflineDatabaseService {
       return result;
     } catch (e) {
       AppLogger.error('Error cleaning up old items: $e');
+      return 0;
+    }
+  }
+
+  /// Reset failed items so they can be retried immediately.
+  Future<int> resetFailedItemsForRetry({int minRetryCount = 3}) async {
+    try {
+      final db = await database;
+      final now = DateTime.now().toIso8601String();
+
+      final result = await db.update(
+        'offline_queue',
+        {
+          'status': OfflineQueueStatus.pending.toString(),
+          'retryCount': 0,
+          'lastError': null,
+          'updatedAt': now,
+        },
+        where: 'status = ? AND retryCount >= ?',
+        whereArgs: [OfflineQueueStatus.failed.toString(), minRetryCount],
+      );
+
+      if (result > 0) {
+        AppLogger.info('Reset $result failed offline queue items for retry');
+      }
+
+      return result;
+    } catch (e) {
+      AppLogger.error('Error resetting failed items for retry: $e');
       return 0;
     }
   }

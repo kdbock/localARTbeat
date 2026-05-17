@@ -19,6 +19,9 @@ class _CaptureSettingsScreenState extends State<CaptureSettingsScreen> {
   bool _highQualityUploadsEnabled = true;
   bool _saveDraftsEnabled = true;
   bool _isLoading = true;
+  bool _isRetryingFailedUploads = false;
+  int _failedUploadsCount = 0;
+  final OfflineQueueService _offlineQueueService = OfflineQueueService();
 
   @override
   void initState() {
@@ -28,14 +31,47 @@ class _CaptureSettingsScreenState extends State<CaptureSettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final queueStats = await _offlineQueueService.getQueueStatistics();
     if (!mounted) return;
     setState(() {
       _locationTagsEnabled = prefs.getBool(_locationTagsKey) ?? true;
       _highQualityUploadsEnabled =
           prefs.getBool(_highQualityUploadsKey) ?? true;
       _saveDraftsEnabled = prefs.getBool(_saveDraftsKey) ?? true;
+      _failedUploadsCount = queueStats.failed;
       _isLoading = false;
     });
+  }
+
+  Future<void> _retryFailedUploads() async {
+    if (_isRetryingFailedUploads) return;
+    setState(() => _isRetryingFailedUploads = true);
+
+    try {
+      final resetCount = await _offlineQueueService.retryFailedUploads();
+      final queueStats = await _offlineQueueService.getQueueStatistics();
+      if (!mounted) return;
+      setState(() {
+        _failedUploadsCount = queueStats.failed;
+      });
+
+      final message = resetCount > 0
+          ? 'Retry started for $resetCount failed upload(s).'
+          : 'No failed uploads were eligible for retry.';
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Retry failed: $e')));
+    } finally {
+      if (mounted) {
+        setState(() => _isRetryingFailedUploads = false);
+      }
+    }
   }
 
   Future<void> _setBool(String key, bool value) async {
@@ -127,6 +163,32 @@ class _CaptureSettingsScreenState extends State<CaptureSettingsScreen> {
                                     value: _saveDraftsEnabled,
                                     onChanged: (value) =>
                                         _setBool(_saveDraftsKey, value),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed:
+                                          _failedUploadsCount > 0 &&
+                                              !_isRetryingFailedUploads
+                                          ? _retryFailedUploads
+                                          : null,
+                                      icon: _isRetryingFailedUploads
+                                          ? const SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child:
+                                                  CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                  ),
+                                            )
+                                          : const Icon(Icons.refresh),
+                                      label: Text(
+                                        _failedUploadsCount > 0
+                                            ? 'Retry Failed Uploads ($_failedUploadsCount)'
+                                            : 'No Failed Uploads to Retry',
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),

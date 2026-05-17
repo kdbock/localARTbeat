@@ -16,6 +16,9 @@ class AuthService {
   late FirebaseAuth _auth;
   late FirebaseFirestore _firestore;
   static Future<void>? _googleSignInInitialization;
+  // Web OAuth client ID from Firebase project OAuth configuration
+  static const String _googleWebClientId =
+      '665020451634-3vhr69cpqs4vd3rheci5bf71054od58v.apps.googleusercontent.com';
 
   /// Initialize Google Sign-In with proper error handling
   /// Now uses the singleton instance in 7.x
@@ -196,7 +199,14 @@ class AuthService {
     }
 
     final initialization = _googleSignIn
-        .initialize()
+        .initialize(
+          // Android credential-manager flow in google_sign_in 7.x requires
+          // a server client ID. Passing it explicitly avoids config
+          // auto-detection failures from google-services parsing.
+          serverClientId: _googleWebClientId,
+          // Web flow uses clientId directly.
+          clientId: kIsWeb ? _googleWebClientId : null,
+        )
         .then((_) {
           AppLogger.info('✅ Google Sign-In initialized');
         })
@@ -260,15 +270,16 @@ class AuthService {
       final accessToken = clientAuth.accessToken;
       final idToken = googleAuth.idToken;
 
-      // Validate we have required tokens
-      if (accessToken.isEmpty || idToken == null) {
+      // Validate that at least one token exists.
+      // Firebase accepts accessToken, idToken, or both.
+      if (accessToken.isEmpty && idToken == null) {
         AppLogger.error('Google authentication tokens are missing');
         throw Exception('Invalid Google authentication tokens received');
       }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: accessToken,
+        accessToken: accessToken.isEmpty ? null : accessToken,
         idToken: idToken,
       );
 

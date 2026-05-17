@@ -156,6 +156,13 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         AppRoutes.captureSearch,
                         const Color(0xFF34D399),
                       ),
+                      _buildDrawerItem(
+                        context,
+                        'capture_drawer_capture_settings'.tr(),
+                        Icons.tune_rounded,
+                        AppRoutes.captureSettings,
+                        const Color(0xFF22D3EE),
+                      ),
 
                       // Moderation (admin)
                       if (_currentUser?.userType == UserType.admin) ...[

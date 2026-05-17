@@ -228,7 +228,12 @@ class OfflineQueueService {
       // Get all items that can be synced
       final pendingItems = await _dbService.getPendingItems();
       final retryItems = await _dbService.getItemsForAutoRetry();
-      final allItems = [...pendingItems, ...retryItems];
+      final allItems = <OfflineQueueItem>[
+        ...pendingItems,
+        ...retryItems.where((retryItem) {
+          return !pendingItems.any((pending) => pending.id == retryItem.id);
+        }),
+      ];
 
       if (allItems.isEmpty) {
         AppLogger.info('No items to sync');
@@ -427,6 +432,21 @@ class OfflineQueueService {
   /// Clean up old synced items
   Future<int> cleanupOldItems() async {
     return _dbService.cleanupOldItems();
+  }
+
+  /// Reset failed items and trigger a fresh sync attempt.
+  Future<int> retryFailedUploads() async {
+    final resetCount = await _dbService.resetFailedItemsForRetry();
+    if (resetCount > 0) {
+      _attemptImmediateSync();
+      _notifySyncEvent(
+        OfflineSyncEvent(
+          type: OfflineSyncEventType.syncStarted,
+          message: 'Retrying $resetCount previously failed upload(s)...',
+        ),
+      );
+    }
+    return resetCount;
   }
 
   /// Dispose of the service

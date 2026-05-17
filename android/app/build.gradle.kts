@@ -19,6 +19,13 @@ val isReleaseTask = gradle.startParameter.taskNames.any {
     it.contains("release", ignoreCase = true)
 }
 val mapsApiKey = keystoreProperties.getProperty("mapsApiKey", "")
+fun resolveProjectKeystore(path: String): File {
+    val normalized = path.trim()
+    val candidate = rootProject.file(normalized)
+    if (candidate.exists()) return candidate
+    val repoRootCandidate = rootProject.file("../$normalized")
+    return repoRootCandidate
+}
 
 android {
     namespace = "com.wordnerd.artbeat"
@@ -38,9 +45,20 @@ android {
 
     // Setup signing configuration for release builds
     signingConfigs {
+        create("localDebug") {
+            val localDebugKeystore = resolveProjectKeystore("debug.keystore")
+            if (localDebugKeystore.exists()) {
+                storeFile = localDebugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            } else {
+                logger.warn("Local debug.keystore not found at project root; falling back to default debug signing.")
+            }
+        }
         create("release") {
             val keystoreFile = keystoreProperties.getProperty("storeFile")?.let { 
-                rootProject.file(it)
+                resolveProjectKeystore(it)
             }
             if (keystoreFile != null && keystoreFile.exists()) {
                 storeFile = keystoreFile
@@ -58,7 +76,7 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 124
+        versionCode = 126
         versionName = "2.6.17"
         
         // Enable multidex for large app
@@ -78,7 +96,7 @@ android {
                 keystoreProperties.getProperty("storePassword") != null &&
                 keystoreProperties.getProperty("keyAlias") != null &&
                 keystoreProperties.getProperty("keyPassword") != null &&
-                rootProject.file(keystoreProperties.getProperty("storeFile")).exists()
+                resolveProjectKeystore(keystoreProperties.getProperty("storeFile")).exists()
             if (isReleaseTask && !hasReleaseKeystore) {
                 throw GradleException(
                     "Release build requires a valid signing config in key.properties."
@@ -108,8 +126,13 @@ android {
         }
         
         debug {
-            // Debug builds continue to use debug signing
-            signingConfig = signingConfigs.getByName("debug")
+            // Pin debug signing to project-local debug.keystore for stable Firebase SHA fingerprints.
+            val localDebugKeystore = resolveProjectKeystore("debug.keystore")
+            signingConfig = if (localDebugKeystore.exists()) {
+                signingConfigs.getByName("localDebug")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
