@@ -28,6 +28,7 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
   bool _isCompleting = false;
   bool _roleSelected = false;
   File? _artistPhoto;
+  final DateTime _sessionStartedAt = DateTime.now();
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
     setState(() => _isCompleting = true);
 
     await _trackCompletion(action: action);
+    _trackFirstMeaningfulAction(action: action);
 
     await core.OnboardingService().markOnboardingCompleted();
     if (!mounted) return;
@@ -70,6 +72,20 @@ class _UserOnboardingFlowScreenState extends State<UserOnboardingFlowScreen> {
     await Navigator.of(
       context,
     ).pushNamedAndRemoveUntil(core.AppRoutes.dashboard, (route) => false);
+  }
+
+  void _trackFirstMeaningfulAction({required String action}) {
+    final mappedAction = switch (action) {
+      'photo_upload_completed' => 'upload_first_artwork',
+      'location_permission_completed' => 'complete_onboarding_fan_action',
+      'skip' => 'skip_onboarding',
+      _ => 'complete_onboarding',
+    };
+    core.UxSessionAnalyticsService().trackFirstMeaningfulAction(
+      action: mappedAction,
+      routeName: core.AppRoutes.dashboard,
+      durationMs: DateTime.now().difference(_sessionStartedAt).inMilliseconds,
+    );
   }
 
   Future<void> _selectRole(bool isArtist) async {

@@ -44,6 +44,7 @@ Future<void> main() async {
   installStartupDiagnostics();
 
   installGlobalErrorHandlers();
+  await UxSessionAnalyticsService().trackSessionStart(source: 'cold_start');
 
   PerformanceMonitor.startTimer('app_startup');
 

@@ -11,6 +11,8 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 import '../../widgets/dashboard/dashboard_browse_section.dart';
 import '../../widgets/dashboard/dashboard_section_button.dart';
+import '../../models/first_session_checklist_model.dart';
+import '../../services/first_session_checklist_service.dart';
 
 /// Local ARTbeat - Explore Dashboard (Feed + Tabs)
 /// - Same modern visual language as the AnimatedDashboardScreen
@@ -54,6 +56,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   // Onboarding state
   bool _isTourActive = false;
   late final OnboardingService _onboardingService;
+  late final FirstSessionChecklistService _checklistService;
+  late final MotionPreferencesService _motionPreferencesService;
+  FirstSessionChecklistState? _checklistState;
+  MotionMode _motionMode = MotionMode.full;
 
   // UI state
   int _scrollDepth = 0;
@@ -141,6 +147,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   void initState() {
     super.initState();
     _onboardingService = context.read<OnboardingService>();
+    _checklistService = FirstSessionChecklistService();
+    _motionPreferencesService = MotionPreferencesService();
 
     _tabController = TabController(length: 3, vsync: this);
 
@@ -163,6 +171,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
     _scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadUxPreferences();
       _fadeController.forward();
 
       try {
@@ -175,6 +184,21 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
         AppLogger.error('❌ Stack trace: $stack');
       }
     });
+  }
+
+  Future<void> _loadUxPreferences() async {
+    final state = await _checklistService.getState(
+      defaultRolePath: FirstSessionRolePath.fan,
+    );
+    final motionMode = await _motionPreferencesService.getMotionMode();
+    if (!mounted) return;
+    setState(() {
+      _checklistState = state;
+      _motionMode = motionMode;
+    });
+    if (motionMode == MotionMode.reduced) {
+      _loopController.stop();
+    }
   }
 
   void _onScroll() {
@@ -359,7 +383,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           Expanded(
                             child: GestureDetector(
                               onTap: () =>
-                                  Navigator.pushNamed(context, '/dashboard'),
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.dashboard,
+                                  ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -413,7 +440,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                             _glassIconButton(
                               icon: Icons.search,
                               onTap: () =>
-                                  Navigator.pushNamed(context, '/search'),
+                                  Navigator.pushNamed(context, AppRoutes.search),
                             ),
                             const SizedBox(width: 8),
                           ],
@@ -421,7 +448,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                             _glassIconButton(
                               icon: Icons.message,
                               onTap: () =>
-                                  Navigator.pushNamed(context, '/messaging'),
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.messaging,
+                                  ),
                             ),
                             const SizedBox(width: 8),
                           ],
@@ -438,7 +468,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         const SizedBox(height: 12),
                         GestureDetector(
                           key: _searchKey,
-                          onTap: () => Navigator.pushNamed(context, '/search'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, AppRoutes.search),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: BackdropFilter(
@@ -511,7 +542,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           label: locationLabel,
                           isLoading: vm.isLoadingLocation,
                           onTap: () =>
-                              Navigator.pushNamed(context, '/art-walk/map'),
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.artWalkMap,
+                              ),
                         ),
                       ],
                       if (showQuickStats) ...[
@@ -519,11 +553,20 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         _QuickStatsRow(
                           vm: vm,
                           onAchieveTap: () =>
-                              Navigator.pushNamed(context, '/achievements'),
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.achievements,
+                              ),
                           onArtistsTap: () =>
-                              Navigator.pushNamed(context, '/artist/browse'),
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.artistBrowse,
+                              ),
                           onEventsTap: () =>
-                              Navigator.pushNamed(context, '/events/discover'),
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.eventsDiscover,
+                              ),
                           onCapturesTap: () => Navigator.pushNamed(
                             context,
                             AppRoutes.instantDiscovery,
@@ -534,6 +577,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         const SizedBox(height: 16),
                         _buildBooksSection(context, vm),
                       ],
+                      if (_checklistState != null) ...[
+                        const SizedBox(height: 12),
+                        _buildFirstSessionUxCard(),
+                      ],
                     ],
                   ),
                 );
@@ -541,6 +588,70 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFirstSessionUxCard() {
+    final state = _checklistState!;
+    final requiredSteps = FirstSessionChecklistState.stepsForRole(state.rolePath);
+    final completed = state.completedSteps.length;
+    final total = requiredSteps.length;
+    final isFirstSessionFlow = !state.isCompleted;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'First-session setup',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isFirstSessionFlow
+                ? 'Complete $completed/$total guided steps to unlock full navigation.'
+                : 'Checklist complete. You can still tune comfort settings.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            children: MotionMode.values.map((mode) {
+              final selected = _motionMode == mode;
+              final label = mode.name[0].toUpperCase() + mode.name.substring(1);
+              return ChoiceChip(
+                label: Text(label),
+                selected: selected,
+                onSelected: (_) async {
+                  await _motionPreferencesService.setMotionMode(mode);
+                  await UxSessionAnalyticsService().trackSimpleModeEnabled(
+                    source: 'dashboard_motion_toggle_${mode.name}',
+                  );
+                  if (!mounted) return;
+                  setState(() => _motionMode = mode);
+                  if (mode == MotionMode.reduced) {
+                    _loopController.stop();
+                  } else if (!_loopController.isAnimating) {
+                    _loopController.repeat();
+                  }
+                },
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -576,7 +687,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
               TextButton(
                 onPressed: () {
                   // Navigate to written content discovery
-                  Navigator.pushNamed(context, '/artwork/discovery');
+                  Navigator.pushNamed(context, AppRoutes.artDiscovery);
                 },
                 child: Text(
                   'common_view_all'.tr(),
@@ -810,7 +921,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
       print('🔔 Notification button tapped! Route: /notifications');
     }
     try {
-      Navigator.pushNamed(context, '/notifications');
+      Navigator.pushNamed(context, AppRoutes.notifications);
     } catch (error) {
       AppLogger.error('Notification navigation error: $error');
       if (!mounted) return;
@@ -1136,7 +1247,7 @@ class _ArtistSpotlightHero extends StatelessWidget {
                   '/artist/public-profile',
                   arguments: {'artistId': artist!.userId},
                 )
-              : () => Navigator.pushNamed(context, '/artist/browse'),
+              : () => Navigator.pushNamed(context, AppRoutes.artistBrowse),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: Stack(
@@ -1295,7 +1406,8 @@ class _FeaturedArtistGallery extends StatelessWidget {
             title: 'Featured Artists',
             subtitle: 'Spotlights curated for you',
             actionLabel: 'See All',
-            onActionTap: () => Navigator.pushNamed(context, '/artist/browse'),
+            onActionTap: () =>
+                Navigator.pushNamed(context, AppRoutes.artistBrowse),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1532,7 +1644,8 @@ class _ArtworkSpotlightRail extends StatelessWidget {
             title: 'Artwork Spotlight',
             subtitle: 'New drops from local creators',
             actionLabel: 'Browse Gallery',
-            onActionTap: () => Navigator.pushNamed(context, '/artwork/browse'),
+            onActionTap: () =>
+                Navigator.pushNamed(context, AppRoutes.artworkBrowse),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1698,7 +1811,8 @@ class _ArtistEventsShowcase extends StatelessWidget {
             title: 'Upcoming Artist Events',
             subtitle: 'Meet the creators in real life',
             actionLabel: 'View Calendar',
-            onActionTap: () => Navigator.pushNamed(context, '/events/discover'),
+            onActionTap: () =>
+                Navigator.pushNamed(context, AppRoutes.eventsDiscover),
           ),
           const SizedBox(height: 16),
           SizedBox(

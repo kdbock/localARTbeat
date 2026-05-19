@@ -11,6 +11,7 @@ import 'package:artbeat_core/auth_service.dart' as core_auth;
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
 import '../routing/app_routes.dart';
+import '../services/ux_session_analytics_service.dart';
 import '../utils/logger.dart';
 
 /// Splash screen that matches the "Quest / Glass / Neon" theme.
@@ -42,6 +43,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _scaleAnimation;
 
   bool _hasNavigated = false;
+  bool _didTrackSplashShown = false;
 
   @override
   void initState() {
@@ -131,6 +133,9 @@ class _SplashScreenState extends State<SplashScreen>
 
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
+      UxSessionAnalyticsService().trackSplashToDashboard(
+        routeName: AppRoutes.dashboard,
+      );
 
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
@@ -146,6 +151,9 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
       FocusScope.of(context).unfocus();
+      UxSessionAnalyticsService().trackSplashToDashboard(
+        routeName: AppRoutes.dashboard,
+      );
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
         (Route<dynamic> route) => false,
@@ -187,6 +195,12 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     debugPrint('🧭 SplashScreen.build() entered');
+    if (!_didTrackSplashShown) {
+      _didTrackSplashShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UxSessionAnalyticsService().trackSplashShown();
+      });
+    }
     if (_useMinimalSafeSplash) {
       return const Scaffold(
         backgroundColor: Color(0xFF07060F),

@@ -88,7 +88,7 @@ class NavigationService {
       extra: {'route_name': routeName},
     );
 
-    if (routeName == '/dashboard' || routeName == '/artist/dashboard') {
+    if (routeName == AppRoutes.dashboard || routeName == '/artist/dashboard') {
       await _defensibilityTelemetry.trackEvent(
         DefensibilityEvent.activationMilestoneReached,
         surface: surface,
@@ -99,7 +99,7 @@ class NavigationService {
 
   String? _surfaceForRoute(String routeName) {
     switch (routeName) {
-      case '/dashboard':
+      case AppRoutes.dashboard:
         return 'dashboard';
       case '/community/dashboard':
         return 'community_feed';
@@ -148,7 +148,7 @@ class NavigationService {
               Navigator.of(context).pop();
               Navigator.of(
                 context,
-              ).pushNamedAndRemoveUntil('/dashboard', (route) => false);
+              ).pushNamedAndRemoveUntil(AppRoutes.dashboard, (route) => false);
             },
             child: const Text('Go to Dashboard'),
           ),
@@ -160,7 +160,7 @@ class NavigationService {
   /// Check if route exists
   bool doesRouteExist(String routeName) {
     final validRoutes = [
-      '/dashboard',
+      AppRoutes.dashboard,
       '/search',
       '/artist/search',
       '/trending',

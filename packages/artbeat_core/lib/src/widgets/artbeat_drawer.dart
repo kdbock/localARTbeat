@@ -13,6 +13,9 @@ import '../services/user_service.dart';
 import '../services/user_progression_service.dart';
 import '../services/messaging_status_service.dart';
 import '../services/crash_prevention_service.dart';
+import '../services/ux_session_analytics_service.dart';
+import '../services/first_session_checklist_service.dart';
+import '../models/first_session_checklist_model.dart';
 import '../models/user_model.dart' as core;
 import 'artbeat_drawer_items.dart';
 import 'user_avatar.dart';
@@ -43,8 +46,12 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   String? _roleOverride; // For admin role switching
   late final UserService _userService;
   late final UserProgressionService _userProgressionService;
+  late final FirstSessionChecklistService _firstSessionChecklistService;
 
   late final AnimationController _loop; // ambient animation
+  bool _didTrackDrawerOpen = false;
+  bool _simpleModeEnabled = false;
+  bool _exploreMoreOpened = false;
 
   @override
   void initState() {
@@ -54,12 +61,14 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
       context,
       listen: false,
     );
+    _firstSessionChecklistService = FirstSessionChecklistService();
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
     )..repeat();
 
     _loadUserModel();
+    _loadFirstSessionFlags();
 
     _authSubscription = _userService.authStateChanges.listen((user) {
       if (user != null && _cachedUserModel == null) {
@@ -72,6 +81,17 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
           });
         }
       }
+    });
+  }
+
+  Future<void> _loadFirstSessionFlags() async {
+    final state = await _firstSessionChecklistService.getState(
+      defaultRolePath: FirstSessionRolePath.fan,
+    );
+    if (!mounted) return;
+    setState(() {
+      _simpleModeEnabled = state.simpleModeEnabled;
+      _exploreMoreOpened = state.exploreMoreOpened;
     });
   }
 
@@ -337,8 +357,19 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
   @override
   Widget build(BuildContext context) {
+    if (!_didTrackDrawerOpen) {
+      _didTrackDrawerOpen = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UxSessionAnalyticsService().trackDrawerOpen();
+      });
+    }
+
     final userRole = _getUserRole();
-    final drawerSections = ArtbeatDrawerItems.getSectionsForRole(userRole);
+    final drawerSections = ArtbeatDrawerItems.getSectionsForRole(
+      userRole,
+      simpleMode: _simpleModeEnabled,
+      exploreMoreOpened: _exploreMoreOpened,
+    );
 
     return Drawer(
       backgroundColor: const Color(0xFF07060F),
@@ -364,12 +395,23 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
-                    itemCount: _calculateTotalItems(drawerSections),
+                    itemCount:
+                        _calculateTotalItems(drawerSections) +
+                        (_simpleModeEnabled && !_exploreMoreOpened ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (_simpleModeEnabled &&
+                          !_exploreMoreOpened &&
+                          index == 0) {
+                        return _buildExploreMoreItem();
+                      }
+                      final sectionIndex =
+                          (_simpleModeEnabled && !_exploreMoreOpened)
+                          ? index - 1
+                          : index;
                       return _buildDrawerItemAtIndex(
                         context,
                         drawerSections,
-                        index,
+                        sectionIndex,
                       );
                     },
                   ),
@@ -377,6 +419,47 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExploreMoreItem() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () async {
+          await _firstSessionChecklistService.markExploreMoreOpened();
+          await UxSessionAnalyticsService().trackExploreMoreOpened(
+            source: 'drawer',
+          );
+          if (!mounted) return;
+          setState(() => _exploreMoreOpened = true);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: Colors.white.withValues(alpha: 0.08),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.explore_outlined, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Explore more',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+            ],
+          ),
         ),
       ),
     );
@@ -659,6 +742,11 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
             Navigator.pop(context);
 
             if (!isCurrentRoute) {
+              await UxSessionAnalyticsService().trackDrawerRouteTap(
+                routeName: item.route,
+                source: 'drawer',
+                isMainRoute: isMainNavigationRoute,
+              );
               await Future<void>.delayed(const Duration(milliseconds: 220));
               if (!mounted) return;
 

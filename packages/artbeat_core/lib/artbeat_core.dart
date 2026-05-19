@@ -90,6 +90,10 @@ export 'src/services/image_management_service.dart' show ImageManagementService;
 export 'src/services/monetization_funnel_service.dart'
     show MonetizationFunnelService;
 export 'src/services/onboarding_service.dart' show OnboardingService;
+export 'src/services/ux_session_analytics_service.dart'
+    show UxSessionAnalyticsService;
+export 'src/services/motion_preferences_service.dart'
+    show MotionPreferencesService, MotionMode;
 export 'src/services/payment_analytics_service.dart'
     show PaymentAnalyticsService;
 export 'src/services/leaderboard_service.dart'

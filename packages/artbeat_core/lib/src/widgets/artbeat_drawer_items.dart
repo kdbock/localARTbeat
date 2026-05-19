@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../routing/app_routes.dart';
 import '../theme/artbeat_colors.dart';
 
 // Define drawer section structure
@@ -39,37 +40,37 @@ class ArtbeatDrawerItems {
   static const dashboard = ArtbeatDrawerItem(
     title: 'drawer_dashboard',
     icon: Icons.dashboard_outlined,
-    route: '/dashboard',
+    route: AppRoutes.dashboard,
   );
 
   static const browse = ArtbeatDrawerItem(
     title: 'drawer_browse',
     icon: Icons.search_outlined,
-    route: '/browse',
+    route: AppRoutes.browse,
   );
 
   static const community = ArtbeatDrawerItem(
     title: 'drawer_community',
     icon: Icons.groups_outlined,
-    route: '/community/feed',
+    route: AppRoutes.communityFeed,
   );
 
   static const events = ArtbeatDrawerItem(
     title: 'drawer_events',
     icon: Icons.event_outlined,
-    route: '/events/discover',
+    route: AppRoutes.eventsDiscover,
   );
 
   static const artWalk = ArtbeatDrawerItem(
     title: 'drawer_art_walk',
     icon: Icons.map_outlined,
-    route: '/art-walk/dashboard',
+    route: AppRoutes.artWalkDashboard,
   );
 
   static const messaging = ArtbeatDrawerItem(
     title: 'drawer_messages',
     icon: Icons.message_outlined,
-    route: '/messaging',
+    route: AppRoutes.messaging,
     requiresAuth: true,
     supportsBadge: true,
   );
@@ -85,21 +86,21 @@ class ArtbeatDrawerItems {
   static const createPost = ArtbeatDrawerItem(
     title: 'artist_artist_dashboard_text_add_post',
     icon: Icons.post_add_outlined,
-    route: '/community/hub',
+    route: AppRoutes.artCommunityHub,
     requiredRoles: ['artist', 'admin', 'moderator'],
   );
 
   static const createEvent = ArtbeatDrawerItem(
     title: 'drawer_create_event',
     icon: Icons.add_circle_outline,
-    route: '/events/create',
+    route: AppRoutes.eventsCreate,
     requiredRoles: ['artist', 'admin', 'gallery'],
   );
 
   static const createArtWalk = ArtbeatDrawerItem(
     title: 'drawer_create_art_walk',
     icon: Icons.add_location_outlined,
-    route: '/art-walk/dashboard',
+    route: AppRoutes.artWalkDashboard,
   );
 
   // Quest & Goals items
@@ -121,14 +122,14 @@ class ArtbeatDrawerItems {
   static const artistCommissions = ArtbeatDrawerItem(
     title: 'drawer_commission_hub',
     icon: Icons.handshake_outlined,
-    route: '/commission/hub',
+    route: AppRoutes.commissionHub,
     requiredRoles: ['artist'],
   );
 
   static const commissionRequests = ArtbeatDrawerItem(
     title: 'drawer_commission_requests',
     icon: Icons.request_quote_outlined,
-    route: '/commission/request',
+    route: AppRoutes.commissionRequest,
     requiredRoles: ['artist'],
   );
 
@@ -138,35 +139,35 @@ class ArtbeatDrawerItems {
   static const artistDashboard = ArtbeatDrawerItem(
     title: 'drawer_artist_dashboard',
     icon: Icons.palette_outlined,
-    route: '/artist/dashboard',
+    route: AppRoutes.artistDashboard,
     requiredRoles: ['artist'],
   );
 
   static const myArtwork = ArtbeatDrawerItem(
     title: 'drawer_my_artwork',
     icon: Icons.image_outlined,
-    route: '/artist/artwork',
+    route: AppRoutes.artistArtwork,
     requiredRoles: ['artist'],
   );
 
   static const uploadArtwork = ArtbeatDrawerItem(
     title: 'drawer_upload_artwork',
     icon: Icons.add_photo_alternate_outlined,
-    route: '/artwork/upload',
+    route: AppRoutes.artworkUpload,
     requiredRoles: ['artist'],
   );
 
   static const artistAnalytics = ArtbeatDrawerItem(
     title: 'drawer_analytics',
     icon: Icons.analytics_outlined,
-    route: '/artist/analytics',
+    route: AppRoutes.artistAnalytics,
     requiredRoles: ['artist'],
   );
 
   static const artistEarnings = ArtbeatDrawerItem(
     title: 'drawer_earnings',
     icon: Icons.account_balance_wallet_outlined,
-    route: '/artist/earnings',
+    route: AppRoutes.artistEarnings,
     requiredRoles: ['artist'],
   );
 
@@ -180,49 +181,49 @@ class ArtbeatDrawerItems {
   static const artistEvents = ArtbeatDrawerItem(
     title: 'drawer_my_events',
     icon: Icons.event_note_outlined,
-    route: '/events/my-events',
+    route: AppRoutes.eventsMyEvents,
     requiredRoles: ['artist'],
   );
 
   static const artistProfileEdit = ArtbeatDrawerItem(
     title: 'drawer_edit_profile',
     icon: Icons.edit_outlined,
-    route: '/artist/profile-edit',
+    route: AppRoutes.artistProfileEdit,
     requiredRoles: ['artist'],
   );
 
   static const artistPublicProfile = ArtbeatDrawerItem(
     title: 'drawer_public_profile',
     icon: Icons.person_outline,
-    route: '/artist/public-profile',
+    route: AppRoutes.artistPublicProfile,
     requiredRoles: ['artist'],
   );
 
   static const artistBrowse = ArtbeatDrawerItem(
     title: 'drawer_browse_artists',
     icon: Icons.people_outline,
-    route: '/artist/browse',
+    route: AppRoutes.artistBrowse,
     requiredRoles: ['artist'],
   );
 
   static const featuredArtists = ArtbeatDrawerItem(
     title: 'drawer_featured_artists',
     icon: Icons.star_outline,
-    route: '/artist/featured',
+    route: AppRoutes.artistFeatured,
     requiredRoles: ['artist'],
   );
 
   static const payoutRequest = ArtbeatDrawerItem(
     title: 'drawer_payout_request',
     icon: Icons.request_quote_outlined,
-    route: '/artist/payout-request',
+    route: AppRoutes.artistPayoutRequest,
     requiredRoles: ['artist'],
   );
 
   static const payoutAccounts = ArtbeatDrawerItem(
     title: 'drawer_payout_accounts',
     icon: Icons.account_balance_outlined,
-    route: '/artist/payout-accounts',
+    route: AppRoutes.artistPayoutAccounts,
     requiredRoles: ['artist'],
   );
 
@@ -230,28 +231,28 @@ class ArtbeatDrawerItems {
   static const galleryDashboard = ArtbeatDrawerItem(
     title: 'drawer_gallery_dashboard',
     icon: Icons.business_outlined,
-    route: '/gallery/artists-management',
+    route: AppRoutes.galleryArtistsManagement,
     requiredRoles: ['gallery'],
   );
 
   static const manageArtists = ArtbeatDrawerItem(
     title: 'drawer_manage_artists',
     icon: Icons.manage_accounts_outlined,
-    route: '/gallery/artists-management',
+    route: AppRoutes.galleryArtistsManagement,
     requiredRoles: ['gallery'],
   );
 
   static const galleryAnalytics = ArtbeatDrawerItem(
     title: 'drawer_gallery_analytics',
     icon: Icons.bar_chart_outlined,
-    route: '/gallery/analytics',
+    route: AppRoutes.galleryAnalytics,
     requiredRoles: ['gallery'],
   );
 
   static const galleryCommissions = ArtbeatDrawerItem(
     title: 'drawer_commissions',
     icon: Icons.handshake_outlined,
-    route: '/gallery/commissions',
+    route: AppRoutes.galleryCommissions,
     requiredRoles: ['gallery'],
   );
 
@@ -259,7 +260,7 @@ class ArtbeatDrawerItems {
   static const unifiedAdminDashboard = ArtbeatDrawerItem(
     title: 'drawer_admin_dashboard',
     icon: Icons.admin_panel_settings,
-    route: '/admin/dashboard',
+    route: AppRoutes.adminDashboard,
     requiredRoles: ['admin'],
     color: ArtbeatColors.primaryPurple,
   );
@@ -267,7 +268,7 @@ class ArtbeatDrawerItems {
   static const adminSettings = ArtbeatDrawerItem(
     title: 'drawer_admin_settings',
     icon: Icons.settings_outlined,
-    route: '/admin/settings',
+    route: AppRoutes.adminSettings,
     requiredRoles: ['admin'],
     color: ArtbeatColors.primaryPurple,
   );
@@ -276,7 +277,7 @@ class ArtbeatDrawerItems {
   static const moderatorDashboard = ArtbeatDrawerItem(
     title: 'drawer_moderation_dashboard',
     icon: Icons.security_outlined,
-    route: '/admin/dashboard', // Redirects to unified admin dashboard
+    route: AppRoutes.adminDashboard, // Redirects to unified admin dashboard
     requiredRoles: ['moderator'],
     color: ArtbeatColors.warning,
   );
@@ -285,19 +286,19 @@ class ArtbeatDrawerItems {
   static const editProfile = ArtbeatDrawerItem(
     title: 'drawer_edit_profile',
     icon: Icons.edit_outlined,
-    route: '/profile/edit',
+    route: AppRoutes.profileEdit,
   );
 
   static const achievements = ArtbeatDrawerItem(
     title: 'drawer_achievements',
     icon: Icons.emoji_events_outlined,
-    route: '/achievements',
+    route: AppRoutes.achievements,
   );
 
   static const favorites = ArtbeatDrawerItem(
     title: 'drawer_favorites',
     icon: Icons.favorite_outline,
-    route: '/favorites',
+    route: AppRoutes.favorites,
   );
 
   static const following = ArtbeatDrawerItem(
@@ -316,54 +317,54 @@ class ArtbeatDrawerItems {
   static const myTickets = ArtbeatDrawerItem(
     title: 'drawer_create_event',
     icon: Icons.add_circle_outline,
-    route: '/events/create',
+    route: AppRoutes.eventsCreate,
     requiredRoles: ['artist', 'admin', 'gallery'],
   );
 
   static const notifications = ArtbeatDrawerItem(
     title: 'drawer_notifications',
     icon: Icons.notifications_outlined,
-    route: '/notifications',
+    route: AppRoutes.notifications,
   );
 
   // Enhanced feature items
   static const artWalkCreate = ArtbeatDrawerItem(
     title: 'drawer_create_art_walk',
     icon: Icons.add_location_outlined,
-    route: '/art-walk/dashboard',
+    route: AppRoutes.artWalkDashboard,
   );
 
   static const enhancedSearch = ArtbeatDrawerItem(
     title: 'drawer_advanced_search',
     icon: Icons.search,
-    route: '/search',
+    route: AppRoutes.search,
   );
 
   static const subscriptionPlans = ArtbeatDrawerItem(
     title: 'drawer_subscription_plans',
     icon: Icons.card_membership_outlined,
-    route: '/subscription/plans',
+    route: AppRoutes.subscriptionPlans,
     requiredRoles: ['artist', 'gallery'],
   );
 
   static const paymentMethods = ArtbeatDrawerItem(
     title: 'drawer_payment_methods',
     icon: Icons.payment_outlined,
-    route: '/payment/methods',
+    route: AppRoutes.paymentMethods,
     requiredRoles: ['artist', 'gallery'],
   );
 
   static const paymentScreen = ArtbeatDrawerItem(
     title: 'drawer_payment_screen',
     icon: Icons.payment,
-    route: '/payment/screen',
+    route: AppRoutes.paymentScreen,
     requiredRoles: ['artist'],
   );
 
   static const refundRequest = ArtbeatDrawerItem(
     title: 'drawer_refund_request',
     icon: Icons.undo_outlined,
-    route: '/payment/refund',
+    route: AppRoutes.paymentRefund,
     requiredRoles: ['artist'],
   );
 
@@ -418,7 +419,7 @@ class ArtbeatDrawerItems {
   static const captureModeration = ArtbeatDrawerItem(
     title: 'drawer_capture_moderation',
     icon: Icons.photo_library_outlined,
-    route: '/capture/admin/moderation',
+    route: AppRoutes.captureAdminModeration,
     requiredRoles: ['admin'],
     color: ArtbeatColors.primaryPurple,
   );
@@ -426,7 +427,7 @@ class ArtbeatDrawerItems {
   static const artWalkModeration = ArtbeatDrawerItem(
     title: 'drawer_art_walk_moderation',
     icon: Icons.route_outlined,
-    route: '/artwalk/admin/moderation',
+    route: AppRoutes.artWalkAdminModeration,
     requiredRoles: ['admin'],
     color: ArtbeatColors.primaryPurple,
   );
@@ -435,20 +436,20 @@ class ArtbeatDrawerItems {
   static const settings = ArtbeatDrawerItem(
     title: 'drawer_settings',
     icon: Icons.settings_outlined,
-    route: '/settings',
+    route: AppRoutes.settings,
   );
 
   static const help = ArtbeatDrawerItem(
     title: 'drawer_help_support',
     icon: Icons.help_outline,
-    route: '/support',
+    route: AppRoutes.support,
   );
 
   // Sign out
   static const signOut = ArtbeatDrawerItem(
     title: 'drawer_sign_out',
     icon: Icons.logout,
-    route: '/login',
+    route: AppRoutes.login,
     color: ArtbeatColors.error,
     requiresAuth: false,
   );
@@ -596,7 +597,11 @@ class ArtbeatDrawerItems {
   }
 
   // Helper method to get sections for a specific user role
-  static List<DrawerSection> getSectionsForRole(String? userRole) {
+  static List<DrawerSection> getSectionsForRole(
+    String? userRole, {
+    bool simpleMode = false,
+    bool exploreMoreOpened = false,
+  }) {
     final List<DrawerSection> sections = [];
 
     // 1. Core Navigation (Always Visible)
@@ -610,6 +615,18 @@ class ArtbeatDrawerItems {
       final insertionIndex = dashboardIndex >= 0 ? dashboardIndex + 1 : 0;
       navigationItems.insert(insertionIndex, createPost);
     }
+    if (simpleMode && !exploreMoreOpened) {
+      navigationItems.removeWhere(
+        (item) => !{
+          dashboard.route,
+          createPost.route,
+          browse.route,
+          community.route,
+          events.route,
+          artWalk.route,
+        }.contains(item.route),
+      );
+    }
     if (navigationItems.isNotEmpty) {
       sections.add(
         DrawerSection(
@@ -622,7 +639,7 @@ class ArtbeatDrawerItems {
     // 2. Creation Tools (for artists, galleries, admins)
     final hasCreationRole =
         userRole == 'artist' || userRole == 'gallery' || userRole == 'admin';
-    if (hasCreationRole) {
+    if ((!simpleMode || exploreMoreOpened) && hasCreationRole) {
       final creationTools = _filterItemsForRole(creationItems, userRole);
       if (creationTools.isNotEmpty) {
         sections.add(
@@ -638,7 +655,8 @@ class ArtbeatDrawerItems {
     }
 
     // 4. Role-Specific Management Tools
-    switch (userRole) {
+    if (!simpleMode || exploreMoreOpened) {
+      switch (userRole) {
       case 'artist':
         final artistTools = _filterItemsForRole(artistItems, userRole);
         if (artistTools.isNotEmpty) {
@@ -675,11 +693,12 @@ class ArtbeatDrawerItems {
           );
         }
         break;
+      }
     }
 
     // 6. Personal & Social Features
     final personal = _filterItemsForRole(personalItems, userRole);
-    if (personal.isNotEmpty) {
+    if ((!simpleMode || exploreMoreOpened) && personal.isNotEmpty) {
       sections.add(
         DrawerSection(title: 'drawer_section_personal', items: personal),
       );

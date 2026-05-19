@@ -11,6 +11,7 @@ import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_core/src/services/leaderboard_service.dart';
 import 'package:artbeat_core/src/services/crash_prevention_service.dart';
 import 'package:artbeat_core/src/services/user_progression_service.dart';
+import 'package:artbeat_core/src/services/ux_session_analytics_service.dart';
 import 'package:artbeat_core/src/utils/logger.dart';
 import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
 import 'package:artbeat_core/src/widgets/navigation_overlay.dart';
@@ -64,6 +65,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
   bool _hasRequestedData = false;
   bool _isTourActive = false;
+  final DateTime _sessionStartedAt = DateTime.now();
 
   @override
   void initState() {
@@ -128,6 +130,17 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
   void _openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
+  }
+
+  void _trackFirstMeaningfulAction({
+    required String action,
+    required String routeName,
+  }) {
+    UxSessionAnalyticsService().trackFirstMeaningfulAction(
+      action: action,
+      routeName: routeName,
+      durationMs: DateTime.now().difference(_sessionStartedAt).inMilliseconds,
+    );
   }
 
   @override
@@ -209,7 +222,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             return;
                           }
                           NavigationOverlay.of(context)?.startNavigation();
-                          Navigator.pushNamed(context, '/settings');
+                          Navigator.pushNamed(context, AppRoutes.settings);
                         },
 
                         onLanguageChanged: () {
@@ -240,7 +253,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                         loop: _loop,
 
                         onTap: () =>
-                            Navigator.pushNamed(context, '/old-dashboard'),
+                            Navigator.pushNamed(context, AppRoutes.dashboard),
                       ),
                     ),
 
@@ -282,6 +295,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
+                                  _trackFirstMeaningfulAction(
+                                    action: 'open_capture_dashboard',
+                                    routeName: AppRoutes.captureDashboard,
+                                  );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
@@ -327,12 +344,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
+                                  _trackFirstMeaningfulAction(
+                                    action: 'open_art_walk_dashboard',
+                                    routeName: AppRoutes.artWalkDashboard,
+                                  );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    '/art-walk/dashboard',
+                                    AppRoutes.artWalkDashboard,
                                   );
                                 },
                               ),
@@ -373,12 +394,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
+                                  _trackFirstMeaningfulAction(
+                                    action: 'open_explore_dashboard',
+                                    routeName: AppRoutes.dashboard,
+                                  );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    '/old-dashboard',
+                                    AppRoutes.dashboard,
                                   );
                                 },
                               ),
@@ -419,12 +444,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
+                                  _trackFirstMeaningfulAction(
+                                    action: 'open_community_hub',
+                                    routeName: AppRoutes.artCommunityHub,
+                                  );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    '/community/hub',
+                                    AppRoutes.artCommunityHub,
                                   );
                                 },
                               ),

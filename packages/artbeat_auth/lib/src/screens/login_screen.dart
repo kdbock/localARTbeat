@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen>
       setState(() => _isLoading = true);
       final userCredential = await _authService.signInWithGoogle();
       if (mounted && userCredential.user != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        Navigator.pushReplacementNamed(context, AuthRoutes.dashboard);
       }
     } catch (e) {
       if (!mounted) return;

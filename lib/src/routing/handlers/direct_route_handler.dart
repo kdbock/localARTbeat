@@ -46,6 +46,9 @@ class DirectRouteHandler {
           child: const artwork.ArtworkDiscoveryScreen(),
         );
       case '/old-dashboard':
+        if (!kDebugMode) {
+          return RouteUtils.createNotFoundRoute('debug');
+        }
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
           child: const core.ArtbeatDashboardScreen(),

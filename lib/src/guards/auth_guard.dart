@@ -139,7 +139,7 @@ class AuthRequiredScreen extends StatelessWidget {
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/auth');
+              Navigator.pushReplacementNamed(context, core.AppRoutes.auth);
             },
             child: const Text('Sign In'),
           ),

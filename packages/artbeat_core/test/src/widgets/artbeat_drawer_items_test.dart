@@ -75,5 +75,49 @@ void main() {
       expect(dashboardIndex, greaterThanOrEqualTo(0));
       expect(addPostIndex, equals(dashboardIndex + 1));
     });
+
+    test('legacy old-dashboard route is not exposed in user-facing menus', () {
+      for (final role in [null, 'artist', 'admin', 'moderator']) {
+        final sections = ArtbeatDrawerItems.getSectionsForRole(role);
+        final routes = sections
+            .expand((section) => section.items)
+            .map((item) => item.route)
+            .toSet();
+        expect(routes.contains('/old-dashboard'), isFalse);
+      }
+    });
+
+    test('simple mode collapses advanced sections before explore more', () {
+      final artistSections = ArtbeatDrawerItems.getSectionsForRole(
+        'artist',
+        simpleMode: true,
+        exploreMoreOpened: false,
+      );
+      final routes = artistSections
+          .expand((section) => section.items)
+          .map((item) => item.route)
+          .toSet();
+
+      expect(routes.contains('/dashboard'), isTrue);
+      expect(routes.contains('/browse'), isTrue);
+      expect(routes.contains('/community/feed'), isTrue);
+      expect(routes.contains('/artist/analytics'), isFalse);
+      expect(routes.contains('/subscription/plans'), isFalse);
+    });
+
+    test('simple mode shows full sections after explore more opened', () {
+      final artistSections = ArtbeatDrawerItems.getSectionsForRole(
+        'artist',
+        simpleMode: true,
+        exploreMoreOpened: true,
+      );
+      final routes = artistSections
+          .expand((section) => section.items)
+          .map((item) => item.route)
+          .toSet();
+
+      expect(routes.contains('/artist/analytics'), isTrue);
+      expect(routes.contains('/subscription/plans'), isTrue);
+    });
   });
 }

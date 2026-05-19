@@ -94,6 +94,7 @@ class AppRouter {
 
   /// Main route generation method
   Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    final routeStart = DateTime.now();
     final routeName = settings.name;
     if (routeName == null) {
       return RouteUtils.createNotFoundRoute();
@@ -104,26 +105,53 @@ class AppRouter {
     // Check if user is authenticated for protected routes
     if (!_authGuard.isAuthenticated &&
         _routeAccessPolicy.requiresAuthentication(routeName)) {
+      core.UxSessionAnalyticsService().trackAuthInterrupt(
+        routeName: routeName,
+        source: 'router_guard',
+      );
+      core.UxSessionAnalyticsService().trackRouteRendered(
+        routeName: auth.AuthRoutes.login,
+        source: 'auth_guard_redirect',
+        durationMs: DateTime.now().difference(routeStart).inMilliseconds,
+        success: true,
+      );
       return RouteUtils.createSimpleRoute(child: const auth.LoginScreen());
     }
 
     final authProfileRoute = _authProfileRouteHandler.handleRoute(settings);
     if (authProfileRoute != null) {
+      _trackRouteRendered(routeName, routeStart, source: 'auth_profile_handler');
       return authProfileRoute;
     }
 
     final directRoute = _directRouteHandler.handleRoute(settings);
     if (directRoute != null) {
+      _trackRouteRendered(routeName, routeStart, source: 'direct_handler');
       return directRoute;
     }
 
     final specializedRoute = _specializedRouteDispatcher.handleRoute(settings);
     if (specializedRoute != null) {
+      _trackRouteRendered(routeName, routeStart, source: 'specialized_handler');
       return specializedRoute;
     }
 
     // Route not found
+    _trackRouteRendered(routeName, routeStart, source: 'not_found');
     return RouteUtils.createNotFoundRoute();
+  }
+
+  void _trackRouteRendered(
+    String routeName,
+    DateTime routeStart, {
+    required String source,
+  }) {
+    core.UxSessionAnalyticsService().trackRouteRendered(
+      routeName: routeName,
+      source: source,
+      durationMs: DateTime.now().difference(routeStart).inMilliseconds,
+      success: true,
+    );
   }
 
   /// Get or create shared onboarding view model instance
