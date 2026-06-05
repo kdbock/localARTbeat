@@ -22,6 +22,8 @@ class DashboardTourOverlay extends StatefulWidget {
   final GlobalKey communityNavKey;
   final GlobalKey eventsNavKey;
   final VoidCallback onFinish;
+  final bool isGuest;
+  final VoidCallback? onCreateAccount;
 
   const DashboardTourOverlay({
     super.key,
@@ -39,6 +41,8 @@ class DashboardTourOverlay extends StatefulWidget {
     required this.communityNavKey,
     required this.eventsNavKey,
     required this.onFinish,
+    this.isGuest = false,
+    this.onCreateAccount,
   });
 
   @override
@@ -57,7 +61,24 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
   void initState() {
     super.initState();
     _onboardingService = context.read<OnboardingService>();
-    _steps = [
+    _steps = widget.isGuest ? _buildGuestSteps() : _buildDefaultSteps();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
+    _animationController.forward();
+
+    // Ensure first step is visible
+    _ensureStepVisible();
+  }
+
+  List<TourStep> _buildDefaultSteps() {
+    return [
       TourStep(
         targetKey: widget.discoverKey,
         title: 'DISCOVER',
@@ -80,19 +101,32 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
         details: const [],
       ),
     ];
+  }
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    );
-    _animationController.forward();
-
-    // Ensure first step is visible
-    _ensureStepVisible();
+  List<TourStep> _buildGuestSteps() {
+    return [
+      TourStep(
+        targetKey: widget.discoverKey,
+        title: 'DISCOVER LOCAL ART',
+        description: 'Browse art walks and nearby creativity right away.',
+        accentColor: ArtbeatColors.secondaryTeal,
+        details: const [],
+      ),
+      TourStep(
+        targetKey: widget.captureKey,
+        title: 'TRY THE FLOW',
+        description: 'Preview capture and exploration tools before signing in.',
+        accentColor: ArtbeatColors.primaryPurple,
+        details: const [],
+      ),
+      TourStep(
+        targetKey: widget.communityKey,
+        title: 'UNLOCK MORE WITH AN ACCOUNT',
+        description: 'Create an account to save progress, post, follow artists, and personalize your experience.',
+        accentColor: ArtbeatColors.primaryGreen,
+        details: const [],
+      ),
+    ];
   }
 
   void _ensureStepVisible() {
@@ -249,6 +283,27 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
               ),
             ),
           ),
+          if (widget.isGuest && _currentStepIndex == _steps.length - 1)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 32,
+              child: ElevatedButton(
+                onPressed: () {
+                  _finish();
+                  widget.onCreateAccount?.call();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ArtbeatColors.primaryGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text('Create account'),
+              ),
+            ),
 
           // Callout Content
           Positioned(

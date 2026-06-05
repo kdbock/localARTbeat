@@ -19,6 +19,9 @@ import 'package:artbeat_core/src/widgets/developer_menu.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../widgets/tour/dashboard_tour_overlay.dart';
 import '../../services/onboarding_service.dart';
+import '../../models/first_session_checklist_model.dart';
+import '../../services/first_session_checklist_service.dart';
+import '../../services/motion_preferences_service.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
   final GlobalKey? bottomNavKey;
@@ -45,6 +48,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final UserProgressionService _progressionService;
   late final OnboardingService _onboardingService;
+  late final FirstSessionChecklistService _checklistService;
+  late final MotionPreferencesService _motionPreferencesService;
+  FirstSessionChecklistState? _checklistState;
+  bool _useCalmerFirstSessionMotion = false;
 
   // Tour GlobalKeys
   final GlobalKey _menuKey = GlobalKey();
@@ -72,6 +79,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     super.initState();
     _progressionService = context.read<UserProgressionService>();
     _onboardingService = context.read<OnboardingService>();
+    _checklistService = FirstSessionChecklistService();
+    _motionPreferencesService = MotionPreferencesService();
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
@@ -81,7 +90,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       duration: const Duration(milliseconds: 900),
     )..forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadUxPreferences();
       if (!mounted || _hasRequestedData) return;
       final dashboardViewModel = Provider.of<DashboardViewModel>(
         context,
@@ -93,6 +103,26 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       _checkOnboarding();
     });
     // No need to listen to locale changes here; rebuilds will be triggered by context.locale changes.
+  }
+
+  Future<void> _loadUxPreferences() async {
+    final checklistState = await _checklistService.getState(
+      defaultRolePath: FirstSessionRolePath.fan,
+    );
+    final motionMode = await _motionPreferencesService.getMotionMode();
+    final shouldCalm = !checklistState.isCompleted;
+    if (!mounted) return;
+    setState(() {
+      _checklistState = checklistState;
+      _useCalmerFirstSessionMotion = shouldCalm || motionMode == MotionMode.reduced;
+    });
+    if (_useCalmerFirstSessionMotion) {
+      _loop
+        ..stop()
+        ..repeat(period: const Duration(seconds: 16));
+    } else if (!_loop.isAnimating) {
+      _loop.repeat(period: const Duration(seconds: 9));
+    }
   }
 
   Future<void> _checkOnboarding() async {
@@ -256,7 +286,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             Navigator.pushNamed(context, AppRoutes.dashboard),
                       ),
                     ),
-
                     // The QUEST BUTTONS (focal point)
                     Column(
                       children: [
@@ -523,6 +552,13 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
             captureNavKey: widget.bottomNavItemKeys?[2] ?? _captureNavKey,
             communityNavKey: widget.bottomNavItemKeys?[3] ?? _communityNavKey,
             eventsNavKey: widget.bottomNavItemKeys?[4] ?? _eventsNavKey,
+            isGuest: user == null,
+            onCreateAccount: user == null
+                ? () {
+                    NavigationOverlay.of(context)?.startNavigation();
+                    Navigator.pushNamed(context, AppRoutes.register);
+                  }
+                : null,
             onFinish: () {
               setState(() => _isTourActive = false);
               _onboardingService.markOnboardingCompleted();
@@ -531,6 +567,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       ],
     );
   }
+
 }
 
 /// =======================
