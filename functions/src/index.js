@@ -90,6 +90,419 @@ function normalizeDisplayName(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+const NOTIFICATION_TYPE_PREFERENCE_KEYS = {
+  like: ["likes", "pushNotifications"],
+  comment: ["comments", "pushNotifications"],
+  follow: ["follows", "pushNotifications"],
+  message: ["messages", "pushNotifications"],
+  new_message: ["messages", "pushNotifications"],
+  mention: ["mentions", "pushNotifications"],
+  achievement: ["achievements", "pushNotifications"],
+  town_activity: ["townActivity", "pushNotifications"],
+  capture: ["captures", "pushNotifications"],
+};
+
+function asString(value, fallback = "") {
+  if (value === undefined || value === null) return fallback;
+  return String(value).trim() || fallback;
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const normalized = asString(value);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function truncateForPush(value, maxLength = 160) {
+  const text = asString(value);
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1).trim()}…`;
+}
+
+function normalizeNotificationType(value) {
+  const type = asString(value, "systemNotification");
+  if (type === "new_message") return "message";
+  return type;
+}
+
+function routeForNotification(type, data = {}) {
+  const route = asString(data.route);
+  if (route) return route;
+
+  if (data.chatId) return `/chat/${data.chatId}`;
+  if (data.postId) return `/post/${data.postId}`;
+  if (data.artworkId) return `/artwork/${data.artworkId}`;
+  if (data.captureId) return `/capture/${data.captureId}`;
+  if (data.fromUserId) return `/profile/${data.fromUserId}`;
+  if (type === "town_activity") return "/discover";
+  return "/notifications";
+}
+
+function notificationPreferenceAllows(userData, type) {
+  const preferences = userData.notificationPreferences || {};
+  if (preferences.pushNotifications === false) return false;
+
+  const keys = NOTIFICATION_TYPE_PREFERENCE_KEYS[type] || [];
+  for (const key of keys) {
+    if (preferences[key] === false) return false;
+  }
+  return true;
+}
+
+function notificationDataForPush(rawData = {}) {
+  const nestedData = rawData.data && typeof rawData.data === "object" ?
+    rawData.data :
+    {};
+  const type = normalizeNotificationType(rawData.type || nestedData.type);
+  const mergedData = {
+    ...nestedData,
+    ...rawData,
+    type,
+  };
+  delete mergedData.deviceTokens;
+
+  const title = firstNonEmpty(
+    rawData.title,
+    nestedData.title,
+    type === "message" ? "New message" : "ARTbeat update"
+  );
+  const body = firstNonEmpty(rawData.message, rawData.body, nestedData.message);
+  const route = routeForNotification(type, mergedData);
+
+  return {
+    type,
+    title: truncateForPush(title, 80),
+    body: truncateForPush(body || "Open ARTbeat to see what happened."),
+    route,
+    data: Object.fromEntries(
+      Object.entries({
+        ...mergedData,
+        type,
+        route,
+      })
+        .filter(([, value]) => value !== undefined && value !== null)
+        .map(([key, value]) => [key, String(value)])
+    ),
+  };
+}
+
+async function getUserDisplayNameForNotification(userId, fallback = "Someone") {
+  if (!userId) return fallback;
+  const userDoc = await admin.firestore().collection("users").doc(userId).get();
+  const userData = userDoc.data() || {};
+  return firstNonEmpty(
+    userData.displayName,
+    userData.fullName,
+    userData.name,
+    userData.username,
+    fallback
+  );
+}
+
+async function writeUserNotification(userId, notification) {
+  if (!userId) return null;
+  const type = normalizeNotificationType(notification.type);
+  const data = {
+    ...(notification.data || {}),
+    type,
+    route: routeForNotification(type, notification.data || {}),
+  };
+
+  return admin.firestore()
+    .collection("users")
+    .doc(userId)
+    .collection("notifications")
+    .add({
+      userId,
+      title: notification.title || "ARTbeat update",
+      message: notification.message || notification.body || "",
+      body: notification.body || notification.message || "",
+      type,
+      read: false,
+      isRead: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      data,
+    });
+}
+
+async function sendPushForNotification(userId, notificationData) {
+  const userRef = admin.firestore().collection("users").doc(userId);
+  const userDoc = await userRef.get();
+  if (!userDoc.exists) return {sent: 0, removed: 0};
+
+  const userData = userDoc.data() || {};
+  const push = notificationDataForPush(notificationData);
+  if (!notificationPreferenceAllows(userData, push.type)) {
+    logger.info("Push notification skipped by user preferences", {
+      userId,
+      type: push.type,
+    });
+    return {sent: 0, removed: 0};
+  }
+
+  const tokens = Array.isArray(userData.deviceTokens) ?
+    [...new Set(userData.deviceTokens.filter(Boolean).map(String))] :
+    [];
+  if (tokens.length === 0) return {sent: 0, removed: 0};
+
+  const response = await admin.messaging().sendEachForMulticast({
+    tokens,
+    notification: {
+      title: push.title,
+      body: push.body,
+    },
+    data: push.data,
+    android: {
+      priority: "high",
+      notification: {
+        channelId: push.type === "message" ? "chat_messages" : "engagement",
+        clickAction: "FLUTTER_NOTIFICATION_CLICK",
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: "default",
+          badge: 1,
+        },
+      },
+    },
+  });
+
+  const invalidTokens = [];
+  response.responses.forEach((result, index) => {
+    const code = result.error && result.error.code;
+    if (
+      code === "messaging/invalid-registration-token" ||
+      code === "messaging/registration-token-not-registered"
+    ) {
+      invalidTokens.push(tokens[index]);
+    }
+  });
+
+  if (invalidTokens.length > 0) {
+    await userRef.update({
+      deviceTokens: admin.firestore.FieldValue.arrayRemove(...invalidTokens),
+    });
+  }
+
+  logger.info("Push notification fan-out complete", {
+    userId,
+    type: push.type,
+    successCount: response.successCount,
+    failureCount: response.failureCount,
+    invalidTokens: invalidTokens.length,
+  });
+
+  return {
+    sent: response.successCount,
+    removed: invalidTokens.length,
+  };
+}
+
+exports.sendUserNotificationPush = onDocumentCreated(
+  "users/{userId}/notifications/{notificationId}",
+  async (event) => {
+    const data = event.data && event.data.data();
+    if (!data) return;
+
+    await sendPushForNotification(event.params.userId, data);
+  }
+);
+
+exports.sendTopLevelNotificationPush = onDocumentCreated(
+  "notifications/{notificationId}",
+  async (event) => {
+    const data = event.data && event.data.data();
+    if (!data) return;
+
+    const userId = firstNonEmpty(data.userId, data.recipientId, data.toUserId);
+    if (!userId) return;
+
+    await sendPushForNotification(userId, data);
+  }
+);
+
+exports.notifyPostComment = onDocumentCreated(
+  "posts/{postId}/comments/{commentId}",
+  async (event) => {
+    const comment = event.data && event.data.data();
+    if (!comment) return;
+
+    const postRef = admin.firestore().collection("posts").doc(event.params.postId);
+    const postDoc = await postRef.get();
+    if (!postDoc.exists) return;
+
+    const post = postDoc.data() || {};
+    const ownerId = firstNonEmpty(post.userId, post.ownerId, post.artistId);
+    const commenterId = firstNonEmpty(comment.userId, comment.authorId);
+    if (!ownerId || ownerId === commenterId) return;
+
+    const commenterName = firstNonEmpty(
+      comment.userName,
+      await getUserDisplayNameForNotification(commenterId)
+    );
+
+    await writeUserNotification(ownerId, {
+      type: "comment",
+      title: `${commenterName} commented on your post`,
+      message: truncateForPush(comment.content || comment.text),
+      data: {
+        postId: event.params.postId,
+        commentId: event.params.commentId,
+        fromUserId: commenterId,
+      },
+    });
+  }
+);
+
+exports.notifyPostLike = onDocumentCreated(
+  "posts/{postId}/likes/{likeId}",
+  async (event) => {
+    const like = event.data && event.data.data();
+    if (!like) return;
+
+    const likerId = firstNonEmpty(like.userId, event.params.likeId);
+    const postDoc = await admin.firestore()
+      .collection("posts")
+      .doc(event.params.postId)
+      .get();
+    if (!postDoc.exists) return;
+
+    const post = postDoc.data() || {};
+    const ownerId = firstNonEmpty(post.userId, post.ownerId, post.artistId);
+    if (!ownerId || ownerId === likerId) return;
+
+    const likerName = await getUserDisplayNameForNotification(likerId);
+    await writeUserNotification(ownerId, {
+      type: "like",
+      title: `${likerName} reacted to your post`,
+      message: "Your art is getting attention.",
+      data: {
+        postId: event.params.postId,
+        fromUserId: likerId,
+      },
+    });
+  }
+);
+
+exports.notifyNewFollower = onDocumentCreated(
+  "follows/{followId}",
+  async (event) => {
+    const follow = event.data && event.data.data();
+    if (!follow) return;
+
+    const followerId = firstNonEmpty(follow.followerId, follow.userId);
+    const followedId = firstNonEmpty(follow.followedId, follow.artistId);
+    if (!followerId || !followedId || followerId === followedId) return;
+
+    const followerName = await getUserDisplayNameForNotification(followerId);
+    await writeUserNotification(followedId, {
+      type: "follow",
+      title: `${followerName} followed you`,
+      message: "Open ARTbeat to see who is following your work.",
+      data: {
+        fromUserId: followerId,
+        followId: event.params.followId,
+      },
+    });
+  }
+);
+
+exports.notifyCaptureComment = onDocumentCreated(
+  "engagements/{engagementId}",
+  async (event) => {
+    const engagement = event.data && event.data.data();
+    if (!engagement || engagement.type !== "comment") return;
+    if (engagement.contentType !== "capture") return;
+
+    const captureId = firstNonEmpty(engagement.contentId);
+    if (!captureId) return;
+
+    const captureDoc = await admin.firestore()
+      .collection("captures")
+      .doc(captureId)
+      .get();
+    if (!captureDoc.exists) return;
+
+    const capture = captureDoc.data() || {};
+    const ownerId = firstNonEmpty(capture.userId, capture.ownerId);
+    const commenterId = firstNonEmpty(engagement.userId);
+    if (!ownerId || ownerId === commenterId) return;
+
+    const commenterName = firstNonEmpty(
+      engagement.userName,
+      await getUserDisplayNameForNotification(commenterId)
+    );
+
+    await writeUserNotification(ownerId, {
+      type: "comment",
+      title: `${commenterName} commented on your capture`,
+      message: truncateForPush(engagement.text),
+      data: {
+        captureId,
+        engagementId: event.params.engagementId,
+        fromUserId: commenterId,
+      },
+    });
+  }
+);
+
+exports.notifyNewPublicCapture = onDocumentCreated(
+  "captures/{captureId}",
+  async (event) => {
+    const capture = event.data && event.data.data();
+    if (!capture || capture.isPublic === false) return;
+
+    const ownerId = firstNonEmpty(capture.userId);
+    const locationName = firstNonEmpty(
+      capture.locationName,
+      capture.address,
+      capture.city
+    );
+    if (!ownerId || !locationName) return;
+
+    await writeUserNotification(ownerId, {
+      type: "capture",
+      title: "Your capture is on the map",
+      message: `Your ${locationName} capture can now be discovered.`,
+      data: {
+        captureId: event.params.captureId,
+        locationName,
+        fromUserId: ownerId,
+      },
+    });
+
+    const townUsers = await admin.firestore()
+      .collection("users")
+      .where("homeCity", "==", locationName)
+      .limit(50)
+      .get()
+      .catch(() => null);
+    if (!townUsers || townUsers.empty) return;
+
+    const notifications = [];
+    townUsers.forEach((doc) => {
+      if (doc.id === ownerId) return;
+      notifications.push(writeUserNotification(doc.id, {
+        type: "town_activity",
+        title: `New art captured in ${locationName}`,
+        message: "Open ARTbeat to see what was just added near you.",
+        data: {
+          captureId: event.params.captureId,
+          locationName,
+          fromUserId: ownerId,
+        },
+      }));
+    });
+
+    await Promise.all(notifications);
+  }
+);
+
 exports.updateNotificationSummary = onDocumentWritten(
   "users/{userId}/notifications/{notificationId}",
   async (event) => {

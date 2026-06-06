@@ -10,6 +10,12 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Enum for different notification types
 enum NotificationType {
   message('message', '💬'),
+  like('like', '❤️'),
+  comment('comment', '💬'),
+  follow('follow', '👤'),
+  capture('capture', '📍'),
+  townActivity('town_activity', '🗺️'),
+  achievement('achievement', '🏆'),
   boost('boost', '⚡'),
   commission('commission', '🎨'),
   event('event', '📅');
@@ -19,6 +25,7 @@ enum NotificationType {
   const NotificationType(this.value, this.emoji);
 
   static NotificationType fromString(String? type) {
+    if (type == 'new_message') return NotificationType.message;
     return NotificationType.values.firstWhere(
       (e) => e.value == type,
       orElse: () => NotificationType.message,
@@ -276,9 +283,11 @@ class NotificationService {
   void _handleMessageOpenedApp(RemoteMessage message) async {
     try {
       final data = message.data;
-      if (data['chatId'] != null) {
-        // Navigate to chat using provided callback
-        // This will be handled by the app's navigation system
+      final route = data['route'];
+      if (route is String && route.trim().isNotEmpty) {
+        onNavigateToRoute?.call(route.trim());
+      } else if (data['chatId'] != null) {
+        onNavigateToRoute?.call('/chat/${data['chatId']}');
       }
     } catch (e) {
       AppLogger.error('❌ Error handling opened notification: $e');
@@ -456,6 +465,10 @@ class NotificationService {
       final body = notificationData['body'] as String? ?? '';
       final typeStr = notificationData['type'] as String? ?? 'message';
       final type = NotificationType.fromString(typeStr);
+      final nestedData = notificationData['data'];
+      final nestedRoute = nestedData is Map ? nestedData['route'] : null;
+      final route =
+          notificationData['route'] as String? ?? nestedRoute as String? ?? '';
 
       // Different badge behavior per type - only messages increment badge
       int? badgeCount;
@@ -471,7 +484,7 @@ class NotificationService {
       );
 
       // Create payload with type and route information for tap handling
-      final payload = '${type.value}:${notificationData['route'] ?? ''}';
+      final payload = '${type.value}:$route';
 
       await _showLocalNotificationCompat(
         id: notificationId,
@@ -529,6 +542,12 @@ class NotificationService {
   (String, String) _getNotificationChannel(NotificationType type) {
     return switch (type) {
       NotificationType.message => ('chat_messages', 'Messages'),
+      NotificationType.like => ('engagement', 'Engagement'),
+      NotificationType.comment => ('engagement', 'Engagement'),
+      NotificationType.follow => ('engagement', 'Engagement'),
+      NotificationType.capture => ('captures', 'Captures'),
+      NotificationType.townActivity => ('town_activity', 'Town Activity'),
+      NotificationType.achievement => ('achievements', 'Achievements'),
       NotificationType.boost => ('artist_boosts', 'Artist Boosts'),
       NotificationType.commission => ('commissions', 'Commissions'),
       NotificationType.event => ('event_reminders', 'Events'),
@@ -542,6 +561,36 @@ class NotificationService {
         'Chat Messages',
         'Notifications for new chat messages',
         'notification_message',
+      ),
+      NotificationType.like => (
+        'Engagement',
+        'Notifications when people react to your posts',
+        'notification_engagement',
+      ),
+      NotificationType.comment => (
+        'Comments',
+        'Notifications when people comment on your work',
+        'notification_engagement',
+      ),
+      NotificationType.follow => (
+        'New Followers',
+        'Notifications when someone follows you',
+        'notification_engagement',
+      ),
+      NotificationType.capture => (
+        'Captures',
+        'Notifications when your captures go live',
+        'notification_capture',
+      ),
+      NotificationType.townActivity => (
+        'Town Activity',
+        'Notifications when new art is captured nearby',
+        'notification_town_activity',
+      ),
+      NotificationType.achievement => (
+        'Achievements',
+        'Notifications for ARTbeat progress and milestones',
+        'notification_achievement',
       ),
       NotificationType.boost => (
         'Artist Boost Received',
@@ -673,11 +722,14 @@ class NotificationService {
       final data = message.data;
       final chatId = data['chatId'];
       final messageId = data['messageId'];
+      final route = data['route'];
 
-      if (chatId != null) {
-        // Navigate to specific chat
-        // This would typically be handled by the app's navigation system
+      if (route is String && route.trim().isNotEmpty) {
+        AppLogger.info('Navigate to notification route: $route');
+        onNavigateToRoute?.call(route.trim());
+      } else if (chatId != null) {
         AppLogger.info('Navigate to chat: $chatId');
+        onNavigateToRoute?.call('/chat/$chatId');
 
         if (messageId != null) {
           // Navigate to specific message
@@ -763,9 +815,9 @@ class NotificationService {
         '${type.emoji} Handling notification tap - Type: ${type.value}, Route: $route',
       );
 
-      // For all notification types, route to notifications screen
-      AppLogger.info('${type.emoji} Routing to notifications screen');
-      onNavigateToRoute?.call('/notifications');
+      final destination = route.isNotEmpty ? route : '/notifications';
+      AppLogger.info('${type.emoji} Routing to $destination');
+      onNavigateToRoute?.call(destination);
     } catch (e) {
       AppLogger.error('❌ Error handling notification tap: $e');
     }
