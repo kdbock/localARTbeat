@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 import 'package:artbeat_core/src/routing/app_routes.dart';
@@ -50,7 +51,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   late final OnboardingService _onboardingService;
   late final FirstSessionChecklistService _checklistService;
   late final MotionPreferencesService _motionPreferencesService;
-  FirstSessionChecklistState? _checklistState;
   bool _useCalmerFirstSessionMotion = false;
 
   // Tour GlobalKeys
@@ -113,8 +113,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     final shouldCalm = !checklistState.isCompleted;
     if (!mounted) return;
     setState(() {
-      _checklistState = checklistState;
-      _useCalmerFirstSessionMotion = shouldCalm || motionMode == MotionMode.reduced;
+      _useCalmerFirstSessionMotion =
+          shouldCalm || motionMode == MotionMode.reduced;
     });
     if (_useCalmerFirstSessionMotion) {
       _loop
@@ -192,7 +192,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       key: _scaffoldKey,
       backgroundColor: ArtbeatColors.backgroundDark,
       drawer: const ArtbeatDrawer(),
-      endDrawer: const DeveloperMenu(),
+      endDrawer: kDebugMode ? const DeveloperMenu() : null,
       body: Stack(
         children: [
           // GAME WORLD BACKGROUND
@@ -567,7 +567,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       ],
     );
   }
-
 }
 
 /// =======================

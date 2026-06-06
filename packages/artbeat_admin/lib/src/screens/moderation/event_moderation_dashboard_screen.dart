@@ -365,7 +365,8 @@ class _EventModerationDashboardScreenState
         TextEditingController(text: event?.location ?? '');
     final imageUrlController = TextEditingController();
     final imageUrls = List<String>.from(event?.imageUrls ?? <String>[]);
-    DateTime startDate = event?.startDate ?? DateTime.now().add(const Duration(hours: 1));
+    DateTime startDate =
+        event?.startDate ?? DateTime.now().add(const Duration(hours: 1));
     DateTime? endDate = event?.endDate;
     var isPublic = event?.isPublic ?? true;
     var isActive = event?.isActive ?? true;
@@ -402,15 +403,19 @@ class _EventModerationDashboardScreenState
                       final pickedDate = await showDatePicker(
                         context: context,
                         initialDate: startDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now().add(const Duration(days: 3650)),
+                        firstDate:
+                            DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate:
+                            DateTime.now().add(const Duration(days: 3650)),
                       );
                       if (pickedDate == null) return;
+                      if (!context.mounted) return;
                       final pickedTime = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay.fromDateTime(startDate),
                       );
                       if (pickedTime == null) return;
+                      if (!context.mounted) return;
                       setStateDialog(() {
                         startDate = DateTime(
                           pickedDate.year,
@@ -426,7 +431,9 @@ class _EventModerationDashboardScreenState
                     contentPadding: EdgeInsets.zero,
                     title: const Text('End date & time (optional)'),
                     subtitle: Text(
-                      endDate == null ? 'Not set' : endDate!.toLocal().toString(),
+                      endDate == null
+                          ? 'Not set'
+                          : endDate!.toLocal().toString(),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -434,25 +441,31 @@ class _EventModerationDashboardScreenState
                         if (endDate != null)
                           IconButton(
                             icon: const Icon(Icons.clear),
-                            onPressed: () => setStateDialog(() => endDate = null),
+                            onPressed: () =>
+                                setStateDialog(() => endDate = null),
                           ),
                         const Icon(Icons.calendar_month),
                       ],
                     ),
                     onTap: () async {
-                      final base = endDate ?? startDate.add(const Duration(hours: 2));
+                      final base =
+                          endDate ?? startDate.add(const Duration(hours: 2));
                       final pickedDate = await showDatePicker(
                         context: context,
                         initialDate: base,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now().add(const Duration(days: 3650)),
+                        firstDate:
+                            DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate:
+                            DateTime.now().add(const Duration(days: 3650)),
                       );
                       if (pickedDate == null) return;
+                      if (!context.mounted) return;
                       final pickedTime = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay.fromDateTime(base),
                       );
                       if (pickedTime == null) return;
+                      if (!context.mounted) return;
                       setStateDialog(() {
                         endDate = DateTime(
                           pickedDate.year,
@@ -494,20 +507,26 @@ class _EventModerationDashboardScreenState
                                   setStateDialog(() => isUploadingImage = true);
                                   Uint8List? bytes;
                                   String fileName = 'image.jpg';
-                                  if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-                                    final result = await FilePicker.platform.pickFiles(
+                                  if (Platform.isMacOS ||
+                                      Platform.isWindows ||
+                                      Platform.isLinux) {
+                                    final result =
+                                        await FilePicker.platform.pickFiles(
                                       type: FileType.image,
                                       withData: true,
                                     );
-                                    if (result == null || result.files.isEmpty) return;
+                                    if (result == null || result.files.isEmpty)
+                                      return;
                                     final file = result.files.first;
                                     bytes = file.bytes;
                                     fileName = file.name;
                                     if (bytes == null && file.path != null) {
-                                      bytes = await File(file.path!).readAsBytes();
+                                      bytes =
+                                          await File(file.path!).readAsBytes();
                                     }
                                     if (bytes == null) {
-                                      throw Exception('Failed to read selected image file');
+                                      throw Exception(
+                                          'Failed to read selected image file');
                                     }
                                   } else {
                                     final picker = ImagePicker();
@@ -519,7 +538,8 @@ class _EventModerationDashboardScreenState
                                     fileName = picked.name;
                                   }
 
-                                  final uid = FirebaseAuth.instance.currentUser?.uid;
+                                  final uid =
+                                      FirebaseAuth.instance.currentUser?.uid;
                                   if (uid == null || uid.isEmpty) {
                                     throw Exception('Not signed in');
                                   }
@@ -548,7 +568,9 @@ class _EventModerationDashboardScreenState
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Image upload failed: $e')),
+                                      SnackBar(
+                                          content:
+                                              Text('Image upload failed: $e')),
                                     );
                                   }
                                 } finally {
@@ -575,7 +597,8 @@ class _EventModerationDashboardScreenState
                       title: Text(imageUrls[i],
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle, color: Colors.red),
+                        icon:
+                            const Icon(Icons.remove_circle, color: Colors.red),
                         onPressed: () => setStateDialog(() {
                           imageUrls.removeAt(i);
                         }),
@@ -639,7 +662,8 @@ class _EventModerationDashboardScreenState
       await _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(event == null ? 'Event created' : 'Event updated')),
+          SnackBar(
+              content: Text(event == null ? 'Event created' : 'Event updated')),
         );
       }
     }

@@ -226,7 +226,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
     final List<Widget> actions = <Widget>[];
 
     // Developer tools (if enabled) - placed first (leftmost)
-    if (widget.showDeveloperTools) {
+    if (widget.showDeveloperTools && kDebugMode) {
       actions.add(
         IconButton(
           icon: Icon(

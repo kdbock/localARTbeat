@@ -61,6 +61,7 @@ void main() {
     required ArtWalkNavigationService navigationService,
     required core_auth.AuthService authService,
     required ArtWalkUserStatsService userStatsService,
+    InstantDiscoveryService? instantDiscoveryService,
     ArtWalkService? providerArtWalkService,
     ArtWalkService? overrideArtWalkService,
   }) {
@@ -73,6 +74,9 @@ void main() {
         Provider<SocialService>.value(value: socialService),
         Provider<core_auth.AuthService>.value(value: authService),
         Provider<ArtWalkUserStatsService>.value(value: userStatsService),
+        Provider<InstantDiscoveryService>.value(
+          value: instantDiscoveryService ?? InstantDiscoveryService(),
+        ),
         Provider<ArtWalkNavigationService>.value(value: navigationService),
       ],
       child: MaterialApp(

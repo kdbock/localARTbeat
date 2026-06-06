@@ -172,6 +172,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadUxPreferences();
+      if (!mounted) return;
       _fadeController.forward();
 
       try {
@@ -382,11 +383,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           const SizedBox(width: 10),
                           Expanded(
                             child: GestureDetector(
-                              onTap: () =>
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.dashboard,
-                                  ),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.dashboard,
+                              ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -439,19 +439,20 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           if (!isCompact || !showSearchInput) ...[
                             _glassIconButton(
                               icon: Icons.search,
-                              onTap: () =>
-                                  Navigator.pushNamed(context, AppRoutes.search),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.search,
+                              ),
                             ),
                             const SizedBox(width: 8),
                           ],
                           if (!isCompact) ...[
                             _glassIconButton(
                               icon: Icons.message,
-                              onTap: () =>
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.messaging,
-                                  ),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.messaging,
+                              ),
                             ),
                             const SizedBox(width: 8),
                           ],
@@ -541,32 +542,28 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           key: _locationKey,
                           label: locationLabel,
                           isLoading: vm.isLoadingLocation,
-                          onTap: () =>
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.artWalkMap,
-                              ),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.artWalkMap,
+                          ),
                         ),
                       ],
                       if (showQuickStats) ...[
                         const SizedBox(height: 10),
                         _QuickStatsRow(
                           vm: vm,
-                          onAchieveTap: () =>
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.achievements,
-                              ),
-                          onArtistsTap: () =>
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.artistBrowse,
-                              ),
-                          onEventsTap: () =>
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.eventsDiscover,
-                              ),
+                          onAchieveTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.achievements,
+                          ),
+                          onArtistsTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.artistBrowse,
+                          ),
+                          onEventsTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.eventsDiscover,
+                          ),
                           onCapturesTap: () => Navigator.pushNamed(
                             context,
                             AppRoutes.instantDiscovery,
@@ -594,7 +591,9 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 
   Widget _buildFirstSessionUxCard() {
     final state = _checklistState!;
-    final requiredSteps = FirstSessionChecklistState.stepsForRole(state.rolePath);
+    final requiredSteps = FirstSessionChecklistState.stepsForRole(
+      state.rolePath,
+    );
     final completed = state.completedSteps.length;
     final total = requiredSteps.length;
     final isFirstSessionFlow = !state.isCompleted;

@@ -16,11 +16,6 @@ service firebase.storage {
     function isAuthenticatedOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
-    function isUserPath(userId) {
-      return isAuthorized() && request.auth.uid == userId;
-    }
-
     function isAdmin(userId) {
       return (firestore.exists(/databases/(default)/documents/users/$(userId)) 
         && firestore.get(/databases/(default)/documents/users/$(userId)).data.userType == 'admin');
@@ -30,15 +25,6 @@ service firebase.storage {
       return isAuthenticated() &&
         firestore.exists(/databases/(default)/documents/chats/$(chatId)) &&
         request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participantIds;
-    }
-
-    function hasValidChatUploadMetadata(chatId) {
-      return request.resource != null &&
-        request.resource.metadata != null &&
-        (request.resource.metadata.uploaderId == request.auth.uid ||
-         request.resource.metadata.uploaderid == request.auth.uid) &&
-        (request.resource.metadata.chatId == chatId ||
-         request.resource.metadata.chatid == chatId);
     }
 
     // Base rules that apply to all paths
@@ -223,11 +209,11 @@ service firebase.storage {
     // Capture images - allow authenticated users to upload to their own folder
     match /capture_images/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
@@ -236,11 +222,11 @@ service firebase.storage {
     // Allow nested thumbnails and other capture-owned files under capture_images
     match /capture_images/{userId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -254,11 +240,11 @@ service firebase.storage {
     // Post images for community feed
     match /post_images/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -267,11 +253,11 @@ service firebase.storage {
     // Post videos for community feed
     match /posts/{userId}/videos/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -280,11 +266,11 @@ service firebase.storage {
     // Post audio for community feed
     match /posts/{userId}/audio/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -350,11 +336,11 @@ service firebase.storage {
     // Event images - for event creation (headshots, banners, event images)
     match /events/{userId}/{eventId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -363,11 +349,11 @@ service firebase.storage {
     // Event images fallback path (owner-only)
     match /events/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
@@ -412,11 +398,11 @@ service firebase.storage {
     // Ad images - for advertisement uploads
     match /ads/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
+      allow write: if isAuthorized() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthenticated() && (
+      allow delete: if isAuthorized() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );

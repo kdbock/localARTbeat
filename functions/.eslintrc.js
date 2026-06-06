@@ -19,6 +19,7 @@ module.exports = {
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
+    "/archive/**/*", // Ignore archived legacy entrypoints.
     "/src_v2_backup/**/*", // Ignore archived backup code.
   ],
   plugins: [

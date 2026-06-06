@@ -5,6 +5,7 @@ import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../screens/notifications_screen.dart';
@@ -64,6 +65,9 @@ class MiscRouteHandler {
         );
 
       case core.AppRoutes.developerFeedbackAdmin:
+        if (!kDebugMode) {
+          return RouteUtils.createNotFoundRoute('developer');
+        }
         return RouteUtils.createMainLayoutRoute(
           child: const admin.ModernUnifiedAdminDashboard(),
         );

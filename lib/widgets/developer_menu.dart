@@ -1,49 +1,56 @@
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DeveloperMenu extends StatelessWidget {
   const DeveloperMenu({super.key});
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          // Header section
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(12),
+  Widget build(BuildContext context) {
+    if (!kDebugMode) {
+      return const SizedBox.shrink();
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            // Header section
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Developer Menu',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Screen Navigation & Tools',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ],
+              ),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Developer Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Screen Navigation & Tools',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildAdminSection(context),
-          const SizedBox(height: 8),
-          _buildDebugSection(context),
-          const SizedBox(height: 8),
-          _buildFeedbackSection(context),
-          const SizedBox(height: 8),
-          _buildBackupSection(context),
-        ],
+            const SizedBox(height: 16),
+            _buildAdminSection(context),
+            const SizedBox(height: 8),
+            _buildDebugSection(context),
+            const SizedBox(height: 8),
+            _buildFeedbackSection(context),
+            const SizedBox(height: 8),
+            _buildBackupSection(context),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _buildAdminSection(BuildContext context) => ExpansionTile(
     title: const Text('Admin Command Center'),
