@@ -50,6 +50,7 @@ Required environment variables:
 
 Optional environment variables:
     ENVIRONMENT (defaults to production)
+    BUILD_ENV_FILE (defaults to .env.production when present)
     FIREBASE_REGION
     FIREBASE_PROJECT_ID
     FIREBASE_FUNCTIONS_BASE_URL
@@ -104,12 +105,21 @@ if [[ "$ENVIRONMENT" != "production" ]]; then
     exit 1
 fi
 
-# Fall back to .env when required values are not already exported.
-if [[ ( -z "${GOOGLE_MAPS_API_KEY:-}" || ( -z "${RELEASE_STRIPE_PUBLISHABLE_KEY:-}" && -z "${STRIPE_PUBLISHABLE_KEY:-}" ) ) && -f ".env" ]]; then
-    print_info "Loading missing build variables from .env..."
+BUILD_ENV_FILE="${BUILD_ENV_FILE:-}"
+if [[ -z "$BUILD_ENV_FILE" ]]; then
+    if [[ -f ".env.production" ]]; then
+        BUILD_ENV_FILE=".env.production"
+    else
+        BUILD_ENV_FILE=".env"
+    fi
+fi
+
+# Fall back to the configured build env file when required values are not already exported.
+if [[ ( -z "${GOOGLE_MAPS_API_KEY:-}" || ( -z "${RELEASE_STRIPE_PUBLISHABLE_KEY:-}" && -z "${STRIPE_PUBLISHABLE_KEY:-}" ) ) && -f "$BUILD_ENV_FILE" ]]; then
+    print_info "Loading missing build variables from $BUILD_ENV_FILE..."
     set -a
-    # shellcheck disable=SC1091
-    source .env
+    # shellcheck disable=SC1090
+    source "$BUILD_ENV_FILE"
     set +a
 fi
 
@@ -137,8 +147,13 @@ fi
 print_info "Fetching Flutter dependencies..."
 flutter pub get
 
+GATE_ENV_FILE="/dev/null"
+if [[ -f "$BUILD_ENV_FILE" ]]; then
+    GATE_ENV_FILE="$BUILD_ENV_FILE"
+fi
+
 print_info "Running release payment/config gate..."
-bash tools/architecture/check_release_payment_config.sh
+bash tools/architecture/check_release_payment_config.sh "$GATE_ENV_FILE"
 print_success "Release payment/config gate passed"
 
 print_info "Running release monetization prerequisite gate..."
