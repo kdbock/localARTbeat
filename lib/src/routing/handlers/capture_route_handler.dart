@@ -138,53 +138,59 @@ class CaptureRouteHandler {
     }
   }
 
-  Route<dynamic> _buildUserCapturesRoute(
-    String routeName,
-  ) => RouteUtils.createMainLayoutRoute(
-    child: Builder(
-      builder: (context) {
-        final userId = FirebaseAuth.instance.currentUser?.uid;
-        if (userId == null) {
-          return const Center(
-            child: Text('Please log in to view your captures'),
-          );
-        }
-        return FutureBuilder<List<capture.CaptureModel>>(
-          future: context.read<capture.CaptureService>().getCapturesForUser(
-            userId,
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+  Route<dynamic> _buildUserCapturesRoute(String routeName) =>
+      RouteUtils.createMainLayoutRoute(
+        child: Builder(
+          builder: (context) {
+            final userId = FirebaseAuth.instance.currentUser?.uid;
+            if (userId == null) {
+              return const Center(
+                child: Text('Please log in to view your captures'),
+              );
             }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error loading captures'));
-            }
-            final captures = snapshot.data ?? [];
-            switch (routeName) {
-              case core.AppRoutes.captureMyCaptures:
-                return capture.MyCapturesScreen(captures: captures);
-              case core.AppRoutes.capturePending:
-                final pending = captures
-                    .where((captureModel) => captureModel.status == 'pending')
-                    .toList();
-                return capture.MyCapturesPendingScreen(captures: pending);
-              case core.AppRoutes.captureApproved:
-                final approved = captures
-                    .where((captureModel) => captureModel.status == 'approved')
-                    .toList();
-                return capture.MyCapturesApprovedScreen(captures: approved);
-              case core.AppRoutes.captures:
-              case core.AppRoutes.captureMap:
-              case core.AppRoutes.capturePublic:
-              default:
-                return capture.CapturesListScreen(captures: captures);
-            }
+            return FutureBuilder<List<capture.CaptureModel>>(
+              future: context.read<capture.CaptureService>().getCapturesForUser(
+                userId,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading captures'));
+                }
+                final captures = snapshot.data ?? [];
+                switch (routeName) {
+                  case core.AppRoutes.captureMyCaptures:
+                    return capture.MyCapturesScreen(captures: captures);
+                  case core.AppRoutes.capturePending:
+                    final pending = captures
+                        .where(
+                          (captureModel) =>
+                              captureModel.status == core.CaptureStatus.pending,
+                        )
+                        .toList();
+                    return capture.MyCapturesPendingScreen(captures: pending);
+                  case core.AppRoutes.captureApproved:
+                    final approved = captures
+                        .where(
+                          (captureModel) =>
+                              captureModel.status ==
+                              core.CaptureStatus.approved,
+                        )
+                        .toList();
+                    return capture.MyCapturesApprovedScreen(captures: approved);
+                  case core.AppRoutes.captures:
+                  case core.AppRoutes.captureMap:
+                  case core.AppRoutes.capturePublic:
+                  default:
+                    return capture.CapturesListScreen(captures: captures);
+                }
+              },
+            );
           },
-        );
-      },
-    ),
-  );
+        ),
+      );
 
   Route<dynamic> _buildCaptureListRoute({
     required Future<List<capture.CaptureModel>> Function(BuildContext context)

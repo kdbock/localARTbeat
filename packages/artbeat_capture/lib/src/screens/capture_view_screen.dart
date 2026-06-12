@@ -119,133 +119,133 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !_isSubmitting,
+      canPop: true,
       child: Scaffold(
         backgroundColor: const Color(0xFF07060F),
         body: Stack(
           children: [
-          // BACKGROUND GRADIENT
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF07060F),
-                  Color(0xFF0B1222),
-                  Color(0xFF0A1B15),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            // BACKGROUND GRADIENT
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF07060F),
+                    Color(0xFF0B1222),
+                    Color(0xFF0A1B15),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
             ),
-          ),
 
             SafeArea(
               child: Column(
                 children: [
-                HudTopBar(
-                  title: 'capture_view_title'.tr(),
-                  subtitle: 'capture_view_subtitle'.tr(),
-                  onBack: () => Navigator.pop(context),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(18),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 520),
-                        child: GlassCard(
-                          radius: 26,
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // IMAGE PREVIEW
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(22),
-                                child: Image.file(
-                                  widget.imageFile,
-                                  width: double.infinity,
-                                  height: 240,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-
-                              const SizedBox(height: 18),
-
-                              // TITLE
-                              Text(
-                                widget.title,
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white.withAlpha(
-                                    (0.95 * 255).toInt(),
+                  HudTopBar(
+                    title: 'capture_view_title'.tr(),
+                    subtitle: 'capture_view_subtitle'.tr(),
+                    onBack: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(18),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: GlassCard(
+                            radius: 26,
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // IMAGE PREVIEW
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(22),
+                                  child: Image.file(
+                                    widget.imageFile,
+                                    width: double.infinity,
+                                    height: 240,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              ),
 
-                              const SizedBox(height: 6),
+                                const SizedBox(height: 18),
 
-                              if (widget.artistName.trim().isNotEmpty) ...[
+                                // TITLE
                                 Text(
-                                  widget.artistName.trim(),
+                                  widget.title,
                                   style: GoogleFonts.spaceGrotesk(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
                                     color: Colors.white.withAlpha(
-                                      (0.82 * 255).toInt(),
+                                      (0.95 * 255).toInt(),
                                     ),
                                   ),
                                 ),
+
                                 const SizedBox(height: 6),
-                              ],
 
-                              // DESCRIPTION
-                              if (widget.description.trim().isNotEmpty)
-                                Text(
-                                  widget.description,
-                                  style: GoogleFonts.spaceGrotesk(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white.withAlpha(
-                                      (0.7 * 255).toInt(),
+                                if (widget.artistName.trim().isNotEmpty) ...[
+                                  Text(
+                                    widget.artistName.trim(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white.withAlpha(
+                                        (0.82 * 255).toInt(),
+                                      ),
                                     ),
                                   ),
-                                ),
-
-                              const SizedBox(height: 24),
-
-                              // ACTION BUTTONS
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: HudButton(
-                                      label: 'capture_view_edit'.tr(),
-                                      icon: Icons.edit_rounded,
-                                      onTap: _isSubmitting
-                                          ? () {}
-                                          : () => Navigator.pop(context),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: HudButton(
-                                      label: _isSubmitting
-                                          ? 'capture_upload_submitting'.tr()
-                                          : 'capture_view_submit'.tr(),
-                                      icon: Icons.cloud_upload_rounded,
-                                      onTap: _isSubmitting ? () {} : _submit,
-                                    ),
-                                  ),
+                                  const SizedBox(height: 6),
                                 ],
-                              ),
-                            ],
+
+                                // DESCRIPTION
+                                if (widget.description.trim().isNotEmpty)
+                                  Text(
+                                    widget.description,
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white.withAlpha(
+                                        (0.7 * 255).toInt(),
+                                      ),
+                                    ),
+                                  ),
+
+                                const SizedBox(height: 24),
+
+                                // ACTION BUTTONS
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: HudButton(
+                                        label: 'capture_view_edit'.tr(),
+                                        icon: Icons.edit_rounded,
+                                        onTap: _isSubmitting
+                                            ? () {}
+                                            : () => Navigator.pop(context),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: HudButton(
+                                        label: _isSubmitting
+                                            ? 'capture_upload_submitting'.tr()
+                                            : 'capture_view_submit'.tr(),
+                                        icon: Icons.cloud_upload_rounded,
+                                        onTap: _isSubmitting ? () {} : _submit,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
                 ],
               ),
             ),
@@ -258,38 +258,49 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
 
   Widget _buildSubmittingOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          color: Colors.black.withAlpha((0.42 * 255).toInt()),
-          child: Center(
-            child: GlassCard(
-              radius: 22,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.cyanAccent.shade100,
-                      ),
+      child: Container(
+        color: Colors.black.withAlpha((0.42 * 255).toInt()),
+        child: Center(
+          child: GlassCard(
+            radius: 22,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.cyanAccent.shade100,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'capture_upload_submitting'.tr(),
-                    textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'capture_upload_submitting'.tr(),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white.withAlpha((0.95 * 255).toInt()),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.popUntil(context, (route) => route.isFirst),
+                  child: Text(
+                    'Leave this screen',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white.withAlpha((0.95 * 255).toInt()),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withAlpha((0.82 * 255).toInt()),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

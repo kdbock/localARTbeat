@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +22,7 @@ class CaptureService implements CaptureServiceInterface {
   CapturePostCaptureHooks? _postCaptureHooksOverride;
   StorageService? _storageServiceOverride;
   OfflineQueueService? _offlineQueueServiceOverride;
+  Duration? _captureUploadTimeoutOverride;
 
   Connectivity get _connectivity => _connectivityOverride ?? Connectivity();
   UserService get _userService => _userServiceOverride ?? UserService();
@@ -30,6 +32,8 @@ class CaptureService implements CaptureServiceInterface {
       _storageServiceOverride ?? StorageService();
   OfflineQueueService get _offlineQueueService =>
       _offlineQueueServiceOverride ?? OfflineQueueService();
+  Duration get _captureUploadTimeout =>
+      _captureUploadTimeoutOverride ?? const Duration(seconds: 75);
 
   FirebaseFirestore? _mockFirestore;
 
@@ -56,6 +60,7 @@ class CaptureService implements CaptureServiceInterface {
     CapturePostCaptureHooks? postCaptureHooks,
     StorageService? storageService,
     OfflineQueueService? offlineQueueService,
+    Duration? captureUploadTimeout,
   }) {
     _mockFirestore = firestore;
     _connectivityOverride = connectivity;
@@ -63,6 +68,7 @@ class CaptureService implements CaptureServiceInterface {
     _postCaptureHooksOverride = postCaptureHooks;
     _storageServiceOverride = storageService;
     _offlineQueueServiceOverride = offlineQueueService;
+    _captureUploadTimeoutOverride = captureUploadTimeout;
   }
 
   /// Lazy Firebase Firestore instance
@@ -259,10 +265,18 @@ class CaptureService implements CaptureServiceInterface {
         return (captureId: localCaptureId, queuedOffline: true);
       }
 
-      final imageUrl = await _storageService.uploadCaptureImage(
-        File(localImagePath),
-        capture.userId,
-      );
+      final imageUrl = await _storageService
+          .uploadCaptureImage(File(localImagePath), capture.userId)
+          .timeout(
+            _captureUploadTimeout,
+            onTimeout: () {
+              throw TimeoutException(
+                'Capture image upload timed out after '
+                '${_captureUploadTimeout.inSeconds} seconds',
+                _captureUploadTimeout,
+              );
+            },
+          );
       final savedCapture = await createCapture(
         capture.copyWith(imageUrl: imageUrl),
       );

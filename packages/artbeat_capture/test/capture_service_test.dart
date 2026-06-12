@@ -1,5 +1,8 @@
 // ignore_for_file: subtype_of_sealed_class
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,6 +25,25 @@ class StubConnectivity extends Fake implements Connectivity {
 
   @override
   Future<List<ConnectivityResult>> checkConnectivity() async => results;
+}
+
+class SlowStorageService extends Fake implements StorageService {
+  @override
+  Future<String> uploadCaptureImage(File file, String userId) =>
+      Completer<String>().future;
+}
+
+class StubOfflineQueueService extends Fake implements OfflineQueueService {
+  int queueCount = 0;
+
+  @override
+  Future<String> addCaptureToQueue({
+    required CaptureModel captureData,
+    required String localImagePath,
+  }) async {
+    queueCount++;
+    return 'local_timeout_capture';
+  }
 }
 
 class FakeCapturePostCaptureHooks extends Fake
@@ -236,6 +258,42 @@ void main() {
       () async {
         // OfflineQueueService is still a singleton with local persistence, so
         // this remains better covered by integration-style tests.
+      },
+    );
+
+    test(
+      'createCaptureFromLocalImage queues when upload exceeds timeout',
+      () async {
+        final offlineQueueService = StubOfflineQueueService();
+        captureService = CaptureService.withDependencies(
+          firestore: firestore,
+          connectivity: StubConnectivity(<ConnectivityResult>[
+            ConnectivityResult.wifi,
+          ]),
+          userService: userService,
+          postCaptureHooks: fakePostCaptureHooks,
+          storageService: SlowStorageService(),
+          offlineQueueService: offlineQueueService,
+          captureUploadTimeout: const Duration(milliseconds: 1),
+        );
+
+        final capture = CaptureModel(
+          id: '',
+          userId: 'test_user',
+          imageUrl: '',
+          createdAt: DateTime.now(),
+          title: 'Timed out capture',
+        );
+
+        final outcome = await captureService.createCaptureFromLocalImage(
+          capture: capture,
+          localImagePath: '/tmp/image.jpg',
+        );
+
+        expect(outcome.captureId, 'local_timeout_capture');
+        expect(outcome.queuedOffline, isTrue);
+        expect(offlineQueueService.queueCount, 1);
+        expect(capturesCollection.addedPayloads, isEmpty);
       },
     );
   });
