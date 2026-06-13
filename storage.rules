@@ -209,11 +209,14 @@ service firebase.storage {
     // Capture images - allow authenticated users to upload to their own folder
     match /capture_images/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      // Capture upload must remain reliable for field testing. Auth owner
+      // checks preserve user isolation; App Check enforcement can reject valid
+      // TestFlight/internal builds when provider registration lags signing.
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId || 
         isAdmin(request.auth.uid)
       );
@@ -222,11 +225,11 @@ service firebase.storage {
     // Allow nested thumbnails and other capture-owned files under capture_images
     match /capture_images/{userId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthorized() && (
+      allow write: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
-      allow delete: if isAuthorized() && (
+      allow delete: if isAuthenticated() && (
         request.auth.uid == userId ||
         isAdmin(request.auth.uid)
       );
