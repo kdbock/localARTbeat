@@ -282,7 +282,7 @@ class CaptureService implements CaptureServiceInterface {
       );
       return (captureId: savedCapture.id, queuedOffline: false);
     } catch (e) {
-      if (_shouldQueueOfflineFallback(e)) {
+      if (await _shouldQueueOfflineFallback(e)) {
         try {
           final localCaptureId = await _queueCaptureForLater(
             capture: capture,
@@ -310,22 +310,53 @@ class CaptureService implements CaptureServiceInterface {
     );
   }
 
-  bool _shouldQueueOfflineFallback(Object error) {
+  Future<bool> _shouldQueueOfflineFallback(Object error) async {
+    if (await _isCurrentlyOffline()) {
+      return true;
+    }
+
     final message = error.toString().toLowerCase();
-    return message.contains('network') ||
+
+    // Do not hide app/config/backend failures as "offline" captures. If the
+    // device still has connectivity, surface the upload error so it can be
+    // fixed instead of silently moving the capture into a queue that cannot
+    // resolve permission, App Check, moderation, or server-contract failures.
+    if (message.contains('permission-denied') ||
+        message.contains('unauthorized') ||
+        message.contains('unauthenticated') ||
+        message.contains('user not authenticated') ||
+        message.contains('app check') ||
+        message.contains('safety scanning') ||
+        message.contains('moderation') ||
+        message.contains('failed to decode image') ||
+        message.contains('image file does not exist')) {
+      return false;
+    }
+
+    return message.contains('network-request-failed') ||
+        message.contains('network is unreachable') ||
         message.contains('socket') ||
-        message.contains('timeout') ||
         message.contains('unavailable') ||
-        message.contains('connection') ||
+        message.contains('connection reset') ||
+        message.contains('connection refused') ||
+        message.contains('connection closed') ||
         message.contains('cannot connect to firebase storage') ||
-        message.contains('failed to upload image') ||
-        message.contains('upload failed after') ||
-        message.contains('fallback upload failed') ||
-        message.contains('all storage configurations failed') ||
         message.contains('deadline-exceeded') ||
-        message.contains('cloud_firestore/unavailable') ||
-        message.contains('firebase upload failed') ||
-        message.contains('storage/retry-limit-exceeded');
+        message.contains('cloud_firestore/unavailable');
+  }
+
+  Future<bool> _isCurrentlyOffline() async {
+    try {
+      final connectivityResults = await _connectivity.checkConnectivity();
+      return !connectivityResults.any(
+        (result) => result != ConnectivityResult.none,
+      );
+    } catch (e) {
+      AppLogger.warning(
+        'Could not verify connectivity for capture fallback: $e',
+      );
+      return false;
+    }
   }
 
   /// Save a new capture

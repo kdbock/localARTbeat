@@ -33,6 +33,17 @@ class SlowStorageService extends Fake implements StorageService {
       Completer<String>().future;
 }
 
+class ThrowingStorageService extends Fake implements StorageService {
+  ThrowingStorageService(this.error);
+
+  final Object error;
+
+  @override
+  Future<String> uploadCaptureImage(File file, String userId) async {
+    throw error;
+  }
+}
+
 class StubOfflineQueueService extends Fake implements OfflineQueueService {
   int queueCount = 0;
 
@@ -261,8 +272,40 @@ void main() {
       },
     );
 
+    test('createCaptureFromLocalImage queues when already offline', () async {
+      final offlineQueueService = StubOfflineQueueService();
+      captureService = CaptureService.withDependencies(
+        firestore: firestore,
+        connectivity: StubConnectivity(<ConnectivityResult>[
+          ConnectivityResult.none,
+        ]),
+        userService: userService,
+        postCaptureHooks: fakePostCaptureHooks,
+        storageService: ThrowingStorageService(Exception('should not upload')),
+        offlineQueueService: offlineQueueService,
+      );
+
+      final capture = CaptureModel(
+        id: '',
+        userId: 'test_user',
+        imageUrl: '',
+        createdAt: DateTime.now(),
+        title: 'Offline capture',
+      );
+
+      final outcome = await captureService.createCaptureFromLocalImage(
+        capture: capture,
+        localImagePath: '/tmp/image.jpg',
+      );
+
+      expect(outcome.captureId, 'local_timeout_capture');
+      expect(outcome.queuedOffline, isTrue);
+      expect(offlineQueueService.queueCount, 1);
+      expect(capturesCollection.addedPayloads, isEmpty);
+    });
+
     test(
-      'createCaptureFromLocalImage queues when upload exceeds timeout',
+      'createCaptureFromLocalImage surfaces upload timeout while still online',
       () async {
         final offlineQueueService = StubOfflineQueueService();
         captureService = CaptureService.withDependencies(
@@ -285,14 +328,53 @@ void main() {
           title: 'Timed out capture',
         );
 
-        final outcome = await captureService.createCaptureFromLocalImage(
-          capture: capture,
-          localImagePath: '/tmp/image.jpg',
+        await expectLater(
+          captureService.createCaptureFromLocalImage(
+            capture: capture,
+            localImagePath: '/tmp/image.jpg',
+          ),
+          throwsA(isA<TimeoutException>()),
         );
 
-        expect(outcome.captureId, 'local_timeout_capture');
-        expect(outcome.queuedOffline, isTrue);
-        expect(offlineQueueService.queueCount, 1);
+        expect(offlineQueueService.queueCount, 0);
+        expect(capturesCollection.addedPayloads, isEmpty);
+      },
+    );
+
+    test(
+      'createCaptureFromLocalImage does not queue app/config upload failures',
+      () async {
+        final offlineQueueService = StubOfflineQueueService();
+        captureService = CaptureService.withDependencies(
+          firestore: firestore,
+          connectivity: StubConnectivity(<ConnectivityResult>[
+            ConnectivityResult.wifi,
+          ]),
+          userService: userService,
+          postCaptureHooks: fakePostCaptureHooks,
+          storageService: ThrowingStorageService(
+            Exception('Firebase upload failed: permission-denied'),
+          ),
+          offlineQueueService: offlineQueueService,
+        );
+
+        final capture = CaptureModel(
+          id: '',
+          userId: 'test_user',
+          imageUrl: '',
+          createdAt: DateTime.now(),
+          title: 'Permission failure capture',
+        );
+
+        await expectLater(
+          captureService.createCaptureFromLocalImage(
+            capture: capture,
+            localImagePath: '/tmp/image.jpg',
+          ),
+          throwsA(isA<Exception>()),
+        );
+
+        expect(offlineQueueService.queueCount, 0);
         expect(capturesCollection.addedPayloads, isEmpty);
       },
     );

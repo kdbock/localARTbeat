@@ -38,12 +38,21 @@ class FirebaseStorageAuthService {
       }
 
       // Refresh App Check token
-      if (!SecureFirebaseConfig.shouldBypassAppCheckTokenRefresh) {
+      final shouldBypassAppCheck =
+          SecureFirebaseConfig.shouldBypassAppCheckTokenRefresh;
+
+      if (!shouldBypassAppCheck) {
         try {
-          await FirebaseAppCheck.instance.getToken(true); // Force refresh
-          appCheckRefreshed = true;
+          final token = await FirebaseAppCheck.instance.getToken(
+            true,
+          ); // Force refresh
+          appCheckRefreshed = token != null && token.isNotEmpty;
           if (kDebugMode) {
-            AppLogger.info('✅ App Check token refreshed successfully');
+            if (appCheckRefreshed) {
+              AppLogger.info('✅ App Check token refreshed successfully');
+            } else {
+              AppLogger.error('❌ App Check token refresh returned no token');
+            }
           }
         } catch (e) {
           if (kDebugMode) {
@@ -56,12 +65,19 @@ class FirebaseStorageAuthService {
         );
       }
 
+      if (!shouldBypassAppCheck && !appCheckRefreshed) {
+        throw StateError(
+          'Firebase App Check token unavailable. Storage uploads are blocked '
+          'until App Check is configured for this app build.',
+        );
+      }
+
       return authRefreshed || appCheckRefreshed;
     } catch (e) {
       if (kDebugMode) {
         AppLogger.error('❌ Error during token refresh: $e');
       }
-      return false;
+      rethrow;
     }
   }
 

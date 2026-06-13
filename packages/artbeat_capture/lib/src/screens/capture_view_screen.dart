@@ -102,9 +102,7 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
     } catch (e) {
       AppLogger.error('Error submitting capture: $e');
       if (mounted) {
-        final message = kDebugMode
-            ? 'Failed to submit capture: $e'
-            : 'capture_upload_error_generic'.tr();
+        final message = _captureSubmitErrorMessage(e);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));
@@ -114,6 +112,23 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  String _captureSubmitErrorMessage(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('app check')) {
+      return 'Capture upload is blocked by app verification. Please install the latest tester build or contact support.';
+    }
+    if (message.contains('timeout') || message.contains('timed out')) {
+      return 'Capture upload timed out while the app was online. Please retry; this was not saved to the offline queue.';
+    }
+    if (message.contains('safety scanning') || message.contains('moderation')) {
+      return 'Capture safety scanning is unavailable right now. Please try again shortly.';
+    }
+    if (kDebugMode) {
+      return 'Failed to submit capture: $error';
+    }
+    return 'capture_upload_error_generic'.tr();
   }
 
   @override
