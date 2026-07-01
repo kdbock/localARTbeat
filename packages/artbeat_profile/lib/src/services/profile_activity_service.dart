@@ -199,38 +199,6 @@ class ProfileActivityService extends ChangeNotifier {
     );
   }
 
-  Future<void> recordFollow(
-    String followedUserId,
-    String followerUserId,
-    String followerName,
-    String? followerAvatar,
-  ) async {
-    await recordActivity(
-      userId: followedUserId,
-      activityType: 'follow',
-      targetUserId: followerUserId,
-      targetUserName: followerName,
-      targetUserAvatar: followerAvatar,
-      description: '$followerName started following you',
-    );
-  }
-
-  Future<void> recordUnfollow(
-    String unfollowedUserId,
-    String unfollowerUserId,
-    String unfollowerName,
-    String? unfollowerAvatar,
-  ) async {
-    await recordActivity(
-      userId: unfollowedUserId,
-      activityType: 'unfollow',
-      targetUserId: unfollowerUserId,
-      targetUserName: unfollowerName,
-      targetUserAvatar: unfollowerAvatar,
-      description: '$unfollowerName unfollowed you',
-    );
-  }
-
   @override
   void dispose() {
     // Singleton pattern - don't dispose

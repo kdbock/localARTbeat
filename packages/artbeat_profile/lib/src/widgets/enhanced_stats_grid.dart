@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Enhanced stats grid showing 8+ metrics
+/// Enhanced stats grid for capture, discovery, and community activity.
 class EnhancedStatsGrid extends StatelessWidget {
   final int posts;
   final int captures;
@@ -8,8 +8,6 @@ class EnhancedStatsGrid extends StatelessWidget {
   final int likes;
   final int shares;
   final int comments;
-  final int followers;
-  final int following;
 
   const EnhancedStatsGrid({
     super.key,
@@ -19,8 +17,6 @@ class EnhancedStatsGrid extends StatelessWidget {
     required this.likes,
     required this.shares,
     required this.comments,
-    required this.followers,
-    required this.following,
   });
 
   @override
@@ -50,10 +46,10 @@ class EnhancedStatsGrid extends StatelessWidget {
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
+            crossAxisCount: 3,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 0.8,
+            childAspectRatio: 1,
             children: [
               _buildStatItem(Icons.article, 'Posts', posts),
               _buildStatItem(Icons.camera_alt, 'Captures', captures),
@@ -61,8 +57,6 @@ class EnhancedStatsGrid extends StatelessWidget {
               _buildStatItem(Icons.favorite, 'Likes', likes),
               _buildStatItem(Icons.share, 'Shares', shares),
               _buildStatItem(Icons.comment, 'Comments', comments),
-              _buildStatItem(Icons.people, 'Followers', followers),
-              _buildStatItem(Icons.person_add, 'Following', following),
             ],
           ),
         ],

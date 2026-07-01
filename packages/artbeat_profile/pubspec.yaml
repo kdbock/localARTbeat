@@ -1,6 +1,6 @@
 name: artbeat_profile
 description: User profile features for ARTbeat app
-version: 0.0.2
+version: 2.7.0
 publish_to: "none"
 
 environment:

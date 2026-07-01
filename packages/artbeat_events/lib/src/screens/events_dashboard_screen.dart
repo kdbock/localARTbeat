@@ -15,7 +15,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_ads/artbeat_ads.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:provider/provider.dart';
 import '../models/artbeat_event.dart';
@@ -81,7 +80,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       'events_gallery'.tr(),
       'events_other'.tr(),
     ];
-    _allCategory = _categories.first;
+    _allCategory = _categories.isNotEmpty ? _categories.first : 'All';
     _selectedCategory = _allCategory;
 
     _fadeController = AnimationController(
@@ -159,14 +158,15 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   void _applyFilters() {
     setState(() {
       _filteredEvents = _events.where((event) {
-        final selected = _selectedCategory.toLowerCase();
-        final category = event.category.toLowerCase();
-        final guessed = _getCategoryFromDescription(
-          event.description,
-        ).toLowerCase();
+        final selected = _normalizeCategory(_selectedCategory);
+        final category = _normalizeCategory(event.category);
+        final guessed = _normalizeCategory(
+          _getCategoryFromDescription(event.description),
+        );
 
         final categoryMatch =
             _selectedCategory == _allCategory ||
+            selected == 'all' ||
             category == selected ||
             guessed == selected;
 
@@ -185,6 +185,25 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     if (desc.contains('workshop') || desc.contains('class')) return 'Workshop';
     if (desc.contains('gallery')) return 'Gallery';
     return 'Other';
+  }
+
+  String _normalizeCategory(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized.isEmpty) return 'other';
+    if (normalized == _allCategory.toLowerCase() ||
+        normalized == 'all' ||
+        normalized == 'all categories') {
+      return 'all';
+    }
+    final localized = <String, String>{
+      'events_exhibition'.tr().toLowerCase(): 'exhibition',
+      'events_workshop'.tr().toLowerCase(): 'workshop',
+      'events_tour'.tr().toLowerCase(): 'tour',
+      'events_concert'.tr().toLowerCase(): 'concert',
+      'events_gallery'.tr().toLowerCase(): 'gallery',
+      'events_other'.tr().toLowerCase(): 'other',
+    };
+    return localized[normalized] ?? normalized;
   }
 
   @override
@@ -213,30 +232,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     _buildHeroHeader(currentUser),
                     SliverToBoxAdapter(child: _buildStatsSection()),
                     SliverToBoxAdapter(child: _buildCategoryFilter()),
-                    if (_filteredEvents.isNotEmpty)
-                      SliverToBoxAdapter(child: _buildFeaturedSection()),
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(14, 8, 14, 4),
-                        child: AdSmallBannerWidget(
-                          zone: LocalAdZone.events,
-                          height: 88,
-                          isDismissible: false,
-                        ),
-                      ),
-                    ),
+                    SliverToBoxAdapter(child: _buildFeaturedSection()),
                     SliverToBoxAdapter(
                       child: _buildQuickActionsGrid(currentUser),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(14, 8, 14, 8),
-                        child: AdSmallBannerWidget(
-                          zone: LocalAdZone.events,
-                          height: 96,
-                          isDismissible: false,
-                        ),
-                      ),
                     ),
                     SliverToBoxAdapter(
                       child: _buildSectionHeader(
@@ -665,17 +663,51 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               ],
             ),
           ),
-          SizedBox(
-            height: 270,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
+          if (featured.isEmpty)
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
-              itemCount: featured.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) =>
-                  _buildFeaturedEventCard(featured[index]),
+              child: _Glass(
+                radius: 18,
+                fillAlpha: 0.06,
+                borderAlpha: 0.12,
+                shadow: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      const _GradientIconChip(
+                        icon: Icons.event_busy,
+                        gradient: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'events_empty_message'.tr(),
+                          style: const TextStyle(
+                            color: Color(0xB3FFFFFF),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              height: 270,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                itemCount: featured.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                itemBuilder: (context, index) =>
+                    _buildFeaturedEventCard(featured[index]),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1531,6 +1563,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   }
 
   String _formatDate(DateTime dateTime) {
+    final monthIndex = dateTime.month - 1;
     final months = [
       'events_month_jan'.tr(),
       'events_month_feb'.tr(),
@@ -1545,7 +1578,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       'events_month_nov'.tr(),
       'events_month_dec'.tr(),
     ];
-    return '${months[dateTime.month - 1]} ${dateTime.day}';
+    final monthName = monthIndex >= 0 && monthIndex < months.length
+        ? months[monthIndex]
+        : dateTime.month.toString().padLeft(2, '0');
+    return '$monthName ${dateTime.day}';
   }
 
   IconData _getEventIcon(String description) {

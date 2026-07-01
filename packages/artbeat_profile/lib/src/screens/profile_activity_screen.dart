@@ -216,7 +216,7 @@ class _ProfileActivityScreenState extends State<ProfileActivityScreen>
       case 'profile_view':
         return '$userName viewed your profile';
       case 'follow':
-        return '$userName started following you';
+        return '$userName interacted with your profile';
       case 'unfollow':
         return '$userName unfollowed you';
       case 'like':

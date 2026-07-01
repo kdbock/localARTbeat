@@ -39,42 +39,14 @@ class DeveloperMenu extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildAdminSection(context),
-            const SizedBox(height: 8),
             _buildDebugSection(context),
             const SizedBox(height: 8),
             _buildFeedbackSection(context),
-            const SizedBox(height: 8),
-            _buildBackupSection(context),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildAdminSection(BuildContext context) => ExpansionTile(
-    title: const Text('Admin Command Center'),
-    initiallyExpanded: true,
-    children: [
-      ListTile(
-        leading: const Icon(Icons.dashboard_rounded, color: Colors.blue),
-        title: const Text('Unified Admin Dashboard'),
-        subtitle: const Text('Central hub for all administration'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.pushNamed(context, '/admin/dashboard');
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.settings_rounded, color: Colors.grey),
-        title: const Text('System Settings'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.pushNamed(context, '/admin/settings');
-        },
-      ),
-    ],
-  );
 
   Widget _buildFeedbackSection(BuildContext context) => ExpansionTile(
     title: const Text('Feedback System'),
@@ -102,36 +74,6 @@ class DeveloperMenu extends StatelessWidget {
             MaterialPageRoute<void>(
               builder: (context) => const FeedbackSystemInfoScreen(),
             ),
-          );
-        },
-      ),
-    ],
-  );
-
-  Widget _buildBackupSection(BuildContext context) => ExpansionTile(
-    title: const Text('Backup Management'),
-    children: [
-      ListTile(
-        title: const Text('View Backups'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Backup viewer coming soon')),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Create Backup'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Backup creation coming soon')),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Restore Backup'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Backup restoration coming soon')),
           );
         },
       ),

@@ -1,4 +1,3 @@
-import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_core/artbeat_core.dart' as core;
@@ -9,19 +8,15 @@ import 'package:provider/provider.dart';
 
 import '../route_utils.dart';
 
-typedef AdminRouteHandler = Route<dynamic>? Function(RouteSettings settings);
-
 class ArtWalkRouteHandler {
   const ArtWalkRouteHandler();
 
-  Route<dynamic>? handleRoute(
-    RouteSettings settings, {
-    required AdminRouteHandler handleAdminRoute,
-  }) {
+  Route<dynamic>? handleRoute(RouteSettings settings) {
     switch (settings.name) {
       case core.AppRoutes.artWalkDashboard:
-        return RouteUtils.createSimpleRoute(
-          child: const art_walk.DiscoverDashboardScreen(),
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 1,
+          child: const art_walk.InstantDiscoveryRadarScreen(),
         );
 
       case core.AppRoutes.artWalkMap:
@@ -66,7 +61,7 @@ class ArtWalkRouteHandler {
       case core.AppRoutes.artWalkExplore:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const art_walk.DiscoverDashboardScreen(),
+          child: const art_walk.InstantDiscoveryRadarScreen(),
         );
 
       case core.AppRoutes.artWalkStart:
@@ -138,12 +133,7 @@ class ArtWalkRouteHandler {
         );
 
       case core.AppRoutes.artWalkAdminModeration:
-        return handleAdminRoute(
-          RouteSettings(
-            name: admin.AdminRoutes.artWalkModeration,
-            arguments: settings.arguments,
-          ),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case '/art-walk/review':
         final args = settings.arguments as Map<String, dynamic>?;

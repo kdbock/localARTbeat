@@ -30,7 +30,7 @@ Current examples exist in `test/` including onboarding/auth/instant discovery/lo
 Manual QA is required for user journeys that involve:
 
 - camera/media capture and upload
-- payments and subscription/boost flows
+- payments for reviewed sponsorships and event submissions
 - moderation and safety enforcement
 - account, profile, and auth state transitions
 - release-only behavior not fully covered by unit/widget tests

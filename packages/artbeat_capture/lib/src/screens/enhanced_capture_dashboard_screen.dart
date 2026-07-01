@@ -362,13 +362,13 @@ class _EnhancedCaptureDashboardScreenState
                       },
                     ),
                     _buildSearchOption(
-                      icon: Icons.person_search,
-                      title: 'capture_dashboard_find_artists'.tr(),
-                      subtitle: 'capture_dashboard_find_artists_subtitle'.tr(),
+                      icon: Icons.radar,
+                      title: 'art_walk_drawer_instant_discovery'.tr(),
+                      subtitle: 'capture_drawer_nearby_art'.tr(),
                       color: ArtbeatColors.accentYellow,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, AppRoutes.artistSearch);
+                        Navigator.pushNamed(context, AppRoutes.instantDiscovery);
                       },
                     ),
                   ],
@@ -499,7 +499,7 @@ class _EnhancedCaptureDashboardScreenState
                                   onSearch: () => _showSearchModal(context),
                                   onChat: () => Navigator.pushNamed(
                                     context,
-                                    AppRoutes.messaging,
+                                    AppRoutes.communityFeed,
                                   ),
                                   onNotifications: () => Navigator.pushNamed(
                                     context,

@@ -2,8 +2,6 @@ package com.facebook.react.bridge;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.reactnativestripesdk.StripeSdkModule;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -16,7 +14,7 @@ public class ReactApplicationContext extends ReactContext {
 
     private final ActivityPluginBinding binding;
 
-    public ReactApplicationContext(ActivityPluginBinding binding, MethodChannel channel, Function0<StripeSdkModule> sdkAccessor) {
+    public ReactApplicationContext(ActivityPluginBinding binding, MethodChannel channel, Function0<?> sdkAccessor) {
         super((FragmentActivity) binding.getActivity(), channel, sdkAccessor);
         this.binding = binding;
     }

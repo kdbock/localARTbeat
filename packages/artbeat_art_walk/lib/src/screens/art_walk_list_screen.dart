@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -885,7 +886,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: itemCount,
-      cacheExtent: 640,
+      scrollCacheExtent: const ScrollCacheExtent.pixels(640),
       itemBuilder: (context, index) {
         if (index >= _filteredWalks.length) {
           return Padding(

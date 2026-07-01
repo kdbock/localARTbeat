@@ -5,20 +5,13 @@ import 'package:geolocator/geolocator.dart';
 class CaptureArtWalkHooks implements CapturePostCaptureHooks {
   CaptureArtWalkHooks({
     art_walk.RewardsService? rewardsService,
-    art_walk.ChallengeService? challengeService,
-    art_walk.WeeklyGoalsService? weeklyGoalsService,
     art_walk.SocialService? socialService,
     art_walk.ArtWalkService? artWalkService,
   }) : _rewardsService = rewardsService ?? art_walk.RewardsService(),
-       _challengeService = challengeService ?? art_walk.ChallengeService(),
-       _weeklyGoalsService =
-           weeklyGoalsService ?? art_walk.WeeklyGoalsService(),
        _socialService = socialService ?? art_walk.SocialService(),
        _artWalkService = artWalkService ?? art_walk.ArtWalkService();
 
   final art_walk.RewardsService _rewardsService;
-  final art_walk.ChallengeService _challengeService;
-  final art_walk.WeeklyGoalsService _weeklyGoalsService;
   final art_walk.SocialService _socialService;
   final art_walk.ArtWalkService _artWalkService;
 
@@ -77,27 +70,8 @@ class CaptureArtWalkHooks implements CapturePostCaptureHooks {
   }
 
   @override
-  Future<void> recordCaptureChallengeProgress() async {
-    await Future.wait([
-      _challengeService.recordPhotoCapture(),
-      _challengeService.recordTimeBasedDiscovery(),
-    ]);
-  }
+  Future<void> recordCaptureChallengeProgress() async {}
 
   @override
-  Future<void> updateWeeklyPhotographyGoals() async {
-    final currentGoals = await _weeklyGoalsService.getCurrentWeekGoals();
-    final updates = currentGoals
-        .where(
-          (goal) =>
-              goal.category == art_walk.WeeklyGoalCategory.photography &&
-              !goal.isCompleted,
-        )
-        .map((goal) => _weeklyGoalsService.updateWeeklyGoalProgress(goal.id, 1))
-        .toList();
-
-    if (updates.isNotEmpty) {
-      await Future.wait(updates);
-    }
-  }
+  Future<void> updateWeeklyPhotographyGoals() async {}
 }

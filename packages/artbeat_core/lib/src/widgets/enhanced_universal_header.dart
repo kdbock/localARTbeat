@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../theme/artbeat_colors.dart';
-import '../providers/messaging_provider.dart';
 import '../services/onboarding_service.dart';
 import '../routing/app_routes.dart';
 
@@ -253,9 +251,6 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
       );
     }
 
-    // Messaging icon with unread dot
-    actions.add(_buildMessagingIcon());
-
     // Profile icon
     actions.add(_buildProfileIcon());
 
@@ -266,105 +261,6 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
     }
 
     return actions;
-  }
-
-  Widget _buildMessagingIcon() {
-    // In test environment, return a simple icon without Consumer
-    if (kDebugMode || Platform.environment.containsKey('FLUTTER_TEST')) {
-      return IconButton(
-        icon: Icon(
-          Icons.message_outlined,
-          color: widget.foregroundColor ?? ArtbeatColors.headerText,
-        ),
-        onPressed: () async {
-          // Navigate to messaging and refresh count when returning
-          await Navigator.pushNamed(context, '/messaging');
-        },
-        tooltip: 'header_tooltip_messages'.tr(),
-      );
-    }
-
-    return Consumer<MessagingProvider>(
-      builder: (context, messagingProvider, child) {
-        // Only log when there are actual changes to avoid spam
-        if (messagingProvider.hasUnreadMessages || messagingProvider.hasError) {
-          debugPrint(
-            'MessagingIcon: hasUnread=${messagingProvider.hasUnreadMessages}, count=${messagingProvider.unreadCount}, initialized=${messagingProvider.isInitialized}, hasError=${messagingProvider.hasError}',
-          );
-        }
-
-        return Stack(
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.message_outlined,
-                color: messagingProvider.hasError
-                    ? ArtbeatColors.error.withValues(alpha: 0.6)
-                    : widget.foregroundColor ?? ArtbeatColors.headerText,
-              ),
-              onPressed: () async {
-                // Navigate to messaging and refresh count when returning
-                await Navigator.pushNamed(context, '/messaging');
-                // Refresh the unread count when returning from messaging
-                if (context.mounted) {
-                  final provider = context.read<MessagingProvider>();
-                  provider.refreshUnreadCount();
-                }
-              },
-              tooltip: messagingProvider.hasError
-                  ? 'Messages (Error loading count)'
-                  : 'Messages',
-            ),
-            // Loading indicator for uninitialized state
-            if (!messagingProvider.isInitialized && !messagingProvider.hasError)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      widget.foregroundColor ?? ArtbeatColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            // Unread message indicator
-            if (messagingProvider.isInitialized &&
-                !messagingProvider.hasError &&
-                messagingProvider.hasUnreadMessages)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: ArtbeatColors.error,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    messagingProvider.unreadCount > 99
-                        ? '99+'
-                        : messagingProvider.unreadCount.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
   }
 
   Widget _buildProfileIcon() {

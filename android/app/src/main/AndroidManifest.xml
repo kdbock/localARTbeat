@@ -18,7 +18,7 @@
     <!-- In-app billing permission -->
     <uses-permission android:name="com.android.vending.BILLING" />
     <application
-        android:label="ARTbeat"
+        android:label="Local ARTbeat"
         android:name=".ArtbeatApplication"
         android:icon="@mipmap/ic_launcher">
         <!-- Google Maps API Key -->

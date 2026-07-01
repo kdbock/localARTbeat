@@ -6,10 +6,8 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final bool showSearchIcon;
-  final bool showMessagingIcon;
   final bool showDeveloperIcon;
   final VoidCallback? onSearchPressed;
-  final VoidCallback? onMessagingPressed;
   final VoidCallback? onDeveloperPressed;
   final VoidCallback? onBackPressed;
 
@@ -18,10 +16,8 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.showBackButton = true,
     this.showSearchIcon = true,
-    this.showMessagingIcon = true,
     this.showDeveloperIcon = true,
     this.onSearchPressed,
-    this.onMessagingPressed,
     this.onDeveloperPressed,
     this.onBackPressed,
   });
@@ -38,12 +34,6 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.search, color: Colors.white),
             onPressed: onSearchPressed ?? () => _navigateToSearch(context),
           ),
-        if (showMessagingIcon)
-          IconButton(
-            icon: const Icon(Icons.message, color: Colors.white),
-            onPressed:
-                onMessagingPressed ?? () => _navigateToMessaging(context),
-          ),
         if (showDeveloperIcon)
           IconButton(
             icon: const Icon(Icons.developer_mode, color: Colors.white),
@@ -58,10 +48,6 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
 
   void _navigateToSearch(BuildContext context) {
     Navigator.pushNamed(context, '/community/search');
-  }
-
-  void _navigateToMessaging(BuildContext context) {
-    Navigator.pushNamed(context, '/community/messaging');
   }
 
   void _openDeveloperTools(BuildContext context) {

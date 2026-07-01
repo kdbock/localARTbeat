@@ -39,6 +39,17 @@ class _SponsorshipDashboardScreenState
         HudTopBar(
           title: 'sponsorship_dashboard_title'.tr(),
           onBackPressed: () => Navigator.pop(context),
+          actions: [
+            AppHelpButton(
+              title: 'sponsorship_hub_help_title'.tr(),
+              body: 'sponsorship_hub_help_body'.tr(),
+              steps: [
+                'sponsorship_hub_help_step_choose'.tr(),
+                'sponsorship_hub_help_step_creative'.tr(),
+                'sponsorship_hub_help_step_review'.tr(),
+              ],
+            ),
+          ],
         ),
         Expanded(
           child: FutureBuilder<List<Sponsorship>>(

@@ -1,14 +1,11 @@
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
-import 'package:artbeat_community/artbeat_community.dart' as community;
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart' as sponsorships;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../screens/in_app_purchase_demo_screen.dart';
 import '../../../test_payment_debug.dart';
-import '../../screens/ads_route_screen.dart';
 import '../../screens/onboarding_funnel_report_screen.dart';
 import '../../screens/user_onboarding_flow_screen.dart';
 import '../route_utils.dart';
@@ -24,16 +21,15 @@ class DirectRouteHandler {
         );
       case core.AppRoutes.sponsorshipCapture:
       case core.AppRoutes.sponsorshipDiscover:
-        return RouteUtils.createMainLayoutRoute(child: const AdsRouteScreen());
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.LocalBusinessScreen(),
+        );
       case core.AppRoutes.sponsorshipCreate:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.CreateSponsorshipScreen(),
         );
       case '/store':
-        return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Artbeat Store'),
-          child: const core.ArtbeatStoreScreen(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
       case core.AppRoutes.splash:
         return RouteUtils.createSimpleRoute(child: const core.SplashScreen());
       case core.AppRoutes.chapterLanding:
@@ -43,7 +39,8 @@ class DirectRouteHandler {
       case core.AppRoutes.artDiscovery:
       case '/community/discovery':
         return RouteUtils.createMainLayoutRoute(
-          child: const artwork.ArtworkDiscoveryScreen(),
+          currentIndex: 1,
+          child: const art_walk.InstantDiscoveryRadarScreen(),
         );
       case '/old-dashboard':
         if (!kDebugMode) {
@@ -68,9 +65,7 @@ class DirectRouteHandler {
           child: const OnboardingFunnelReportScreen(),
         );
       case core.AppRoutes.artworkBrowse:
-        return RouteUtils.createSimpleRoute(
-          child: const artwork.ArtworkBrowseScreen(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
       case core.AppRoutes.search:
         return _searchRoute(settings);
       case core.AppRoutes.searchResults:
@@ -83,12 +78,7 @@ class DirectRouteHandler {
           child: const core.FullBrowseScreen(),
         );
       case '/community/create-post':
-        return RouteUtils.createMainNavRoute(
-          child: const community.CreateGroupPostScreen(
-            groupType: community.GroupType.artist,
-            postType: 'artwork',
-          ),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
       case '/events/create':
         return RouteUtils.createMainNavRoute(
           child: const events.CreateEventScreen(),
@@ -104,19 +94,10 @@ class DirectRouteHandler {
           child: const events.EventsDashboardScreen(),
         );
       case core.AppRoutes.inAppPurchaseDemo:
-        if (!kDebugMode) {
-          return RouteUtils.createNotFoundRoute('debug');
-        }
-        return RouteUtils.createMainNavRoute(
-          child: const InAppPurchaseDemoScreen(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
       case core.AppRoutes.localBusiness:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.LocalBusinessScreen(),
-        );
-      case '/auction/hub':
-        return RouteUtils.createMainLayoutRoute(
-          child: const core.AuthRequiredScreen(),
         );
       default:
         return null;

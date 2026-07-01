@@ -86,9 +86,6 @@ class DashboardUserSection extends StatelessWidget {
       case 'captures':
         Navigator.pushNamed(context, '/captures');
         break;
-      case 'following':
-        Navigator.pushNamed(context, '/following');
-        break;
       case 'achievements':
         Navigator.pushNamed(context, '/achievements');
         break;

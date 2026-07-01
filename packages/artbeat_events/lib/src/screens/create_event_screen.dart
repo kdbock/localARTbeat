@@ -11,6 +11,7 @@ import '../models/artbeat_event.dart';
 import '../forms/event_form_builder.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
+import '../services/event_submission_checkout_service.dart';
 
 /// Screen for creating new events
 class CreateEventScreen extends StatefulWidget {
@@ -114,6 +115,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     try {
       final eventService = context.read<EventService>();
       final notificationService = context.read<EventNotificationService>();
+      final submissionCheckoutService = context
+          .read<EventSubmissionCheckoutService>();
       String eventId;
 
       if (widget.editEvent != null) {
@@ -130,18 +133,40 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           );
         }
       } else {
+        final checkout = await submissionCheckoutService
+            .purchaseSubmissionReview(
+              eventTitle: event.title,
+              contactEmail: event.contactEmail,
+            );
+        final existingMetadata = event.metadata ?? const <String, dynamic>{};
+        final submittedEvent = event.copyWith(
+          isPublic: false,
+          moderationStatus: 'paid_pending_review',
+          metadata: <String, dynamic>{
+            ...existingMetadata,
+            'submissionProductId': checkout.productId,
+            'submissionPurchaseId': checkout.purchaseId,
+            'submissionTransactionId': checkout.transactionId,
+            'submissionPaymentStatus': checkout.status,
+            'submissionAmount': checkout.amount,
+            'submissionCurrency': checkout.currency,
+            'submittedForReviewAt': DateTime.now().toIso8601String(),
+          },
+        );
+
         // Create new event
-        eventId = await eventService.createEvent(event);
+        eventId = await eventService.createEvent(submittedEvent);
 
         // Schedule event reminders if enabled
-        String successMessage = 'events_created_success'.tr();
+        String successMessage =
+            'Event submitted. Payment was received and the event is queued for review.';
         if (event.reminderEnabled) {
           try {
             // Initialize notification service first
             await notificationService.initialize();
             await notificationService.requestPermissions();
 
-            final updatedEvent = event.copyWith(id: eventId);
+            final updatedEvent = submittedEvent.copyWith(id: eventId);
             await notificationService.scheduleEventReminders(updatedEvent);
           } on Exception catch (notificationError) {
             _logger.e('Failed to schedule reminders: $notificationError');
@@ -198,7 +223,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               Text(
                 isEdit
                     ? 'events_updated_success'.tr()
-                    : 'events_created_success'.tr(),
+                    : 'Event submitted for review. It will not appear publicly until approved.',
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,

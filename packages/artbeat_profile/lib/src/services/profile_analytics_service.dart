@@ -112,41 +112,11 @@ class ProfileAnalyticsService extends ChangeNotifier {
         'avgViewsPerDay': avgViewsPerDay,
         'peakEngagementDay': peakDay,
         'growthTrend': growthTrend,
-        'totalFollowers': analytics.totalFollowers,
         'totalPosts': analytics.totalPosts,
         'profileViews': analytics.profileViews,
       };
     } catch (e) {
       AppLogger.error('Error getting engagement metrics: $e');
-      return {};
-    }
-  }
-
-  /// Get follower growth data over time
-  Future<Map<String, int>> getFollowerGrowth(
-    String userId, {
-    int days = 30,
-  }) async {
-    try {
-      final analytics = await getProfileAnalytics(userId);
-      if (analytics == null) return {};
-
-      // For now, we'll simulate growth data based on weekly engagement
-      // In a real implementation, you'd track daily follower counts
-      final growthData = <String, int>{};
-
-      analytics.weeklyEngagement.forEach((week, engagement) {
-        // Convert week string to approximate follower count for that period
-        // This is a simplified simulation - real implementation would track actual follower counts
-        final baseFollowers = (analytics.totalFollowers * 0.8).toInt();
-        final weeklyGrowth = (engagement * 0.1)
-            .toInt(); // Simulate growth based on engagement
-        growthData[week] = baseFollowers + weeklyGrowth;
-      });
-
-      return growthData;
-    } catch (e) {
-      AppLogger.error('Error getting follower growth: $e');
       return {};
     }
   }

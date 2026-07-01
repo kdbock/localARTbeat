@@ -448,10 +448,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                           ],
                           if (!isCompact) ...[
                             _glassIconButton(
-                              icon: Icons.message,
+                              icon: Icons.people_alt_rounded,
                               onTap: () => Navigator.pushNamed(
                                 context,
-                                AppRoutes.messaging,
+                                AppRoutes.communityFeed,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -1056,35 +1056,7 @@ class _ForYouTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find artists who have artwork
-    final artistsWithArtwork = vm.artists
-        .where(
-          (artist) =>
-              vm.artwork.any((artwork) => artwork.artistId == artist.userId),
-        )
-        .toList();
-
-    final ArtistProfileModel? spotlightArtist;
-    final ArtworkModel? heroArtwork;
-
-    if (artistsWithArtwork.isNotEmpty) {
-      // Select the first artist who has artwork
-      spotlightArtist = artistsWithArtwork.first;
-      // Find the first artwork by this artist
-      heroArtwork = vm.artwork.firstWhere(
-        (artwork) => artwork.artistId == spotlightArtist!.userId,
-        orElse: () => throw StateError('No artwork found for artist'),
-      );
-    } else {
-      // Fallback to original logic if no matching pairs
-      spotlightArtist = vm.artists.isNotEmpty ? vm.artists.first : null;
-      heroArtwork = vm.artwork.isNotEmpty ? vm.artwork.first : null;
-    }
-
     final EventModel? heroEvent = vm.events.isNotEmpty ? vm.events.first : null;
-
-    final featuredArtists = vm.artists.take(6).toList();
-    final featuredArtworks = vm.artwork.take(8).toList();
     final upcomingEvents = vm.events.take(6).toList();
 
     return CustomScrollView(
@@ -1092,38 +1064,19 @@ class _ForYouTab extends StatelessWidget {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        if (spotlightArtist != null || heroArtwork != null)
+        if (heroEvent != null)
           SliverToBoxAdapter(
             child: _ArtistSpotlightHero(
               key: artistSpotlightKey,
-              artist: spotlightArtist,
-              artwork: heroArtwork,
+              artist: null,
+              artwork: null,
               event: heroEvent,
             ),
           ),
-        if (featuredArtists.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _FeaturedArtistGallery(artists: featuredArtists),
-          ),
-        if (featuredArtworks.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _ArtworkSpotlightRail(
-              key: artworkGalleryKey,
-              artworks: featuredArtworks,
-            ),
-          ),
-        if (vm.artwork.length > 4)
-          SliverToBoxAdapter(child: DashboardArtworkSection(viewModel: vm)),
         if (upcomingEvents.isNotEmpty)
           SliverToBoxAdapter(
             child: _ArtistEventsShowcase(events: upcomingEvents),
           ),
-        SliverToBoxAdapter(
-          child: _ArtistAdSpace(
-            onTap: () => Navigator.pushNamed(context, '/artist/signup'),
-          ),
-        ),
-        SliverToBoxAdapter(child: DashboardArtistCtaSection(viewModel: vm)),
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
     );
@@ -1382,50 +1335,6 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-class _FeaturedArtistGallery extends StatelessWidget {
-  const _FeaturedArtistGallery({required this.artists});
-
-  final List<ArtistProfileModel> artists;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionHeader(
-            icon: Icons.auto_awesome,
-            title: 'Featured Artists',
-            subtitle: 'Spotlights curated for you',
-            actionLabel: 'See All',
-            onActionTap: () =>
-                Navigator.pushNamed(context, AppRoutes.artistBrowse),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 260,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (context, index) =>
-                  _ArtistFeatureCard(artist: artists[index]),
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemCount: artists.length,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.icon,
@@ -1483,302 +1392,6 @@ class _SectionHeader extends StatelessWidget {
             onTap: onActionTap!,
           ),
       ],
-    );
-  }
-}
-
-class _ArtistFeatureCard extends StatelessWidget {
-  const _ArtistFeatureCard({required this.artist});
-
-  final ArtistProfileModel artist;
-
-  @override
-  Widget build(BuildContext context) {
-    final mediums = artist.mediums.isNotEmpty
-        ? artist.mediums.take(2).join(' • ')
-        : 'Multidisciplinary';
-
-    return SizedBox(
-      width: 180,
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/artist/public-profile',
-            arguments: {'artistId': artist.userId},
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(22),
-                ),
-                child: SizedBox(
-                  height: 120,
-                  width: double.infinity,
-                  child:
-                      artist.coverImageUrl != null &&
-                          artist.coverImageUrl!.isNotEmpty
-                      ? SecureNetworkImage(
-                          imageUrl: artist.coverImageUrl!,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          color: ArtbeatColors.backgroundSecondary,
-                          child: const Icon(
-                            Icons.image,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                        ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 4,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: ArtbeatColors.backgroundSecondary,
-                            ),
-                            child: ClipOval(
-                              child:
-                                  artist.profileImageUrl != null &&
-                                      artist.profileImageUrl!.isNotEmpty
-                                  ? SecureNetworkImage(
-                                      imageUrl: artist.profileImageUrl!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      color: ArtbeatColors.textSecondary,
-                                    ),
-                            ),
-                          ),
-                          if (artist.isVerified)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 6),
-                              child: Icon(
-                                Icons.verified,
-                                color: ArtbeatColors.primaryPurple,
-                                size: 18,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        artist.displayName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: ArtbeatColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        mediums,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${artist.followersCount} followers',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ArtworkSpotlightRail extends StatelessWidget {
-  const _ArtworkSpotlightRail({required this.artworks, super.key});
-
-  final List<ArtworkModel> artworks;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionHeader(
-            icon: Icons.palette,
-            title: 'Artwork Spotlight',
-            subtitle: 'New drops from local creators',
-            actionLabel: 'Browse Gallery',
-            onActionTap: () =>
-                Navigator.pushNamed(context, AppRoutes.artworkBrowse),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 250,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (context, index) =>
-                  _ArtworkSpotlightCard(artwork: artworks[index]),
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemCount: artworks.length,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ArtworkSpotlightCard extends StatelessWidget {
-  const _ArtworkSpotlightCard({required this.artwork});
-
-  final ArtworkModel artwork;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(26),
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/artwork/detail',
-            arguments: {'artworkId': artwork.id},
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.18),
-                  blurRadius: 24,
-                  offset: const Offset(0, 14),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: artwork.imageUrl.isNotEmpty
-                        ? SecureNetworkImage(
-                            imageUrl: artwork.imageUrl,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            color: ArtbeatColors.backgroundSecondary,
-                            child: const Icon(
-                              Icons.image,
-                              color: ArtbeatColors.textSecondary,
-                              size: 48,
-                            ),
-                          ),
-                  ),
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.85),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 18,
-                    right: 18,
-                    bottom: 18,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _TagChip(
-                          label: artwork.medium.isNotEmpty
-                              ? artwork.medium
-                              : 'Artwork',
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          artwork.title.isNotEmpty ? artwork.title : 'Untitled',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          artwork.artistName,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          artwork.price > 0
-                              ? '\$${artwork.price.toStringAsFixed(0)}'
-                              : 'Available now',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -2051,74 +1664,8 @@ class _ArtistEventCard extends StatelessWidget {
   }
 }
 
-class _ArtistAdSpace extends StatelessWidget {
-  const _ArtistAdSpace({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFC857), Color(0xFFFB7185)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 28,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Artist Ad Space',
-            style: GoogleFonts.spaceGrotesk(
-              color: Colors.black,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Boost your next drop with premium placement across Local ArtBeat.',
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 14,
-              height: 1.4,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onTap,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              minimumSize: const Size(double.infinity, 50),
-            ),
-            child: const Text('Reserve Spotlight'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // -----------------------------------------------------------------------------
-// TAB 2: Explore (artists + artwork + browse)
+// TAB 2: Explore
 // -----------------------------------------------------------------------------
 class _ExploreTab extends StatelessWidget {
   const _ExploreTab({required this.vm, required this.browseKey});
@@ -2132,22 +1679,6 @@ class _ExploreTab extends StatelessWidget {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        if (vm.artists.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: DashboardArtistsSection(viewModel: vm),
-            ),
-          ),
-        if (vm.artwork.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: DashboardArtworkSection(viewModel: vm),
-            ),
-          ),
-
-        // Always include browse gateway
         SliverToBoxAdapter(
           child: Padding(
             key: browseKey,
@@ -2162,7 +1693,7 @@ class _ExploreTab extends StatelessWidget {
 }
 
 // -----------------------------------------------------------------------------
-// TAB 3: Community (community + events + artist CTA)
+// TAB 3: Community
 // -----------------------------------------------------------------------------
 class _CommunityTab extends StatelessWidget {
   const _CommunityTab({required this.vm});
@@ -2178,10 +1709,6 @@ class _CommunityTab extends StatelessWidget {
         SliverToBoxAdapter(child: DashboardCommunitySection(viewModel: vm)),
         if (vm.events.isNotEmpty)
           SliverToBoxAdapter(child: DashboardEventsSection(viewModel: vm)),
-
-        // Conversion zone (from deleted)
-        SliverToBoxAdapter(child: DashboardArtistCtaSection(viewModel: vm)),
-
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
     );

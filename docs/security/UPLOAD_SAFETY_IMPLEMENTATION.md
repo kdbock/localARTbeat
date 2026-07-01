@@ -151,15 +151,11 @@ Every decision is logged to Firestore for audit trail and monitoring:
 - **Error:** `moderation_errors` collection
   - Fields: error message, stack trace, request body, timestamp
 
-### 3. Artist-Only Direct Posting Enforcement
+### 3. Activity-Only Community Feed Enforcement
 
-Direct posting to the community feed is now restricted to artist accounts only:
-
-**Files Updated:**
-
-- `packages/artbeat_community/lib/screens/create_art_post_screen.dart`
-- `packages/artbeat_community/lib/screens/feed/create_post_screen.dart`
-- `packages/artbeat_community/lib/screens/create_art_post_screen.dart`
+Direct posting to the community feed has been removed. Feed content should be
+generated from app activity such as captures, discoveries, art walks, rankings,
+events, and sponsorship review outcomes.
 
 **Behavior:**
 

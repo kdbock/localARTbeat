@@ -87,7 +87,7 @@ class ProfileActivityModel {
       case 'profile_view':
         return '${targetUserName ?? 'Someone'} viewed your profile';
       case 'follow':
-        return '${targetUserName ?? 'Someone'} started following you';
+        return '${targetUserName ?? 'Someone'} interacted with your profile';
       case 'unfollow':
         return '${targetUserName ?? 'Someone'} unfollowed you';
       case 'like':

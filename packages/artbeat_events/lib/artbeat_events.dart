@@ -11,11 +11,10 @@ export 'src/models/refund_policy.dart';
 export 'src/services/event_service.dart';
 export 'src/services/recurring_event_service.dart';
 export 'src/services/event_notification_service.dart';
+export 'src/services/event_submission_checkout_service.dart';
 export 'src/services/calendar_integration_service.dart';
 export 'src/services/event_analytics_service.dart';
 export 'src/services/event_analytics_service_phase3.dart';
-export 'src/services/event_moderation_service.dart';
-export 'src/services/event_bulk_management_service.dart';
 export 'src/services/revenue_tracking_service.dart';
 export 'src/services/social_integration_service.dart';
 
@@ -28,7 +27,6 @@ export 'src/screens/events_list_screen.dart';
 export 'src/screens/event_search_screen.dart';
 export 'src/screens/my_tickets_screen.dart';
 export 'src/screens/user_events_dashboard_screen.dart';
-export 'src/screens/event_bulk_management_screen.dart';
 export 'src/screens/calendar_screen.dart';
 
 // Widgets - Reusable UI components

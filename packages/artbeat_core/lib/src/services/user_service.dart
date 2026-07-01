@@ -1067,17 +1067,6 @@ class UserService extends ChangeNotifier {
     }
   }
 
-  Stream<List<Map<String, dynamic>>> watchUserBoostBadges(String userId) {
-    return firestore
-        .collection('users')
-        .doc(userId)
-        .collection('boost_badges')
-        .orderBy('awardedAt', descending: true)
-        .limit(12)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
-  }
-
   // Get favorite by ID
   Future<Map<String, dynamic>?> getFavoriteById(String favoriteId) async {
     final userId = currentUserId;

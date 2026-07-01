@@ -5696,6 +5696,285 @@ exports.verifyGooglePlayPurchase = onRequest(
 );
 
 /**
+ * Verify event submission IAP purchase server-side and persist verification state.
+ */
+exports.verifyEventSubmissionPurchase = onCall(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  async (request) => {
+    if (!request.auth?.uid) {
+      throw new HttpsError("unauthenticated", "Authentication required.");
+    }
+
+    const uid = request.auth.uid;
+    const data = request.data || {};
+    const eventSubmissionId = String(data.eventSubmissionId || "").trim();
+    const platform = String(data.platform || "").trim().toLowerCase();
+    const productId = String(data.productId || "").trim();
+    const verificationData = String(data.verificationData || "").trim();
+    const packageName = String(data.packageName || "").trim();
+    const purchaseId = String(data.purchaseId || "").trim();
+    const transactionId = String(data.transactionId || "").trim();
+
+    const eventProductId = "artbeat_event_listing_submission";
+
+    if (!eventSubmissionId) {
+      throw new HttpsError(
+        "invalid-argument",
+        "eventSubmissionId is required."
+      );
+    }
+    if (!productId || productId !== eventProductId) {
+      throw new HttpsError(
+        "invalid-argument",
+        `productId must be ${eventProductId}.`
+      );
+    }
+    if (!verificationData) {
+      throw new HttpsError(
+        "invalid-argument",
+        "verificationData is required."
+      );
+    }
+    if (platform !== "ios" && platform !== "android") {
+      throw new HttpsError(
+        "invalid-argument",
+        "platform must be ios or android."
+      );
+    }
+
+    const submissionRef = admin
+      .firestore()
+      .collection("eventSubmissions")
+      .doc(eventSubmissionId);
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(verificationData)
+      .digest("hex");
+
+    try {
+      let verificationResult = null;
+
+      if (platform === "ios") {
+        let validationResult = await validateReceiptWithApple(
+          verificationData,
+          false
+        );
+
+        if (validationResult.error && validationResult.error === "21007") {
+          validationResult = await validateReceiptWithApple(verificationData, true);
+        }
+
+        if (validationResult.error) {
+          throw new HttpsError(
+            "failed-precondition",
+            `Apple receipt validation failed with code ${validationResult.error}.`
+          );
+        }
+
+        const receipt = validationResult.receipt || {};
+        const purchases = Array.isArray(receipt.in_app) ? receipt.in_app : [];
+        const matchingPurchase = purchases.find((purchase) => {
+          const purchaseProductId = String(purchase.product_id || "");
+          const purchaseTx = String(purchase.transaction_id || "");
+          if (purchaseProductId !== productId) return false;
+          if (transactionId) {
+            return purchaseTx === transactionId;
+          }
+          if (purchaseId) {
+            return purchaseTx === purchaseId;
+          }
+          return Boolean(purchaseTx);
+        });
+
+        if (!matchingPurchase) {
+          throw new HttpsError(
+            "failed-precondition",
+            "Apple receipt does not include the required event submission purchase."
+          );
+        }
+
+        verificationResult = {
+          valid: true,
+          platform: "ios",
+          environment: validationResult.environment || "production",
+          transactionId: String(matchingPurchase.transaction_id || transactionId || purchaseId || ""),
+          purchaseTimeMillis: String(matchingPurchase.purchase_date_ms || ""),
+        };
+      } else {
+        if (!packageName) {
+          throw new HttpsError(
+            "invalid-argument",
+            "packageName is required for android verification."
+          );
+        }
+
+        const verification = await verifyGooglePlayPurchaseWithApi({
+          packageName,
+          productId,
+          purchaseToken: verificationData,
+        });
+
+        if (!verification.valid) {
+          throw new HttpsError(
+            "failed-precondition",
+            "Google Play purchase token is not valid for this product."
+          );
+        }
+
+        verificationResult = {
+          valid: true,
+          platform: "android",
+          orderId: verification.orderId || "",
+          purchaseType: verification.purchaseType || "",
+          purchaseState: verification.purchaseState ?? null,
+          subscriptionState: verification.subscriptionState || null,
+          purchaseTimeMillis: verification.purchaseTimeMillis || null,
+          expiryTime: verification.expiryTime || null,
+        };
+      }
+
+      await submissionRef.set(
+        {
+          userId: uid,
+          purchaseProductId: productId,
+          purchaseVerificationPlatform: platform,
+          purchaseVerificationTokenHash: tokenHash,
+          purchaseVerificationStatus: "verified",
+          purchaseVerifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+          purchaseVerificationResult: verificationResult,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          // Keep moderation fields explicit for admin workflows.
+          reviewedBy: null,
+          reviewedAt: null,
+          reviewNotes: null,
+        },
+        {merge: true}
+      );
+
+      await admin.firestore().collection("iapValidations").add({
+        userId: uid,
+        productId,
+        platform,
+        packageName: packageName || null,
+        eventSubmissionId,
+        purchaseTokenHash: tokenHash,
+        valid: true,
+        verificationResult,
+        validatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return {
+        ok: true,
+        valid: true,
+        eventSubmissionId,
+        verificationResult,
+      };
+    } catch (error) {
+      await submissionRef.set(
+        {
+          userId: uid,
+          purchaseProductId: productId,
+          purchaseVerificationPlatform: platform,
+          purchaseVerificationTokenHash: tokenHash,
+          purchaseVerificationStatus: "failed",
+          purchaseVerificationError:
+            error?.message || String(error || "verification_failed"),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        {merge: true}
+      );
+      throw error;
+    }
+  }
+);
+
+/**
+ * Admin moderation action for event submissions with review notes.
+ */
+exports.reviewEventSubmission = onCall(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  async (request) => {
+    if (!request.auth?.uid) {
+      throw new HttpsError("unauthenticated", "Authentication required.");
+    }
+
+    const reviewerUid = request.auth.uid;
+    if (!(await isAdminUser(reviewerUid))) {
+      throw new HttpsError("permission-denied", "Admin access required.");
+    }
+
+    const data = request.data || {};
+    const eventSubmissionId = String(data.eventSubmissionId || "").trim();
+    const decision = String(data.decision || "").trim().toLowerCase();
+    const reviewNotes = String(data.reviewNotes || "").trim();
+
+    if (!eventSubmissionId) {
+      throw new HttpsError(
+        "invalid-argument",
+        "eventSubmissionId is required."
+      );
+    }
+
+    const allowedDecisions = new Set([
+      "approved",
+      "changes_requested",
+      "rejected",
+      "pending_review",
+    ]);
+    if (!allowedDecisions.has(decision)) {
+      throw new HttpsError(
+        "invalid-argument",
+        "decision must be approved, changes_requested, rejected, or pending_review."
+      );
+    }
+
+    const submissionRef = admin
+      .firestore()
+      .collection("eventSubmissions")
+      .doc(eventSubmissionId);
+    const submissionSnap = await submissionRef.get();
+    if (!submissionSnap.exists) {
+      throw new HttpsError("not-found", "Event submission not found.");
+    }
+
+    await submissionRef.set(
+      {
+        status: decision,
+        reviewedBy: reviewerUid,
+        reviewedAt: admin.firestore.FieldValue.serverTimestamp(),
+        reviewNotes: reviewNotes || null,
+        adminDecision: decision,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      {merge: true}
+    );
+
+    await admin.firestore().collection("eventSubmissionReviews").add({
+      eventSubmissionId,
+      decision,
+      reviewNotes: reviewNotes || null,
+      reviewedBy: reviewerUid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return {
+      ok: true,
+      eventSubmissionId,
+      decision,
+    };
+  }
+);
+
+/**
  * Activate a verified IAP subscription in backend-owned state.
  * This should be called only after store receipt verification succeeds.
  */

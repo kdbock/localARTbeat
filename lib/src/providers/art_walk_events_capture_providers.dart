@@ -6,9 +6,7 @@ import 'package:artbeat_events/artbeat_events.dart'
     show
         EventService,
         EventNotificationService,
-        EventBulkManagementService,
-        CalendarIntegrationService,
-        SocialIntegrationService;
+        EventSubmissionCheckoutService;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -53,14 +51,6 @@ List<SingleChildWidget> createArtWalkEventsCaptureProviders() => [
     create: (_) => InstantDiscoveryService()..initialize(),
     lazy: true,
   ),
-  Provider<ChallengeService>(
-    create: (_) => ChallengeService()..initialize(),
-    lazy: true,
-  ),
-  Provider<WeeklyGoalsService>(
-    create: (_) => WeeklyGoalsService()..initialize(),
-    lazy: true,
-  ),
   Provider<RewardsService>(create: (_) => RewardsService(), lazy: true),
   Provider<events.EventService>(
     create: (_) => events.EventService(),
@@ -70,16 +60,8 @@ List<SingleChildWidget> createArtWalkEventsCaptureProviders() => [
     create: (_) => events.EventNotificationService(),
     lazy: true,
   ),
-  Provider<events.EventBulkManagementService>(
-    create: (_) => events.EventBulkManagementService(),
-    lazy: true,
-  ),
-  Provider<events.CalendarIntegrationService>(
-    create: (_) => events.CalendarIntegrationService(),
-    lazy: true,
-  ),
-  Provider<events.SocialIntegrationService>(
-    create: (_) => events.SocialIntegrationService(),
+  Provider<events.EventSubmissionCheckoutService>(
+    create: (_) => events.EventSubmissionCheckoutService(),
     lazy: true,
   ),
   Provider<capture.CaptureService>(

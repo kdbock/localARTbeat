@@ -4,10 +4,8 @@ import 'package:artbeat_core/src/models/subscription_tier.dart';
 /// Enum for different ARTbeat modules
 enum ArtbeatModule {
   core, // artbeat_core - subscriptions, AI credits
-  artist, // artbeat_artist - payouts, commissions
-  ads, // artbeat_ads - advertising
   events, // artbeat_events - ticketing
-  messaging, // artbeat_messaging - gifts, chat perks
+  sponsorships, // artbeat_sponsorships - reviewed sponsor placements
   capture, // artbeat_capture - premium features
   artWalk, // artbeat_art_walk - premium features
   profile, // artbeat_profile - customization
@@ -38,22 +36,12 @@ class PaymentStrategyService {
       PurchaseType.consumable: PaymentMethod.iap,
       PurchaseType.nonConsumable: PaymentMethod.iap,
     },
-    ArtbeatModule.artist: {
-      PurchaseType.subscription: PaymentMethod.stripe,
-      PurchaseType.consumable: PaymentMethod.stripe,
-      PurchaseType.nonConsumable: PaymentMethod.stripe,
-    },
-    ArtbeatModule.ads: {
-      PurchaseType.subscription: PaymentMethod.iap,
-      PurchaseType.consumable: PaymentMethod.iap,
-      PurchaseType.nonConsumable: PaymentMethod.iap,
-    },
     ArtbeatModule.events: {
       PurchaseType.subscription: PaymentMethod.stripe,
       PurchaseType.consumable: PaymentMethod.stripe,
       PurchaseType.nonConsumable: PaymentMethod.stripe,
     },
-    ArtbeatModule.messaging: {
+    ArtbeatModule.sponsorships: {
       PurchaseType.subscription: PaymentMethod.iap,
       PurchaseType.consumable: PaymentMethod.iap,
       PurchaseType.nonConsumable: PaymentMethod.iap,
@@ -136,7 +124,7 @@ class PaymentStrategyService {
           return 'Premium features use In-App Purchases for one-time unlocks';
       }
     } else {
-      return 'This purchase requires Stripe for payout processing to artists/organizers';
+      return 'This purchase requires Stripe for organizer payout processing';
     }
   }
 

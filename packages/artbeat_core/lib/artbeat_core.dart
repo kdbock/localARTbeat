@@ -37,7 +37,6 @@ export 'src/config/legal_config.dart' show LegalConfig;
 export 'src/services/user_service.dart' show UserService, UserStreakSummary;
 export 'src/services/user_progression_service.dart' show UserProgressionService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
-export 'src/services/subscription_service.dart' show SubscriptionService;
 export 'src/services/artist_service.dart' show ArtistService;
 export 'src/services/artist_follow_service.dart' show ArtistFollowService;
 export 'src/services/artwork_read_service.dart' show ArtworkReadService;
@@ -53,10 +52,6 @@ export 'src/services/discovery_progress_read_service.dart'
 export 'src/services/event_read_service.dart' show EventReadService;
 export 'src/services/community_post_read_service.dart'
     show CommunityPostReadService;
-export 'src/services/commission_artist_preview_service.dart'
-    show CommissionArtistPreviewService;
-export 'src/services/artist_boost_service.dart' show ArtistBoostService;
-export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 // 2025 Enhanced Services (Consolidated into UnifiedPaymentService)
 export 'src/services/unified_payment_service.dart'
     show
@@ -71,8 +66,6 @@ export 'src/services/payment_strategy_service.dart'
 export 'src/services/crash_prevention_service.dart' show CrashPreventionService;
 // In-App Purchase Services
 export 'src/services/in_app_purchase_service.dart' show InAppPurchaseService;
-export 'src/services/in_app_subscription_service.dart'
-    show InAppSubscriptionService;
 export 'src/services/in_app_purchase_manager.dart'
     show InAppPurchaseManager, PurchaseEvent, PurchaseEventType;
 export 'src/services/in_app_purchase_setup.dart' show InAppPurchaseSetup;
@@ -80,7 +73,6 @@ export 'src/models/in_app_purchase_models.dart' show CompletedPurchase;
 export 'src/services/in_app_ad_service.dart' show InAppAdService;
 export 'src/services/notification_service.dart'
     show NotificationService, NotificationType;
-export 'src/services/messaging_status_service.dart' show MessagingStatusService;
 export 'src/services/purchase_verification_service.dart'
     show PurchaseVerificationService;
 export 'src/services/feedback_service.dart' show FeedbackService;
@@ -124,15 +116,11 @@ export 'src/services/ai_features_service.dart'
 export 'src/services/usage_tracking_service.dart' show UsageTrackingService;
 export 'src/services/defensibility_telemetry_service.dart'
     show DefensibilityEvent, DefensibilityTelemetryService;
-export 'src/services/store_preview_read_service.dart'
-    show StorePreviewReadService;
 export 'src/services/user_maintenance_service.dart'
     show UserMaintenanceService, UserXpRepairResult;
-export 'src/services/subscription_migration_service.dart'
-    show SubscriptionMigrationService;
 export 'src/services/chapter_partner_service.dart' show ChapterPartnerService;
-export 'src/services/artist_feature_testing_service.dart'
-    show ArtistFeatureTestingService, TestResult;
+export 'src/services/capture_edit_suggestion_service.dart'
+    show CaptureEditSuggestionService;
 
 export 'src/services/content_engagement_service.dart'
     show ContentEngagementService;
@@ -164,12 +152,7 @@ export 'src/repositories/known_entity_repository.dart'
 // Export Screens
 export 'src/screens/leaderboard_screen.dart' show LeaderboardScreen;
 export 'src/screens/help_support_screen.dart' show HelpSupportScreen;
-export 'src/screens/subscription_plans_screen.dart'
-    show SubscriptionPlansScreen;
-export 'src/screens/boosts/artist_boosts_screen.dart' show ArtistBoostsScreen;
 export 'src/widgets/ads_preview_card.dart' show AdsPreviewCard;
-export 'src/widgets/commission_artists_preview.dart'
-    show CommissionArtistsPreview;
 export 'src/widgets/book_preview_card.dart' show BookPreviewCard;
 
 // Export Core Models
@@ -184,8 +167,6 @@ export 'src/models/social_activity_model.dart'
 export 'src/models/daily_challenge_model.dart'
     show DailyChallengeModel, DailyChallengeType;
 export 'src/models/public_art_model.dart' show PublicArtModel;
-export 'src/models/commission_artist_preview_model.dart'
-    show CommissionArtistPreviewModel;
 export 'src/models/capture_model.dart'
     show CaptureModel, CaptureStatus, CaptureStatusExtension;
 export 'src/models/user_type.dart' show UserType;
@@ -217,7 +198,6 @@ export 'src/widgets/universal_content_card.dart' show UniversalContentCard;
 export 'src/widgets/chapters/chapter_selection_widget.dart'
     show ChapterSelectionWidget;
 export 'src/widgets/profile_tab_interface.dart';
-export 'src/widgets/featured_content_row_widget.dart';
 export 'src/widgets/network_error_widget.dart';
 export 'src/widgets/main_layout.dart';
 export 'src/widgets/navigation_overlay.dart' show NavigationOverlay;
@@ -233,10 +213,12 @@ export 'src/widgets/artist_cta_widget.dart'
 export 'src/widgets/usage_limits_widget.dart' show UsageLimitsWidget;
 
 export 'src/widgets/user_avatar.dart';
-export 'src/widgets/boost_pulse_ring.dart';
 export 'src/widgets/optimized_image.dart';
+export 'src/widgets/app_help_button.dart' show AppHelpButton;
 export 'src/widgets/feedback_form.dart';
 export 'src/widgets/feedback_system_info_screen.dart';
+export 'src/widgets/capture_edit_suggestion_sheet.dart'
+    show CaptureEditSuggestionSheet;
 export 'src/widgets/developer_menu.dart';
 
 // Export Core Widget Utils
@@ -274,8 +256,6 @@ export 'src/screens/dashboard/explore_dashboard_screen.dart'
 // export 'src/screens/search_results_screen.dart' show SearchResultsScreen;
 export 'src/screens/search_results_page.dart' show SearchResultsPage;
 export 'src/screens/auth_required_screen.dart' show AuthRequiredScreen;
-export 'src/screens/subscription_purchase_screen.dart'
-    show SubscriptionPurchaseScreen;
 export 'src/screens/coupon_management_screen.dart' show CouponManagementScreen;
 export 'src/screens/full_browse_screen.dart' show FullBrowseScreen;
 export 'src/screens/chapters/chapter_landing_screen.dart'
@@ -284,18 +264,10 @@ export 'src/screens/terms_of_service_screen.dart' show TermsOfServiceScreen;
 export 'src/screens/privacy_policy_screen.dart' show PrivacyPolicyScreen;
 export 'src/screens/legal_center_screen.dart' show LegalCenterScreen;
 
-// Export Artist Onboarding Screens
-export 'src/screens/artist_onboarding/artist_onboarding_screens.dart';
-
 // Export ViewModels
 export 'src/viewmodels/dashboard_view_model.dart' show DashboardViewModel;
-export 'src/viewmodels/artist_onboarding/artist_onboarding_view_model.dart';
-
-// Export Models
-export 'src/models/artist_onboarding/artist_onboarding_data.dart';
 
 // Export Providers
-export 'src/providers/messaging_provider.dart' show MessagingProvider;
 export 'src/providers/community_provider.dart' show CommunityProvider;
 export 'src/providers/chapter_partner_provider.dart'
     show ChapterPartnerProvider;
@@ -310,6 +282,3 @@ export 'src/widgets/quick_navigation_fab.dart'
 
 // Export In-App Purchase Widgets
 export 'src/widgets/widgets.dart';
-
-// Export Artbeat Store Screen
-export 'src/screens/artbeat_store.dart' show ArtbeatStoreScreen;

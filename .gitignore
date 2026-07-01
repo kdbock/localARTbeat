@@ -54,6 +54,8 @@ catlog
 .pub-cache/
 .pub/
 /build/
+android/.kotlin/
+functions/build/
 # iOS build artifacts should never be committed
 ios/build/
 

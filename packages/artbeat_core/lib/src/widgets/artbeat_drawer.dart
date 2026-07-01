@@ -8,10 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../theme/artbeat_colors.dart';
 import '../services/user_service.dart';
 import '../services/user_progression_service.dart';
-import '../services/messaging_status_service.dart';
 import '../services/crash_prevention_service.dart';
 import '../services/ux_session_analytics_service.dart';
 import '../services/first_session_checklist_service.dart';
@@ -25,11 +23,9 @@ import '../utils/logger.dart';
 // Define main navigation routes that should use pushReplacement
 const Set<String> mainRoutes = {
   '/dashboard',
-  '/browse',
   '/community/feed',
-  '/artist/dashboard',
-  '/gallery/artists-management',
-  '/admin/dashboard',
+  '/art-walk/map',
+  '/events/discover',
 };
 
 class ArtbeatDrawer extends StatefulWidget {
@@ -43,7 +39,6 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
     with TickerProviderStateMixin {
   core.UserModel? _cachedUserModel;
   StreamSubscription<User?>? _authSubscription;
-  String? _roleOverride; // For admin role switching
   late final UserService _userService;
   late final UserProgressionService _userProgressionService;
   late final FirstSessionChecklistService _firstSessionChecklistService;
@@ -77,7 +72,6 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
         if (mounted) {
           setState(() {
             _cachedUserModel = null;
-            _roleOverride = null;
           });
         }
       }
@@ -141,45 +135,10 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
       '/profile/edit',
       '/login',
       '/register',
-      '/browse',
-      '/artist/dashboard',
-      '/artist/onboarding',
-      '/artist/profile-edit',
-      '/artist/public-profile',
-      '/artist/analytics',
-      '/artist/artwork',
-      '/artist/browse',
-      '/artist/earnings',
-      '/artist/payout-request',
-      '/artist/payout-accounts',
-      '/artist/featured',
-      '/artist/approved-ads',
-      '/artwork/upload',
-      '/artwork/browse',
-      '/artwork/edit',
-      '/artwork/detail',
-      '/artwork/featured',
-      '/artwork/search',
-      '/artwork/recent',
-      '/artwork/trending',
-      '/gallery/artists-management',
-      '/gallery/analytics',
-      '/gallery/commissions',
-      '/commission/hub',
-      '/commission/request',
       '/community/feed',
-      '/community/dashboard',
-      '/community/artists',
       '/community/search',
-      '/community/posts',
-      '/community/studios',
-      '/community/gifts',
-      '/community/portfolios',
-      '/community/moderation',
       '/community/sponsorships',
       '/community/settings',
-      '/community/create',
-      '/community/messaging',
       '/community/trending',
       '/community/featured',
       '/community/hub',
@@ -187,40 +146,22 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
       '/art-walk/map',
       '/art-walk/list',
       '/art-walk/detail',
-      '/art-walk/create',
       '/art-walk/experience',
       '/art-walk/search',
       '/art-walk/explore',
       '/art-walk/start',
       '/art-walk/nearby',
       '/art-walk/dashboard',
-      '/messaging',
-      '/messaging/new',
-      '/messaging/chat',
-      '/messaging/user-chat',
+      '/instant-discovery',
       '/events/discover',
       '/events/dashboard',
-      '/events/artist-dashboard',
       '/events/create',
-      '/events/my-events',
-      '/events/my-tickets',
       '/events/detail',
-      '/admin/dashboard',
-      '/admin/settings',
-      '/admin/security',
-      '/admin/monitoring',
-      '/admin/payments',
-      '/admin/curation',
       '/settings',
       '/settings/account',
       '/settings/notifications',
       '/settings/privacy',
       '/settings/security',
-      '/payment/methods',
-      '/payment/refund',
-      '/payment/screen',
-      '/subscription/plans',
-      '/subscription/comparison',
       '/captures',
       '/capture/camera',
       '/capture/dashboard',
@@ -233,36 +174,18 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
       '/capture/browse',
       '/capture/approved',
       '/capture/settings',
-      '/capture/admin/moderation',
       '/capture/gallery',
       '/capture/edit',
       '/capture/create',
       '/capture/public',
-      '/artwalk/admin/moderation',
-      '/ads/create',
-      '/ads/management',
-      '/ads/statistics',
-      '/ads/payment',
-      '/achievements',
-      '/achievements/info',
       '/notifications',
       '/search',
       '/search/results',
       '/feedback',
       '/favorites',
-      '/developer-feedback-admin',
       '/system/info',
       '/support',
-      '/profile/following',
-      '/profile/followers',
-      '/quest-history',
-      '/weekly-goals',
     };
-
-    if (route == '/store') {
-      Navigator.of(snackBarContext, rootNavigator: true).pushNamed('/store');
-      return;
-    }
 
     if (implementedRoutes.contains(route)) {
       try {
@@ -312,47 +235,11 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   }
 
   String? _getUserRole() {
-    if (_roleOverride != null && _isCurrentUserAdmin()) {
-      if (_roleOverride == 'user') return null;
-      return _roleOverride;
-    }
-
     final userModel = _cachedUserModel;
     if (userModel != null) {
-      if (userModel.isAdmin) return 'admin';
-      if (userModel.isArtist) return 'artist';
-      if (userModel.isGallery) return 'gallery';
-      if (userModel.isModerator) return 'moderator';
+      return null;
     }
     return null;
-  }
-
-  bool _isCurrentUserAdmin() => _cachedUserModel?.isAdmin ?? false;
-
-  void _toggleRoleOverride() {
-    if (!_isCurrentUserAdmin()) return;
-
-    setState(() {
-      switch (_roleOverride) {
-        case null:
-          _roleOverride = 'user';
-          break;
-        case 'user':
-          _roleOverride = 'artist';
-          break;
-        case 'artist':
-          _roleOverride = 'gallery';
-          break;
-        case 'gallery':
-          _roleOverride = 'moderator';
-          break;
-        case 'moderator':
-          _roleOverride = null;
-          break;
-        default:
-          _roleOverride = null;
-      }
-    });
   }
 
   @override
@@ -515,10 +402,8 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   }
 
   Widget _buildDrawerHeader() {
-    final headerHeight = _isCurrentUserAdmin() ? 200.0 : 180.0;
-
     return SizedBox(
-      height: headerHeight,
+      height: 180,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
         child: _QuestGlass(
@@ -601,16 +486,14 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
                   final profileImageUrl = userModel?.profileImageUrl;
 
                   final role = _getUserRole();
-                  final isAdmin = _isCurrentUserAdmin();
-
                   return _HeaderUserBlock(
                     displayName: displayName,
                     subtitle: user.email ?? '',
                     role: role,
                     profileUrl: profileImageUrl,
-                    showRoleToggle: isAdmin,
-                    roleToggle: isAdmin ? _buildRoleToggleChip() : null,
-                    isAdmin: isAdmin,
+                    showRoleToggle: false,
+                    roleToggle: null,
+                    isAdmin: false,
                     modeChip: _buildModeChip(role),
                   );
                 },
@@ -630,56 +513,6 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
       label: label,
       accent: const Color(0xFF22D3EE),
       icon: Icons.radar_rounded,
-    );
-  }
-
-  Widget _buildRoleToggleChip() {
-    final currentViewRole = _roleOverride ?? 'admin';
-    String displayText;
-    Color badgeColor;
-    IconData icon;
-
-    switch (currentViewRole) {
-      case 'admin':
-        displayText = 'drawer_mode_admin'.tr();
-        badgeColor = ArtbeatColors.primaryPurple;
-        icon = Icons.admin_panel_settings_rounded;
-        break;
-      case 'user':
-        displayText = 'drawer_mode_user'.tr();
-        badgeColor = ArtbeatColors.textSecondary;
-        icon = Icons.person_rounded;
-        break;
-      case 'artist':
-        displayText = 'drawer_mode_artist'.tr();
-        badgeColor = ArtbeatColors.primaryGreen;
-        icon = Icons.palette_rounded;
-        break;
-      case 'gallery':
-        displayText = 'drawer_mode_gallery'.tr();
-        badgeColor = const Color(0xFF2196F3);
-        icon = Icons.business_rounded;
-        break;
-      case 'moderator':
-        displayText = 'drawer_mode_moderator'.tr();
-        badgeColor = const Color(0xFFFF9800);
-        icon = Icons.gavel_rounded;
-        break;
-      default:
-        displayText = 'drawer_mode_admin'.tr();
-        badgeColor = ArtbeatColors.primaryPurple;
-        icon = Icons.admin_panel_settings_rounded;
-    }
-
-    return InkWell(
-      onTap: _toggleRoleOverride,
-      borderRadius: BorderRadius.circular(999),
-      child: _NeonChip(
-        label: displayText,
-        accent: badgeColor,
-        icon: icon,
-        trailing: Icons.swap_horiz_rounded,
-      ),
     );
   }
 
@@ -836,63 +669,6 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   }
 
   Widget _buildIconWithBadge(ArtbeatDrawerItem item, bool isCurrentRoute) {
-    if (item.route == '/messaging') {
-      final messagingStatusService = context.read<MessagingStatusService>();
-      return StreamBuilder<int>(
-        stream: messagingStatusService.getTotalUnreadCount(),
-        builder: (context, snapshot) {
-          final unreadCount = snapshot.data ?? 0;
-
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(
-                item.icon,
-                color: Colors.white.withValues(alpha: 0.92),
-                size: 20,
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  right: -7,
-                  top: -7,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF3D8D),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.18),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(
-                            0xFFFF3D8D,
-                          ).withValues(alpha: 0.22),
-                          blurRadius: 14,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      unreadCount > 99 ? '99+' : unreadCount.toString(),
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.black.withValues(alpha: 0.88),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-      );
-    }
-
     return Icon(
       item.icon,
       color: Colors.white.withValues(alpha: 0.92),
@@ -1067,13 +843,10 @@ class _NeonChip extends StatelessWidget {
   final String label;
   final Color accent;
   final IconData icon;
-  final IconData? trailing;
-
   const _NeonChip({
     required this.label,
     required this.accent,
     required this.icon,
-    this.trailing,
   });
 
   @override
@@ -1102,14 +875,6 @@ class _NeonChip extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            Icon(
-              trailing,
-              size: 16,
-              color: Colors.white.withValues(alpha: 0.55),
-            ),
-          ],
         ],
       ),
     );

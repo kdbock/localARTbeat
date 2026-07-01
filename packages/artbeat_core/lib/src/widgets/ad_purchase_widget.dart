@@ -4,9 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 /// Legacy compatibility widget for older routes that previously opened the
 /// retired ad-package flow.
 ///
-/// ARTbeat local ads now use the dedicated `artbeat_ads` submission flow,
-/// where businesses create an ad, choose a placement, complete store checkout,
-/// and then wait for admin review before the ad is published.
+/// Local ARTbeat now routes businesses toward reviewed sponsorship placements:
+/// choose a placement, complete store checkout, then wait for approval before
+/// anything is published.
 class AdPurchaseWidget extends StatelessWidget {
   final String? artworkId;
   final String? artworkTitle;

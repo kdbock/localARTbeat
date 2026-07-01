@@ -32,6 +32,9 @@ class Sponsorship {
     this.paymentStatus,
     this.paymentFollowUpStatus,
     this.paymentFollowUpNotes,
+    this.iapProductId,
+    this.iapPurchaseId,
+    this.iapTransactionId,
     this.stripeCustomerId,
     this.stripeSubscriptionId,
     this.stripePriceId,
@@ -83,6 +86,9 @@ class Sponsorship {
         paymentStatus: data['paymentStatus'] as String?,
         paymentFollowUpStatus: data['paymentFollowUpStatus'] as String?,
         paymentFollowUpNotes: data['paymentFollowUpNotes'] as String?,
+        iapProductId: data['iapProductId'] as String?,
+        iapPurchaseId: data['iapPurchaseId'] as String?,
+        iapTransactionId: data['iapTransactionId'] as String?,
         stripeCustomerId: data['stripeCustomerId'] as String?,
         stripeSubscriptionId: data['stripeSubscriptionId'] as String?,
         stripePriceId: data['stripePriceId'] as String?,
@@ -123,6 +129,9 @@ class Sponsorship {
   final String? paymentStatus;
   final String? paymentFollowUpStatus;
   final String? paymentFollowUpNotes;
+  final String? iapProductId;
+  final String? iapPurchaseId;
+  final String? iapTransactionId;
   final String? stripeCustomerId;
   final String? stripeSubscriptionId;
   final String? stripePriceId;
@@ -159,6 +168,9 @@ class Sponsorship {
     'paymentStatus': paymentStatus,
     'paymentFollowUpStatus': paymentFollowUpStatus,
     'paymentFollowUpNotes': paymentFollowUpNotes,
+    'iapProductId': iapProductId,
+    'iapPurchaseId': iapPurchaseId,
+    'iapTransactionId': iapTransactionId,
     'stripeCustomerId': stripeCustomerId,
     'stripeSubscriptionId': stripeSubscriptionId,
     'stripePriceId': stripePriceId,

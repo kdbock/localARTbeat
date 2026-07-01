@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           providers: createAppProviders(),
           child: MaterialApp(
             navigatorKey: navigatorKey,
-            title: 'ARTbeat',
+            title: 'Local ARTbeat',
             theme: ThemeData.light(),
             initialRoute: core.AppRoutes.splash,
             onGenerateRoute: _appRouter.onGenerateRoute,

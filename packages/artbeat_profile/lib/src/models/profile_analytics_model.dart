@@ -5,8 +5,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 class ProfileAnalyticsModel {
   final String userId;
   final int profileViews;
-  final int totalFollowers;
-  final int totalFollowing;
   final int totalPosts;
   final int totalLikes;
   final int totalComments;
@@ -23,8 +21,6 @@ class ProfileAnalyticsModel {
   ProfileAnalyticsModel({
     required this.userId,
     this.profileViews = 0,
-    this.totalFollowers = 0,
-    this.totalFollowing = 0,
     this.totalPosts = 0,
     this.totalLikes = 0,
     this.totalComments = 0,
@@ -44,8 +40,6 @@ class ProfileAnalyticsModel {
     return ProfileAnalyticsModel(
       userId: doc.id,
       profileViews: FirestoreUtils.getInt(data, 'profileViews'),
-      totalFollowers: FirestoreUtils.getInt(data, 'totalFollowers'),
-      totalFollowing: FirestoreUtils.getInt(data, 'totalFollowing'),
       totalPosts: FirestoreUtils.getInt(data, 'totalPosts'),
       totalLikes: FirestoreUtils.getInt(data, 'totalLikes'),
       totalComments: FirestoreUtils.getInt(data, 'totalComments'),
@@ -71,8 +65,6 @@ class ProfileAnalyticsModel {
   Map<String, dynamic> toFirestore() {
     return {
       'profileViews': profileViews,
-      'totalFollowers': totalFollowers,
-      'totalFollowing': totalFollowing,
       'totalPosts': totalPosts,
       'totalLikes': totalLikes,
       'totalComments': totalComments,
@@ -90,8 +82,6 @@ class ProfileAnalyticsModel {
 
   ProfileAnalyticsModel copyWith({
     int? profileViews,
-    int? totalFollowers,
-    int? totalFollowing,
     int? totalPosts,
     int? totalLikes,
     int? totalComments,
@@ -106,8 +96,6 @@ class ProfileAnalyticsModel {
     return ProfileAnalyticsModel(
       userId: userId,
       profileViews: profileViews ?? this.profileViews,
-      totalFollowers: totalFollowers ?? this.totalFollowers,
-      totalFollowing: totalFollowing ?? this.totalFollowing,
       totalPosts: totalPosts ?? this.totalPosts,
       totalLikes: totalLikes ?? this.totalLikes,
       totalComments: totalComments ?? this.totalComments,

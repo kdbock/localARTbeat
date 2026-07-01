@@ -12,28 +12,30 @@ void main() {
 
     test('uses expected policy for compliance-sensitive paths', () {
       expect(
-        strategy.getPaymentMethod(PurchaseType.nonConsumable, ArtbeatModule.messaging),
+        strategy.getPaymentMethod(
+          PurchaseType.consumable,
+          ArtbeatModule.sponsorships,
+        ),
         PaymentMethod.iap,
       );
       expect(
-        strategy.getPaymentMethod(PurchaseType.consumable, ArtbeatModule.ads),
+        strategy.getPaymentMethod(
+          PurchaseType.subscription,
+          ArtbeatModule.core,
+        ),
         PaymentMethod.iap,
       );
       expect(
-        strategy.getPaymentMethod(PurchaseType.subscription, ArtbeatModule.core),
-        PaymentMethod.iap,
-      );
-      expect(
-        strategy.getPaymentMethod(PurchaseType.nonConsumable, ArtbeatModule.artist),
+        strategy.getPaymentMethod(
+          PurchaseType.nonConsumable,
+          ArtbeatModule.events,
+        ),
         PaymentMethod.stripe,
       );
     });
 
     test('keeps payout modules on Stripe for all purchase types', () {
-      const payoutModules = <ArtbeatModule>[
-        ArtbeatModule.artist,
-        ArtbeatModule.events,
-      ];
+      const payoutModules = <ArtbeatModule>[ArtbeatModule.events];
 
       for (final module in payoutModules) {
         for (final purchaseType in PurchaseType.values) {
@@ -54,8 +56,7 @@ void main() {
     test('keeps app-store-governed modules on IAP for all purchase types', () {
       const iapModules = <ArtbeatModule>[
         ArtbeatModule.core,
-        ArtbeatModule.ads,
-        ArtbeatModule.messaging,
+        ArtbeatModule.sponsorships,
         ArtbeatModule.capture,
         ArtbeatModule.artWalk,
         ArtbeatModule.profile,

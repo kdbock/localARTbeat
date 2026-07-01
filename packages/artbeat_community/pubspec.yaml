@@ -1,6 +1,6 @@
 name: artbeat_community
 description: Social and community features for ARTbeat app
-version: 0.0.2
+version: 2.7.0
 publish_to: "none"
 
 environment:
@@ -12,8 +12,6 @@ dependencies:
     sdk: flutter
   artbeat_core:
     path: ../artbeat_core
-  artbeat_ads:
-    path: ../artbeat_ads
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4
   cloud_firestore: ^6.1.2
@@ -27,21 +25,19 @@ dependencies:
   intl: ^0.20.2
   provider: ^6.1.1
   share_plus: ^12.0.1
-  google_maps_flutter: ^2.5.3
+  google_maps_flutter: ^2.17.1
   flutter_svg: ^2.0.10+1
   profanity_filter: ^2.0.0
   url_launcher: ^6.2.5
-  flutter_stripe: ^12.2.0  # Latest with enhanced ProGuard rules
+  flutter_stripe: ^13.0.0
   uuid: ^4.2.1
   geolocator: ^14.0.1
   http: ^1.2.0
   xml: ^6.5.0
   path_provider: ^2.1.5
-  flutter_image_compress: ^2.3.0
   video_player: ^2.8.2
   audioplayers: ^6.0.0
   google_fonts: ^8.0.2
-  image_editor_plus: ^1.0.4
   file_picker: ^10.3.10
   easy_localization: ^3.0.7
   package_info_plus: ^9.0.0

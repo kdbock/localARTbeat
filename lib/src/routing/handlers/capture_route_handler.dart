@@ -1,4 +1,3 @@
-import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
@@ -8,15 +7,10 @@ import 'package:provider/provider.dart';
 
 import '../route_utils.dart';
 
-typedef AdminRouteDelegate = Route<dynamic>? Function(RouteSettings settings);
-
 class CaptureRouteHandler {
   const CaptureRouteHandler();
 
-  Route<dynamic>? handleRoute(
-    RouteSettings settings, {
-    required AdminRouteDelegate handleAdminRoute,
-  }) {
+  Route<dynamic>? handleRoute(RouteSettings settings) {
     switch (settings.name) {
       case core.AppRoutes.captures:
       case core.AppRoutes.captureMyCaptures:
@@ -36,7 +30,8 @@ class CaptureRouteHandler {
 
       case core.AppRoutes.captureDashboard:
         return RouteUtils.createMainLayoutRoute(
-          child: const capture.EnhancedCaptureDashboardScreen(),
+          currentIndex: 2,
+          child: const capture.CaptureScreen(),
         );
 
       case core.AppRoutes.captureCamera:
@@ -46,12 +41,7 @@ class CaptureRouteHandler {
         );
 
       case core.AppRoutes.captureAdminModeration:
-        return handleAdminRoute(
-          RouteSettings(
-            name: admin.AdminRoutes.contentModeration,
-            arguments: settings.arguments,
-          ),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case core.AppRoutes.captureTerms:
         return RouteUtils.createMainLayoutRoute(

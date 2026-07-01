@@ -1,6 +1,6 @@
 name: artbeat_auth
 description: Authentication components for the ARTbeat application
-version: 0.0.2
+version: 2.7.0
 publish_to: "none"
 
 environment:
@@ -19,7 +19,7 @@ dependencies:
   # Social login dependencies
   google_fonts: ^8.0.2
   google_sign_in: ^7.2.0
-  sign_in_with_apple: ^7.0.1
+  sign_in_with_apple: ^8.1.0
   crypto: ^3.0.3
 
   # ARTbeat packages

@@ -76,8 +76,8 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 128
-        versionName = "2.6.19"
+        versionCode = 134
+        versionName = "2.7.2"
         
         // Enable multidex for large app
         multiDexEnabled = true
@@ -87,6 +87,10 @@ android {
         
         // Override manifest attributes for plugins with incompatible minSdk
         manifestPlaceholders["minSdkVersion"] = 24
+
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {

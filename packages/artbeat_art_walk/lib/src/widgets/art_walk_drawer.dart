@@ -98,10 +98,7 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
     if (!mounted) return;
 
     AppLogger.info('ArtWalkDrawer: navigate to ${item.route}');
-    // Use pushReplacementNamed for Quest History and Weekly Goals to avoid duplicate stacking
-    if (item.route == '/quest-history' || item.route == '/weekly-goals') {
-      navigator.pushReplacementNamed(item.route);
-    } else if (_shouldPush(item.route)) {
+    if (_shouldPush(item.route)) {
       navigator.pushNamed(item.route);
     } else {
       navigator.pushReplacementNamed(item.route);
@@ -166,10 +163,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
     return route.startsWith('/art-walk/') ||
         route == '/capture/public' ||
         route == '/instant-discovery' ||
-        route == '/achievements' ||
         route == '/leaderboard' ||
-        route == '/quest-history' ||
-        route == '/weekly-goals' ||
+        route == '/events/dashboard' ||
+        route == '/community/sponsorships' ||
         route == '/profile';
   }
 }
@@ -568,12 +564,6 @@ const _drawerSections = <_DrawerSectionConfig>[
         accent: Color(0xFFFFC857),
       ),
       _DrawerNavItem(
-        titleKey: 'art_walk_drawer_messages',
-        icon: Icons.forum_rounded,
-        route: '/messaging',
-        accent: Color(0xFFFF3D8D),
-      ),
-      _DrawerNavItem(
         titleKey: 'art_walk_drawer_search',
         icon: Icons.search_rounded,
         route: '/search',
@@ -614,18 +604,6 @@ const _drawerSections = <_DrawerSectionConfig>[
         accent: Color(0xFFFF3D8D),
       ),
       _DrawerNavItem(
-        titleKey: 'art_walk_drawer_achievements',
-        icon: Icons.emoji_events_rounded,
-        route: '/achievements',
-        accent: Color(0xFFFFC857),
-      ),
-      _DrawerNavItem(
-        titleKey: 'art_walk_drawer_quest_history',
-        icon: Icons.history_rounded,
-        route: '/quest-history',
-        accent: Color(0xFF22D3EE),
-      ),
-      _DrawerNavItem(
         titleKey: 'leaderboard_title',
         icon: Icons.leaderboard_rounded,
         route: '/leaderboard',
@@ -641,6 +619,18 @@ const _drawerSections = <_DrawerSectionConfig>[
         icon: Icons.person_rounded,
         route: '/profile',
         accent: Color(0xFF7C7E91),
+      ),
+      _DrawerNavItem(
+        titleKey: 'events_drawer_events_dashboard',
+        icon: Icons.event_rounded,
+        route: '/events/dashboard',
+        accent: Color(0xFF34D399),
+      ),
+      _DrawerNavItem(
+        titleKey: 'Sponsorships',
+        icon: Icons.campaign_rounded,
+        route: '/community/sponsorships',
+        accent: Color(0xFFFFC857),
       ),
     ],
   ),

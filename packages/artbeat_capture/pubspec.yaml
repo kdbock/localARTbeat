@@ -1,7 +1,7 @@
 name: artbeat_capture
 description: Camera and capture module for ARTbeat
 publish_to: "none"
-version: 0.0.2
+version: 2.7.0
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
@@ -14,8 +14,8 @@ dependencies:
   image_picker: ^1.0.7
   path_provider: ^2.1.5
   google_fonts: ^8.0.2
-  google_maps_flutter: ^2.5.3
-  # Temporarily commenting out to resolve pod install issues
+  google_maps_flutter: ^2.17.1
+  # Disabled during the app simplification; reintroduce only with a tested capture text-recognition flow.
   # google_mlkit_text_recognition: ^0.15.0
   geolocator: ^14.0.1
   cloud_firestore: ^6.1.2

@@ -216,34 +216,8 @@ class CommunityService extends ChangeNotifier {
     return getPosts(limit: limit);
   }
 
-  Future<List<Map<String, dynamic>>> getFeaturedArtists({
-    required SubscriptionService subscriptionService,
-  }) async {
-    try {
-      final featuredArtists = await subscriptionService.getFeaturedArtists();
-      final artists = <Map<String, dynamic>>[];
-
-      for (final artist in featuredArtists) {
-        artists.add({
-          'id': artist.id,
-          'userId': artist.userId,
-          'name': artist.displayName,
-          'specialty': _resolveArtistSpecialty(
-            mediums: artist.mediums,
-            styles: artist.styles,
-            location: artist.location,
-          ),
-          'avatar': artist.profileImageUrl ?? '',
-          'followers': await _getArtistFollowerCount(artist.id),
-        });
-      }
-
-      return artists;
-    } catch (e) {
-      AppLogger.error('Error loading featured artists: $e');
-      return [];
-    }
-  }
+  Future<List<Map<String, dynamic>>> getFeaturedArtists() async =>
+      const <Map<String, dynamic>>[];
 
   Future<List<Map<String, dynamic>>> getVerifiedArtists({
     int limit = 10,
@@ -271,8 +245,6 @@ class CommunityService extends ChangeNotifier {
 
     if (type == 'sale') {
       query = query.where('isForSale', isEqualTo: true);
-    } else if (type == 'auction') {
-      query = query.where('auctionEnabled', isEqualTo: true);
     } else if (type == 'featured') {
       query = query.where('isFeatured', isEqualTo: true);
     }

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart' as compress;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Service for handling Firebase Storage operations
@@ -205,26 +204,5 @@ class FirebaseStorageService {
 
   bool isValidFileSize(File file) {
     return file.lengthSync() <= maxFileSizeBytes;
-  }
-
-  /// Compress image (safe, optional)
-  Future<File> compressImage(File file) async {
-    try {
-      final targetPath =
-          '${Directory.systemTemp.path}/${_uuid.v4()}_compressed.jpg';
-
-      final result = await compress.FlutterImageCompress.compressAndGetFile(
-        file.absolute.path,
-        targetPath,
-        quality: 85,
-        minWidth: 1920,
-        minHeight: 1920,
-        format: compress.CompressFormat.jpeg,
-      );
-
-      return result != null ? File(result.path) : file;
-    } catch (_) {
-      return file;
-    }
   }
 }
