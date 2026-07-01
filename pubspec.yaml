@@ -127,10 +127,20 @@ dependency_overrides:
     path: third_party/pub_overrides/audioplayers_android
   camera_android_camerax:
     path: third_party/pub_overrides/camera_android_camerax
+  cloud_functions:
+    path: third_party/pub_overrides/cloud_functions
   device_info_plus:
     path: third_party/pub_overrides/device_info_plus
   file_picker:
     path: third_party/pub_overrides/file_picker
+  firebase_analytics:
+    path: third_party/pub_overrides/firebase_analytics
+  firebase_app_check:
+    path: third_party/pub_overrides/firebase_app_check
+  firebase_remote_config:
+    path: third_party/pub_overrides/firebase_remote_config
+  firebase_storage:
+    path: third_party/pub_overrides/firebase_storage
   font_awesome_flutter: ^11.0.0
   google_sign_in_android:
     path: third_party/pub_overrides/google_sign_in_android
@@ -145,6 +155,8 @@ dependency_overrides:
     path: third_party/pub_overrides/share_plus
   shared_preferences_android:
     path: third_party/pub_overrides/shared_preferences_android
+  sign_in_with_apple:
+    path: third_party/pub_overrides/sign_in_with_apple
   stripe_android:
     path: third_party/pub_overrides/stripe_android
   stripe_ios:

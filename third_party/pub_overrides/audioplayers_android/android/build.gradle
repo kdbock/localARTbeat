@@ -27,10 +27,6 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 apply plugin: 'de.mannodermaus.android-junit5'
 
-def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
-if (agpMajor < 9) {
-    apply plugin: 'kotlin-android'
-}
 
 android {
     compileSdk 35
@@ -41,15 +37,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
-    if (agpMajor < 9) {
-        kotlinOptions {
-            jvmTarget = '1.8'
-        }
-    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
