@@ -20,9 +20,6 @@ GENERATED_XCCONFIG="$CI_PRIMARY_REPOSITORY_PATH/ios/Flutter/Generated.xcconfig"
 if [ ! -f "$GENERATED_XCCONFIG" ]; then
     echo "Generated.xcconfig not found. Regenerating Flutter iOS files..."
     flutter pub get
-    cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
-    pod install --repo-update
-    cd "$CI_PRIMARY_REPOSITORY_PATH"
 fi
 
 # Verify all required Flutter files exist
@@ -30,7 +27,6 @@ echo "Verifying Flutter iOS files..."
 FLUTTER_DIR="$CI_PRIMARY_REPOSITORY_PATH/ios/Flutter"
 required_files=(
     "Generated.xcconfig"
-    "Flutter.podspec"
     "AppFrameworkInfo.plist"
 )
 

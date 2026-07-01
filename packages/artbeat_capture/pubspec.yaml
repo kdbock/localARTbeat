@@ -15,7 +15,7 @@ dependencies:
   path_provider: ^2.1.5
   google_fonts: ^8.0.2
   google_maps_flutter: ^2.17.1
-  # Temporarily commenting out to resolve pod install issues
+  # Disabled during the app simplification; reintroduce only with a tested capture text-recognition flow.
   # google_mlkit_text_recognition: ^0.15.0
   geolocator: ^14.0.1
   cloud_firestore: ^6.1.2

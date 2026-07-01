@@ -1,6 +1,6 @@
 # ARTbeat Documentation Index
 
-Last updated: June 28, 2026
+Last updated: July 1, 2026
 
 ## Purpose
 
@@ -18,6 +18,10 @@ This folder contains current, operational documentation for the live app.
   - Setup, quality gates, release operations, and incident/compliance runbook links.
 - `TEST_STRATEGY.md`
   - Test layers and release gate expectations.
+- `RELEASE_CHECKLIST.md`
+  - Store-build and Transporter/Play testing release steps.
+- `DEPENDENCY_AUDIT.md`
+  - Current dependency/override status and upgrade order.
 
 ## Legal And Safety Docs
 
