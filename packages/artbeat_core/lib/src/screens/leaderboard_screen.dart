@@ -142,7 +142,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Visibility boosts, promo ads, and artist subscriptions power every rank you see here.',
+            'Capture local art, discover nearby pieces, complete art walks, and support the feed to climb.',
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white70,
               fontSize: 13,

@@ -484,11 +484,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         icon: Icons.people,
         items: [
           'help_community_feed'.tr(),
-          'help_direct_commissions'.tr(),
-          'help_studio_system'.tr(),
           'help_profile_features'.tr(),
-          'help_messaging'.tr(),
-          'help_gifts'.tr(),
+          'help_rankings'.tr(),
+          'help_events'.tr(),
+          'help_sponsorships'.tr(),
         ],
       ),
       _HelpSectionData(

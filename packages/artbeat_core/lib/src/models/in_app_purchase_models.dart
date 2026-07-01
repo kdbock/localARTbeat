@@ -2,14 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Enum for different types of in-app purchases
 enum PurchaseType {
-  consumable, // Ads, boosts - can be purchased multiple times
+  consumable, // One-time listing/submission purchases
   nonConsumable, // One-time purchases like premium features
   subscription, // Recurring subscriptions
 }
 
 /// Enum for purchase categories
 enum PurchaseCategory {
-  ads, // Advertisement purchases
+  sponsorships, // Reviewed local sponsorship placements
+  eventSubmissions, // Reviewed event listing submissions
+  ads, // Legacy advertisement purchases
   boosts, // Boost purchases
   subscription, // Subscription purchases
   premium, // Premium features

@@ -50,6 +50,12 @@ class InAppPurchaseService {
       'artbeat_boost_overdrive', // Overdrive Boost
     ],
     'ads': ['artbeat_ad_banner_monthly', 'artbeat_ad_inline_monthly'],
+    'sponsorships': [
+      'artbeat_sponsorship_discovery_monthly',
+      'artbeat_sponsorship_capture_monthly',
+      'artbeat_sponsorship_art_walk_monthly',
+    ],
+    'eventSubmissions': ['artbeat_event_submission_review'],
   };
 
   // Callbacks for purchase events
@@ -472,10 +478,18 @@ class InAppPurchaseService {
         await _processSubscriptionPurchase(purchase, details);
         break;
       case PurchaseCategory.boosts:
-        await _processBoostPurchase(purchase, details);
+        AppLogger.warning(
+          'Retired boost purchase category ignored: ${purchase.productId}',
+        );
         break;
       case PurchaseCategory.ads:
         await _processAdPurchase(purchase, details);
+        break;
+      case PurchaseCategory.sponsorships:
+        await _processSponsorshipPurchase(purchase, details);
+        break;
+      case PurchaseCategory.eventSubmissions:
+        await _processEventSubmissionPurchase(purchase, details);
         break;
       case PurchaseCategory.premium:
         await _processPremiumPurchase(purchase, details);
@@ -491,20 +505,6 @@ class InAppPurchaseService {
     AppLogger.info(
       '✅ Verified IAP subscription recorded; backend activation owns entitlement for ${purchase.productId}',
     );
-  }
-
-  /// Process boost purchase
-  Future<void> _processBoostPurchase(
-    CompletedPurchase purchase,
-    PurchaseDetails details,
-  ) async {
-    try {
-      // Boost processing is handled by the boost service
-      // This is just to record the purchase
-      AppLogger.info('✅ Boost purchase processed: ${purchase.productId}');
-    } catch (e) {
-      AppLogger.error('Error processing boost purchase: $e');
-    }
   }
 
   /// Process ad purchase
@@ -532,6 +532,24 @@ class InAppPurchaseService {
     } catch (e) {
       AppLogger.error('Error processing premium purchase: $e');
     }
+  }
+
+  Future<void> _processSponsorshipPurchase(
+    CompletedPurchase purchase,
+    PurchaseDetails details,
+  ) async {
+    AppLogger.info(
+      '✅ Sponsorship IAP recorded for review workflow: ${purchase.productId}',
+    );
+  }
+
+  Future<void> _processEventSubmissionPurchase(
+    CompletedPurchase purchase,
+    PurchaseDetails details,
+  ) async {
+    AppLogger.info(
+      '✅ Event submission IAP recorded for review workflow: ${purchase.productId}',
+    );
   }
 
   /// Purchase a product
@@ -588,12 +606,8 @@ class InAppPurchaseService {
             userId: user.uid,
             purchaseDate: DateTime.now(),
             status: 'completed',
-            type: _isBoostProduct(productId)
-                ? PurchaseType.consumable
-                : PurchaseType.subscription,
-            category: _isBoostProduct(productId)
-                ? PurchaseCategory.boosts
-                : PurchaseCategory.premium,
+            type: _getPurchaseType(productId),
+            category: _getPurchaseCategory(productId),
             amount: 4.99, // Default amount for dev mode
             currency: 'USD',
             transactionId: transactionId,
@@ -801,9 +815,11 @@ class InAppPurchaseService {
   /// Helper methods
   PurchaseType _getPurchaseType(String productId) {
     if (_productIds['subscriptions']!.contains(productId) ||
-        _productIds['ads']!.contains(productId)) {
+        _productIds['ads']!.contains(productId) ||
+        _productIds['sponsorships']!.contains(productId)) {
       return PurchaseType.subscription;
-    } else if (_productIds['boosts']!.contains(productId)) {
+    } else if (_productIds['boosts']!.contains(productId) ||
+        _productIds['eventSubmissions']!.contains(productId)) {
       return PurchaseType.consumable;
     }
     return PurchaseType.nonConsumable;
@@ -816,6 +832,10 @@ class InAppPurchaseService {
       return PurchaseCategory.boosts;
     } else if (_productIds['ads']!.contains(productId)) {
       return PurchaseCategory.ads;
+    } else if (_productIds['sponsorships']!.contains(productId)) {
+      return PurchaseCategory.sponsorships;
+    } else if (_productIds['eventSubmissions']!.contains(productId)) {
+      return PurchaseCategory.eventSubmissions;
     }
     return PurchaseCategory.premium;
   }

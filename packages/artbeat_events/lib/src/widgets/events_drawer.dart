@@ -64,7 +64,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
     try {
       final userId = _userService.currentUserId;
       if (userId != null) {
-        final userEvents = await _eventService.getEventsByArtist(userId);
+        final userEvents = await _eventService.getEventsBySubmitter(userId);
         final upcomingEvents = await _eventService.getUpcomingPublicEvents(
           limit: 5,
         );
@@ -148,9 +148,10 @@ class _EventsDrawerState extends State<EventsDrawer> {
                               _navigateToScreen(context, '/events/search'),
                         ),
                         _NavItem(
-                          icon: Icons.message,
-                          title: 'events_drawer_messages'.tr(),
-                          onTap: () => _navigateToScreen(context, '/messaging'),
+                          icon: Icons.people_alt,
+                          title: 'community_drawer_art_feed'.tr(),
+                          onTap: () =>
+                              _navigateToScreen(context, AppRoutes.communityFeed),
                         ),
                         _NavItem(
                           icon: Icons.person,

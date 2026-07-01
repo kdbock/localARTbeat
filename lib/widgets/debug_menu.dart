@@ -11,8 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../test_artist_features_app.dart';
-
 /// Debug menu for accessing development and testing features
 class DebugMenu extends StatelessWidget {
   const DebugMenu({super.key});
@@ -39,31 +37,6 @@ class DebugMenu extends StatelessWidget {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
-
-          // Artist Features Test
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.science, color: Colors.blue, size: 32),
-              title: const Text(
-                'Artist Features Test',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Verify all subscription tier features work properly\n2025 optimization validation',
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const ArtistFeatureTestApp(),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 16),
 
           // Firebase Debug
           Card(

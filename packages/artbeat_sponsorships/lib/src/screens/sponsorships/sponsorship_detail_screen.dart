@@ -149,17 +149,16 @@ class SponsorshipDetailScreen extends StatelessWidget {
                               : '${sponsorship.radiusMiles} mi',
                         ),
                         SponsorshipReviewRow(
-                          label: 'sponsorship_detail_label_stripe_subscription'
-                              .tr(),
-                          value: sponsorship.stripeSubscriptionId ?? '--',
+                          label: 'IAP purchase',
+                          value: sponsorship.iapPurchaseId ?? '--',
                         ),
                         SponsorshipReviewRow(
-                          label: 'sponsorship_detail_label_stripe_price'.tr(),
-                          value: sponsorship.stripePriceId ?? '--',
+                          label: 'IAP product',
+                          value: sponsorship.iapProductId ?? '--',
                         ),
                         SponsorshipReviewRow(
-                          label: 'Stripe payment intent',
-                          value: sponsorship.stripePaymentIntentStatus ?? '--',
+                          label: 'IAP transaction',
+                          value: sponsorship.iapTransactionId ?? '--',
                         ),
                       ],
                     ),

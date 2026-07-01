@@ -1221,6 +1221,20 @@ service cloud.firestore {
       );
     }
 
+    // Capture edit suggestions - user submitted corrections reviewed in WordPress.
+    match /captureEditSuggestions/{suggestionId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.captureId is string &&
+        request.resource.data.proposedChanges is map;
+      allow read, list: if isAuthenticated() && (
+        resource.data.submittedBy == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update, delete: if isAuthenticated() && isAdmin(request.auth.uid);
+    }
+
     // Posts and applause
     match /posts/{postId} {
       allow read: if true;

@@ -647,16 +647,18 @@ class InstantDiscoveryService {
       final List<PublicArtModel> sponsoredArt = [];
       for (final sponsor in sponsorships) {
         if (!sponsor.isActive) continue;
+        final sponsorLatitude = sponsor.latitude;
+        final sponsorLongitude = sponsor.longitude;
 
         // Check radius targeting
         if (sponsor.radiusMiles != null &&
-            sponsor.latitude != null &&
-            sponsor.longitude != null) {
+            sponsorLatitude != null &&
+            sponsorLongitude != null) {
           final distance = Geolocator.distanceBetween(
             userPosition.latitude,
             userPosition.longitude,
-            sponsor.latitude!,
-            sponsor.longitude!,
+            sponsorLatitude,
+            sponsorLongitude,
           );
 
           // Convert miles to meters
@@ -673,8 +675,8 @@ class InstantDiscoveryService {
             description: sponsor.businessDescription ?? 'Sponsored discovery',
             imageUrl: sponsor.logoUrl,
             location: GeoPoint(
-              sponsor.latitude ?? userPosition.latitude,
-              sponsor.longitude ?? userPosition.longitude,
+              sponsorLatitude ?? userPosition.latitude,
+              sponsorLongitude ?? userPosition.longitude,
             ),
             createdAt: sponsor.createdAt,
             isVerified: true,

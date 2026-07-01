@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 import '../models/artbeat_event.dart';
 
 /// Service for handling event-related notifications
@@ -22,9 +23,15 @@ class EventNotificationService {
   ) async {
     final dynamic plugin = _localNotifications;
     try {
-      await plugin.initialize(settings: settings);
+      await plugin.initialize(
+        settings: settings,
+        onDidReceiveNotificationResponse: _onNotificationResponse,
+      );
     } on Object {
-      await plugin.initialize(settings);
+      await plugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: _onNotificationResponse,
+      );
     }
   }
 
@@ -40,20 +47,8 @@ class EventNotificationService {
   /// Initialize notification service
   Future<void> initialize() async {
     try {
-      // Initialize awesome_notifications
-      await AwesomeNotifications().initialize(null, [
-        NotificationChannel(
-          channelKey: _channelId,
-          channelName: 'Event Notifications',
-          channelDescription: 'Notifications for ARTbeat events',
-          defaultColor: const Color(0xFF6F42C1),
-          importance: NotificationImportance.High,
-          playSound: true,
-          enableVibration: true,
-        ),
-      ]);
+      tz_data.initializeTimeZones();
 
-      // Initialize local notifications
       const initializationSettingsAndroid = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
       );
@@ -78,18 +73,6 @@ class EventNotificationService {
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     try {
-      // Check if already allowed
-      final isAllowed = await AwesomeNotifications().isNotificationAllowed();
-      if (isAllowed) {
-        _logger.i('Notification permissions already granted');
-        return true;
-      }
-
-      // Request permissions for awesome_notifications
-      final granted = await AwesomeNotifications()
-          .requestPermissionToSendNotifications();
-
-      // Request permissions for local_notifications on iOS
       final localPermission = await _localNotifications
           .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin
@@ -104,7 +87,7 @@ class EventNotificationService {
           ?.requestNotificationsPermission();
 
       final finalResult =
-          granted && (localPermission ?? true) && (androidPermission ?? true);
+          (localPermission ?? true) && (androidPermission ?? true);
 
       if (finalResult) {
         _logger.i('Notification permissions granted successfully');
@@ -142,22 +125,12 @@ class EventNotificationService {
         return;
       }
 
-      // Schedule with awesome_notifications for better cross-platform support
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: event.id.hashCode,
-          channelKey: _channelId,
-          title: 'Event Reminder: ${event.title}',
-          body: 'Your event starts in 1 hour at ${event.location}',
-          bigPicture: event.eventBannerUrl.isNotEmpty
-              ? event.eventBannerUrl
-              : null,
-          notificationLayout: event.eventBannerUrl.isNotEmpty
-              ? NotificationLayout.BigPicture
-              : NotificationLayout.Default,
-          payload: {'eventId': event.id, 'type': 'event_reminder'},
-        ),
-        schedule: NotificationCalendar.fromDate(date: reminderTime),
+      await _scheduleLocalNotification(
+        id: event.id.hashCode,
+        title: 'Event Reminder: ${event.title}',
+        body: 'Your event starts in 1 hour at ${event.location}',
+        scheduledDate: reminderTime,
+        payload: 'event_reminder:${event.id}',
       );
 
       _logger.i('Event reminder scheduled for: ${event.title}');
@@ -189,19 +162,12 @@ class EventNotificationService {
 
       for (final reminderTime in reminderTimes) {
         if (reminderTime.isAfter(now)) {
-          await AwesomeNotifications().createNotification(
-            content: NotificationContent(
-              id: '${event.id}_${reminderTime.millisecondsSinceEpoch}'.hashCode,
-              channelKey: _channelId,
-              title: _getReminderTitle(eventTime, reminderTime),
-              body: 'Event: ${event.title}\nLocation: ${event.location}',
-              bigPicture: event.eventBannerUrl,
-              notificationLayout: event.eventBannerUrl.isNotEmpty
-                  ? NotificationLayout.BigPicture
-                  : NotificationLayout.Default,
-              payload: {'eventId': event.id, 'type': 'event_reminder'},
-            ),
-            schedule: NotificationCalendar.fromDate(date: reminderTime),
+          await _scheduleLocalNotification(
+            id: '${event.id}_${reminderTime.millisecondsSinceEpoch}'.hashCode,
+            title: _getReminderTitle(eventTime, reminderTime),
+            body: 'Event: ${event.title}\nLocation: ${event.location}',
+            scheduledDate: reminderTime,
+            payload: 'event_reminder:${event.id}',
           );
         }
       }
@@ -229,12 +195,6 @@ class EventNotificationService {
   /// Cancel event reminders
   Future<void> cancelEventReminders(String eventId) async {
     try {
-      // Cancel awesome_notifications
-      await AwesomeNotifications().cancel(eventId.hashCode);
-      await AwesomeNotifications().cancel('${eventId}_day'.hashCode);
-      await AwesomeNotifications().cancel('${eventId}_hour'.hashCode);
-
-      // Cancel local notifications
       await _cancelLocalNotification(eventId.hashCode);
 
       _logger.i('Event reminders cancelled for: $eventId');
@@ -250,15 +210,12 @@ class EventNotificationService {
     required String ticketType,
   }) async {
     try {
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: DateTime.now().millisecondsSinceEpoch,
-          channelKey: _channelId,
-          title: 'Tickets Purchased!',
-          body:
-              'You\'ve successfully purchased $quantity $ticketType ticket${quantity > 1 ? 's' : ''} for $eventTitle',
-          payload: {'type': 'ticket_purchase_confirmation'},
-        ),
+      await _showLocalNotification(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: 'Tickets Purchased!',
+        body:
+            'You\'ve successfully purchased $quantity $ticketType ticket${quantity > 1 ? 's' : ''} for $eventTitle',
+        payload: 'ticket_purchase_confirmation',
       );
 
       _logger.i('Ticket purchase confirmation sent');
@@ -273,15 +230,12 @@ class EventNotificationService {
     required double refundAmount,
   }) async {
     try {
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: DateTime.now().millisecondsSinceEpoch,
-          channelKey: _channelId,
-          title: 'Refund Processed',
-          body:
-              'Your refund of \$${refundAmount.toStringAsFixed(2)} for $eventTitle has been processed',
-          payload: {'type': 'refund_confirmation'},
-        ),
+      await _showLocalNotification(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: 'Refund Processed',
+        body:
+            'Your refund of \$${refundAmount.toStringAsFixed(2)} for $eventTitle has been processed',
+        payload: 'refund_confirmation',
       );
 
       _logger.i('Refund confirmation sent');
@@ -297,14 +251,11 @@ class EventNotificationService {
     required String eventId,
   }) async {
     try {
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: DateTime.now().millisecondsSinceEpoch,
-          channelKey: _channelId,
-          title: 'Event Update: $eventTitle',
-          body: updateMessage,
-          payload: {'eventId': eventId, 'type': 'event_update'},
-        ),
+      await _showLocalNotification(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: 'Event Update: $eventTitle',
+        body: updateMessage,
+        payload: 'event_update:$eventId',
       );
 
       _logger.i('Event update notification sent');
@@ -313,57 +264,89 @@ class EventNotificationService {
     }
   }
 
-  /// Set up listener for awesome_notifications
-  void setupNotificationListener() {
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: _onActionReceived,
-      onNotificationCreatedMethod: _onNotificationCreated,
-      onNotificationDisplayedMethod: _onNotificationDisplayed,
-      onDismissActionReceivedMethod: _onDismissActionReceived,
-    );
-  }
+  /// Listener setup is handled during initialize for flutter_local_notifications.
+  void setupNotificationListener() {}
 
-  /// Handle notification action received
-  static Future<void> _onActionReceived(ReceivedAction receivedAction) async {
-    final payload = receivedAction.payload;
-    if (payload != null) {
-      final logger = Logger();
-      logger.i('Notification action received with payload: $payload');
-      final eventId = payload['eventId'];
-      if (eventId != null) {
-        eventNotificationNavigatorKey.currentState?.pushNamed(
-          '/event/$eventId',
-        );
-      }
+  static void _onNotificationResponse(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+
+    final logger = Logger();
+    logger.i('Notification response received with payload: $payload');
+
+    final parts = payload.split(':');
+    if (parts.length >= 2 && parts.first.startsWith('event')) {
+      eventNotificationNavigatorKey.currentState?.pushNamed(
+        '/event/${parts[1]}',
+      );
     }
   }
 
-  static Future<void> _onNotificationCreated(
-    ReceivedNotification receivedNotification,
-  ) async {
-    // Optional: Handle when notification is created
+  NotificationDetails _notificationDetails() {
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId,
+        'Event Notifications',
+        channelDescription: 'Notifications for Local ARTbeat events',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
   }
 
-  static Future<void> _onNotificationDisplayed(
-    ReceivedNotification receivedNotification,
-  ) async {
-    // Optional: Handle when notification is displayed
+  Future<void> _showLocalNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) {
+    return _localNotifications.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: _notificationDetails(),
+      payload: payload,
+    );
   }
 
-  static Future<void> _onDismissActionReceived(
-    ReceivedAction receivedAction,
-  ) async {
-    // Optional: Handle when notification is dismissed
+  Future<void> _scheduleLocalNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+  }) {
+    return _localNotifications.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: _notificationDetails(),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
   }
 
   /// Check if notifications are enabled
   Future<bool> areNotificationsEnabled() async {
-    return await AwesomeNotifications().isNotificationAllowed();
+    final iosPermission = await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.checkPermissions();
+    final androidPermission = await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.areNotificationsEnabled();
+
+    return (iosPermission?.isEnabled ?? true) && (androidPermission ?? true);
   }
 
   /// Get scheduled notifications
-  Future<List<NotificationModel>> getScheduledNotifications() async {
-    return await AwesomeNotifications().listScheduledNotifications();
+  Future<List<PendingNotificationRequest>> getScheduledNotifications() async {
+    return _localNotifications.pendingNotificationRequests();
   }
 }
 

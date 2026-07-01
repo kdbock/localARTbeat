@@ -1,4 +1,5 @@
 import Flutter
+import Stripe
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -37,5 +38,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        for context in URLContexts {
+            if StripeAPI.handleURLCallback(with: context.url) {
+                return
+            }
+        }
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let url = userActivity.webpageURL
+        else {
+            return
+        }
+
+        _ = StripeAPI.handleURLCallback(with: url)
     }
 }

@@ -145,6 +145,7 @@ class EventService {
       Query query = _firestore
           .collection(_eventsCollection)
           .where('isPublic', isEqualTo: true)
+          .where('moderationStatus', isEqualTo: 'approved')
           .where('dateTime', isGreaterThan: Timestamp.now());
 
       if (chapterId != null) {
@@ -176,12 +177,12 @@ class EventService {
     }
   }
 
-  /// Get events created by a specific artist
-  Future<List<ArtbeatEvent>> getEventsByArtist(String artistId) async {
+  /// Get events submitted by a specific user.
+  Future<List<ArtbeatEvent>> getEventsBySubmitter(String userId) async {
     try {
       final snapshot = await _firestore
           .collection(_eventsCollection)
-          .where('artistId', isEqualTo: artistId)
+          .where('artistId', isEqualTo: userId)
           .orderBy('dateTime', descending: true)
           .get();
 
@@ -197,10 +198,14 @@ class EventService {
           .whereType<ArtbeatEvent>()
           .toList();
     } catch (e) {
-      _logger.e('Error getting events by artist: $e');
+      _logger.e('Error getting events by submitter: $e');
       rethrow;
     }
   }
+
+  @Deprecated('Use getEventsBySubmitter instead.')
+  Future<List<ArtbeatEvent>> getEventsByArtist(String artistId) =>
+      getEventsBySubmitter(artistId);
 
   /// Get events by tags
   Future<List<ArtbeatEvent>> getEventsByTags(List<String> tags) async {
@@ -209,6 +214,7 @@ class EventService {
           .collection(_eventsCollection)
           .where('tags', arrayContainsAny: tags)
           .where('isPublic', isEqualTo: true)
+          .where('moderationStatus', isEqualTo: 'approved')
           .where('dateTime', isGreaterThan: Timestamp.now())
           .orderBy('dateTime', descending: false)
           .get();
@@ -242,6 +248,7 @@ class EventService {
       final snapshot = await _firestore
           .collection(_eventsCollection)
           .where('isPublic', isEqualTo: true)
+          .where('moderationStatus', isEqualTo: 'approved')
           .where('dateTime', isGreaterThan: Timestamp.now())
           .get();
 
@@ -495,6 +502,7 @@ class EventService {
     Query query = _firestore
         .collection(_eventsCollection)
         .where('isPublic', isEqualTo: true)
+        .where('moderationStatus', isEqualTo: 'approved')
         .where('dateTime', isGreaterThan: Timestamp.now())
         .orderBy('dateTime', descending: false);
 

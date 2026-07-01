@@ -1,5 +1,3 @@
-import 'package:artbeat_artwork/artbeat_artwork.dart'
-    show ArtworkCleanupService;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -20,30 +18,8 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final NotificationService _notificationService = NotificationService();
-  final UserService _userService = UserService();
 
-  UserModel? _currentUserModel;
   _NotificationFilter _activeFilter = _NotificationFilter.all;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      final userModel = await _userService.getUserModel(user.uid);
-      if (mounted) {
-        setState(() => _currentUserModel = userModel);
-      }
-    } on Exception catch (e) {
-      AppLogger.error('Error loading user model: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,11 +79,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: _buildNotificationsStream(user),
             ),
           ),
-          if (_isAdminUser() && kDebugMode)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: _buildDebugTools(),
-            ),
         ],
       ),
     );
@@ -630,34 +601,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     ),
   );
 
-  Widget _buildDebugTools() => GlassCard(
-    margin: EdgeInsets.zero,
-    padding: const EdgeInsets.all(18),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Debug Tools',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton.icon(
-          onPressed: _runImageCleanup,
-          icon: const Icon(Icons.build_rounded),
-          label: Text('notifications_fix_images'.tr()),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ArtbeatColors.primaryPurple,
-            foregroundColor: Colors.white,
-          ),
-        ),
-      ],
-    ),
-  );
-
   Future<void> _markAllAsRead() async {
     try {
       await _notificationService.markAllNotificationsAsRead();
@@ -875,15 +818,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (docs.isEmpty) return null;
     final timestamp = docs.first.data()['createdAt'] as Timestamp?;
     return timestamp?.toDate();
-  }
-
-  bool _isAdminUser() => _currentUserModel?.isAdmin ?? false;
-
-  Future<void> _runImageCleanup() async {
-    final cleanupService = ArtworkCleanupService();
-    await cleanupService.checkSpecificImage();
-    await cleanupService.cleanupBrokenArtworkImages();
-    await cleanupService.cleanupBrokenArtworkImages(dryRun: false);
   }
 
   String _trWithFallback(String key, String fallback) {

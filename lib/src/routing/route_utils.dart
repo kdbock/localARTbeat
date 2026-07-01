@@ -146,6 +146,57 @@ class RouteUtils {
         ),
       );
 
+  /// Creates a route for old surfaces that are intentionally paused while
+  /// Local ARTbeat is simplified around capture, discovery, feed, and rankings.
+  static MaterialPageRoute<void> createRevampPausedRoute([String? routeName]) =>
+      MaterialPageRoute<void>(
+        builder: (_) => core.MainLayout(
+          currentIndex: -1,
+          child: Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.tune,
+                      size: 64,
+                      color: Color(0xFF2E7D32),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Feature Paused',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'This older section is being simplified for Local ARTbeat.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    if (routeName != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        routeName,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
   /// Creates an error route with custom message
   static MaterialPageRoute<void> createErrorRoute(String message) =>
       MaterialPageRoute<void>(

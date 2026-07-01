@@ -94,17 +94,7 @@ class ProfileRouteHandler {
         );
 
       case '/profile/connections':
-        return AuthGuard.guardRoute(
-          settings: settings,
-          authenticatedBuilder: () => const core.MainLayout(
-            currentIndex: -1,
-            child: profile.ProfileConnectionsScreen(),
-          ),
-          unauthenticatedBuilder: () => const core.MainLayout(
-            currentIndex: -1,
-            child: core.AuthRequiredScreen(),
-          ),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case '/profile/activity':
         return AuthGuard.guardRoute(
@@ -136,54 +126,6 @@ class ProfileRouteHandler {
             currentIndex: -1,
             child: profile.AchievementsScreen(),
           ),
-          unauthenticatedBuilder: () => const core.MainLayout(
-            currentIndex: -1,
-            child: core.AuthRequiredScreen(),
-          ),
-        );
-
-      case '/profile/following':
-        return AuthGuard.guardRoute(
-          settings: settings,
-          authenticatedBuilder: () {
-            final currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser == null) {
-              return const core.MainLayout(
-                currentIndex: -1,
-                child: Center(child: Text('Following not available')),
-              );
-            }
-            return core.MainLayout(
-              currentIndex: -1,
-              child: profile.FollowedArtistsScreen(
-                userId: currentUser.uid,
-                embedInMainLayout: false,
-              ),
-            );
-          },
-          unauthenticatedBuilder: () => const core.MainLayout(
-            currentIndex: -1,
-            child: core.AuthRequiredScreen(),
-          ),
-        );
-
-      case '/profile/followers':
-        return AuthGuard.guardRoute(
-          settings: settings,
-          authenticatedBuilder: () {
-            final currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser == null) {
-              return const core.MainLayout(
-                currentIndex: -1,
-                child: Center(child: Text('Followers not available')),
-              );
-            }
-            return core.MainLayout(
-              currentIndex: -1,
-              appBar: RouteUtils.createAppBar('Followers'),
-              child: profile.FollowersListScreen(userId: currentUser.uid),
-            );
-          },
           unauthenticatedBuilder: () => const core.MainLayout(
             currentIndex: -1,
             child: core.AuthRequiredScreen(),
@@ -559,7 +501,7 @@ class _ProfileActivityContentState extends State<_ProfileActivityContent> {
       case 'profile_view':
         return '$userName viewed your profile';
       case 'follow':
-        return '$userName started following you';
+        return '$userName interacted with your profile';
       case 'unfollow':
         return '$userName unfollowed you';
       case 'like':

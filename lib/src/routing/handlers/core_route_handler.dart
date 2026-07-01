@@ -154,10 +154,7 @@ class CoreRouteHandler implements RouteHandler {
   }
 
   MaterialPageRoute<dynamic> _createFavoritesRoute() =>
-      RouteUtils.createMainLayoutRoute(
-        appBar: RouteUtils.createAppBar('Following'),
-        child: const Center(child: Text('Following coming soon')),
-      );
+      RouteUtils.createRevampPausedRoute();
 
   MaterialPageRoute<dynamic> _createFavoriteDeepRoute(RouteSettings settings) {
     final favoriteId = RouteUtils.getArgument<String>(settings, 'favoriteId');

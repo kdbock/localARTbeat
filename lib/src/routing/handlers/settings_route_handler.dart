@@ -1,4 +1,3 @@
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_settings/artbeat_settings.dart' as settings_pkg;
@@ -60,10 +59,7 @@ class SettingsRouteHandler {
         );
 
       case core.AppRoutes.paymentSettings:
-        return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Payment Settings'),
-          child: const artist.PaymentMethodsScreen(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case '/settings/become-artist':
         return AuthGuard.guardRoute(

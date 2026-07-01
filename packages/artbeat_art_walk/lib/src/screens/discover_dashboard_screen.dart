@@ -271,7 +271,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               showChat: true,
               onSearchPressed: () => Navigator.pushNamed(context, '/search'),
               onChatPressed: () =>
-                  Navigator.pushNamed(context, '/messaging/inbox'),
+                  Navigator.pushNamed(context, AppRoutes.communityFeed),
               actions: [
                 IconButton(
                   key: _notificationsKey,
@@ -1270,29 +1270,23 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
         ),
         child: Row(
           children: [
-            BoostPulseRing(
-              enabled: artist.hasActiveBoost || artist.hasKioskLane,
-              ringPadding: 3,
-              ringWidth: 2,
-              child: CircleAvatar(
-                radius: 18,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  artist.profileImageUrl,
-                ),
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
-                child:
-                    !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
-                    ? Text(
-                        artist.displayName.isNotEmpty
-                            ? artist.displayName[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
+            CircleAvatar(
+              radius: 18,
+              backgroundImage: ImageUrlValidator.safeNetworkImage(
+                artist.profileImageUrl,
               ),
+              backgroundColor: Colors.white.withValues(alpha: 0.15),
+              child: !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
+                  ? Text(
+                      artist.displayName.isNotEmpty
+                          ? artist.displayName[0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 10),
             Expanded(

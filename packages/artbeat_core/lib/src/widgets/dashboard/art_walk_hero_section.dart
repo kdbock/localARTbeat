@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -251,9 +249,6 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
                 _buildNotificationButton(),
               if (widget.onNotificationPressed != null)
                 const SizedBox(width: 4),
-              // Messaging button with unread indicator
-              _buildMessagingButton(),
-              const SizedBox(width: 4),
               // Profile button
               Material(
                 color: Colors.transparent,
@@ -274,102 +269,6 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildMessagingButton() {
-    return Consumer<MessagingProvider>(
-      builder: (context, messagingProvider, child) {
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () async {
-                  // Debug: Check if button is being tapped
-                  if (kDebugMode) {
-                    print('[DEBUG] Messaging button tapped! Route: /messaging');
-                  }
-
-                  // Show immediate feedback
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('dashboard_opening_messages'.tr()),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-
-                  try {
-                    await Navigator.pushNamed(context, '/messaging');
-                    if (context.mounted) {
-                      messagingProvider.refreshUnreadCount();
-                    }
-                  } catch (error) {
-                    // If route navigation fails, show error
-                    if (context.mounted) {
-                      AppLogger.error('Messaging navigation error: $error');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'dashboard_messaging_error'.tr(
-                              namedArgs: {'error': error.toString()},
-                            ),
-                          ),
-                          backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 4),
-                        ),
-                      );
-                    }
-                  }
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.message_outlined,
-                    color: messagingProvider.hasError
-                        ? Colors.white.withValues(alpha: 0.6)
-                        : Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
-            // Unread message indicator
-            if (messagingProvider.isInitialized &&
-                !messagingProvider.hasError &&
-                messagingProvider.hasUnreadMessages)
-              Positioned(
-                right: 4,
-                top: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: ArtbeatColors.error,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white, width: 1.5),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  child: Text(
-                    messagingProvider.unreadCount > 99
-                        ? '99+'
-                        : messagingProvider.unreadCount.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
     );
   }
 

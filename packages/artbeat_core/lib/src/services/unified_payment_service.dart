@@ -96,25 +96,19 @@ class PaymentMethodWithRisk extends PaymentMethodModel {
 
 /// Enum for revenue stream types
 enum RevenueStream {
-  subscription, // Subscriptions (IAP + Stripe)
-  boosts, // Boosts to other users (IAP + Stripe)
-  ads, // Advertising (Stripe only)
-  commissions, // Artist commissions (Stripe only)
-  artwork, // Artist artwork sales (Stripe only)
+  eventTickets,
+  webPayments,
 }
 
 // ============================================================================
-// UNIFIED PAYMENT SERVICE - CONSOLIDATES ALL 5 REVENUE STREAMS
+// STRIPE PAYMENT SERVICE
 // ============================================================================
 
 /// Unified Payment Service
 ///
-/// Handles all ArtBeat payment processing across 5 revenue streams:
-/// - Subscriptions (Apple IAP + Stripe)
-/// - Gifts (Apple IAP + Stripe)
-/// - Ads (Stripe only)
-/// - Commissions (Stripe only)
-/// - Artist Artwork Sales (Stripe only)
+/// Handles Stripe-backed payment processing for real-world ticketing and
+/// future web/admin purchases. Mobile sponsorships and event submissions use
+/// the in-app purchase services instead.
 ///
 /// Features:
 /// - Automatic payment method routing (IAP vs Stripe)
@@ -152,18 +146,7 @@ class UnifiedPaymentService {
     'createCustomer': 'createCustomer',
     'createSetupIntent': 'createSetupIntent',
     'createPaymentIntent': 'createPaymentIntent',
-    'processBoostPayment': 'processBoostPayment',
-    'processSubscriptionPayment': 'processSubscriptionPayment',
-    'processAdPayment': 'processAdPayment',
-    'processSponsorshipPayment': 'processSponsorshipPayment',
-    'processCommissionPayment': 'processCommissionPayment',
-    'createCommissionPaymentIntent': 'createCommissionPaymentIntent',
-    'processCommissionDepositPayment': 'processCommissionDepositPayment',
-    'processCommissionMilestonePayment': 'processCommissionMilestonePayment',
-    'processCommissionFinalPayment': 'processCommissionFinalPayment',
-    'processArtworkSalePayment': 'processArtworkSalePayment',
     'processEventTicketPayment': 'processEventTicketPayment',
-    'completeCommission': 'completeCommission',
     'getPaymentMethods': 'getPaymentMethods',
     'updateCustomer': 'updateCustomer',
     'detachPaymentMethod': 'detachPaymentMethod',
@@ -415,7 +398,7 @@ class UnifiedPaymentService {
   }
 
   // ========================================================================
-  // REVENUE STREAM PROCESSING (5 Streams)
+  // STRIPE-BACKED PAYMENT PROCESSING
   // ========================================================================
 
   /// Process subscription payment (IAP + Stripe support)
@@ -571,61 +554,6 @@ class UnifiedPaymentService {
     }
   }
 
-  /// Process boost payment (IAP + Stripe support)
-  Future<PaymentResult> processBoostPayment({
-    required String recipientId,
-    required double amount,
-    required PaymentMethod method,
-    String? paymentIntentId,
-    String? boostType,
-    String? boostMessage,
-    String? productId,
-  }) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
-
-      if (method == PaymentMethod.iap) {
-        return PaymentResult(
-          success: true,
-          paymentIntentId: 'iap-boost-${DateTime.now().millisecondsSinceEpoch}',
-        );
-      } else {
-        final response = await _makeAuthenticatedRequest(
-          functionKey: 'processBoostPayment',
-          body: {
-            'paymentIntentId': paymentIntentId,
-            'recipientId': recipientId,
-            'amount': amount,
-            if (boostType != null) 'boostType': boostType,
-            if (boostMessage != null) 'boostMessage': boostMessage,
-            if (productId != null) 'productId': productId,
-          },
-        );
-
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body) as Map<String, dynamic>;
-          _logPaymentEvent('boost', amount, 'success');
-          return PaymentResult(
-            success: true,
-            paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-            clientSecret: (data['clientSecret'] as String?) ?? '',
-          );
-        } else {
-          _logPaymentEvent('boost', amount, 'failed');
-          return PaymentResult(
-            success: false,
-            error: 'Failed to process boost payment',
-          );
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Error processing boost: $e');
-      _logPaymentEvent('boost', 0, 'error');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
   /// Process advertising payment (Stripe only)
   Future<PaymentResult> processAdPayment({
     required String adType,
@@ -669,299 +597,6 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error processing ad payment: $e');
       _logPaymentEvent('ad', 0, 'error');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Process commission payment (Stripe only - artist earnings)
-  Future<PaymentResult> processCommissionPayment({
-    required String artistId,
-    required double amount,
-    required String commissionType,
-    required String paymentIntentId,
-    String? description,
-    DateTime? deadline,
-  }) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
-
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processCommissionPayment',
-        body: {
-          'paymentIntentId': paymentIntentId,
-          'artistId': artistId,
-          'amount': amount,
-          'commissionType': commissionType,
-          if (description != null) 'description': description,
-          if (deadline != null) 'deadline': deadline.toIso8601String(),
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('commission', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-        );
-      } else {
-        _logPaymentEvent('commission', amount, 'failed');
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process commission payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing commission: $e');
-      _logPaymentEvent('commission', 0, 'error');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Create a payment intent for a commission (Direct Commissions)
-  Future<Map<String, dynamic>> createCommissionPaymentIntent({
-    required String commissionId,
-    required double amount,
-    required String type, // 'deposit', 'milestone', 'final'
-    String? milestoneId,
-    String? customerId,
-  }) async {
-    try {
-      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'createCommissionPaymentIntent',
-        body: {
-          'amount': amount,
-          'commissionId': commissionId,
-          'type': type,
-          'milestoneId': milestoneId,
-          'customerId': actualCustomerId,
-        },
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create commission payment intent');
-      }
-
-      return json.decode(response.body) as Map<String, dynamic>;
-    } catch (e) {
-      AppLogger.error('Error creating commission payment intent: $e');
-      rethrow;
-    }
-  }
-
-  /// Process a commission deposit payment (Direct Commissions)
-  Future<PaymentResult> processCommissionDepositPayment({
-    required String commissionId,
-    required double amount,
-    required String paymentMethodId,
-    String? message,
-    String? customerId,
-  }) async {
-    try {
-      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processCommissionDepositPayment',
-        body: {
-          'amount': amount,
-          'commissionId': commissionId,
-          'paymentMethodId': paymentMethodId,
-          'customerId': actualCustomerId,
-          'message': message,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('commission_deposit', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-        );
-      } else {
-        _logPaymentEvent('commission_deposit', amount, 'failed');
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process commission deposit payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing commission deposit: $e');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Process a commission milestone payment (Direct Commissions)
-  Future<PaymentResult> processCommissionMilestonePayment({
-    required String commissionId,
-    required String milestoneId,
-    required double amount,
-    required String paymentMethodId,
-    String? message,
-    String? customerId,
-  }) async {
-    try {
-      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processCommissionMilestonePayment',
-        body: {
-          'amount': amount,
-          'commissionId': commissionId,
-          'milestoneId': milestoneId,
-          'paymentMethodId': paymentMethodId,
-          'customerId': actualCustomerId,
-          'message': message,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('commission_milestone', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-        );
-      } else {
-        _logPaymentEvent('commission_milestone', amount, 'failed');
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process commission milestone payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing commission milestone: $e');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Process a commission final payment (Direct Commissions)
-  Future<PaymentResult> processCommissionFinalPayment({
-    required String commissionId,
-    required double amount,
-    required String paymentMethodId,
-    String? message,
-    String? customerId,
-  }) async {
-    try {
-      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processCommissionFinalPayment',
-        body: {
-          'amount': amount,
-          'commissionId': commissionId,
-          'paymentMethodId': paymentMethodId,
-          'customerId': actualCustomerId,
-          'message': message,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('commission_final', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-        );
-      } else {
-        _logPaymentEvent('commission_final', amount, 'failed');
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process commission final payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing commission final payment: $e');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Complete a commission and release held funds to the artist
-  Future<PaymentResult> completeCommission({
-    required String commissionId,
-  }) async {
-    try {
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'completeCommission',
-        body: {'commissionId': commissionId},
-      );
-
-      if (response.statusCode == 200) {
-        AppLogger.info('✅ Commission completed: $commissionId');
-        return PaymentResult(success: true, paymentIntentId: commissionId);
-      } else {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        AppLogger.warning('⚠️ Failed to complete commission: ${data['error']}');
-        return PaymentResult(
-          success: false,
-          error: (data['error'] as String?) ?? 'Failed to complete commission',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error completing commission: $e');
-      return PaymentResult(success: false, error: e.toString());
-    }
-  }
-
-  /// Get commission payment history
-  Future<List<Map<String, dynamic>>> getCommissionPayments(
-    String commissionId,
-  ) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('commission_payments')
-          .where('commissionId', isEqualTo: commissionId)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return querySnapshot.docs.map((doc) => doc.data()).toList();
-    } catch (e) {
-      AppLogger.error('Error getting commission payments: $e');
-      return [];
-    }
-  }
-
-  /// Process artwork sale payment (Stripe only)
-  Future<PaymentResult> processArtworkSalePayment({
-    required String artworkId,
-    required double amount,
-    required String artistId,
-    required String paymentIntentId,
-    bool isAuction = false,
-  }) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
-
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processArtworkSalePayment',
-        body: {
-          'paymentIntentId': paymentIntentId,
-          'artworkId': artworkId,
-          'amount': amount,
-          'artistId': artistId,
-          'isAuction': isAuction,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('artwork_sale', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-          clientSecret: (data['clientSecret'] as String?) ?? '',
-        );
-      } else {
-        _logPaymentEvent('artwork_sale', amount, 'failed');
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process artwork sale payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing artwork sale: $e');
-      _logPaymentEvent('artwork_sale', 0, 'error');
       return PaymentResult(success: false, error: e.toString());
     }
   }
@@ -1180,50 +815,6 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error updating subscription price: $e');
       rethrow;
-    }
-  }
-
-  /// Process sponsorship payment
-  Future<PaymentResult> processSponsorshipPayment({
-    required String artistId,
-    required double amount,
-    required String sponsorshipType,
-    required String paymentIntentId,
-    int? duration,
-    List<String>? benefits,
-  }) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
-
-      final response = await _makeAuthenticatedRequest(
-        functionKey: 'processSponsorshipPayment',
-        body: {
-          'paymentIntentId': paymentIntentId,
-          'artistId': artistId,
-          'amount': amount,
-          'sponsorshipType': sponsorshipType,
-          if (duration != null) 'duration': duration,
-          if (benefits != null) 'benefits': benefits,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        _logPaymentEvent('sponsorship', amount, 'success');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
-        );
-      } else {
-        return PaymentResult(
-          success: false,
-          error: 'Failed to process sponsorship payment',
-        );
-      }
-    } catch (e) {
-      AppLogger.error('Error processing sponsorship: $e');
-      return PaymentResult(success: false, error: e.toString());
     }
   }
 

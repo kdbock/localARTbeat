@@ -1,55 +1,48 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/sponsorship_tier.dart';
 
-class SponsorshipStripePlan {
-  const SponsorshipStripePlan({required this.productId, required this.priceId});
+class SponsorshipIapPlan {
+  const SponsorshipIapPlan({required this.productId});
 
   final String productId;
-  final String priceId;
 }
 
 class SponsorshipCheckoutResult {
   const SponsorshipCheckoutResult({
-    required this.customerId,
-    required this.subscriptionId,
-    required this.priceId,
     required this.productId,
-    this.status,
-    this.clientSecret,
-    this.paymentIntentStatus,
-    this.rawResponse,
+    required this.status,
+    this.purchaseId,
+    this.transactionId,
+    this.amount,
+    this.currency,
+    this.rawPurchase,
   });
 
-  final String customerId;
-  final String subscriptionId;
-  final String priceId;
   final String productId;
-  final String? status;
-  final String? clientSecret;
-  final String? paymentIntentStatus;
-  final Map<String, dynamic>? rawResponse;
+  final String status;
+  final String? purchaseId;
+  final String? transactionId;
+  final double? amount;
+  final String? currency;
+  final CompletedPurchase? rawPurchase;
 }
 
 class SponsorshipCheckoutService {
-  SponsorshipCheckoutService({UnifiedPaymentService? paymentService})
-    : _paymentService = paymentService ?? UnifiedPaymentService();
+  SponsorshipCheckoutService({InAppPurchaseManager? purchaseManager})
+    : _purchaseManager = purchaseManager ?? InAppPurchaseManager();
 
-  static const Map<SponsorshipTier, String> _productEnvKeys = {
-    SponsorshipTier.artWalk: 'STRIPE_PRODUCT_SPONSORSHIP_ART_WALK',
-    SponsorshipTier.capture: 'STRIPE_PRODUCT_SPONSORSHIP_CAPTURE',
-    SponsorshipTier.discover: 'STRIPE_PRODUCT_SPONSORSHIP_DISCOVERY',
+  static const Duration _purchaseTimeout = Duration(minutes: 3);
+
+  static const Map<SponsorshipTier, String> _productIds = {
+    SponsorshipTier.discover: 'artbeat_sponsorship_discovery_monthly',
+    SponsorshipTier.capture: 'artbeat_sponsorship_capture_monthly',
+    SponsorshipTier.artWalk: 'artbeat_sponsorship_art_walk_monthly',
   };
 
-  static const Map<SponsorshipTier, String> _priceEnvKeys = {
-    SponsorshipTier.artWalk: 'STRIPE_PRICE_SPONSORSHIP_ART_WALK_MONTHLY',
-    SponsorshipTier.capture: 'STRIPE_PRICE_SPONSORSHIP_CAPTURE_MONTHLY',
-    SponsorshipTier.discover: 'STRIPE_PRICE_SPONSORSHIP_DISCOVERY_MONTHLY',
-  };
-
-  final UnifiedPaymentService _paymentService;
+  final InAppPurchaseManager _purchaseManager;
 
   Future<SponsorshipCheckoutResult> startRecurringCheckout({
     required SponsorshipTier tier,
@@ -57,166 +50,96 @@ class SponsorshipCheckoutService {
     required String contactEmail,
   }) async {
     final plan = _resolvePlan(tier);
-    final trimmedBusinessName = businessName.trim();
-    final trimmedContactEmail = contactEmail.trim();
-    if (trimmedContactEmail.isEmpty) {
-      throw Exception('A contact email is required for sponsorship billing');
-    }
+    final checkoutId = 'sponsor_${DateTime.now().millisecondsSinceEpoch}';
 
-    var customerId = await _paymentService.getOrCreateCustomerId(
-      fallbackEmail: trimmedContactEmail,
-      fallbackName: trimmedBusinessName,
-    );
-    final setupIntentSecret = await _createSetupIntentWithRecovery(
-      customerId,
-      contactEmail: trimmedContactEmail,
-      businessName: trimmedBusinessName,
-    );
-    if (setupIntentSecret.customerId != null) {
-      customerId = setupIntentSecret.customerId!;
-    }
-
-    await _paymentService.setupPaymentSheet(
-      customerId: customerId,
-      setupIntentClientSecret: setupIntentSecret.secret,
-    );
-    await _paymentService.safelyPresentPaymentSheet(
-      operationName: 'sponsorship_${tier.value}_setup',
-    );
-
-    var paymentMethodId = await _paymentService.getDefaultPaymentMethodId();
-    if (paymentMethodId == null) {
-      final methods = await _paymentService.getPaymentMethods(customerId);
-      if (methods.isNotEmpty) {
-        paymentMethodId = methods.first.id;
+    if (!_purchaseManager.isInitialized) {
+      final initialized = await _purchaseManager.initialize();
+      if (!initialized) {
+        throw Exception('In-app purchases are not available right now.');
       }
     }
-    if (paymentMethodId == null) {
-      throw Exception('No payment method found after setup');
-    }
 
-    final response = await _paymentService.makeAuthenticatedRequest(
-      functionKey: 'createSubscription',
-      body: {
-        'customerId': customerId,
-        'priceId': plan.priceId,
-        'productId': plan.productId,
-        'paymentMethodId': paymentMethodId,
-        'sponsorshipType': tier.value,
-        'metadata': {
-          'module': 'sponsorships',
-          'businessName': trimmedBusinessName,
-          'contactEmail': trimmedContactEmail,
-        },
+    final completion = _waitForPurchase(
+      productId: plan.productId,
+      checkoutId: checkoutId,
+    );
+
+    final started = await _purchaseManager.purchaseProduct(
+      plan.productId,
+      metadata: <String, dynamic>{
+        'checkoutId': checkoutId,
+        'module': 'sponsorships',
+        'productFamily': 'sponsorship',
+        'sponsorshipTier': tier.value,
+        'businessName': businessName.trim(),
+        'contactEmail': contactEmail.trim(),
       },
     );
 
-    if (response.statusCode != 200) {
-      String message = 'Failed to create sponsorship subscription';
-      try {
-        final decoded = json.decode(response.body) as Map<String, dynamic>;
-        message = (decoded['error'] as String?) ?? message;
-      } on Exception {
-        // Keep fallback message if response is not JSON.
-      }
-      throw Exception(message);
+    if (!started) {
+      throw Exception('The store did not start the sponsorship purchase.');
     }
 
-    final data = json.decode(response.body) as Map<String, dynamic>;
-    var status = data['status'] as String?;
-    final clientSecret = data['clientSecret'] as String?;
-    final paymentIntentStatus = data['paymentIntentStatus'] as String?;
-
-    // If the first invoice still needs action, surface Stripe's payment sheet.
-    if (clientSecret != null &&
-        clientSecret.isNotEmpty &&
-        (status == null || status == 'incomplete')) {
-      await _paymentService.initPaymentSheetForPayment(
-        paymentIntentClientSecret: clientSecret,
-        customerId: customerId,
-      );
-      await _paymentService.safelyPresentPaymentSheet(
-        operationName: 'sponsorship_${tier.value}_invoice_confirmation',
-      );
-      status = status ?? 'processing';
-    }
-
-    final subscriptionId =
-        (data['subscriptionId'] as String?) ??
-        (data['id'] as String?) ??
-        (data['stripeSubscriptionId'] as String?) ??
-        '';
-    if (subscriptionId.isEmpty) {
-      throw Exception('Subscription created but no subscription ID returned');
-    }
-
+    final purchase = await completion;
     return SponsorshipCheckoutResult(
-      customerId: customerId,
-      subscriptionId: subscriptionId,
-      priceId: plan.priceId,
       productId: plan.productId,
-      status: status,
-      clientSecret: clientSecret,
-      paymentIntentStatus: paymentIntentStatus,
-      rawResponse: data,
+      status: purchase.status,
+      purchaseId: purchase.purchaseId,
+      transactionId: purchase.transactionId,
+      amount: purchase.amount,
+      currency: purchase.currency,
+      rawPurchase: purchase,
     );
   }
 
-  Future<({String secret, String? customerId})> _createSetupIntentWithRecovery(
-    String customerId, {
-    required String contactEmail,
-    required String businessName,
-  }) async {
-    try {
-      final secret = await _paymentService.createSetupIntent(customerId);
-      return (secret: secret, customerId: null);
-    } on Exception catch (e) {
-      final message = e.toString().toLowerCase();
-      final shouldRecover =
-          message.contains('no such customer') ||
-          message.contains('resource_missing') ||
-          message.contains('customer');
+  Future<CompletedPurchase> _waitForPurchase({
+    required String productId,
+    required String checkoutId,
+  }) {
+    late final StreamSubscription<PurchaseEvent> subscription;
+    final completer = Completer<CompletedPurchase>();
 
-      if (!shouldRecover) rethrow;
+    subscription = _purchaseManager.purchaseEventStream.listen((event) {
+      if (event.type == PurchaseEventType.error && !completer.isCompleted) {
+        completer.completeError(
+          Exception(event.error ?? 'Sponsorship purchase failed.'),
+        );
+        return;
+      }
 
-      final freshCustomerId = await _paymentService.createCustomer(
-        email: contactEmail,
-        name: businessName,
-      );
-      final secret = await _paymentService.createSetupIntent(freshCustomerId);
-      return (secret: secret, customerId: freshCustomerId);
-    }
+      if (event.type == PurchaseEventType.cancelled &&
+          event.productId == productId &&
+          !completer.isCompleted) {
+        completer.completeError(Exception('Sponsorship purchase cancelled.'));
+        return;
+      }
+
+      final purchase = event.purchase;
+      if (event.type == PurchaseEventType.completed &&
+          purchase != null &&
+          purchase.productId == productId &&
+          purchase.metadata['checkoutId'] == checkoutId &&
+          !completer.isCompleted) {
+        completer.complete(purchase);
+      }
+    });
+
+    return completer.future
+        .timeout(
+          _purchaseTimeout,
+          onTimeout: () => throw TimeoutException(
+            'Timed out waiting for sponsorship purchase confirmation.',
+            _purchaseTimeout,
+          ),
+        )
+        .whenComplete(subscription.cancel);
   }
 
-  SponsorshipStripePlan _resolvePlan(SponsorshipTier tier) {
-    final env = EnvLoader();
-    final productEnvKey = _productEnvKey(tier);
-    final priceEnvKey = _priceEnvKey(tier);
-    final product = env.getRequired(productEnvKey).trim();
-    final price = env.getRequired(priceEnvKey).trim();
-    if (product.isNotEmpty &&
-        price.isNotEmpty &&
-        !_looksLikePlaceholderId(product) &&
-        !_looksLikePlaceholderId(price)) {
-      return SponsorshipStripePlan(productId: product, priceId: price);
+  SponsorshipIapPlan _resolvePlan(SponsorshipTier tier) {
+    final productId = _productIds[tier];
+    if (productId == null || productId.isEmpty) {
+      throw Exception('Sponsorship product is not configured for ${tier.value}.');
     }
-
-    throw Exception(
-      'Stripe sponsorship plan is not configured for ${tier.value}. '
-      'Set $productEnvKey and $priceEnvKey with real Stripe IDs.',
-    );
-  }
-
-  String _productEnvKey(SponsorshipTier tier) => _productEnvKeys[tier]!;
-
-  String _priceEnvKey(SponsorshipTier tier) => _priceEnvKeys[tier]!;
-
-  bool _looksLikePlaceholderId(String value) {
-    final v = value.trim();
-    if (v.isEmpty) return true;
-    return v.contains('XXXXXXXX') ||
-        v.startsWith('your_') ||
-        v.startsWith('prod_sponsorship_') ||
-        v.startsWith('price_sponsorship_');
+    return SponsorshipIapPlan(productId: productId);
   }
 }

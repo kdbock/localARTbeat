@@ -2,24 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
 
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardViewModel extends ChangeNotifier {
-  final EventReadService _eventService;
-  final ArtworkReadService _artworkService;
-  final PublicArtReadService _publicArtService;
   final SocialActivityReadService _socialService;
-  final SubscriptionService _subscriptionService;
-  final ArtistService _artistService;
   final ArtistFollowService _artistFollowService;
   final UserService _userService;
   final UserProgressionService _progressionService;
   final DiscoveryProgressReadService _discoveryProgressService;
-  final CaptureServiceInterface _captureService;
   final ContentEngagementService _engagementService;
-  final CommunityPostReadService _communityService;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? chapterId;
 
@@ -33,7 +25,7 @@ class DashboardViewModel extends ChangeNotifier {
   bool _isLoadingBooks = true;
   bool _isLoadingArtists = true;
   bool _isLoadingLocation = true;
-  bool _isMapPreviewReady = false;
+  final bool _isMapPreviewReady = false;
   final bool _isLoadingMap = false;
   bool _isLoadingAchievements = true;
   bool _isLoadingLocalCaptures = true;
@@ -51,25 +43,19 @@ class DashboardViewModel extends ChangeNotifier {
   String? _localCapturesError;
   String? _postsError;
 
-  List<EventModel> _events = [];
+  final List<EventModel> _events = [];
   final List<EventModel> _upcomingEvents = [];
-  List<ArtworkModel> _artwork = [];
-  List<ArtworkModel> _books = [];
+  final List<ArtworkModel> _artwork = [];
+  final List<ArtworkModel> _books = [];
   List<ArtistProfileModel> _artists = [];
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
   Position? _currentLocation;
   LatLng? _mapLocation;
-  List<AchievementModel> _achievements = [];
+  final List<AchievementModel> _achievements = [];
   List<CaptureModel> _localCaptures = [];
-  List<CommunityPostModel> _posts = [];
+  final List<CommunityPostModel> _posts = [];
   List<SocialActivityModel> _activities = [];
   DailyChallengeModel? _todaysChallenge;
-  final Map<String, Set<Marker>> _markerCache = {};
-  LatLng? _lastMarkerLocation;
-  LatLng? _pendingMarkerLocation;
-  Timer? _markerRefreshTimer;
-  DateTime? _lastMarkerLoadedAt;
-  static const Duration _markerThrottleDuration = Duration(milliseconds: 700);
 
   // User progress stats
   int _totalDiscoveries = 0;
@@ -78,34 +64,20 @@ class DashboardViewModel extends ChangeNotifier {
   int _loginStreak = 0;
 
   DashboardViewModel({
-    EventReadService? eventService,
-    ArtworkReadService? artworkService,
-    PublicArtReadService? publicArtService,
     SocialActivityReadService? socialService,
-    required SubscriptionService subscriptionService,
-    ArtistService? artistService,
     ArtistFollowService? artistFollowService,
     UserProgressionService? progressionService,
     DiscoveryProgressReadService? discoveryProgressService,
     required UserService userService,
-    CaptureServiceInterface? captureService,
     ContentEngagementService? engagementService,
-    CommunityPostReadService? communityService,
     this.chapterId,
-  }) : _eventService = eventService ?? EventReadService(),
-       _artworkService = artworkService ?? ArtworkReadService(),
-       _publicArtService = publicArtService ?? PublicArtReadService(),
-       _socialService = socialService ?? SocialActivityReadService(),
-       _subscriptionService = subscriptionService,
-       _artistService = artistService ?? ArtistService(),
+  }) : _socialService = socialService ?? SocialActivityReadService(),
        _artistFollowService = artistFollowService ?? ArtistFollowService(),
        _progressionService = progressionService ?? UserProgressionService(),
        _discoveryProgressService =
            discoveryProgressService ?? DiscoveryProgressReadService(),
        _userService = userService,
-       _captureService = captureService ?? DefaultCaptureService(),
-       _engagementService = engagementService ?? ContentEngagementService(),
-       _communityService = communityService ?? CommunityPostReadService();
+       _engagementService = engagementService ?? ContentEngagementService();
 
   /// Initializes dashboard data and state
   Future<void> initialize() async {
@@ -127,11 +99,8 @@ class DashboardViewModel extends ChangeNotifier {
       await _loadCurrentUser();
       AppLogger.info('👤 Current user loaded: ${_currentUser?.id}');
 
-      // Start critical data loading
-      await Future.wait<void>([
-        _loadLocation(notify: false),
-        _loadUserProgress(notify: false),
-      ]);
+      await _loadUserProgress(notify: false);
+      _markPausedDashboardSectionsLoaded();
 
       // Mark as initialized early so UI can show basic info
       _isInitialized = true;
@@ -139,22 +108,7 @@ class DashboardViewModel extends ChangeNotifier {
       _safeNotifyListeners();
       debugPrint('🔍 DashboardViewModel: Initialized with critical data');
 
-      // Then load all other data in background
-      unawaited(
-        Future.wait<void>([
-          _loadEvents(notify: true),
-          _loadArtwork(notify: true),
-          _loadBooks(notify: true),
-          _loadArtists(notify: true),
-          _loadAchievements(notify: true),
-          _loadLocalCaptures(notify: true),
-          _loadPosts(notify: true),
-          _loadTodaysChallenge(notify: true),
-          _loadActivities(notify: true),
-        ]),
-      );
-
-      debugPrint('🔍 DashboardViewModel: ✅ Background data loading started');
+      debugPrint('🔍 DashboardViewModel: ✅ Revamp dashboard data loaded');
     } catch (e, stack) {
       debugPrint('🔍 DashboardViewModel: ❌ Initialization error: $e');
       AppLogger.error('❌ Error initializing dashboard: $e');
@@ -179,6 +133,19 @@ class DashboardViewModel extends ChangeNotifier {
     _isLoadingActivities = true;
     _isLoadingUserProgress = true;
     if (notify) _safeNotifyListeners();
+  }
+
+  void _markPausedDashboardSectionsLoaded() {
+    _isLoadingEvents = false;
+    _isLoadingUpcomingEvents = false;
+    _isLoadingArtwork = false;
+    _isLoadingBooks = false;
+    _isLoadingArtists = false;
+    _isLoadingLocation = false;
+    _isLoadingAchievements = false;
+    _isLoadingLocalCaptures = false;
+    _isLoadingPosts = false;
+    _isLoadingActivities = false;
   }
 
   /// Safely notify listeners, catching disposal errors
@@ -294,192 +261,13 @@ class DashboardViewModel extends ChangeNotifier {
     try {
       _resetLoadingStates(notify: false);
       await _loadCurrentUser();
-
-      final locationLoad = _loadLocation(notify: true);
-
-      await Future.wait<void>([
-        locationLoad,
-        _loadEvents(notify: true),
-        _loadArtwork(notify: true),
-        _loadBooks(notify: true),
-        _loadArtists(notify: true),
-        _loadAchievements(notify: true),
-        _loadLocalCaptures(notify: true),
-        _loadPosts(notify: true),
-        _loadUserProgress(notify: true),
-        // Activities depend on location for "nearby" features
-        (() async {
-          await locationLoad;
-          await _loadActivities(notify: true);
-        })(),
-      ]);
+      await _loadUserProgress(notify: true);
+      _markPausedDashboardSectionsLoaded();
     } catch (e, stack) {
       AppLogger.error('❌ Error refreshing dashboard: $e');
       AppLogger.error('❌ Stack trace: $stack');
     } finally {
       _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadAchievements({bool notify = true}) async {
-    try {
-      if (_currentUser == null) {
-        _achievements = [];
-        _achievementsError = null;
-        return;
-      }
-
-      _achievements = await _userService.getUserAchievements(_currentUser!.id);
-      _achievementsError = null;
-    } catch (e) {
-      AppLogger.error('Error loading achievements: $e');
-      _achievementsError = e.toString();
-      _achievements = [];
-    } finally {
-      _isLoadingAchievements = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadEvents({bool notify = true}) async {
-    try {
-      _isLoadingEvents = true;
-      if (notify) _safeNotifyListeners();
-
-      final events = await _eventService.getUpcomingPublicEvents(
-        chapterId: chapterId,
-      );
-      _events = events;
-      _eventsError = null;
-    } catch (e) {
-      AppLogger.error('Error loading events: $e');
-      _eventsError = e.toString();
-      _events = [];
-    } finally {
-      _isLoadingEvents = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadArtwork({bool notify = true}) async {
-    try {
-      _isLoadingArtwork = true;
-      if (notify) _safeNotifyListeners();
-
-      // Try featured artwork first, fallback to public artwork
-      var artworkServiceModels = await _artworkService.getFeaturedArtwork(
-        chapterId: chapterId,
-      );
-      if (artworkServiceModels.isEmpty) {
-        AppLogger.info('No featured artwork found, loading public artwork...');
-        artworkServiceModels = await _artworkService.getAllPublicArtwork(
-          limit: 10,
-          chapterId: chapterId,
-        );
-      }
-
-      _artwork = artworkServiceModels;
-
-      _artworkError = null;
-      AppLogger.info('✅ Loaded ${_artwork.length} artworks successfully');
-    } catch (e) {
-      AppLogger.error('Error loading artwork: $e');
-      _artworkError = e.toString();
-      _artwork = [];
-    } finally {
-      _isLoadingArtwork = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadBooks({bool notify = true}) async {
-    try {
-      _isLoadingBooks = true;
-      if (notify) _safeNotifyListeners();
-
-      final booksServiceModels = await _artworkService.getWrittenContent(
-        limit: 10,
-        includeSerialized: true,
-        includeCompleted: true,
-      );
-
-      _books = booksServiceModels;
-
-      _booksError = null;
-      AppLogger.info('✅ Loaded ${_books.length} books successfully');
-    } catch (e) {
-      AppLogger.error('Error loading books: $e');
-      _booksError = e.toString();
-      _books = [];
-    } finally {
-      _isLoadingBooks = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadArtists({bool notify = true}) async {
-    try {
-      _isLoadingArtists = true;
-      if (notify) _safeNotifyListeners();
-
-      final featuredArtists = await _artistService.getFeaturedArtistProfiles();
-      if (featuredArtists.isNotEmpty) {
-        _artists = featuredArtists;
-      } else {
-        final allArtists = await _artistService.getAllArtistProfiles(limit: 20);
-        _artists = allArtists;
-      }
-      _artistsError = null;
-    } catch (e) {
-      AppLogger.error('Error loading artists: $e');
-      _artistsError = e.toString();
-      _artists = [];
-    } finally {
-      _isLoadingArtists = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadLocalCaptures({bool notify = true}) async {
-    try {
-      _isLoadingLocalCaptures = true;
-      if (notify) _safeNotifyListeners();
-
-      // Get all captures
-      final allCaptures = await _captureService.getAllCaptures();
-
-      // Show all captures regardless of location (removed 15-mile restriction)
-      _localCaptures = allCaptures;
-
-      _localCapturesError = null;
-    } catch (e) {
-      AppLogger.error('Error loading local captures: $e');
-      _localCapturesError = e.toString();
-      _localCaptures = [];
-    } finally {
-      _isLoadingLocalCaptures = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadPosts({bool notify = true}) async {
-    try {
-      _isLoadingPosts = true;
-      if (notify) _safeNotifyListeners();
-
-      // Load recent posts from community service
-      final posts = await _communityService.getFeed(limit: 10);
-
-      _posts = posts;
-      _postsError = null;
-      AppLogger.info('✅ Loaded ${_posts.length} posts successfully');
-    } catch (e) {
-      AppLogger.error('Error loading posts: $e');
-      _postsError = e.toString();
-      _posts = [];
-    } finally {
-      _isLoadingPosts = false;
-      if (notify) _safeNotifyListeners();
     }
   }
 
@@ -574,244 +362,10 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadLocation({bool notify = true}) async {
-    try {
-      _isLoadingLocation = true;
-      if (notify) _safeNotifyListeners();
-
-      final lastKnown = await LocationUtils.getLastKnownPositionSafe();
-      if (lastKnown != null) {
-        _currentLocation = lastKnown;
-        _mapLocation = LatLng(lastKnown.latitude, lastKnown.longitude);
-        _safeNotifyListeners();
-        unawaited(_loadNearbyArtMarkers());
-      }
-
-      // Use shorter timeout for better UX - if location takes too long, fallback faster
-      final position =
-          await LocationUtils.getCurrentPosition(
-            timeoutDuration: const Duration(seconds: 8), // Reduced timeout
-          ).timeout(
-            const Duration(seconds: 10), // Overall timeout reduced
-            onTimeout: () {
-              AppLogger.warning(
-                '⚠️ Location request timed out after 10 seconds',
-              );
-              throw TimeoutException(
-                'Location request timed out',
-                const Duration(seconds: 10),
-              );
-            },
-          );
-
-      _currentLocation = position;
-      _mapLocation = LatLng(position.latitude, position.longitude);
-
-      await _loadNearbyArtMarkers();
-      _locationError = null;
-      debugPrint(
-        '✅ Location loaded successfully: ${position.latitude}, ${position.longitude}',
-      );
-    } catch (e) {
-      AppLogger.error('❌ Error loading location: $e');
-      _locationError = e.toString();
-
-      // Set default location to Raleigh, NC if location fails
-      _mapLocation = const LatLng(35.7796, -78.6382);
-      AppLogger.info('🌍 Using default location: Raleigh, NC');
-
-      // Still try to load markers for default location
-      try {
-        await _loadNearbyArtMarkers();
-      } catch (markerError) {
-        debugPrint(
-          '❌ Error loading markers for default location: $markerError',
-        );
-      }
-    } finally {
-      _isLoadingLocation = false;
-      if (notify) _safeNotifyListeners();
-    }
-  }
-
-  Future<void> _loadNearbyArtMarkers({bool force = false}) async {
-    if (_mapLocation == null) return;
-
-    final location = _mapLocation!;
-    final now = DateTime.now();
-    if (!force &&
-        _lastMarkerLoadedAt != null &&
-        now.difference(_lastMarkerLoadedAt!) < _markerThrottleDuration &&
-        _lastMarkerLocation != null &&
-        _isLocationClose(location, _lastMarkerLocation!)) {
-      _pendingMarkerLocation = location;
-      _scheduleMarkerRefresh();
-      return;
-    }
-
-    try {
-      final cacheKey =
-          '${location.latitude.toStringAsFixed(2)}_${location.longitude.toStringAsFixed(2)}';
-      if (_markerCache.containsKey(cacheKey)) {
-        _markers = _markerCache[cacheKey]!;
-        _isMapPreviewReady = true;
-        _safeNotifyListeners();
-        return;
-      }
-
-      final newMarkers = <Marker>{};
-
-      // Add current location marker if we have it
-      newMarkers.add(
-        Marker(
-          markerId: const MarkerId('current_location'),
-          position: _mapLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
-          infoWindow: const InfoWindow(title: 'Current Location'),
-        ),
-      );
-
-      // Get nearby art pieces from ArtWalk service
-      final List<PublicArtModel> nearbyArt = await _publicArtService
-          .getPublicArtNearLocation(
-            latitude: location.latitude,
-            longitude: location.longitude,
-            radiusKm: 10, // 10km radius
-          );
-      final List<PublicArtModel> limitedNearbyArt = nearbyArt
-          .take(300)
-          .toList();
-
-      // Cluster markers to reduce load when many nearby items exist
-      final Map<String, List<PublicArtModel>> clusters = {};
-      const double clusterSize = 0.01; // ~1km grid
-
-      for (final art in limitedNearbyArt) {
-        final lat = art.location.latitude;
-        final lng = art.location.longitude;
-        final key =
-            '${(lat / clusterSize).floor()}_${(lng / clusterSize).floor()}';
-        clusters.putIfAbsent(key, () => []).add(art);
-      }
-
-      for (final entry in clusters.entries) {
-        final List<PublicArtModel> items = entry.value;
-        final PublicArtModel first = items.first;
-        final position = LatLng(
-          first.location.latitude,
-          first.location.longitude,
-        );
-
-        if (items.length == 1) {
-          newMarkers.add(
-            Marker(
-              markerId: MarkerId('art_${first.id}'),
-              position: position,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueViolet,
-              ),
-              infoWindow: InfoWindow(
-                title: first.title,
-                snippet: first.artistName,
-              ),
-            ),
-          );
-        } else {
-          newMarkers.add(
-            Marker(
-              markerId: MarkerId('cluster_${entry.key}'),
-              position: position,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueRose,
-              ),
-              infoWindow: InfoWindow(
-                title: '${items.length} nearby artworks',
-                snippet: 'Zoom in to see individual pieces',
-              ),
-            ),
-          );
-        }
-      }
-
-      _markers = newMarkers;
-      _markerCache[cacheKey] = newMarkers;
-      _isMapPreviewReady = true;
-      _lastMarkerLocation = location;
-      _lastMarkerLoadedAt = DateTime.now();
-      _safeNotifyListeners();
-    } catch (e) {
-      AppLogger.error('Error loading nearby art markers: $e');
-      _isMapPreviewReady = false;
-      _safeNotifyListeners();
-    }
-  }
-
-  bool _isLocationClose(LatLng a, LatLng b, {double thresholdMeters = 250}) {
-    final distance = Geolocator.distanceBetween(
-      a.latitude,
-      a.longitude,
-      b.latitude,
-      b.longitude,
-    );
-    return distance < thresholdMeters;
-  }
-
-  void _scheduleMarkerRefresh() {
-    if (_markerRefreshTimer?.isActive ?? false) return;
-    _markerRefreshTimer = Timer(_markerThrottleDuration, () {
-      _markerRefreshTimer = null;
-      if (_pendingMarkerLocation != null) {
-        _mapLocation = _pendingMarkerLocation;
-        _pendingMarkerLocation = null;
-      }
-      unawaited(_loadNearbyArtMarkers(force: true));
-    });
-  }
-
   @override
   void dispose() {
     _isDisposed = true;
-    _markerRefreshTimer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _loadTodaysChallenge({bool notify = true}) async {
-    try {
-      debugPrint('🎯 DashboardViewModel: Loading today\'s challenge');
-      // Temporarily disable service call for testing
-      // _todaysChallenge = await _challengeService.getTodaysChallenge();
-
-      // Use a test challenge instead
-      _todaysChallenge = DailyChallengeModel(
-        id: 'test_daily_challenge',
-        userId: 'test_user',
-        title: 'Art Hunter',
-        description: 'Discover 3 pieces of public art in your neighborhood',
-        type: DailyChallengeType.daily,
-        targetCount: 3,
-        currentCount: 1,
-        rewardXP: 150,
-        rewardDescription: '🏆 Explorer Badge + 150 XP',
-        isCompleted: false,
-        createdAt: DateTime.now(),
-        expiresAt: DateTime.now().add(const Duration(hours: 18)),
-      );
-
-      debugPrint(
-        '🎯 DashboardViewModel: Loaded challenge: ${_todaysChallenge?.title ?? "None"}',
-      );
-      AppLogger.info(
-        'Loaded today\'s challenge: ${_todaysChallenge?.title ?? "None"}',
-      );
-    } catch (e) {
-      debugPrint('🎯 DashboardViewModel: ❌ Error loading challenge: $e');
-      AppLogger.error('Error loading today\'s challenge: $e');
-      _todaysChallenge = null;
-    } finally {
-      if (notify) _safeNotifyListeners();
-    }
   }
 
   // Intentionally removed duplicate methods that were declared again below
@@ -881,14 +435,11 @@ class DashboardViewModel extends ChangeNotifier {
           .toList();
       _safeNotifyListeners();
 
-      final subscription = await _subscriptionService.getUserSubscription();
-      if (subscription != null) {
-        final success = await _artistFollowService.followArtist(artistId);
-        if (!success) {
-          throw Exception('Failed to follow artist');
-        }
-        AppLogger.info('Artist follow requested: $artistId');
+      final success = await _artistFollowService.followArtist(artistId);
+      if (!success) {
+        throw Exception('Failed to follow artist');
       }
+      AppLogger.info('Artist follow requested: $artistId');
     } catch (e) {
       // Revert on error
       _artists = _artists
@@ -911,14 +462,11 @@ class DashboardViewModel extends ChangeNotifier {
           .toList();
       _safeNotifyListeners();
 
-      final subscription = await _subscriptionService.getUserSubscription();
-      if (subscription != null) {
-        final success = await _artistFollowService.unfollowArtist(artistId);
-        if (!success) {
-          throw Exception('Failed to unfollow artist');
-        }
-        AppLogger.info('Artist unfollow requested: $artistId');
+      final success = await _artistFollowService.unfollowArtist(artistId);
+      if (!success) {
+        throw Exception('Failed to unfollow artist');
       }
+      AppLogger.info('Artist unfollow requested: $artistId');
     } catch (e) {
       // Revert on error
       _artists = _artists

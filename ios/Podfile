@@ -45,13 +45,6 @@ target 'Runner' do
     end
   end
 
-  # Explicitly specify Google Maps version
-  pod 'GoogleMaps', '9.4.0'
-  pod 'Google-Maps-iOS-Utils', '6.1.0'
-  
-  # Configure SDWebImage to work with modular headers
-  pod 'SDWebImage', :modular_headers => true
-  
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
   target 'RunnerTests' do

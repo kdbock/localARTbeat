@@ -493,9 +493,9 @@
 			baseConfigurationReference = 9FCCFCDEDA9C6A5602BBD945 /* Pods-RunnerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 132;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wordnerd.artbeat.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -508,9 +508,9 @@
 			baseConfigurationReference = DD1197B799598DFA0A85C037 /* Pods-RunnerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 132;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wordnerd.artbeat.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -523,9 +523,9 @@
 			baseConfigurationReference = 067EEB0D7494D8B4A9A429A1 /* Pods-RunnerTests.profile.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 132;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wordnerd.artbeat.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

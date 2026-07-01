@@ -4,11 +4,7 @@ import '../models/artist_model.dart';
 import '../models/artist_profile_model.dart';
 import '../utils/logger.dart';
 
-/// Unified ArtistService that handles both basic artist operations
-/// and enhanced artist profile functionality
-///
-/// This service consolidates functionality from both artbeat_core and artbeat_artist
-/// to provide a single point of truth for artist-related operations.
+/// Artist profile lookup service for capture attribution and discovery.
 class ArtistService {
   ArtistService({FirebaseFirestore? firestore})
     : _firestoreInstance = firestore;

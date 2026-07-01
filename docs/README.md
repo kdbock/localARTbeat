@@ -1,6 +1,6 @@
 # ARTbeat Documentation Index
 
-Last updated: April 7, 2026
+Last updated: June 28, 2026
 
 ## Purpose
 
@@ -10,26 +10,14 @@ This folder contains current, operational documentation for the live app.
 
 - `ARCHITECTURE.md`
   - Current app and package architecture, routing ownership, and runtime boundaries.
-- `FEATURES.md`
-  - Current production feature surface by domain.
+- `REVENUE_AND_RETENTION_PLAN.md`
+  - Current monetization, payment-routing, moderation, and retention strategy.
+- `MODERATOR_DASHBOARD_CONTRACT.md`
+  - External dashboard Firestore read/write contract for sponsorship and event approvals.
 - `OPERATIONS.md`
   - Setup, quality gates, release operations, and incident/compliance runbook links.
 - `TEST_STRATEGY.md`
   - Test layers and release gate expectations.
-- `WORK_QUEUE.md`
-  - Active engineering work and risk tracking.
-- `ROADMAP.md`
-  - Near-term priorities.
-- `KNOWN_ISSUES.md`
-  - Current known issues and mitigations.
-- `DEPENDENCY_RULES.md`
-  - Package boundary and dependency policy.
-- `PACKAGE_DEPENDENCY_INVENTORY.md`
-  - Current generated package dependency graph.
-- `DECISIONS.md`
-  - Architecture/process decisions log.
-- `REPO_HYGIENE.md`
-  - Repo structure and cleanup policy.
 
 ## Legal And Safety Docs
 
@@ -39,13 +27,12 @@ This folder contains current, operational documentation for the live app.
 - `security/LAW_ENFORCEMENT_REQUEST_POLICY.md`
 - `security/UPLOAD_SAFETY_IMPLEMENTATION.md`
 - `security/LEGAL_INCIDENT_RESPONSE_PLAN.md`
-- `security/LEGAL_RELEASE_STATUS.md`
 - `security/LEGAL_PRODUCTION_CANARY_ROLLOUT_RUNBOOK.md`
 
 ## Domain/Implementation Docs
 
 - `SPONSORSHIP_IMPLEMENTATION.md`
-- `STARTUP_INTEGRITY_STANDARD.md`
+- `FEATURE_SPECS/`
 
 ## Archive Policy
 

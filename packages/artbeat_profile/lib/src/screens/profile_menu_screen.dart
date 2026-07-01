@@ -138,19 +138,7 @@ class _ProfileMenuContent extends StatelessWidget {
             route: '/profile/achievement-info',
           ),
           const SizedBox(height: 24),
-          const SectionHeader(title: 'Social'),
-          _menuItem(
-            context,
-            icon: Icons.people_outline,
-            label: 'Followers',
-            route: '/profile/followers',
-          ),
-          _menuItem(
-            context,
-            icon: Icons.person_add_alt,
-            label: 'Following',
-            route: '/profile/following',
-          ),
+          const SectionHeader(title: 'Activity'),
           _menuItem(
             context,
             icon: Icons.favorite_outline,

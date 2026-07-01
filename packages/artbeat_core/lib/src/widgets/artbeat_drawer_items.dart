@@ -76,10 +76,46 @@ class ArtbeatDrawerItems {
   );
 
   static const advertise = ArtbeatDrawerItem(
-    title: 'drawer_advertise',
+    title: 'drawer_sponsorships',
     icon: Icons.campaign,
-    route: '/ads/create',
+    route: AppRoutes.communitySponsorships,
     color: ArtbeatColors.primaryGreen,
+  );
+
+  static const capture = ArtbeatDrawerItem(
+    title: 'drawer_capture',
+    icon: Icons.camera_alt_outlined,
+    route: AppRoutes.captureCamera,
+  );
+
+  static const radar = ArtbeatDrawerItem(
+    title: 'drawer_radar',
+    icon: Icons.radar_outlined,
+    route: AppRoutes.instantDiscovery,
+  );
+
+  static const map = ArtbeatDrawerItem(
+    title: 'drawer_map',
+    icon: Icons.map_outlined,
+    route: AppRoutes.artWalkMap,
+  );
+
+  static const feed = ArtbeatDrawerItem(
+    title: 'drawer_feed',
+    icon: Icons.dynamic_feed_outlined,
+    route: AppRoutes.communityFeed,
+  );
+
+  static const rankings = ArtbeatDrawerItem(
+    title: 'drawer_rankings',
+    icon: Icons.emoji_events_outlined,
+    route: AppRoutes.leaderboard,
+  );
+
+  static const myCaptures = ArtbeatDrawerItem(
+    title: 'drawer_my_captures',
+    icon: Icons.photo_library_outlined,
+    route: AppRoutes.captureMyCaptures,
   );
 
   // Role-specific creation items
@@ -116,21 +152,6 @@ class ArtbeatDrawerItems {
     icon: Icons.flag_outlined,
     route: '/weekly-goals',
     color: ArtbeatColors.primaryBlue,
-  );
-
-  // Commission items
-  static const artistCommissions = ArtbeatDrawerItem(
-    title: 'drawer_commission_hub',
-    icon: Icons.handshake_outlined,
-    route: AppRoutes.commissionHub,
-    requiredRoles: ['artist'],
-  );
-
-  static const commissionRequests = ArtbeatDrawerItem(
-    title: 'drawer_commission_requests',
-    icon: Icons.request_quote_outlined,
-    route: AppRoutes.commissionRequest,
-    requiredRoles: ['artist'],
   );
 
   // Role-Specific Items
@@ -249,13 +270,6 @@ class ArtbeatDrawerItems {
     requiredRoles: ['gallery'],
   );
 
-  static const galleryCommissions = ArtbeatDrawerItem(
-    title: 'drawer_commissions',
-    icon: Icons.handshake_outlined,
-    route: AppRoutes.galleryCommissions,
-    requiredRoles: ['gallery'],
-  );
-
   // Admin-specific items - Streamlined to unified dashboard
   static const unifiedAdminDashboard = ArtbeatDrawerItem(
     title: 'drawer_admin_dashboard',
@@ -299,19 +313,6 @@ class ArtbeatDrawerItems {
     title: 'drawer_favorites',
     icon: Icons.favorite_outline,
     route: AppRoutes.favorites,
-  );
-
-  static const following = ArtbeatDrawerItem(
-    title: 'drawer_following',
-    icon: Icons.person_add_outlined,
-    route: '/profile/following',
-  );
-
-  static const followers = ArtbeatDrawerItem(
-    title: 'drawer_followers',
-    icon: Icons.people_outlined,
-    route: '/profile/followers',
-    requiredRoles: ['artist', 'admin', 'gallery'], // Artist POV
   );
 
   static const myTickets = ArtbeatDrawerItem(
@@ -486,30 +487,18 @@ class ArtbeatDrawerItems {
     color: ArtbeatColors.primaryPurple,
   );
 
-  // Grouped items for different user types
-  static const artbeatStore = ArtbeatDrawerItem(
-    title: 'drawer_artbeat_store',
-    icon: Icons.storefront_outlined,
-    route: '/store',
-    color: ArtbeatColors.primaryPurple,
-    requiresAuth: false,
-  );
-
   static List<ArtbeatDrawerItem> get coreItems => [
-    artbeatStore,
     dashboard,
-    browse,
-    enhancedSearch,
-    community,
+    capture,
+    radar,
+    map,
+    feed,
+    rankings,
     events,
-    artWalk,
-  ];
-
-  static List<ArtbeatDrawerItem> get creationItems => [
-    createEvent,
-    createArtWalk,
     advertise,
   ];
+
+  static List<ArtbeatDrawerItem> get creationItems => [myCaptures, advertise];
 
   static List<ArtbeatDrawerItem> get questsAndGoals => [
     dailyQuests,
@@ -518,67 +507,17 @@ class ArtbeatDrawerItems {
 
   static List<ArtbeatDrawerItem> get personalItems => [
     notifications,
-    achievements,
     favorites,
-    following,
-    followers,
+    myCaptures,
   ];
 
-  static List<ArtbeatDrawerItem> get artistItems => [
-    // Artist Management
-    artistDashboard,
-    artistAnalytics,
-    artistEarnings,
-    // Profile & Content
-    artistProfileEdit,
-    artistPublicProfile,
-    uploadArtwork,
-    // Artist Discovery
-    artistBrowse,
-    featuredArtists,
-    artistEvents,
-    // Commissions & Business
-    artistCommissions, // Commission settings
-    commissionRequests, // Commission requests
-    // Payments & Payouts
-    payoutAccounts,
-    payoutRequest,
-    paymentMethods,
-    paymentScreen,
-    refundRequest,
-    // Advertising
-    createAd,
-    manageMyAds,
-    approvedAds,
-    // Subscriptions
-    subscriptionPlans,
-  ];
+  static List<ArtbeatDrawerItem> get artistItems => [];
 
-  static List<ArtbeatDrawerItem> get galleryItems => [
-    // Gallery Management
-    galleryDashboard,
-    manageArtists,
-    galleryAnalytics,
-    galleryCommissions,
-    // Advertising
-    createAd,
-    manageMyAds,
-    // Subscriptions
-    subscriptionPlans,
-    paymentMethods,
-  ];
+  static List<ArtbeatDrawerItem> get galleryItems => [];
 
-  static List<ArtbeatDrawerItem> get adminItems => [
-    unifiedAdminDashboard,
-    platformCuration,
-    securityCenter,
-    systemHealth,
-    paymentManagement,
-    adminSettings,
-    manageAds,
-  ];
+  static List<ArtbeatDrawerItem> get adminItems => [];
 
-  static List<ArtbeatDrawerItem> get moderatorItems => [moderatorDashboard];
+  static List<ArtbeatDrawerItem> get moderatorItems => [];
 
   static List<ArtbeatDrawerItem> get settingsItems => [settings, help, signOut];
 
@@ -606,24 +545,17 @@ class ArtbeatDrawerItems {
 
     // 1. Core Navigation (Always Visible)
     final navigationItems = _filterItemsForRole(coreItems, userRole);
-    final canQuickAddPost =
-        userRole == 'artist' || userRole == 'admin' || userRole == 'moderator';
-    if (canQuickAddPost) {
-      final dashboardIndex = navigationItems.indexWhere(
-        (item) => item.route == dashboard.route,
-      );
-      final insertionIndex = dashboardIndex >= 0 ? dashboardIndex + 1 : 0;
-      navigationItems.insert(insertionIndex, createPost);
-    }
     if (simpleMode && !exploreMoreOpened) {
       navigationItems.removeWhere(
         (item) => !{
           dashboard.route,
-          createPost.route,
-          browse.route,
-          community.route,
+          capture.route,
+          radar.route,
+          map.route,
+          feed.route,
+          rankings.route,
           events.route,
-          artWalk.route,
+          advertise.route,
         }.contains(item.route),
       );
     }
@@ -636,63 +568,16 @@ class ArtbeatDrawerItems {
       );
     }
 
-    // 2. Creation Tools (for artists, galleries, admins)
-    final hasCreationRole =
-        userRole == 'artist' || userRole == 'gallery' || userRole == 'admin';
-    if ((!simpleMode || exploreMoreOpened) && hasCreationRole) {
+    // 2. Local ARTbeat actions
+    if (!simpleMode || exploreMoreOpened) {
       final creationTools = _filterItemsForRole(creationItems, userRole);
       if (creationTools.isNotEmpty) {
         sections.add(
-          DrawerSection(title: 'drawer_section_create', items: creationTools),
+          DrawerSection(
+            title: 'drawer_section_local_artbeat',
+            items: creationTools,
+          ),
         );
-      }
-    }
-
-    // 3. Messaging (always available for authenticated users)
-    final messagingItems = _filterItemsForRole(const [messaging], userRole);
-    if (messagingItems.isNotEmpty) {
-      sections.add(DrawerSection(items: messagingItems));
-    }
-
-    // 4. Role-Specific Management Tools
-    if (!simpleMode || exploreMoreOpened) {
-      switch (userRole) {
-      case 'artist':
-        final artistTools = _filterItemsForRole(artistItems, userRole);
-        if (artistTools.isNotEmpty) {
-          sections.add(
-            DrawerSection(title: 'drawer_section_artist', items: artistTools),
-          );
-        }
-        break;
-      case 'gallery':
-        final galleryTools = _filterItemsForRole(galleryItems, userRole);
-        if (galleryTools.isNotEmpty) {
-          sections.add(
-            DrawerSection(title: 'drawer_section_gallery', items: galleryTools),
-          );
-        }
-        break;
-      case 'admin':
-        final adminTools = _filterItemsForRole(adminItems, userRole);
-        if (adminTools.isNotEmpty) {
-          sections.add(
-            DrawerSection(title: 'drawer_section_admin', items: adminTools),
-          );
-        }
-        // Removed paymentMethods from admin drawer - admins should use AdminPaymentScreen
-        break;
-      case 'moderator':
-        final moderatorTools = _filterItemsForRole(moderatorItems, userRole);
-        if (moderatorTools.isNotEmpty) {
-          sections.add(
-            DrawerSection(
-              title: 'drawer_section_moderation',
-              items: moderatorTools,
-            ),
-          );
-        }
-        break;
       }
     }
 

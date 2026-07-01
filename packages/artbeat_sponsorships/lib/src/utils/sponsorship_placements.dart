@@ -6,11 +6,14 @@ class SponsorshipPlacements {
 
   static const String discoverRadarBanner = 'discover_radar_banner';
 
+  static const String communityFeedBanner = 'community_feed_banner';
+
   static const List<String> all = [
     artWalkHeader,
     artWalkStopCard,
     captureDetailBanner,
     discoverRadarBanner,
+    communityFeedBanner,
   ];
 
   static bool isValid(String placementKey) => all.contains(placementKey);

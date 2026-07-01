@@ -37,7 +37,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     children: [
                       ToggleTile(
                         title: 'Private Profile',
-                        subtitle: 'Only followers can see your content',
+                        subtitle: 'Only approved users can see your content',
                         value: isPrivate,
                         onChanged: (bool val) {
                           setState(() => isPrivate = val);

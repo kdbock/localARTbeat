@@ -42,13 +42,6 @@ class AppRoutes {
   static const String myEvents = '/events/my-events';
   static const String eventDetail = '/events/detail';
 
-  // Gallery routes
-  static const String galleryCommissions = '/gallery/commissions';
-
-  // Commission routes
-  static const String commissionHub = '/commission/hub';
-  static const String commissionRequest = '/commission/request';
-
   // Artist routes
   static const String artistDashboard = '/artist/dashboard';
   static const String artistOnboarding = '/artist/onboarding';
@@ -90,8 +83,6 @@ class AppRoutes {
   static const String artworkTrending = '/artwork/trending';
   static const String artworkEdit = '/artwork/edit';
   static const String artworkDetail = '/artwork/detail';
-  static const String artworkAuctionManage = '/artwork/auction/manage';
-  static const String artworkAuctionSetup = '/artwork/auction-setup';
   static const String artworkPurchase = '/artwork/purchase';
 
   // Gallery routes
@@ -102,7 +93,6 @@ class AppRoutes {
   static const String subscriptionComparison = '/subscription/comparison';
   static const String subscriptionPlans = '/subscription/plans';
   static const String subscriptions = '/iap/subscriptions';
-  static const String boosts = '/iap/boosts';
   static const String ads = '/iap/ads';
 
   // Payment routes
@@ -168,8 +158,6 @@ class AppRoutes {
   static const String communitySearch = '/community/search';
   static const String communityPostDetail = '/community/post-detail';
   static const String communityPosts = '/community/posts';
-  static const String communityStudios = '/community/studios';
-  static const String communityBoosts = '/community/boosts';
   static const String communityPortfolios = '/community/portfolios';
   static const String communityModeration = '/community/moderation';
   static const String communitySponsorships = '/community/sponsorships';

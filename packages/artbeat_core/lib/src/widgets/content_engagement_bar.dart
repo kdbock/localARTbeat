@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import '../models/engagement_model.dart';
 import '../services/engagement_config_service.dart';
 import '../services/content_engagement_service.dart';
-import '../services/artist_boost_service.dart';
 
 /// Content-specific engagement bar for ARTbeat content types
 /// Replaces the universal engagement bar with content-specific engagement options
@@ -43,12 +42,10 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
   late EngagementStats _stats;
   final Map<EngagementType, bool> _userEngagements = {};
   bool _isLoading = false;
-  late ArtistBoostService _boostService;
 
   @override
   void initState() {
     super.initState();
-    _boostService = context.read<ArtistBoostService>();
     _stats = widget.initialStats;
     _loadUserEngagements();
   }
@@ -560,32 +557,10 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('content_engagement_boost_processing'.tr()),
-        duration: const Duration(seconds: 1),
+        content: Text('content_engagement_boost_retired'.tr()),
+        duration: const Duration(seconds: 2),
       ),
     );
-
-    final success = await _boostService.purchaseQuickBoost(widget.artistId!);
-
-    if (!mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('content_engagement_boost_success'.tr()),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('content_engagement_boost_error'.tr()),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   Future<void> _handleShare() async {

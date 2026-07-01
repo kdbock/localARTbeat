@@ -56,6 +56,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
+
   final String _artFilter = 'public'; // 'public', 'my_captures', 'my_artwalks'
 
   // Location and timer
@@ -702,7 +703,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                               Platform.isMacOS
                                   ? 'Map view is not available on macOS yet. Use iOS/Android for interactive map features.'
                                   : 'art_walk_art_walk_map_text_map_features_mobile'
-                                      .tr(),
+                                        .tr(),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                 fontSize: 14,
@@ -784,14 +785,6 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                         ),
                         onPressed: () =>
                             Navigator.pushNamed(context, '/search'),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.message,
-                          color: ArtWalkDesignSystem.hudInactiveColor,
-                        ),
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/messaging'),
                       ),
                       Stack(
                         clipBehavior: Clip.none,
@@ -1182,6 +1175,36 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
     }
   }
 
+  void _openFullScreenImage(CaptureModel capture) {
+    final imageUrl = _resolveCaptureImageUrl(capture);
+    if (imageUrl == null) return;
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.94),
+      builder: (context) => _FullScreenCaptureImageViewer(
+        imageUrl: imageUrl,
+        heroTag: 'art_walk_capture_${capture.id}',
+      ),
+    );
+  }
+
+  Future<void> _suggestEdit(CaptureModel capture) async {
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CaptureEditSuggestionSheet(capture: capture),
+    );
+    if (!mounted || submitted != true) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Edit suggestion sent for moderator review.'),
+        backgroundColor: ArtWalkDesignSystem.hudActiveColor,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.captures.isEmpty) return const SizedBox.shrink();
@@ -1248,11 +1271,18 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
                         color: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: imageUrl != null
-                            ? OptimizedImage(
-                                imageUrl: imageUrl,
-                                width: double.infinity,
-                                height: 280,
-                                fit: BoxFit.contain,
+                            ? GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => _openFullScreenImage(item),
+                                child: Hero(
+                                  tag: 'art_walk_capture_${item.id}',
+                                  child: OptimizedImage(
+                                    imageUrl: imageUrl,
+                                    width: double.infinity,
+                                    height: 280,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               )
                             : const Center(
                                 child: Icon(
@@ -1496,6 +1526,33 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _suggestEdit(capture),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
+                      side: BorderSide(
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.28,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                    ),
+                    icon: const Icon(Icons.edit_note_rounded),
+                    label: Text(
+                      'Suggest an edit',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
                     onPressed: () => _goNowToCapture(capture),
@@ -1543,6 +1600,59 @@ class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FullScreenCaptureImageViewer extends StatelessWidget {
+  const _FullScreenCaptureImageViewer({
+    required this.imageUrl,
+    required this.heroTag,
+  });
+
+  final String imageUrl;
+  final String heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Center(
+                child: Hero(
+                  tag: heroTag,
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: OptimizedImage(
+                      imageUrl: imageUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 12,
+              right: 12,
+              child: IconButton.filled(
+                onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.close_rounded),
+                tooltip: 'Close image',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -199,108 +199,134 @@ class _AchievementsScreenState extends State<AchievementsScreen>
             ),
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.8,
-            ),
-            itemCount: ProfileRewardsService.badges.length,
-            itemBuilder: (context, index) {
-              final badgeEntry = ProfileRewardsService.badges.entries.elementAt(
-                index,
-              );
-              final badgeId = badgeEntry.key;
-              final badge = badgeEntry.value;
-              final isUnlocked = _userBadges.containsKey(badgeId);
-              final isNew = _unviewedBadges.contains(badgeId);
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columnCount = constraints.maxWidth < 520 ? 2 : 3;
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columnCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: columnCount == 2 ? 0.96 : 0.72,
+                ),
+                itemCount: ProfileRewardsService.badges.length,
+                itemBuilder: (context, index) {
+                  final badgeEntry = ProfileRewardsService.badges.entries
+                      .elementAt(index);
+                  final badgeId = badgeEntry.key;
+                  final badge = badgeEntry.value;
+                  final isUnlocked = _userBadges.containsKey(badgeId);
+                  final isNew = _unviewedBadges.contains(badgeId);
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: isUnlocked ? Colors.white : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(12),
-                  border: isNew
-                      ? Border.all(color: Colors.green, width: 2)
-                      : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            badge['icon'] as String,
-                            style: TextStyle(
-                              fontSize: 32,
-                              color: isUnlocked ? Colors.black : Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            badge['name'] as String,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: isUnlocked ? Colors.black : Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            badge['description'] as String,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isUnlocked
-                                  ? Colors.grey[600]
-                                  : Colors.grey,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isNew)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'NEW',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                  return _BadgeCollectionCard(
+                    icon: badge['icon'] as String,
+                    name: badge['name'] as String,
+                    description: badge['description'] as String,
+                    isUnlocked: isUnlocked,
+                    isNew: isNew,
+                  );
+                },
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BadgeCollectionCard extends StatelessWidget {
+  const _BadgeCollectionCard({
+    required this.icon,
+    required this.name,
+    required this.description,
+    required this.isUnlocked,
+    required this.isNew,
+  });
+
+  final String icon;
+  final String name;
+  final String description;
+  final bool isUnlocked;
+  final bool isNew;
+
+  @override
+  Widget build(BuildContext context) {
+    final foreground = isUnlocked ? Colors.black : Colors.grey;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isUnlocked ? Colors.white : Colors.grey[300],
+        borderRadius: BorderRadius.circular(12),
+        border: isNew ? Border.all(color: Colors.green, width: 2) : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(icon, style: TextStyle(fontSize: 30, color: foreground)),
+                const SizedBox(height: 8),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.1,
+                    fontWeight: FontWeight.bold,
+                    color: foreground,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Flexible(
+                  child: Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      height: 1.15,
+                      color: isUnlocked ? Colors.grey[600] : Colors.grey,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isNew)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'NEW',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

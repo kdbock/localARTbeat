@@ -36,10 +36,6 @@ List<SingleChildWidget> createCoreFoundationProviders() => [
     create: (_) => core.UserProgressionService(),
     lazy: true,
   ),
-  Provider<core.DailyChallengeReadService>(
-    create: (_) => core.DailyChallengeReadService(),
-    lazy: true,
-  ),
   Provider<core.CommunityPostReadService>(
     create: (_) => core.CommunityPostReadService(),
     lazy: true,
@@ -69,10 +65,6 @@ List<SingleChildWidget> createCoreFoundationProviders() => [
     create: (_) => core.ArtworkReadService()..initialize(),
     lazy: true,
   ),
-  Provider<core.StorePreviewReadService>(
-    create: (_) => core.StorePreviewReadService(),
-    lazy: true,
-  ),
   Provider<core.UserMaintenanceService>(
     create: (_) => core.UserMaintenanceService(),
     lazy: true,
@@ -85,21 +77,6 @@ List<SingleChildWidget> createCoreFoundationProviders() => [
     create: (_) => core.PublicArtReadService()..initialize(),
     lazy: true,
   ),
-  ChangeNotifierProvider<core.SubscriptionService>.value(
-    value: core.SubscriptionService()..initialize(),
-  ),
-  Provider<core.InAppSubscriptionService>(
-    create: (_) => core.InAppSubscriptionService()..initialize(),
-    lazy: true,
-  ),
-  Provider<core.ArtistBoostService>(
-    create: (_) => core.ArtistBoostService(),
-    lazy: true,
-  ),
-  Provider<core.CommissionArtistPreviewService>(
-    create: (_) => core.CommissionArtistPreviewService(),
-    lazy: true,
-  ),
   Provider<core.FeedbackService>(
     create: (_) => core.FeedbackService(),
     lazy: true,
@@ -108,24 +85,22 @@ List<SingleChildWidget> createCoreFoundationProviders() => [
     create: (_) => core.UsageTrackingService(),
     lazy: true,
   ),
-  Provider<core.PaymentAnalyticsService>(
-    create: (_) => core.PaymentAnalyticsService(),
-    lazy: true,
-  ),
   Provider<core.ImageManagementService>(
     create: (_) => core.ImageManagementService()..initialize(),
-    lazy: true,
-  ),
-  Provider<core.ArtistFeatureService>(
-    create: (_) => core.ArtistFeatureService(),
     lazy: true,
   ),
   Provider<core.UnifiedPaymentService>(
     create: (_) => core.UnifiedPaymentService(),
     lazy: true,
   ),
-  ChangeNotifierProvider<core.CouponService>(
-    create: (_) => core.CouponService(),
-    lazy: true,
+  ChangeNotifierProxyProvider<core.UserService, core.DashboardViewModel>(
+    create: (context) =>
+        core.DashboardViewModel(userService: context.read<core.UserService>()),
+    update: (context, userService, previous) {
+      final chapterProvider = context.read<core.ChapterPartnerProvider>();
+      final viewModel =
+          previous ?? core.DashboardViewModel(userService: userService);
+      return viewModel..updateChapter(chapterProvider.activeChapterId);
+    },
   ),
 ];

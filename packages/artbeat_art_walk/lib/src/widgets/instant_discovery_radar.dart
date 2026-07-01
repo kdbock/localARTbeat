@@ -75,15 +75,10 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   late AnimationController _gridController;
   late final InstantDiscoveryService _discoveryService;
 
-  // Discovery statistics
-  int _todayDiscoveries = 0;
-  int _streakCount = 0;
-
   // Particles for background animation
   final List<RadarParticle> _particles = [];
 
-  // Achievement system
-  final List<String> _recentAchievements = [];
+  DateTime _lastScanAt = DateTime.now();
 
   @override
   void initState() {
@@ -110,7 +105,6 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     )..repeat();
 
     _initializeParticles();
-    _loadDiscoveryStats();
   }
 
   void _initializeParticles() {
@@ -138,29 +132,6 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
           icon: artIcons[random.nextInt(artIcons.length)],
         ),
       );
-    }
-  }
-
-  void _loadDiscoveryStats() {
-    // Simulate loading discovery statistics
-    setState(() {
-      _todayDiscoveries = 3;
-      _streakCount = 7;
-      _checkAchievements();
-    });
-  }
-
-  void _checkAchievements() {
-    if (_todayDiscoveries >= 5 &&
-        !_recentAchievements.contains('Art Explorer')) {
-      _recentAchievements.add('🎨 Art Explorer - Discovered 5 artworks today!');
-    }
-    if (_streakCount >= 7 && !_recentAchievements.contains('Week Warrior')) {
-      _recentAchievements.add('🔥 Week Warrior - 7 day discovery streak!');
-    }
-    if (widget.nearbyArt.length >= 10 &&
-        !_recentAchievements.contains('Art Magnet')) {
-      _recentAchievements.add('🧲 Art Magnet - 10+ artworks in range!');
     }
   }
 
@@ -192,24 +163,25 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
           _buildHeader(),
           // Radar
           Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: _buildRadar(),
-                ),
-              ),
+            flex: 5,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final radarSize = math.min(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: radarSize,
+                    height: radarSize,
+                    child: _buildRadar(),
+                  ),
+                );
+              },
             ),
           ),
-          // Overlays moved below
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [_buildStatsWidget(), _buildMiniMapWidget()],
-            ),
-          ),
+          _buildScanControls(),
           // Sponsor Banner
           SponsorBanner(
             placementKey: SponsorshipPlacements.discoverRadarBanner,
@@ -221,8 +193,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
             onPlaceholderTap: () =>
                 Navigator.pushNamed(context, '/discover-sponsorship'),
           ),
-          // Art list
-          _buildArtList(),
+          _buildTargetList(),
         ],
       ),
     );
@@ -248,14 +219,14 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Instant Discovery',
+                        'Radar',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: ArtWalkDesignSystem.textPrimary,
                         ),
                       ),
                       Text(
-                        '${widget.nearbyArt.length} artworks nearby',
+                        _radarStatusText(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: ArtWalkDesignSystem.textSecondary,
                         ),
@@ -311,6 +282,16 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     );
   }
 
+  String _radarStatusText() {
+    if (widget.nearbyArt.isEmpty) {
+      return 'Scanning for nearby public art';
+    }
+    if (widget.nearbyArt.length == 1) {
+      return '1 target nearby';
+    }
+    return '${widget.nearbyArt.length} targets nearby';
+  }
+
   Widget _buildRadar() {
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -352,100 +333,44 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     );
   }
 
-  // Overlay widgets
-  Widget _buildMiniMapWidget() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 12),
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  ArtWalkDesignSystem.primaryTeal,
-                  ArtWalkDesignSystem.accentOrange,
-                ],
-              ),
-            ),
-            child: const Center(
-              child: Icon(Icons.map, color: Colors.white, size: 24),
-            ),
-          ),
-          Positioned(
-            bottom: 4,
-            right: 4,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: ArtWalkDesignSystem.accentOrange,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildScanControls() {
+    final secondsSinceScan = DateTime.now().difference(_lastScanAt).inSeconds;
+    final label = secondsSinceScan < 5
+        ? 'Scan complete'
+        : 'Scan nearby targets';
 
-  Widget _buildStatsWidget() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.star,
-                color: ArtWalkDesignSystem.accentOrange,
-                size: 16,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Today: $_todayDiscoveries',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: ArtWalkDesignSystem.textPrimary,
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () => setState(() => _lastScanAt = DateTime.now()),
+              style: FilledButton.styleFrom(
+                backgroundColor: ArtWalkDesignSystem.primaryTeal,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.local_fire_department,
-                color: ArtWalkDesignSystem.accentOrange,
-                size: 16,
+              icon: const Icon(Icons.radar_rounded),
+              label: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
-              const SizedBox(width: 4),
-              Text(
-                'Streak: $_streakCount',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: ArtWalkDesignSystem.textPrimary,
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '${widget.nearbyArt.length} nearby',
-            style: const TextStyle(
-              fontSize: 10,
-              color: ArtWalkDesignSystem.textSecondary,
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 16),
+            child: Text(
+              '+25 XP find',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -842,7 +767,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     }
   }
 
-  Widget _buildArtList() {
+  Widget _buildTargetList() {
     if (widget.nearbyArt.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(24),
@@ -855,14 +780,14 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
             ),
             const SizedBox(height: 16),
             Text(
-              'No art nearby',
+              'No targets nearby',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: ArtWalkDesignSystem.textSecondaryDark,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Try moving to a different location',
+              'Move around or open the map to scan another area.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: ArtWalkDesignSystem.textSecondaryDark,
               ),
@@ -873,34 +798,55 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     }
 
     return Container(
-      constraints: const BoxConstraints(maxHeight: 200),
+      constraints: const BoxConstraints(maxHeight: 330),
       decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 0),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: widget.nearbyArt.length,
+        itemCount: _sortedTargets().length,
         itemBuilder: (context, index) {
-          final art = widget.nearbyArt[index];
+          final art = _sortedTargets()[index];
           final distance = _discoveryService.calculateDistance(
             widget.userPosition,
             art,
           );
-          return _buildArtListItem(art, distance);
+          return _buildTargetCard(art, distance, index);
         },
       ),
     );
   }
 
-  Widget _buildArtListItem(PublicArtModel art, double distance) {
-    final proximityMessage = _discoveryService.getProximityMessage(distance);
+  List<PublicArtModel> _sortedTargets() {
+    final sorted = [...widget.nearbyArt]
+      ..sort((a, b) {
+        final aDistance = _discoveryService.calculateDistance(
+          widget.userPosition,
+          a,
+        );
+        final bDistance = _discoveryService.calculateDistance(
+          widget.userPosition,
+          b,
+        );
+        return aDistance.compareTo(bDistance);
+      });
+    return sorted.take(3).toList(growable: false);
+  }
+
+  Widget _buildTargetCard(PublicArtModel art, double distance, int index) {
     final isClose = distance < 100;
     final isVeryClose = distance < 50;
-    final isAccessible =
-        art.description.toLowerCase().contains('wheelchair') ||
-        art.description.toLowerCase().contains('accessible');
+    final targetLabel = switch (index) {
+      0 => 'Closest',
+      1 => 'Worth the walk',
+      _ => 'Hidden nearby',
+    };
+    final xp = isVeryClose ? 75 : (isClose ? 50 : 25);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      color: Colors.white.withValues(alpha: 0.92),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         leading: Stack(
           alignment: Alignment.center,
           children: [
@@ -932,24 +878,25 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                 size: 24,
               ),
             ),
-            if (isAccessible)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.accessible,
+            Positioned(
+              bottom: -2,
+              right: -2,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: const BoxDecoration(
+                  color: ArtWalkDesignSystem.accentOrange,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                child: Text(
+                  '+$xp',
+                  style: const TextStyle(
                     color: Colors.white,
-                    size: 10,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
+            ),
           ],
         ),
         title: Row(
@@ -963,8 +910,15 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                 ),
               ),
             ),
-            if (art.description.toLowerCase().contains('rare'))
-              const Icon(Icons.star, color: Color(0xFFFFD700), size: 16),
+            const SizedBox(width: 8),
+            Text(
+              targetLabel,
+              style: const TextStyle(
+                color: ArtWalkDesignSystem.primaryTeal,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
         subtitle: Column(
@@ -983,7 +937,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               children: [
                 Expanded(
                   child: Text(
-                    proximityMessage,
+                    _targetSubtitle(distance),
                     style: TextStyle(
                       color: isVeryClose
                           ? const Color(0xFFFFD700)
@@ -1016,18 +970,6 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                   ),
               ],
             ),
-            if (isAccessible)
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Text(
-                  'Wheelchair accessible',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
           ],
         ),
         trailing: Column(
@@ -1038,7 +980,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const Text(
-              'Go Now',
+              'Go Find It',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -1050,6 +992,13 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
         onTap: () => widget.onArtTap?.call(art, distance),
       ),
     );
+  }
+
+  String _targetSubtitle(double distance) {
+    if (distance < 50) return 'Hot target · close enough to capture';
+    if (distance < 150) return 'Near target · walkable discovery';
+    if (distance < 500) return 'In range · follow the radar';
+    return 'Nearby target · open to explore';
   }
 }
 

@@ -140,7 +140,6 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
 
                   const SizedBox(height: 16),
 
-                  // Activity & Social Section
                   _buildSectionHeader('profile_menu_activity_social'.tr()),
                   _buildMenuTile(
                     context: context,
@@ -149,14 +148,6 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                     subtitle: 'profile_menu_liked_items_subtitle'.tr(),
                     color: ArtbeatColors.error,
                     onTap: () => _navigateToRoute('/profile/liked'),
-                  ),
-                  _buildMenuTile(
-                    context: context,
-                    icon: Icons.people,
-                    title: 'profile_menu_following'.tr(),
-                    subtitle: 'profile_menu_following_subtitle'.tr(),
-                    color: ArtbeatColors.primaryPurple,
-                    onTap: () => _navigateToRoute('/profile/following'),
                   ),
                   _buildMenuTile(
                     context: context,

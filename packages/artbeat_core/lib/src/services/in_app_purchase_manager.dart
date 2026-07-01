@@ -3,8 +3,6 @@ import '../models/in_app_purchase_models.dart';
 import '../models/subscription_tier.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
-import 'in_app_subscription_service.dart';
-import 'artist_boost_service.dart';
 import 'in_app_ad_service.dart';
 import 'payment_strategy_service.dart';
 
@@ -16,9 +14,6 @@ class InAppPurchaseManager {
   InAppPurchaseManager._internal();
 
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
-  final InAppSubscriptionService _subscriptionService =
-      InAppSubscriptionService();
-  final ArtistBoostService _boostService = ArtistBoostService();
   final InAppAdService _adService = InAppAdService();
   final PaymentStrategyService _paymentStrategy = PaymentStrategyService();
 
@@ -73,11 +68,18 @@ class InAppPurchaseManager {
           _handleSubscriptionPurchase(purchase);
           break;
         case PurchaseCategory.boosts:
-          AppLogger.info('🚀 Processing boost purchase...');
-          _handleBoostPurchase(purchase);
+          AppLogger.warning(
+            'Retired boost purchase ignored: ${purchase.productId}',
+          );
           break;
         case PurchaseCategory.ads:
           _handleAdPurchase(purchase);
+          break;
+        case PurchaseCategory.sponsorships:
+          _handleSponsorshipPurchase(purchase);
+          break;
+        case PurchaseCategory.eventSubmissions:
+          _handleEventSubmissionPurchase(purchase);
           break;
         case PurchaseCategory.premium:
           _handlePremiumPurchase(purchase);
@@ -118,44 +120,21 @@ class InAppPurchaseManager {
     );
   }
 
-  /// Handle boost purchase
-  void _handleBoostPurchase(CompletedPurchase purchase) {
-    // Extract boost metadata
-    final metadata = purchase.metadata;
-    final recipientId = metadata['recipientId'] as String?;
-    final message = metadata['message'] as String?;
-
-    if (recipientId == null || recipientId.isEmpty) {
-      AppLogger.error(
-        '❌ Boost purchase missing recipientId: ${purchase.productId}',
-      );
-      AppLogger.error('Metadata: $metadata');
-      return;
-    }
-
-    if (message == null || message.isEmpty) {
-      AppLogger.warning(
-        '⚠️ Boost purchase missing message, using default: ${purchase.productId}',
-      );
-    }
-
-    try {
-      _boostService.completeBoostPurchase(
-        senderId: purchase.userId,
-        recipientId: recipientId,
-        productId: purchase.productId,
-        transactionId: purchase.transactionId ?? purchase.purchaseId,
-        message: message ?? 'A boost from an ArtBeat supporter!',
-      );
-      AppLogger.info('✅ Boost purchase completed successfully');
-    } catch (e) {
-      AppLogger.error('❌ Error completing boost purchase: $e');
-    }
-  }
-
   /// Handle ad purchase
   void _handleAdPurchase(CompletedPurchase purchase) {
     _adService.logLegacyAdPurchaseAttempt(purchase.productId);
+  }
+
+  void _handleSponsorshipPurchase(CompletedPurchase purchase) {
+    AppLogger.info(
+      '✅ Sponsorship purchase completed for review workflow: ${purchase.productId}',
+    );
+  }
+
+  void _handleEventSubmissionPurchase(CompletedPurchase purchase) {
+    AppLogger.info(
+      '✅ Event submission purchase completed for review workflow: ${purchase.productId}',
+    );
   }
 
   /// Handle premium purchase
@@ -174,81 +153,71 @@ class InAppPurchaseManager {
       );
       // For now, proceed with IAP as it's required by App Store
     }
-    return _subscriptionService.subscribeToTier(tier, isYearly: isYearly);
+    AppLogger.warning('App subscriptions are retired in the lean app.');
+    return Future.value(false);
   }
 
   Future<bool> cancelSubscription(String subscriptionId) {
-    return _subscriptionService.cancelSubscription(subscriptionId);
+    AppLogger.warning('App subscriptions are retired in the lean app.');
+    return Future.value(false);
   }
 
   Future<Map<String, dynamic>> getUserSubscriptionStatus(String userId) {
-    return _subscriptionService.getUserSubscriptionStatus(userId);
+    return Future.value(<String, dynamic>{'active': false});
   }
 
   Future<bool> canAccessFeature(String userId, String feature) {
-    return _subscriptionService.canAccessFeature(userId, feature);
+    return Future.value(true);
   }
 
   List<Map<String, dynamic>> getAllSubscriptionPricing() {
-    return _subscriptionService.getAllSubscriptionPricing();
+    return const <Map<String, dynamic>>[];
   }
 
-  // Boost methods
   Future<bool> purchaseBoost({
     required String recipientId,
     required String boostProductId,
     required String message,
     Map<String, dynamic>? metadata,
   }) {
-    // Check if IAP should be used for boosts in messaging module
-    final paymentMethod = _paymentStrategy.getPaymentMethod(
-      PurchaseType.nonConsumable, // Boosts are typically non-consumable
-      ArtbeatModule.messaging,
-    );
-
-    if (paymentMethod != PaymentMethod.iap) {
-      AppLogger.warning(
-        'Boost purchase should use $paymentMethod but IAP manager was called',
-      );
-      // For now, proceed with IAP for digital-only boosts
-      // Stripe would be used for boosts that result in payouts
-    }
-
-    return _boostService.purchaseBoost(
-      recipientId: recipientId,
-      boostProductId: boostProductId,
-      message: message,
-      metadata: metadata,
-    );
+    AppLogger.warning('Boost purchases are retired in the lean app.');
+    return Future.value(false);
   }
 
   List<Map<String, dynamic>> getAvailableBoosts() {
-    return _boostService.getAvailableBoosts();
+    return const <Map<String, dynamic>>[];
   }
 
   Future<List<ArtistBoostPurchase>> getSentBoosts(String userId) {
-    return _boostService.getSentBoosts(userId);
+    return Future.value(const <ArtistBoostPurchase>[]);
   }
 
   Future<List<ArtistBoostPurchase>> getReceivedBoosts(String userId) {
-    return _boostService.getReceivedBoosts(userId);
+    return Future.value(const <ArtistBoostPurchase>[]);
   }
 
   Future<int> getBoostCreditsBalance(String userId) {
-    return _boostService.getArtistXPBalance(userId);
+    return Future.value(0);
   }
 
   Future<bool> useBoostCredits(String userId, int amount) {
-    return _boostService.useArtistXP(userId, amount);
+    return Future.value(false);
   }
 
   Future<Map<String, dynamic>> getBoostStatistics(String userId) {
-    return _boostService.getBoostStatistics(userId);
+    return Future.value(const <String, dynamic>{});
   }
 
   // Ad methods
   List<Map<String, dynamic>> getAvailableAdPackages() {
     return _adService.getAvailableAdPackages();
+  }
+
+  Future<bool> purchaseProduct(
+    String productId, {
+    Map<String, dynamic>? metadata,
+  }) {
+    return _purchaseService.purchaseProduct(productId, metadata: metadata);
   }
 
   // General methods

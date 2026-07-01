@@ -1,11 +1,8 @@
-import 'package:artbeat_admin/artbeat_admin.dart' as admin;
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/auth_service.dart' as core_auth;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../screens/notifications_screen.dart';
@@ -65,12 +62,7 @@ class MiscRouteHandler {
         );
 
       case core.AppRoutes.developerFeedbackAdmin:
-        if (!kDebugMode) {
-          return RouteUtils.createNotFoundRoute('developer');
-        }
-        return RouteUtils.createMainLayoutRoute(
-          child: const admin.ModernUnifiedAdminDashboard(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case core.AppRoutes.systemInfo:
         return RouteUtils.createMainLayoutRoute(
@@ -110,10 +102,7 @@ class MiscRouteHandler {
         return RouteUtils.createMainLayoutRoute(child: const RewardsScreen());
 
       case '/billing':
-        return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Billing & Payments'),
-          child: const artist.PaymentMethodsScreen(),
-        );
+        return RouteUtils.createRevampPausedRoute(settings.name);
 
       case '/about':
         return RouteUtils.createMainLayoutRoute(

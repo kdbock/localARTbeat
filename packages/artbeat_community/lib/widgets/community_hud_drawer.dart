@@ -11,9 +11,6 @@ import 'drawer_section.dart' as lab_drawer;
 enum CommunityHudDestination {
   trending,
   artDiscovery,
-  createPost,
-  artworkBrowse,
-  artistOnboarding,
   leaderboard,
   userPosts,
 }
@@ -25,14 +22,12 @@ class CommunityHudDrawer extends StatelessWidget {
     required this.onTabSelected,
     required this.onNavigate,
     required this.closeDrawerAnd,
-    required this.canCreatePosts,
   });
 
   final int selectedTabIndex;
   final ValueChanged<int> onTabSelected;
   final ValueChanged<CommunityHudDestination> onNavigate;
   final void Function(VoidCallback action) closeDrawerAnd;
-  final bool canCreatePosts;
 
   @override
   Widget build(BuildContext context) {
@@ -98,82 +93,28 @@ class CommunityHudDrawer extends StatelessWidget {
                       onTap: () => closeDrawerAnd(() => onTabSelected(0)),
                     ),
                     HudPillTile(
-                      icon: Icons.palette,
-                      title: 'community_hub_tab_artists'.tr(),
-                      subtitle:
-                          'community_hub_drawer_item_artists_gallery_subtitle'
-                              .tr(),
+                      icon: Icons.radar,
+                      title: 'art_walk_drawer_instant_discovery'.tr(),
+                      subtitle: 'Find art around you in real-time',
                       selected: selectedTabIndex == 1,
                       accent: HudPalette.purple,
                       onTap: () => closeDrawerAnd(() => onTabSelected(1)),
                     ),
                     HudPillTile(
-                      icon: Icons.explore,
-                      title: 'community_hub_tab_artwork'.tr(),
-                      subtitle: 'Discover new art, auctions and commissions',
+                      icon: Icons.map,
+                      title: 'art_walk_drawer_explore_map'.tr(),
+                      subtitle: 'Open the local art map',
                       selected: selectedTabIndex == 2,
                       accent: HudPalette.pink,
                       onTap: () => closeDrawerAnd(() => onTabSelected(2)),
                     ),
                     HudPillTile(
-                      icon: Icons.work,
-                      title: 'community_hub_tab_commissions'.tr(),
-                      subtitle: 'Manage your active and pending commissions',
+                      icon: Icons.event,
+                      title: 'events_drawer_events_dashboard'.tr(),
+                      subtitle: 'Find and submit community events',
                       selected: selectedTabIndex == 3,
                       accent: HudPalette.yellow,
                       onTap: () => closeDrawerAnd(() => onTabSelected(3)),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_discover'.tr(),
-                    ),
-                    HudPillTile(
-                      icon: Icons.trending_up,
-                      title: 'community_hub_drawer_item_trending_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_trending_subtitle'
-                          .tr(),
-                      accent: HudPalette.yellow,
-                      onTap: () => closeDrawerAnd(
-                        () => onNavigate(CommunityHudDestination.trending),
-                      ),
-                    ),
-                    HudPillTile(
-                      icon: Icons.radar,
-                      title: 'community_drawer_art_discovery'.tr(),
-                      subtitle: 'Find art around you in real-time',
-                      accent: HudPalette.teal,
-                      onTap: () => closeDrawerAnd(
-                        () => onNavigate(CommunityHudDestination.artDiscovery),
-                      ),
-                    ),
-                    if (canCreatePosts)
-                      lab_drawer.DrawerSection(
-                        title: 'community_hub_drawer_section_create'.tr(),
-                      ),
-                    if (canCreatePosts)
-                      HudPillTile(
-                        icon: Icons.post_add,
-                        title: 'artist_artist_dashboard_text_add_post'.tr(),
-                        subtitle:
-                            'community_hub_drawer_item_create_post_subtitle'
-                                .tr(),
-                        accent: HudPalette.pink,
-                        onTap: () => closeDrawerAnd(
-                          () => onNavigate(CommunityHudDestination.createPost),
-                        ),
-                      ),
-                    HudPillTile(
-                      icon: Icons.person_add,
-                      title: 'community_hub_drawer_item_artist_onboarding_title'
-                          .tr(),
-                      subtitle:
-                          'community_hub_drawer_item_artist_onboarding_subtitle'
-                              .tr(),
-                      accent: HudPalette.teal,
-                      onTap: () => closeDrawerAnd(
-                        () => onNavigate(
-                          CommunityHudDestination.artistOnboarding,
-                        ),
-                      ),
                     ),
                     lab_drawer.DrawerSection(
                       title: 'community_hub_drawer_section_discover'.tr(),

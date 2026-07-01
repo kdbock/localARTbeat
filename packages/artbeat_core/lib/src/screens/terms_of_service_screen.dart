@@ -55,7 +55,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '4. User Types & Roles',
             content:
-                'Regular Users: May browse, follow, favorite, and engage with content.\n\nArtists: May upload artwork, manage profiles, sell work, host events, and access subscription tiers.\n\nGalleries: Manage multiple artists, exhibitions, and commissions.\n\nModerators/Admins: Enforce policies, moderate content, and manage the platform.',
+                'Users may browse, capture, discover, follow, favorite, share, submit events for review, and sponsor reviewed local placements.\n\nModeration and administrative tools are operated outside the mobile app.',
           ),
 
           _TermsSection(
@@ -67,25 +67,25 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '6. Payments & Subscriptions',
             content:
-                'Payments are processed via Stripe.\n\nSubscription tiers, ads, events, and in-app purchases are billed in local currency where supported.\n\nAll purchases are final and non-refundable, except where refunds are required by law or platform store policy.\n\nUsers must provide accurate billing information; fraudulent activity may result in termination.',
+                'In-app sponsorships and event submissions are processed through Apple or Google in-app purchases where required. Real-world ticketing or future web/admin purchases may be processed through Stripe or another supported provider.\n\nPurchases are billed in local currency where supported.\n\nAll purchases are final and non-refundable, except where refunds are required by law or platform store policy.\n\nUsers must provide accurate billing information; fraudulent activity may result in termination.',
           ),
 
           _TermsSection(
             title: '7. Advertising & Sponsorship',
             content:
-                'Ads must comply with community and legal standards.\n\nARTbeat reserves the right to reject or remove ads at its discretion.\n\nAd performance analytics are aggregated and anonymized.',
+                'Sponsorships must comply with community and legal standards.\n\nARTbeat reserves the right to reject, remove, expire, or limit sponsorships at its discretion.\n\nApproved sponsorships may appear in local discovery, capture, or art walk surfaces.',
           ),
 
           _TermsSection(
             title: '8. Events & Ticketing',
             content:
-                'Artists and galleries may create public or private events.\n\nTickets (free, paid, VIP) are sold through Stripe.\n\nFor app-level billing or platform processing issues, ARTbeat may investigate and resolve the issue.\n\nFor creator-run auctions, commissions, sales, and event disputes, the creator or host is primarily responsible for fulfillment, policies, and dispute handling unless ARTbeat states otherwise in writing.',
+                'Users may submit art-related and community events for review.\n\nPaid event submissions and approved ticketing flows may be processed through supported payment providers.\n\nFor app-level billing or platform processing issues, ARTbeat may investigate and resolve the issue.',
           ),
 
           _TermsSection(
-            title: '9. Messaging & Community Conduct',
+            title: '9. Community Conduct',
             content:
-                'Messaging is provided for personal and professional communication.\n\nUsers must not engage in spam, harassment, stalking, doxxing, impersonation, illegal solicitation, off-platform scam solicitation, non-consensual sexual content, or unauthorized data collection.\n\nARTbeat does not read private messages by default, but admins and moderators may review reported threads, attachments, and directly related metadata when investigating abuse, safety, or policy violations.',
+                'Users must not engage in spam, harassment, stalking, doxxing, impersonation, illegal solicitation, scam solicitation, non-consensual sexual content, or unauthorized data collection.\n\nARTbeat may review reported captures, events, sponsorships, profiles, and related metadata when investigating abuse, safety, or policy violations.',
           ),
 
           _TermsSection(
@@ -115,7 +115,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '14. International Use',
             content:
-                'The Platform is operated from the United States.\n\nUsers outside the US are responsible for compliance with local laws and regulations.\n\nCertain features (payments, ticketing, ads) may not be available in all jurisdictions.',
+                'The Platform is operated from the United States.\n\nUsers outside the US are responsible for compliance with local laws and regulations.\n\nCertain features (payments, ticketing, sponsorships) may not be available in all jurisdictions.',
           ),
 
           _TermsSection(

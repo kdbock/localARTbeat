@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../app.dart';
 import '../services/app_permission_service.dart';
 import 'core_startup.dart';
 
@@ -42,27 +39,6 @@ Future<void> _runDeferredInits() async {
 
 void _initializeNonCriticalServices() {
   Future.delayed(const Duration(milliseconds: 100), () async {
-    if (Firebase.apps.isNotEmpty) {
-      try {
-        await messaging.NotificationService(
-          onNavigateToRoute: (route) {
-            navigatorKey.currentState?.pushNamed(route);
-          },
-        ).initialize();
-        AppLogger.info('✅ Notifications ready');
-      } on Object catch (error, stackTrace) {
-        _logDeferredInitFailure(
-          stage: 'non_critical.notifications',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
-    } else {
-      AppLogger.warning(
-        '⚠️ Skipping notification startup: Firebase Core unavailable',
-      );
-    }
-
     try {
       final stepTrackingService = StepTrackingService();
       final challengeService = ChallengeService();

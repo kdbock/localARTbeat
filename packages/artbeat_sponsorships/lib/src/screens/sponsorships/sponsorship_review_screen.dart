@@ -335,10 +335,9 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         status: paymentStatus,
         metadata: <String, Object?>{
           'tier': tier.value,
-          'subscription_id': checkout.subscriptionId,
+          'purchase_id': checkout.purchaseId,
+          'transaction_id': checkout.transactionId,
           'product_id': checkout.productId,
-          'price_id': checkout.priceId,
-          'payment_intent_status': checkout.paymentIntentStatus,
         },
       );
 
@@ -377,11 +376,9 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         paymentStatus: paymentStatus,
         paymentFollowUpStatus: paymentFollowUpStatus,
         paymentFollowUpNotes: paymentFollowUpNotes,
-        stripeCustomerId: checkout.customerId,
-        stripeSubscriptionId: checkout.subscriptionId,
-        stripePriceId: checkout.priceId,
-        stripeProductId: checkout.productId,
-        stripePaymentIntentStatus: checkout.paymentIntentStatus,
+        iapProductId: checkout.productId,
+        iapPurchaseId: checkout.purchaseId,
+        iapTransactionId: checkout.transactionId,
       );
 
       await _submissionService.submitForReview(sponsorship);
@@ -392,7 +389,8 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         metadata: <String, Object?>{
           'tier': tier.value,
           'sponsorship_id': sponsorshipId,
-          'subscription_id': checkout.subscriptionId,
+          'purchase_id': checkout.purchaseId,
+          'transaction_id': checkout.transactionId,
         },
       );
 
@@ -400,7 +398,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Sponsorship submitted. Payment is on file and the request is now queued for review.',
+            'Sponsorship submitted. Payment was received and the request is queued for review.',
           ),
         ),
       );
@@ -498,17 +496,12 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   }
 
   String _normalizePaymentStatus(SponsorshipCheckoutResult checkout) {
-    final status = checkout.status?.trim();
-    if (status != null && status.isNotEmpty) {
+    final status = checkout.status.trim();
+    if (status.isNotEmpty) {
       return status;
     }
 
-    final intentStatus = checkout.paymentIntentStatus?.trim();
-    if (intentStatus != null && intentStatus.isNotEmpty) {
-      return intentStatus;
-    }
-
-    return 'payment_method_attached';
+    return 'paid';
   }
 
   String _paymentFollowUpStatusFor(SponsorshipCheckoutResult checkout) {
@@ -516,13 +509,8 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     if (status == 'active' || status == 'trialing' || status == 'paid') {
       return 'paid_pending_review';
     }
-    if (status == 'processing' ||
-        status == 'requires_action' ||
-        status == 'requires_confirmation') {
+    if (status == 'processing' || status == 'pending') {
       return 'payment_processing_pending_review';
-    }
-    if (status == 'incomplete' || status == 'past_due') {
-      return 'payment_attention_required';
     }
     return 'paid_pending_review';
   }
@@ -532,18 +520,18 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     required SponsorshipCheckoutResult checkout,
   }) {
     final pieces = <String>[
-      'Recurring sponsorship checkout completed for ${tier.value}.',
-      'Subscription ${checkout.subscriptionId} was created for admin review.',
+      'IAP sponsorship checkout completed for ${tier.value}.',
+      'Purchase ${checkout.purchaseId ?? checkout.productId} was created for moderator review.',
     ];
 
-    final status = checkout.status?.trim();
-    if (status != null && status.isNotEmpty) {
-      pieces.add('Stripe subscription status: $status.');
+    final status = checkout.status.trim();
+    if (status.isNotEmpty) {
+      pieces.add('Store purchase status: $status.');
     }
 
-    final paymentIntentStatus = checkout.paymentIntentStatus?.trim();
-    if (paymentIntentStatus != null && paymentIntentStatus.isNotEmpty) {
-      pieces.add('Initial payment intent status: $paymentIntentStatus.');
+    final transactionId = checkout.transactionId?.trim();
+    if (transactionId != null && transactionId.isNotEmpty) {
+      pieces.add('Transaction: $transactionId.');
     }
 
     pieces.add(

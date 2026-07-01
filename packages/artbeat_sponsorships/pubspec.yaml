@@ -2,7 +2,7 @@ name: artbeat_sponsorships
 description: Local ARTbeat sponsorships, promotions, and business advertising
 publish_to: "none"
 
-version: 0.1.0
+version: 2.7.0
 
 environment:
   sdk: "^3.8.0"
@@ -18,7 +18,7 @@ dependencies:
     sdk: flutter
   geocoding: ^4.0.0
   geolocator: ^14.0.1
-  google_maps_flutter: ^2.5.3
+  google_maps_flutter: ^2.17.1
   intl: ^0.20.2
   provider: ^6.1.5
   url_launcher: ^6.3.2

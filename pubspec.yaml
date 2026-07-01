@@ -2,23 +2,15 @@ name: artbeat
 description: "Local ARTbeat - A modular Flutter application for artists, galleries, and art lovers."
 publish_to: "none"
 
-version: 2.6.19+128
+version: 2.7.2+134
 
 environment:
   sdk: ">=3.10.7 <4.0.0"
   flutter: ">=3.38.7"
 
 dependencies:
-  artbeat_admin:
-    path: packages/artbeat_admin
-  artbeat_ads:
-    path: packages/artbeat_ads
   artbeat_art_walk:
     path: packages/artbeat_art_walk
-  artbeat_artist:
-    path: packages/artbeat_artist
-  artbeat_artwork:
-    path: packages/artbeat_artwork
   artbeat_auth:
     path: packages/artbeat_auth
   artbeat_capture:
@@ -29,8 +21,6 @@ dependencies:
     path: packages/artbeat_core
   artbeat_events:
     path: packages/artbeat_events
-  artbeat_messaging:
-    path: packages/artbeat_messaging
   artbeat_profile:
     path: packages/artbeat_profile
   artbeat_settings:
@@ -50,7 +40,7 @@ dependencies:
   firebase_app_check: ^0.4.1+4
   firebase_auth: ^6.1.4
   firebase_core: ^4.4.0
-  firebase_data_connect: ^0.2.2+2
+  firebase_data_connect: ^0.3.0+5
   firebase_messaging: ^16.1.1
   firebase_storage: ^13.0.6
   flag: ^7.0.2
@@ -58,19 +48,16 @@ dependencies:
     sdk: flutter
   flutter_cache_manager: ^3.4.1
   flutter_dotenv: ^6.0.0
-  flutter_image_compress: ^2.3.0
   flutter_local_notifications: ^21.0.0
   flutter_markdown_plus: ^1.0.5
-  flutter_sound: ^9.2.13
   flutter_svg: ^2.1.0
   geocoding: ^4.0.0
   geolocator: ^14.0.1
   google_fonts: ^8.0.2
-  google_maps_flutter: ^2.5.3
+  google_maps_flutter: ^2.17.1
+  google_maps_flutter_ios_sdk10: ^2.18.5
   google_sign_in: ^7.2.0
   http: ^1.4.0
-  image_cropper: ^12.1.1
-  image_editor_plus: ^1.0.4
   image_picker: ^1.0.0
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0+6
@@ -81,10 +68,10 @@ dependencies:
   package_info_plus: ^9.0.0
   path_provider: ^2.1.5
   pedometer: ^4.0.2
-  permission_handler: ^12.0.1
+  permission_handler: ^12.0.3
   provider: ^6.1.5
   shared_preferences: ^2.5.3
-  sign_in_with_apple: ^7.0.1
+  sign_in_with_apple: ^8.1.0
   video_player: ^2.8.2
 
 flutter:
@@ -126,7 +113,7 @@ dev_dependencies:
   build_test: ^3.5.5
   fake_cloud_firestore: ^4.0.0
   firebase_auth_mocks: ^0.15.1
-  firebase_auth_platform_interface: ^8.1.8
+  firebase_auth_platform_interface: ^9.0.3
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
@@ -144,8 +131,7 @@ dependency_overrides:
     path: third_party/pub_overrides/device_info_plus
   file_picker:
     path: third_party/pub_overrides/file_picker
-  flutter_image_compress_common:
-    path: third_party/pub_overrides/flutter_image_compress_common
+  font_awesome_flutter: ^11.0.0
   google_sign_in_android:
     path: third_party/pub_overrides/google_sign_in_android
   local_auth_android:
@@ -159,9 +145,9 @@ dependency_overrides:
     path: third_party/pub_overrides/share_plus
   shared_preferences_android:
     path: third_party/pub_overrides/shared_preferences_android
-  sign_in_with_apple:
-    path: third_party/pub_overrides/sign_in_with_apple
   stripe_android:
     path: third_party/pub_overrides/stripe_android
+  stripe_ios:
+    path: third_party/pub_overrides/stripe_ios
   video_player_android:
     path: third_party/pub_overrides/video_player_android

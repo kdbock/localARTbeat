@@ -3,10 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'feedback_form.dart';
 import '../services/onboarding_service.dart';
-import '../routing/app_routes.dart';
 
-/// Developer menu with admin upload screens only
-/// Refactored to use unified admin tools from artbeat_admin
+/// Debug-only developer menu for local app diagnostics.
 class DeveloperMenu extends StatelessWidget {
   const DeveloperMenu({super.key});
 
@@ -31,28 +29,11 @@ class DeveloperMenu extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Unified Admin & Dev Tools',
+                    'Local Debug Tools',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ],
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.upload_file),
-              title: const Text('Admin Upload Tools'),
-              subtitle: const Text('Consolidated data management'),
-              onTap: () => Navigator.of(
-                context,
-                rootNavigator: true,
-              ).pushNamed('/admin/upload-tools'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.feedback),
-              title: const Text('Developer Feedback Admin'),
-              onTap: () => Navigator.of(
-                context,
-                rootNavigator: true,
-              ).pushNamed('/admin/upload-tools'),
             ),
             ListTile(
               leading: const Icon(Icons.rate_review),
@@ -68,15 +49,6 @@ class DeveloperMenu extends StatelessWidget {
                   );
                 });
               },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: const Text('Unified Admin Dashboard'),
-              onTap: () => Navigator.of(
-                context,
-                rootNavigator: true,
-              ).pushNamed(AppRoutes.adminDashboard),
             ),
             const Divider(),
             ListTile(

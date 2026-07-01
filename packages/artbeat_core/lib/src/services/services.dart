@@ -14,16 +14,11 @@ export 'user_service.dart';
 export 'user_progression_service.dart';
 export 'caching_service.dart';
 export 'navigation_service.dart';
-export 'subscription_service.dart';
-export 'subscription_plan_validator.dart';
-export 'subscription_validation_service.dart';
 export 'image_management_service.dart';
 export 'enhanced_storage_service.dart';
 
 // In-app purchase services
 export 'in_app_purchase_service.dart';
-export 'in_app_subscription_service.dart';
-export 'artist_boost_service.dart';
 export 'artwork_read_service.dart';
 export 'social_activity_read_service.dart';
 export 'daily_challenge_read_service.dart';

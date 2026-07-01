@@ -1,12 +1,11 @@
 import '../utils/logger.dart';
 
-/// Legacy compatibility layer for the simplified monthly ad catalog.
+/// Legacy compatibility layer for the simplified monthly sponsorship catalog.
 ///
 /// ARTbeat no longer uses impression-based ad packages, ad credits, or
-/// campaign analytics. Paid ad checkout is handled by the dedicated
-/// `artbeat_ads` flow, and this service only exposes lightweight product
-/// metadata for older shared purchase surfaces that still need to render
-/// current ad options.
+/// campaign analytics. This service only exposes lightweight product metadata
+/// for older shared purchase surfaces that still need to render current
+/// sponsorship options.
 class InAppAdService {
   static final InAppAdService _instance = InAppAdService._internal();
   factory InAppAdService() => _instance;
@@ -33,7 +32,7 @@ class InAppAdService {
       'placementStyle': 'inline',
       'features': [
         'Community feed placement',
-        'Artists and artwork placement',
+        'Event and discovery placement',
         'Admin review before publishing',
       ],
     },
@@ -52,7 +51,7 @@ class InAppAdService {
   void logLegacyAdPurchaseAttempt(String productId) {
     AppLogger.warning(
       'Legacy ad purchase handler was invoked for $productId. '
-      'ARTbeat ads now use the dedicated reviewed monthly subscription flow.',
+      'Local ARTbeat sponsorships now use the reviewed monthly subscription flow.',
     );
   }
 }

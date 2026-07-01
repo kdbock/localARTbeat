@@ -8,12 +8,6 @@ import 'package:provider/provider.dart';
 import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
 import '../screens/feed/trending_content_screen.dart';
-import '../screens/portfolios/portfolios_screen.dart';
-import '../screens/studios/studios_screen.dart';
-import '../screens/commissions/commission_hub_screen.dart';
-import '../screens/boosts/boosts_screen.dart';
-
-import '../src/screens/community_artists_screen.dart';
 import '../screens/settings/quiet_mode_screen.dart';
 
 /// Community navigation drawer with user profile and navigation options
@@ -77,53 +71,37 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
         routeName: AppRoutes.artDiscovery,
       ),
       _DrawerEntry(
-        icon: Icons.museum,
-        titleBuilder: (_) => 'Art Gallery',
-        routeName: AppRoutes.artworkBrowse,
-      ),
-    ];
-
-    final artistEntries = <_DrawerEntry>[
-      _DrawerEntry(
-        icon: Icons.palette,
-        titleBuilder: (_) => 'community_drawer_artist_portfolios'.tr(),
-        screenBuilder: () => const PortfoliosScreen(),
+        icon: Icons.camera_alt,
+        titleBuilder: (_) => 'capture_drawer_take_photo'.tr(),
+        routeName: AppRoutes.captureCamera,
       ),
       _DrawerEntry(
-        icon: Icons.brush,
-        titleBuilder: (_) => 'Become an Artist',
-        routeName: AppRoutes.artistOnboarding,
-      ),
-    ];
-
-    final studioEntries = <_DrawerEntry>[
-      _DrawerEntry(
-        icon: Icons.business,
-        titleBuilder: (_) => 'community_drawer_studios'.tr(),
-        screenBuilder: () => const StudiosScreen(),
+        icon: Icons.map,
+        titleBuilder: (_) => 'art_walk_drawer_explore_map'.tr(),
+        routeName: AppRoutes.artWalkMap,
       ),
       _DrawerEntry(
-        icon: Icons.handshake,
-        titleBuilder: (_) => 'community_drawer_commissions'.tr(),
-        screenBuilder: () => const CommissionHubScreen(),
-      ),
-      _DrawerEntry(
-        icon: Icons.bolt,
-        titleBuilder: (_) => 'community_drawer_boosts'.tr(),
-        screenBuilder: () => const ViewReceivedBoostsScreen(),
-      ),
-    ];
-
-    final discoverEntries = <_DrawerEntry>[
-      _DrawerEntry(
-        icon: Icons.search,
-        titleBuilder: (_) => 'community_drawer_search_community'.tr(),
-        screenBuilder: () => const CommunityArtistsScreen(),
-      ),
-      _DrawerEntry(
-        icon: Icons.leaderboard,
+        icon: Icons.emoji_events,
         titleBuilder: (_) => 'leaderboard_title'.tr(),
         routeName: AppRoutes.leaderboard,
+      ),
+    ];
+
+    final submitEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.event,
+        titleBuilder: (_) => 'events_drawer_events_dashboard'.tr(),
+        routeName: AppRoutes.eventsDashboard,
+      ),
+      _DrawerEntry(
+        icon: Icons.add_circle,
+        titleBuilder: (_) => 'events_drawer_create_event'.tr(),
+        routeName: AppRoutes.eventsCreate,
+      ),
+      _DrawerEntry(
+        icon: Icons.campaign,
+        titleBuilder: (_) => 'Sponsorships',
+        routeName: AppRoutes.communitySponsorships,
       ),
     ];
 
@@ -173,21 +151,11 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                         context,
                       ),
                       ..._buildNavigationSection(
-                        'Artists',
-                        artistEntries,
-                        context,
-                      ),
-                      ..._buildNavigationSection(
-                        'Studios & Work',
-                        studioEntries,
+                        'Submit',
+                        submitEntries,
                         context,
                       ),
                       const Divider(),
-                      ..._buildNavigationSection(
-                        'Discover',
-                        discoverEntries,
-                        context,
-                      ),
                       ..._buildNavigationSection(
                         'Settings',
                         settingsEntries,

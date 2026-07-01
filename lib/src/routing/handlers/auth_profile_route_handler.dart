@@ -9,12 +9,9 @@ import '../route_utils.dart';
 class AuthProfileRouteHandler {
   const AuthProfileRouteHandler({
     required core_auth.AuthService authService,
-    required Widget Function(String routeName) buildOnboardingScreen,
-  }) : _authService = authService,
-       _buildOnboardingScreen = buildOnboardingScreen;
+  }) : _authService = authService;
 
   final core_auth.AuthService _authService;
-  final Widget Function(String routeName) _buildOnboardingScreen;
 
   Route<dynamic>? handleRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -33,22 +30,6 @@ class AuthProfileRouteHandler {
         final currentUserId = _authService.currentUser?.uid ?? '';
         return RouteUtils.createMainNavRoute(
           child: profile.EditProfileScreen(userId: currentUserId),
-        );
-
-      case core.AppRoutes.artistDashboard:
-        return RouteUtils.createMainNavRoute(
-          child: const core.AuthRequiredScreen(),
-        );
-
-      case core.AppRoutes.artistOnboardingWelcome:
-      case core.AppRoutes.artistOnboardingIntroduction:
-      case core.AppRoutes.artistOnboardingStory:
-      case core.AppRoutes.artistOnboardingArtwork:
-      case core.AppRoutes.artistOnboardingFeatured:
-      case core.AppRoutes.artistOnboardingBenefits:
-      case core.AppRoutes.artistOnboardingSelection:
-        return RouteUtils.createSimpleRoute(
-          child: _buildOnboardingScreen(settings.name!),
         );
 
       default:

@@ -50,20 +50,24 @@ class CaptureDetailViewerScreen extends StatelessWidget {
           children: [
             Hero(
               tag: 'capture_${capture.id}',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.network(
-                    capture.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(Icons.broken_image, color: Colors.white),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openFullScreenImage(context),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Image.network(
+                      capture.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.broken_image, color: Colors.white),
+                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
                     ),
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
-                    },
                   ),
                 ),
               ),
@@ -124,6 +128,29 @@ class CaptureDetailViewerScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _suggestEdit(context),
+                      icon: const Icon(Icons.edit_note_rounded),
+                      label: const Text('Suggest an edit'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white.withValues(alpha: 0.9),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.22),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        textStyle: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () {
                       // optional: like/save/etc.
@@ -153,6 +180,88 @@ class CaptureDetailViewerScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openFullScreenImage(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.94),
+      builder: (context) => _CaptureFullScreenImageViewer(
+        imageUrl: capture.imageUrl,
+        heroTag: 'capture_${capture.id}',
+      ),
+    );
+  }
+
+  Future<void> _suggestEdit(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CaptureEditSuggestionSheet(capture: capture),
+    );
+    if (submitted != true) return;
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Edit suggestion sent for moderator review.'),
+        backgroundColor: Color(0xFF34D399),
+      ),
+    );
+  }
+}
+
+class _CaptureFullScreenImageViewer extends StatelessWidget {
+  const _CaptureFullScreenImageViewer({
+    required this.imageUrl,
+    required this.heroTag,
+  });
+
+  final String imageUrl;
+  final String heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Center(
+                child: Hero(
+                  tag: heroTag,
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.broken_image, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 12,
+              right: 12,
+              child: IconButton.filled(
+                onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.close_rounded),
+                tooltip: 'Close image',
               ),
             ),
           ],

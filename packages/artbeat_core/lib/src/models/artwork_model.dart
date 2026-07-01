@@ -25,9 +25,6 @@ class ArtworkModel {
   final Map<String, dynamic>? readingMetadata;
   final Map<String, dynamic>? serializationConfig;
   final String? chapterId;
-  final bool auctionEnabled;
-  final double? startingPrice;
-  final double? currentHighestBid;
 
   ArtworkModel({
     required this.id,
@@ -52,9 +49,6 @@ class ArtworkModel {
     this.readingMetadata,
     this.serializationConfig,
     this.chapterId,
-    this.auctionEnabled = false,
-    this.startingPrice,
-    this.currentHighestBid,
   });
 
   factory ArtworkModel.fromFirestore(DocumentSnapshot doc) {
@@ -93,12 +87,6 @@ class ArtworkModel {
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
       chapterId: FirestoreUtils.safeString(data['chapterId']),
-      auctionEnabled: FirestoreUtils.safeBool(
-        data['auctionEnabled'] ?? data['isAuction'],
-        false,
-      ),
-      startingPrice: FirestoreUtils.safeDouble(data['startingPrice']),
-      currentHighestBid: FirestoreUtils.safeDouble(data['currentHighestBid']),
     );
   }
 
@@ -126,9 +114,6 @@ class ArtworkModel {
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
       if (chapterId != null) 'chapterId': chapterId,
-      'auctionEnabled': auctionEnabled,
-      if (startingPrice != null) 'startingPrice': startingPrice,
-      if (currentHighestBid != null) 'currentHighestBid': currentHighestBid,
     };
   }
 

@@ -15,6 +15,17 @@ class CreateSponsorshipScreen extends StatelessWidget {
         HudTopBar(
           title: 'sponsorship_create_title'.tr(),
           onBackPressed: () => Navigator.pop(context),
+          actions: [
+            AppHelpButton(
+              title: 'sponsorship_hub_help_title'.tr(),
+              body: 'sponsorship_hub_help_body'.tr(),
+              steps: [
+                'sponsorship_hub_help_step_choose'.tr(),
+                'sponsorship_hub_help_step_creative'.tr(),
+                'sponsorship_hub_help_step_review'.tr(),
+              ],
+            ),
+          ],
         ),
         Expanded(
           child: ListView(
@@ -22,8 +33,7 @@ class CreateSponsorshipScreen extends StatelessWidget {
             children: [
               SponsorshipSection(
                 title: 'sponsorship_create_experiences_title'.tr(),
-                subtitle:
-                    'Art Walk is the premium curated sponsorship experience. Capture and discovery placements are now handled through Local Ads.',
+                subtitle: 'sponsorship_create_experiences_subtitle'.tr(),
                 child: Column(
                   children: [
                     SponsorshipCtaTile(
@@ -36,16 +46,15 @@ class CreateSponsorshipScreen extends StatelessWidget {
                 ),
               ),
               SponsorshipSection(
-                title: 'Local Ads',
-                subtitle:
-                    'Use Local Ads for capture and discovery visibility inside the app.',
+                title: 'sponsorship_create_placements_title'.tr(),
+                subtitle: 'sponsorship_create_placements_subtitle'.tr(),
                 child: Column(
                   children: [
                     SponsorshipCtaTile(
                       icon: Icons.campaign_outlined,
-                      title: 'Open Local Ads',
-                      subtitle:
-                          'Choose Banner or Inline and submit for review through the ad flow.',
+                      title: 'sponsorship_create_placements_cta_title'.tr(),
+                      subtitle: 'sponsorship_create_placements_cta_subtitle'
+                          .tr(),
                       onTap: () => _go(context, AppRoutes.ads),
                     ),
                   ],

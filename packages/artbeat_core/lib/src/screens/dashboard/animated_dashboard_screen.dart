@@ -325,15 +325,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
                                   _trackFirstMeaningfulAction(
-                                    action: 'open_capture_dashboard',
-                                    routeName: AppRoutes.captureDashboard,
+                                    action: 'open_capture',
+                                    routeName: AppRoutes.captureCamera,
                                   );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.of(
                                     context,
-                                  ).pushNamed(AppRoutes.captureDashboard);
+                                  ).pushNamed(AppRoutes.captureCamera);
                                 },
                               ),
                             ),
@@ -374,15 +374,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
                                   _trackFirstMeaningfulAction(
-                                    action: 'open_art_walk_dashboard',
-                                    routeName: AppRoutes.artWalkDashboard,
+                                    action: 'open_radar',
+                                    routeName: AppRoutes.instantDiscovery,
                                   );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    AppRoutes.artWalkDashboard,
+                                    AppRoutes.instantDiscovery,
                                   );
                                 },
                               ),
@@ -424,15 +424,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
                                   _trackFirstMeaningfulAction(
-                                    action: 'open_explore_dashboard',
-                                    routeName: AppRoutes.dashboard,
+                                    action: 'open_map',
+                                    routeName: AppRoutes.artWalkMap,
                                   );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    AppRoutes.dashboard,
+                                    AppRoutes.artWalkMap,
                                   );
                                 },
                               ),
@@ -474,15 +474,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
                                   _trackFirstMeaningfulAction(
-                                    action: 'open_community_hub',
-                                    routeName: AppRoutes.artCommunityHub,
+                                    action: 'open_feed',
+                                    routeName: AppRoutes.communityFeed,
                                   );
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
-                                    AppRoutes.artCommunityHub,
+                                    AppRoutes.communityFeed,
                                   );
                                 },
                               ),
@@ -499,16 +499,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           index: 4,
 
                           child: _BottomChips(
-                            onArtist: () {
+                            onEvents: () {
                               if (!CrashPreventionService.shouldAllowNavigation())
                                 return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(
                                 context,
-                                '/artist/onboarding/welcome',
+                                AppRoutes.eventsDiscover,
                               );
                             },
-                            onBusiness: () {
+                            onSponsor: () {
                               if (!CrashPreventionService.shouldAllowNavigation())
                                 return;
                               NavigationOverlay.of(context)?.startNavigation();
@@ -715,47 +715,73 @@ class _TitleBlock extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'animated_dashboard_title_local'.tr(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: RichText(
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.visible,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        'animated_dashboard_title_local'.tr(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.88,
+                                      ),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'animated_dashboard_title_art'.tr(),
+                                    style: GoogleFonts.dmSerifDisplay(
+                                      color: const Color(0xFFFFC857),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w400,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        'animated_dashboard_title_beat'.tr(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.88,
+                                      ),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'CAPTURE  MAP  SHARE  DISCOVER',
+                              maxLines: 1,
+                              softWrap: false,
                               style: GoogleFonts.spaceGrotesk(
-                                color: Colors.white.withValues(alpha: 0.88),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.4,
+                                color: Colors.white.withValues(alpha: 0.62),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.3,
                               ),
                             ),
-                            TextSpan(
-                              text: 'animated_dashboard_title_art'.tr(),
-                              style: GoogleFonts.dmSerifDisplay(
-                                color: const Color(0xFFFFC857),
-                                fontSize: 20,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            TextSpan(
-                              text: 'animated_dashboard_title_beat'.tr(),
-                              style: GoogleFonts.spaceGrotesk(
-                                color: Colors.white.withValues(alpha: 0.88),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Text(
-                      'animated_dashboard_quest_hub'.tr(),
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.62),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.3,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1097,10 +1123,10 @@ class _TagChip extends StatelessWidget {
 /// =======================
 
 class _BottomChips extends StatelessWidget {
-  final VoidCallback onArtist;
-  final VoidCallback onBusiness;
+  final VoidCallback onEvents;
+  final VoidCallback onSponsor;
 
-  const _BottomChips({required this.onArtist, required this.onBusiness});
+  const _BottomChips({required this.onEvents, required this.onSponsor});
 
   @override
   Widget build(BuildContext context) {
@@ -1108,19 +1134,19 @@ class _BottomChips extends StatelessWidget {
       children: [
         Expanded(
           child: _ChipButton(
-            icon: Icons.palette_outlined,
-            label: 'animated_dashboard_artist_label'.tr(),
+            icon: Icons.event_outlined,
+            label: 'Events',
             glow: ArtbeatColors.accentYellow,
-            onTap: onArtist,
+            onTap: onEvents,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _ChipButton(
             icon: Icons.storefront_outlined,
-            label: 'animated_dashboard_business_label'.tr(),
+            label: 'Sponsorships',
             glow: ArtbeatColors.primaryGreen,
-            onTap: onBusiness,
+            onTap: onSponsor,
           ),
         ),
       ],

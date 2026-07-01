@@ -51,6 +51,17 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
             HudTopBar(
               title: 'sponsorship_hub_title'.tr(),
               onBackPressed: () => Navigator.pop(context),
+              actions: [
+                AppHelpButton(
+                  title: 'sponsorship_hub_help_title'.tr(),
+                  body: 'sponsorship_hub_help_body'.tr(),
+                  steps: [
+                    'sponsorship_hub_help_step_choose'.tr(),
+                    'sponsorship_hub_help_step_creative'.tr(),
+                    'sponsorship_hub_help_step_review'.tr(),
+                  ],
+                ),
+              ],
             ),
             Expanded(
               child: ListView(
@@ -180,6 +191,45 @@ const _quickSignals = [
 
 const _sponsorshipOptions = [
   _SponsorshipOption(
+    icon: Icons.place_outlined,
+    titleKey: 'sponsorship_hub_option_spot_title',
+    priceKey: 'sponsorship_hub_option_spot_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_spot_description',
+    perks: [
+      'sponsorship_hub_option_spot_perk_detail',
+      'sponsorship_hub_option_spot_perk_location',
+      'sponsorship_hub_option_review_required',
+    ],
+    route: AppRoutes.ads,
+  ),
+  _SponsorshipOption(
+    icon: Icons.radar_outlined,
+    titleKey: 'sponsorship_hub_option_radar_title',
+    priceKey: 'sponsorship_hub_option_radar_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_radar_description',
+    perks: [
+      'sponsorship_hub_option_radar_perk_scan',
+      'sponsorship_hub_option_radar_perk_gif',
+      'sponsorship_hub_option_review_required',
+    ],
+    route: AppRoutes.ads,
+  ),
+  _SponsorshipOption(
+    icon: Icons.dynamic_feed_outlined,
+    titleKey: 'sponsorship_hub_option_feed_title',
+    priceKey: 'sponsorship_hub_option_feed_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_feed_description',
+    perks: [
+      'sponsorship_hub_option_feed_perk_zip',
+      'sponsorship_hub_option_feed_perk_square',
+      'sponsorship_hub_option_review_required',
+    ],
+    route: AppRoutes.ads,
+  ),
+  _SponsorshipOption(
     icon: Icons.map,
     titleKey: 'sponsorship_hub_option_art_walk_title',
     priceKey: 'sponsorship_hub_option_art_walk_price',
@@ -196,9 +246,8 @@ const _sponsorshipOptions = [
 
 const _supportCtas = [
   _SupportCta(
-    titleKey: 'Promote your business with Local Ads',
-    subtitleKey:
-        'Capture and discovery placements now live under monthly Banner and Inline ads.',
+    titleKey: 'sponsorship_hub_support_creative_title',
+    subtitleKey: 'sponsorship_hub_support_creative_subtitle',
     icon: Icons.campaign_outlined,
     route: AppRoutes.ads,
   ),
