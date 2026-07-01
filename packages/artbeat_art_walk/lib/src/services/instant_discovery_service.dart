@@ -96,7 +96,16 @@ class InstantDiscoveryService {
           )
           .take(1); // Take first emission
 
-      final capturesResults = await capturesGeoQuery.first;
+      var capturesResults = await capturesGeoQuery.first;
+
+      // Captures created before geo indexing can still have a valid
+      // `location`; keep radar aligned with the Art Walk Map fallback.
+      if (capturesResults.isEmpty) {
+        capturesResults = await _fetchNearbyCapturesByLocationFallback(
+          userPosition: userPosition,
+          radiusMeters: radiusMeters,
+        );
+      }
 
       // Convert publicArt to PublicArtModel and filter out discovered art
       final nearbyPublicArt = publicArtResults
@@ -975,6 +984,38 @@ class InstantDiscoveryService {
       }).toList();
     } catch (e) {
       AppLogger.error('Error in publicArt location fallback query: $e');
+      return const [];
+    }
+  }
+
+  Future<List<DocumentSnapshot<Map<String, dynamic>>>>
+  _fetchNearbyCapturesByLocationFallback({
+    required Position userPosition,
+    required double radiusMeters,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('captures')
+          .where('isPublic', isEqualTo: true)
+          .limit(500)
+          .get();
+
+      return snapshot.docs.where((doc) {
+        final point = _extractGeoPointFromData(doc.data());
+        if (point.latitude == 0 && point.longitude == 0) {
+          return false;
+        }
+
+        final distance = Geolocator.distanceBetween(
+          userPosition.latitude,
+          userPosition.longitude,
+          point.latitude,
+          point.longitude,
+        );
+        return distance <= radiusMeters;
+      }).toList();
+    } catch (e) {
+      AppLogger.error('Error in captures location fallback query: $e');
       return const [];
     }
   }

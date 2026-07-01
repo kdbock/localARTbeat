@@ -38,14 +38,20 @@ The app currently uses local overrides in `third_party/pub_overrides/` for:
 
 - `audioplayers_android`
 - `camera_android_camerax`
+- `cloud_functions`
 - `device_info_plus`
 - `file_picker`
+- `firebase_analytics`
+- `firebase_app_check`
+- `firebase_remote_config`
+- `firebase_storage`
 - `google_sign_in_android`
 - `local_auth_android`
 - `package_info_plus`
 - `pedometer`
 - `share_plus`
 - `shared_preferences_android`
+- `sign_in_with_apple`
 - `stripe_android`
 - `stripe_ios`
 - `video_player_android`
@@ -56,15 +62,16 @@ published package contains the local fix and both store builds pass.
 
 ## Kotlin / AGP Status
 
-Android currently keeps `android.builtInKotlin=false`. Enabling built-in Kotlin
-was tested during cleanup and broke release compilation because several local
-override Kotlin plugin classes were not compiled into the Android artifact.
+Android now keeps `android.builtInKotlin=true`. The Android release build no
+longer emits Flutter's future KGP failure warning.
 
-Flutter still warns that several plugins apply KGP. Some are upstream packages
-outside this repo, and Flutter's own migration guide says plugin authors must
-migrate to built-in Kotlin before temporary compatibility support is removed.
+Several plugins are temporarily vendored under `third_party/pub_overrides`
+because their published Android Gradle files still explicitly apply the Kotlin
+Gradle Plugin. The vendored copies remove that KGP application and rely on AGP
+built-in Kotlin, matching Flutter's migration direction.
 
-Track these plugins during dependency upgrades:
+Track these overrides during dependency upgrades and remove them when the
+published package has migrated:
 
 - `audioplayers_android`
 - `cloud_functions`

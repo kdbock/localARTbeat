@@ -25,10 +25,6 @@ rootProject.allprojects {
 
 apply plugin: 'com.android.library'
 
-def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
-if (agpMajor < 9) {
-    apply plugin: 'org.jetbrains.kotlin.android'
-}
 
 android {
     compileSdk flutter.compileSdkVersion
@@ -43,8 +39,8 @@ android {
     }
     
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     
     dependencies {
@@ -52,11 +48,6 @@ android {
         implementation 'androidx.annotation:annotation:1.9.1'
         implementation "androidx.lifecycle:lifecycle-runtime:2.8.7"
         implementation "org.apache.tika:tika-core:3.2.3"
-    }
-    if (agpMajor < 9) {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_11.toString()
-        }
     }
 
     if (project.android.hasProperty("namespace")) {

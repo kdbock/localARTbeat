@@ -62,8 +62,9 @@ because iOS can cache launch-screen assets.
 
 ## Known Non-Blocking Warnings
 
-- Android: Flutter still warns about plugins applying the Kotlin Gradle Plugin.
-  See `docs/DEPENDENCY_AUDIT.md`.
+- Android: Built-in Kotlin is enabled and the release build should not emit
+  Flutter's future KGP failure warning. See `docs/DEPENDENCY_AUDIT.md` before
+  removing any local Android plugin overrides.
 - iOS: The project has been migrated away from CocoaPods. If a CocoaPods warning
   returns, inspect `ios/Flutter/*.xcconfig`, `ios/Runner.xcworkspace`, and
   `ios/Runner.xcodeproj/project.pbxproj` for new Pods references.
@@ -80,4 +81,3 @@ because iOS can cache launch-screen assets.
 - Events: submit a paid event and confirm moderation status.
 - Sponsorships: submit a paid placement request and confirm moderation status.
 - Profile: verify achievements/badges have no overflow.
-
