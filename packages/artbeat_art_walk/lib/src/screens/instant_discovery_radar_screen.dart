@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/go_now_flow_service.dart';
+import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/widgets/instant_discovery_radar.dart';
 import 'package:artbeat_art_walk/src/widgets/discovery_capture_modal.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
@@ -29,6 +31,7 @@ class _InstantDiscoveryRadarScreenState
   // bool _hasDiscoveries = false;
   Position? _userPosition;
   bool _isLoading = true;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -57,12 +60,39 @@ class _InstantDiscoveryRadarScreenState
       }
     }
 
-    if (_nearbyArt.isEmpty && _userPosition != null) {
-      // Would load from discovery service
+    if (_userPosition != null) {
+      await _loadNearbyArt(showLoading: false, onlyWhenEmpty: true);
     }
 
     if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadNearbyArt({
+    bool showLoading = true,
+    bool onlyWhenEmpty = false,
+  }) async {
+    if (_userPosition == null || (onlyWhenEmpty && _nearbyArt.isNotEmpty)) {
+      return;
+    }
+
+    if (showLoading && mounted) {
+      setState(() => _isRefreshing = true);
+    }
+
+    try {
+      final discoveryService = context.read<InstantDiscoveryService>();
+      final nearbyArt = await discoveryService.getNearbyArt(_userPosition!);
+      if (!mounted) return;
+
+      setState(() {
+        _nearbyArt = nearbyArt;
+        _isRefreshing = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isRefreshing = false);
     }
   }
 
@@ -126,6 +156,8 @@ class _InstantDiscoveryRadarScreenState
           nearbyArt: _nearbyArt,
           radiusMeters: 500,
           onArtTap: _handleArtTap,
+          isScanning: _isRefreshing,
+          onScan: () => _loadNearbyArt(),
         ),
       ),
     );

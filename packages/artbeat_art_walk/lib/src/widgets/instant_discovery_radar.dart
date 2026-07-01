@@ -54,6 +54,8 @@ class InstantDiscoveryRadar extends StatefulWidget {
   final List<PublicArtModel> nearbyArt;
   final double radiusMeters;
   final void Function(PublicArtModel art, double distance)? onArtTap;
+  final Future<void> Function()? onScan;
+  final bool isScanning;
 
   const InstantDiscoveryRadar({
     super.key,
@@ -61,6 +63,8 @@ class InstantDiscoveryRadar extends StatefulWidget {
     required this.nearbyArt,
     this.radiusMeters = 500,
     this.onArtTap,
+    this.onScan,
+    this.isScanning = false,
   });
 
   @override
@@ -335,9 +339,9 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
 
   Widget _buildScanControls() {
     final secondsSinceScan = DateTime.now().difference(_lastScanAt).inSeconds;
-    final label = secondsSinceScan < 5
-        ? 'Scan complete'
-        : 'Scan nearby targets';
+    final label = widget.isScanning
+        ? 'Scanning...'
+        : (secondsSinceScan < 5 ? 'Scan complete' : 'Scan nearby targets');
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -345,7 +349,12 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
         children: [
           Expanded(
             child: FilledButton.icon(
-              onPressed: () => setState(() => _lastScanAt = DateTime.now()),
+              onPressed: widget.isScanning
+                  ? null
+                  : () async {
+                      setState(() => _lastScanAt = DateTime.now());
+                      await widget.onScan?.call();
+                    },
               style: FilledButton.styleFrom(
                 backgroundColor: ArtWalkDesignSystem.primaryTeal,
                 foregroundColor: Colors.white,
@@ -354,7 +363,12 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              icon: const Icon(Icons.radar_rounded),
+              icon: widget.isScanning
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.radar_rounded),
               label: Text(
                 label,
                 style: const TextStyle(fontWeight: FontWeight.w800),
